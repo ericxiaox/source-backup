@@ -10,8 +10,8 @@ from base.spider import Spider
 _UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.7049.96 Safari/537.36'
 
 def _resolve_host_entries():
-    # 入口域名池：原域名 + 官方发布页国内滚动域名（cbdy/bbdy 系会轮换，见 hlbdy.me/about-us）
-    return ['https://heiliao.com/','https://cbdy2.com/','https://cbdy4.com/','https://bbdy34.com/']
+    # 真站为泛子域（官方发布页 JS 动态生成 {随机词}.bqmnxlid.cc，DNS 泛解析），词可任意；cloudfront 为固定兜底线路
+    return ['https://berry.bqmnxlid.cc/','https://melon.bqmnxlid.cc/','https://apple.bqmnxlid.cc/','https://d2ley8cif9a5yt.cloudfront.net/']
 
 def _pick_host(entries):
     import requests as _rq
@@ -22,25 +22,27 @@ def _pick_host(entries):
                 t=r.text or ''
                 if len(t)<2000 and '加载中' in t:
                     m=re.search(r'href="(https?://[^"]+)"',t)
-                    if m:return m.group(1).rstrip('/')
-                if len(t)>2000:
+                    if m:continue  # 入口跳转页不是真站，跳过继续探测（真站候选已内置）
+                if len(t)>2000 and ('archives/' in t or 'post-card' in t):
                     return r.url.rstrip('/')
         except Exception:
             continue
-    return 'https://cbdy2.com'
+    return 'https://berry.bqmnxlid.cc'
 
 class Spider(Spider):
-    SELECTORS=['.video-item','.video-list .item','.list-item','.post-item']
+    SELECTORS=['.post-card','.video-item','.video-list .item','.list-item','.post-item']
     def getName(self):return"黑料不打烊"
     def init(self,extend=""):
         self.HOST=_pick_host(_resolve_host_entries())
         self.host=self.HOST
     def homeContent(self,filter):
-        cateManual={"最新黑料":"hlcg","今日热瓜":"jrrs","每日TOP10":"mrrb","反差女友":"fczq","校园黑料":"xycg","网红黑料":"whhl","明星丑闻":"mxcw","原创社区":"ycsq","推特社区":"ttsq","社会新闻":"shxw","官场爆料":"gchl","影视短剧":"ysdj","全球奇闻":"qqqw","黑料课堂":"hlkt","每日大赛":"mrds","激情小说":"jqxs","桃图杂志":"ttzz","深夜综艺":"syzy","独家爆料":"djbl"}
+        # 2026-09-07 站方改版（Typecho Mirages 主题），分类 slug 全部更新（取自新站导航实测）
+        cateManual={"今日看料":"24hcg","每日大赛":"mrds","AI短剧":"swdj","热门吃瓜":"rgtj","每日热瓜":"mrrg","黑料大事":"hlda","反差女神":"fcns","学院热瓜":"xyrg","网红吃瓜":"whhl","黑料杂谈":"hlzt","明星吃瓜":"mxbg","官场秘闻":"gcmw","禁播动漫":"mrst","撸友看片":"lydt","海角乱伦":"llsq","av解说":"avjs","探花大全":"thdq","网黄专辑":"whzj","原创投稿":"qgzq","性爱技巧":"wyxs","PMV混剪":"pmv","偷拍盗摄":"chjlb","世界杯球员黑料":"sjb-hl","世界杯太太团":"sjb-ttt","世界杯热搜":"sjb-rs","世界杯博彩专区":"sjb-bc","球迷现场":"sjb-qm"}
         return{'class':[{'type_name':k,'type_id':v}for k,v in cateManual.items()]}
     def homeVideoContent(self):return{}
     def categoryContent(self,tid,pg,filter,extend):
-        url=f'{self.HOST}/{tid}/'if int(pg)==1 else f'{self.HOST}/{tid}/page/{pg}/'
+        # 2026-09-07 改版后分类路由为 /category/{slug}/，分页为 /category/{slug}/{pg}/
+        url=f'{self.HOST}/category/{tid}/'if int(pg)==1 else f'{self.HOST}/category/{tid}/{pg}/'
         videos=self.get_list(url)
         return{'list':videos,'page':pg,'pagecount':9999,'limit':90,'total':999999}
     def fetch_and_decrypt_image(self,url):
@@ -78,11 +80,12 @@ class Spider(Spider):
         vids=[]
         for sel in self.SELECTORS:
             for it in root(sel).items():
-                title=it.find('.title, h3, h4, .video-title').text()
+                if 'ad-item' in (it.attr('class') or ''):continue
+                title=it.find('.title, h3, h4, .video-title, .post-card-bottom-title, .post-card-bottom-text').text()
                 if not title:continue
-                link=it.find('a').attr('href')
+                link=it.find('a').attr('href')or it.closest('a').attr('href')or''
                 if not link:continue
-                vids.append({'vod_id':self._abs(link),'vod_name':title,'vod_pic':self._img(it.find('img')),'vod_remarks':it.find('.date, .time, .remarks, .duration').text()or''})
+                vids.append({'vod_id':self._abs(link),'vod_name':title,'vod_pic':self._img(it.find('img')),'vod_remarks':it.find('.date, .time, .remarks, .duration, .post-card-info').text()or''})
             if vids:break
         return vids
     def detailContent(self,array):
@@ -137,6 +140,7 @@ class Spider(Spider):
                 js_urls=re.findall(pattern,html_text)
                 for js_url in js_urls:
                     if'.m3u8'in js_url:
+                        js_url=js_url.replace('\\/','/')  # 2026-09-07 改版后页面内 m3u8 全为 JSON 转义形态 https:\/\/，先清洗
                         if js_url.startswith('//'):js_url='https:'+js_url
                         elif js_url.startswith('/'):js_url=self.HOST+js_url
                         elif not js_url.startswith('http'):js_url='https://'+js_url
@@ -156,7 +160,7 @@ class Spider(Spider):
                 play_from.append('示例视频');play_url.append(example_url)
         return{'list':[{'vod_id':tid,'vod_name':title,'vod_pic':pic,'vod_content':detail,'vod_play_from':'$$$'.join(play_from),'vod_play_url':'$$$'.join(play_url)}]}
     def searchContent(self,key,quick,pg="1"):
-        rsp=self.fetch(f'{self.HOST}/index/search?word={key}')
+        rsp=self.fetch(f'{self.HOST}/search/{quote(key)}/'if int(pg)==1 else f'{self.HOST}/search/{quote(key)}/{pg}/')
         if not rsp:return{'list':[]}
         return{'list':self._parse_items(pq(rsp.text))}
     def playerContent(self,flag,id,vipFlags):

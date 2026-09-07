@@ -802,7 +802,7 @@ class Spider(BaseSpider):
         return str(timestamp)[-6:] + SIGN_KEY[:4] + BUNDLE_ID[:6]
 
     def _gen_iv(self):
-        return BUNDLE_ID[-6:] + SIGN_KEY[-4:] + self._device_id[:6]
+        return BUNDLE_ID[-6:] + SIGN_KEY[-4:] + (self._device_id or 'H5-000')[:6].ljust(6, '0')
 
     def _aes_encrypt(self, plaintext, key_str, iv_str):
         key, iv = key_str.encode(), iv_str.encode()
