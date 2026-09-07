@@ -53,6 +53,42 @@ def parse_ext(ext_str):
     return out
 
 
+def ext_of(extend):
+    """App 传给 Spider.init() 的 extend 统一解析入口。
+
+    兼容三种形态：
+      - None / 空串            -> {}
+      - dict（JSON 形式的 ext） -> 抽取 publish/hosts/host
+      - str（文本 ext 或 JSON 串）-> 先试 JSON，再按文本格式解析
+    任何异常返回 {}（调用方回退内置默认值，不崩源）。
+    """
+    import json as _json
+    try:
+        if not extend:
+            return {}
+        if isinstance(extend, dict):
+            out = {}
+            for k in ('publish', 'host'):
+                if extend.get(k):
+                    out[k] = str(extend[k]).strip()
+            if extend.get('hosts'):
+                hs = extend['hosts'] if isinstance(extend['hosts'], list) else [extend['hosts']]
+                out['hosts'] = [str(h).strip() for h in hs if str(h).strip()]
+            return out
+        s = str(extend).strip()
+        if not s:
+            return {}
+        try:
+            cfg = _json.loads(s)
+            if isinstance(cfg, dict):
+                return ext_of(cfg)
+        except Exception:
+            pass
+        return parse_ext(s)
+    except Exception:
+        return {}
+
+
 def resolve_host(publish_page=None, candidate_hosts=None, headers=None, proxies=None, timeout=8):
     """
     返回当前可用 host（去尾斜杠字符串）。全部失败返回候选首项去尾斜杠。

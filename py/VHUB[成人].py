@@ -1,6 +1,7 @@
 # coding: utf-8
 import json
 import sys
+import os
 import re
 import urllib.request
 import urllib.parse
@@ -61,10 +62,18 @@ class Spider(Spider):
         return "V-HUB[成人]"
 
     def init(self, extend):
-        if extend:
-            self.host = extend.get('host', SITE_URL)
-        else:
-            self.host = SITE_URL
+        # ext 统一解析：host@ 锁定主页 > JSON/文本 ext > 内置 SITE_URL（见 hostresolver.ext_of）
+        try:
+            from hostresolver import ext_of
+            self._ext = ext_of(extend)
+        except Exception:
+            try:
+                sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                from hostresolver import ext_of
+                self._ext = ext_of(extend)
+            except Exception:
+                self._ext = {}
+        self.host = self._ext.get('host', '').rstrip('/') or SITE_URL
         self.api_url = self.host.rstrip('/') + '/api'
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
