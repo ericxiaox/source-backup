@@ -1,0 +1,5 @@
+    {"type_id": "Black_Woman-30", "type_name": "黑人"},
+    {"type_id": "Redhead-31", "type_name": "红发"},
+    {"type_id": "Fucked_Up_Family-81", "type_name": "家庭乱搞"},
+    {"type_id": "Blonde-20", "type_name": "金发"},
+    {"type_id": "Big_Cock-34", "type_name": "巨屌"},
