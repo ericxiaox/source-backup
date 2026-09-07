@@ -1,6 +1,0 @@
-                {'type_id': '618013.xyz_12', 'type_name': '角色扮演'},
-                {'type_id': '618013.xyz_20', 'type_name': '人妻熟女'},
-                {'type_id': '618013.xyz_23', 'type_name': '日韩剧情'},
-                {'type_id': '618013.xyz_21', 'type_name': '经典伦理'},
-                {'type_id': '618013.xyz_7', 'type_name': '成人动漫'},
-                {'type_id': '618013.xyz_14', 'type_name': '精品二区'},

@@ -1,6 +1,0 @@
-            {'type_id': '618013.xyz_9', 'type_name': '辣妹大奶'},
-            {'type_id': '618013.xyz_10', 'type_name': '女同专属'},
-            {'type_id': '618013.xyz_11', 'type_name': '素人出演'},
-            {'type_id': '618013.xyz_12', 'type_name': '角色扮演'},
-            {'type_id': '618013.xyz_20', 'type_name': '人妻熟女'},
-            {'type_id': '618013.xyz_23', 'type_name': '日韩剧情'},
