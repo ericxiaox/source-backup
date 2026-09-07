@@ -1,0 +1,5 @@
+    {"type_id": "Mature-38", "type_name": "成熟"},
+    {"type_id": "Cuckold-237", "type_name": "出轨背叛"},
+    {"type_id": "Femdom-235", "type_name": "调教"},
+    {"type_id": "Anal-12", "type_name": "肛交"},
+    {"type_id": "Brunette-25", "type_name": "褐发"},

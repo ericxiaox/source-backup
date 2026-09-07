@@ -1,0 +1,5 @@
+    {"type_id": "Gapes-167", "type_name": "裂开"},
+    {"type_id": "Ass-14", "type_name": "美臀"},
+    {"type_id": "Lesbian-26", "type_name": "女同"},
+    {"type_id": "bbw-51", "type_name": "胖女"},
+    {"type_id": "Squirting-56", "type_name": "喷出"},
