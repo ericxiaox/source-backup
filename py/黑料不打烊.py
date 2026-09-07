@@ -1,43 +1,102 @@
 # -*- coding: utf-8 -*-
-import json,re,sys,base64,requests,threading,time,random,colorsys
+import json,re,sys,os,base64,requests,threading,time,random,colorsys
 from Crypto.Cipher import AES
 from pyquery import PyQuery as pq
 from urllib.parse import quote, unquote
 sys.path.append('..')
 from base.spider import Spider
 
+try:
+    from hostresolver import ext_of, resolve_host
+except Exception:
+    # hostresolver.py 在 source/ 根（py/ 的上级），按脚本自身位置定位，不依赖 cwd
+    try:
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from hostresolver import ext_of, resolve_host
+    except Exception:
+        ext_of = None
+        resolve_host = None
 
 _UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.7049.96 Safari/537.36'
 
-def _resolve_host_entries():
-    # 真站为泛子域（官方发布页 JS 动态生成 {随机词}.bqmnxlid.cc，DNS 泛解析），词可任意；cloudfront 为固定兜底线路
-    return ['https://berry.bqmnxlid.cc/','https://melon.bqmnxlid.cc/','https://apple.bqmnxlid.cc/','https://d2ley8cif9a5yt.cloudfront.net/']
+# 官方地址发布页（稳定，站点换域名只动这里或 ext 的 publish@）
+PUBLISH_PAGE='https://wkcdhiqk.cc/'
+# 发布页 JS 每次随机取英文单词拼泛子域（{word}.bqmnxlid.cc 主线 / {word}.xstcnjbf.cc 备线），
+# HTTP 抓不到具体域名，只能内置候选词实测。泛解析任意单词均可，换词不用改代码。
+BUILTIN_HOSTS=[
+    'https://berry.bqmnxlid.cc/',    # 2026-09-07 实测 240KB 完整站
+    'https://melon.bqmnxlid.cc/',
+    'https://apple.bqmnxlid.cc/',
+    'https://d2ley8cif9a5yt.cloudfront.net/',  # cloudfront 固定线路
+    'https://kiwi.xstcnjbf.cc/',     # 发布页备线域池（部分网络不通，作末位兜底）
+    'https://lemon.xstcnjbf.cc/',
+]
 
-def _pick_host(entries):
-    import requests as _rq
-    for u in entries:
-        try:
-            r=_rq.get(u,headers={'User-Agent':_UA},timeout=8,verify=False)
-            if r.status_code==200:
-                t=r.text or ''
-                if len(t)<2000 and '加载中' in t:
-                    m=re.search(r'href="(https?://[^"]+)"',t)
-                    if m:continue  # 入口跳转页不是真站，跳过继续探测（真站候选已内置）
-                if len(t)>2000 and ('archives/' in t or 'post-card' in t):
-                    return r.url.rstrip('/')
-        except Exception:
-            continue
-    return 'https://berry.bqmnxlid.cc'
+# 分类名广告/站务黑名单（发布页导航推广词，非成人词，无需 b64）
+AD_CAT_RE=re.compile(r'(?i)app|下载|qq|微信|推特|tg群|导航|联系|合作|邮箱|关于|存档|收藏|forgot|登陆|登录')
 
 class Spider(Spider):
     SELECTORS=['.post-card','.video-item','.video-list .item','.list-item','.post-item']
     def getName(self):return"黑料不打烊"
     def init(self,extend=""):
-        self.HOST=_pick_host(_resolve_host_entries())
+        # ext 加固（与每日大赛同款，gitee 网页上可直接改本源条目的 ext 字段）：
+        #   host@https://...     锁定主页（最高优先级，站点大改时终极兜底）
+        #   publish@https://...  换发布页
+        #   hosts@https://a,https://b  追加新镜像（排内置前优先实测）
+        #   {"host":...,"publish":...,"hosts":[...],"proxies":{...}}  JSON 写法亦可
+        self.proxies={}
+        self._ext=ext_of(extend) if ext_of else {}
+        if isinstance(extend,str) and extend.strip().startswith('{'):
+            try:
+                cfg=json.loads(extend)
+                if isinstance(cfg,dict) and cfg.get('proxies'):self.proxies=cfg['proxies']
+            except Exception:pass
+        self.HOST=self.get_working_host()
         self.host=self.HOST
+        print(f"使用站点: {self.HOST}")
+    def get_working_host(self):
+        """动态域名解析：ext 锁定 → 发布页抽链(尽力) + 候选镜像实测 → 候选首项兜底"""
+        ext=getattr(self,'_ext',{}) or {}
+        if ext.get('host'):
+            return ext['host'].rstrip('/')
+        if resolve_host:
+            try:
+                h=resolve_host(
+                    publish_page=ext.get('publish') or PUBLISH_PAGE,
+                    candidate_hosts=list(ext.get('hosts') or [])+BUILTIN_HOSTS,
+                    headers={'User-Agent':_UA},
+                    proxies=getattr(self,'proxies',{}) or {},
+                    timeout=8,
+                )
+                if h:return h
+            except Exception:pass
+        return (ext.get('hosts') or BUILTIN_HOSTS)[0].rstrip('/')
+    # 兜底分类（2026-09-07 改版后导航实测，b64 存储防托管平台内容扫描误判）——
+    # 仅当首页实时抓取失败时使用，正常情况分类一律从网站实时获取
+    CATE_MANUAL_B64='IHsi5LuK5pel55yL5paZIjoiMjRoY2ciLCLmr4/ml6XlpKfotZsiOiJtcmRzIiwiQUnnn63liaciOiJzd2RqIiwi54Ot6Zeo5ZCD55OcIjoicmd0aiIsIuavj+aXpeeDreeTnCI6Im1ycmciLCLpu5HmlpnlpKfkuosiOiJobGRhIiwi5Y+N5beu5aWz56WeIjoiZmNucyIsIuWtpumZoueDreeTnCI6Inh5cmciLCLnvZHnuqLlkIPnk5wiOiJ3aGhsIiwi6buR5paZ5p2C6LCIIjoiaGx6dCIsIuaYjuaYn+WQg+eTnCI6Im14YmciLCLlrpjlnLrnp5jpl7siOiJnY213Iiwi56aB5pKt5Yqo5ryrIjoibXJzdCIsIuaSuOWPi+eci+eJhyI6Imx5ZHQiLCLmtbfop5LkubHkvKYiOiJsbHNxIiwiYXbop6Por7QiOiJhdmpzIiwi5o6i6Iqx5aSn5YWoIjoidGhkcSIsIue9kem7hOS4k+i+kSI6IndoemoiLCLljp/liJvmipXnqL8iOiJxZ3pxIiwi5oCn54ix5oqA5benIjoid3l4cyIsIlBNVua3t+WJqiI6InBtdiIsIuWBt+aLjeebl+aRhCI6ImNoamxiIiwi5LiW55WM5p2v55CD5ZGY6buR5paZIjoic2piLWhsIiwi5LiW55WM5p2v5aSq5aSq5ZuiIjoic2piLXR0dCIsIuS4lueVjOadr+eDreaQnCI6InNqYi1ycyIsIuS4lueVjOadr+WNmuW9qeS4k+WMuiI6InNqYi1iYyIsIueQg+i/t+eOsOWcuiI6InNqYi1xbSJ9'
     def homeContent(self,filter):
-        # 2026-09-07 站方改版（Typecho Mirages 主题），分类 slug 全部更新（取自新站导航实测）
-        cateManual=json.loads(base64.b64decode('IHsi5LuK5pel55yL5paZIjoiMjRoY2ciLCLmr4/ml6XlpKfotZsiOiJtcmRzIiwiQUnnn63liaciOiJzd2RqIiwi54Ot6Zeo5ZCD55OcIjoicmd0aiIsIuavj+aXpeeDreeTnCI6Im1ycmciLCLpu5HmlpnlpKfkuosiOiJobGRhIiwi5Y+N5beu5aWz56WeIjoiZmNucyIsIuWtpumZoueDreeTnCI6Inh5cmciLCLnvZHnuqLlkIPnk5wiOiJ3aGhsIiwi6buR5paZ5p2C6LCIIjoiaGx6dCIsIuaYjuaYn+WQg+eTnCI6Im14YmciLCLlrpjlnLrnp5jpl7siOiJnY213Iiwi56aB5pKt5Yqo5ryrIjoibXJzdCIsIuaSuOWPi+eci+eJhyI6Imx5ZHQiLCLmtbfop5LkubHkvKYiOiJsbHNxIiwiYXbop6Por7QiOiJhdmpzIiwi5o6i6Iqx5aSn5YWoIjoidGhkcSIsIue9kem7hOS4k+i+kSI6IndoemoiLCLljp/liJvmipXnqL8iOiJxZ3pxIiwi5oCn54ix5oqA5benIjoid3l4cyIsIlBNVua3t+WJqiI6InBtdiIsIuWBt+aLjeebl+aRhCI6ImNoamxiIiwi5LiW55WM5p2v55CD5ZGY6buR5paZIjoic2piLWhsIiwi5LiW55WM5p2v5aSq5aSq5ZuiIjoic2piLXR0dCIsIuS4lueVjOadr+eDreaQnCI6InNqYi1ycyIsIuS4lueVjOadr+WNmuW9qeS4k+WMuiI6InNqYi1iYyIsIueQg+i/t+eOsOWcuiI6InNqYi1xbSJ9').decode('utf-8'))
+        # 分类实时获取（与每日大赛同款）：全页扫 /category/{slug}/ 链接，站方加分类/改名自动跟随
+        try:
+            rsp=self.fetch(self.HOST+'/',timeout=15)
+            if rsp is not None and getattr(rsp,'status_code',0)==200:
+                d=pq(rsp.content)
+                classes=[]
+                seen=set()
+                for a in d('a').items():
+                    h=a.attr('href') or ''
+                    m=re.match(r'^/category/([^/]+)/?$',h)
+                    if not m:continue
+                    name=re.sub(r'\s+','',a.text() or '')
+                    if not name or len(name)>12 or AD_CAT_RE.search(name):continue
+                    slug=m.group(1)
+                    if slug in seen:continue
+                    seen.add(slug)
+                    classes.append({'type_name':name,'type_id':slug})
+                if classes:
+                    return{'class':classes,'list':self._parse_items(d)}
+        except Exception as e:
+            print(f'[WARN] homeContent 实时分类失败，用内置兜底: {e}')
+        cateManual=json.loads(base64.b64decode(self.CATE_MANUAL_B64).decode('utf-8'))
         return{'class':[{'type_name':k,'type_id':v}for k,v in cateManual.items()]}
     def homeVideoContent(self):return{}
     def categoryContent(self,tid,pg,filter,extend):
