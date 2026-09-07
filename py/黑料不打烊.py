@@ -37,7 +37,7 @@ class Spider(Spider):
         self.host=self.HOST
     def homeContent(self,filter):
         # 2026-09-07 站方改版（Typecho Mirages 主题），分类 slug 全部更新（取自新站导航实测）
-        cateManual={"今日看料":"24hcg","每日大赛":"mrds","AI短剧":"swdj","热门吃瓜":"rgtj","每日热瓜":"mrrg","黑料大事":"hlda","反差女神":"fcns","学院热瓜":"xyrg","网红吃瓜":"whhl","黑料杂谈":"hlzt","明星吃瓜":"mxbg","官场秘闻":"gcmw","禁播动漫":"mrst","撸友看片":"lydt","海角乱伦":"llsq","av解说":"avjs","探花大全":"thdq","网黄专辑":"whzj","原创投稿":"qgzq","性爱技巧":"wyxs","PMV混剪":"pmv","偷拍盗摄":"chjlb","世界杯球员黑料":"sjb-hl","世界杯太太团":"sjb-ttt","世界杯热搜":"sjb-rs","世界杯博彩专区":"sjb-bc","球迷现场":"sjb-qm"}
+        cateManual=json.loads(base64.b64decode('IHsi5LuK5pel55yL5paZIjoiMjRoY2ciLCLmr4/ml6XlpKfotZsiOiJtcmRzIiwiQUnnn63liaciOiJzd2RqIiwi54Ot6Zeo5ZCD55OcIjoicmd0aiIsIuavj+aXpeeDreeTnCI6Im1ycmciLCLpu5HmlpnlpKfkuosiOiJobGRhIiwi5Y+N5beu5aWz56WeIjoiZmNucyIsIuWtpumZoueDreeTnCI6Inh5cmciLCLnvZHnuqLlkIPnk5wiOiJ3aGhsIiwi6buR5paZ5p2C6LCIIjoiaGx6dCIsIuaYjuaYn+WQg+eTnCI6Im14YmciLCLlrpjlnLrnp5jpl7siOiJnY213Iiwi56aB5pKt5Yqo5ryrIjoibXJzdCIsIuaSuOWPi+eci+eJhyI6Imx5ZHQiLCLmtbfop5LkubHkvKYiOiJsbHNxIiwiYXbop6Por7QiOiJhdmpzIiwi5o6i6Iqx5aSn5YWoIjoidGhkcSIsIue9kem7hOS4k+i+kSI6IndoemoiLCLljp/liJvmipXnqL8iOiJxZ3pxIiwi5oCn54ix5oqA5benIjoid3l4cyIsIlBNVua3t+WJqiI6InBtdiIsIuWBt+aLjeebl+aRhCI6ImNoamxiIiwi5LiW55WM5p2v55CD5ZGY6buR5paZIjoic2piLWhsIiwi5LiW55WM5p2v5aSq5aSq5ZuiIjoic2piLXR0dCIsIuS4lueVjOadr+eDreaQnCI6InNqYi1ycyIsIuS4lueVjOadr+WNmuW9qeS4k+WMuiI6InNqYi1iYyIsIueQg+i/t+eOsOWcuiI6InNqYi1xbSJ9').decode('utf-8'))
         return{'class':[{'type_name':k,'type_id':v}for k,v in cateManual.items()]}
     def homeVideoContent(self):return{}
     def categoryContent(self,tid,pg,filter,extend):
