@@ -10,7 +10,7 @@
       "key": "py_mrds",
       "name": "📱每日大赛",
       "type": 3,
-      "api": "./py/每日大赛.py",
+      "api": "./py/mrds.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -55,7 +55,7 @@
       "key": "py_mitao",
       "name": "📱蜜桃视频",
       "type": 3,
-      "api": "./py/蜜桃视频.py",
+      "api": "./py/mitao.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -77,7 +77,7 @@
       "key": "py_vhub",
       "name": "📱VHUB·Xvideos免墙",
       "type": 3,
-      "api": "./py/VHUB[成人].py",
+      "api": "./py/vhub.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -88,7 +88,7 @@
       "key": "py_jptt",
       "name": "📱禁片天堂",
       "type": 3,
-      "api": "./py/禁片天堂.py",
+      "api": "./py/jptt.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -99,7 +99,7 @@
       "key": "py_airen",
       "name": "📱AI人短剧",
       "type": 3,
-      "api": "./py/AI人短剧.py",
+      "api": "./py/airdj.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -110,7 +110,7 @@
       "key": "py_xjiao",
       "name": "📱香蕉视频",
       "type": 3,
-      "api": "./py/香蕉视频.py",
+      "api": "./py/xjsp.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -330,7 +330,7 @@
       "key": "py_uaa有声",
       "name": "📱uaa有声",
       "type": 3,
-      "api": "./py/uaa有声.py",
+      "api": "./py/uays.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -897,7 +897,7 @@
       "key": "py_yase",
       "name": "📱亚色影库",
       "type": 3,
-      "api": "./py/亚色影库.py",
+      "api": "./py/ysyk.py",
       "style": {
         "type": "rect",
         "ratio": 1
