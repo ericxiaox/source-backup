@@ -7,3 +7,6 @@ Thumbs.db
 *账号*.txt
 *密码*.txt
 *token*.txt
+
+__pycache__/
+*.pyc
