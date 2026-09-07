@@ -20,6 +20,36 @@ img_cache = {}
 
 class Spider(BaseSpider):
 
+    # 广告/站务名黑名单（分集名/标签用·全量）：联系方式、外站推广、APP下载、详情页组件标题等
+    AD_NAME_RE = re.compile(
+        r'联系|合作|广告|发布页|最新地址|永久地址|备用地址|导航|版权|免责|声明|投稿|赞助|招商'
+        r'|返利|推广|客服|微信|QQ|qq|群|频道|TG|电报|[Tt]elegram|官网|登录|注册|留言|评论'
+        r'|标签云|归档|搜索|关于|帮助|打赏|捐赠|充值|开通会员|商城|网购|彩票|棋牌|支付|汇款'
+        r'|APP|App|app|下载|商务|友链|申请链接|反馈|举报|用户|头像|签到'
+        r'|温馨提示|重要提示|往期|回家的路')
+
+    # 分类专用精简黑名单：只挡"几乎不可能是正式分类"的词（防止误杀"原创投稿"这类真分类）
+    AD_CAT_RE = re.compile(
+        r'联系|合作|广告|发布页|最新地址|永久地址|备用地址|导航|客服|微信|QQ|qq|群|频道'
+        r'|TG|电报|[Tt]elegram|官网|登录|注册|APP|App|app|下载|商务|友链|商城|网购|彩票'
+        r'|棋牌|支付|汇款|打赏|捐赠|充值')
+
+    img_cache = {}
+
+    @staticmethod
+    def _clean_name(s):
+        """剔除未渲染的前端模板串（如 {{u.username}}）"""
+        return re.sub(r'\{\{[^}]*\}\}', '', s or '').strip()
+
+    def _valid_ep_name(self, s, max_len=40):
+        """清洗分集/标签名：模板串剔除后为空、超长、命中广告黑名单 → 返回 ''"""
+        s = self._clean_name(s)
+        if not s or len(s) > max_len:
+            return ''
+        if self.AD_NAME_RE.search(s):
+            return ''
+        return s
+
     def init(self, extend=""):
         try:
             self.proxies = json.loads(extend)
@@ -85,10 +115,17 @@ class Spider(BaseSpider):
             seen_ids = set()
 
             def _add(href, name):
-                if not href or href == '#' or not name or href == '/':
+                # 广告清理：外链(联系方式/外站推广)、非内容路径(关于/归档/下载页)、
+                # 命中广告黑名单或超长的名称，一律不收
+                if not href or href == '#':
                     return
-                if not href.startswith('http'):
-                    href = href if href.startswith('/') else f"/{href}"
+                if not href.startswith('/'):
+                    return
+                if not re.match(r'^/(category|tag)/', href):
+                    return
+                name = self._clean_name(name)
+                if not name or len(name) > 12 or self.AD_CAT_RE.search(name):
+                    return
                 if href in seen_ids:
                     return
                 seen_ids.add(href)
@@ -105,9 +142,7 @@ class Spider(BaseSpider):
             # 2) 兜底：全页扫描 /category/ /tag/ 链接，保证分类取完全（不漏掉次级导航）
             if len(classes) < 5:
                 for a in data('a').items():
-                    href = a.attr('href') or ''
-                    if re.match(r'^/(category|tag|class)/', href):
-                        _add(href, a.text())
+                    _add(a.attr('href') or '', a.text())
 
             if not classes:
                 classes = [
@@ -199,7 +234,7 @@ class Spider(BaseSpider):
                                 parent = k.parents().eq(0)
                                 for _ in range(4):
                                     if not parent: break
-                                    heading = parent.find('h2, h3, h4').eq(0).text().strip()
+                                    heading = self._valid_ep_name(parent.find('h2, h3, h4').eq(0).text())
                                     if heading:
                                         ep_name = heading
                                         break
@@ -225,7 +260,7 @@ class Spider(BaseSpider):
                     link_href = link.attr('href')
 
                     if link_href and any(kw in link_text for kw in ['点击观看', '观看', '播放', '视频', '第一弹']):
-                        ep_name = link_text.replace('点击观看：', '').replace('点击观看', '').strip()
+                        ep_name = self._valid_ep_name(link_text.replace('点击观看：', '').replace('点击观看', ''))
                         if not ep_name:
                             ep_name = f"视频{i}"
 
@@ -249,7 +284,7 @@ class Spider(BaseSpider):
                 
                 candidates = []
                 for k in tag_links.items():
-                    title = k.text().strip()
+                    title = self._valid_ep_name(k.text(), max_len=20)
                     href = k.attr('href')
                     if title and href:
                         # 修正相对链接为绝对链接
