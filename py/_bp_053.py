@@ -1,5 +1,0 @@
-    {"type_id": "Big_Tits-23", "type_name": "巨乳"},
-    {"type_id": "Big_Ass-24", "type_name": "巨臀"},
-    {"type_id": "Blowjob-15", "type_name": "口交"},
-    {"type_id": "Latina-16", "type_name": "拉丁裔"},
-    {"type_id": "Milf-19", "type_name": "辣妈"},

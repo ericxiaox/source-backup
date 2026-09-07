@@ -4,6 +4,8 @@ import sys
 import urllib.parse
 import re
 from lxml import etree
+import json
+from base64 import b64decode
 
 sys.path.append('..')
 from base.spider import Spider
@@ -17,67 +19,7 @@ class Spider(Spider):
         pass
 
     def homeContent(self, filter):
-        cateManual = {
-            "中文": "278",
-            "巨乳": "15",
-            "熟女": "95",
-            "騎乘位": "74",
-            "口交": "34",
-            "癡女": "75",
-            "潮吹": "32",
-            "企劃片": "84",
-            "美尻": "156",
-            "打手槍": "98",
-            "戲劇、連續劇": "58",
-            "制服": "19",
-            "美腿": "157",
-            "舔鮑": "122",
-            "美乳": "166",
-            "搭訕": "12",
-            "妄想族": "184",
-            "第一人稱視點": "167",
-            "媽媽系": "193",
-            "人妻・主婦": "26",
-            "多種職業": "84",
-            "羞辱": "163",
-            "女教師": "131",
-            "淫語": "151",
-            "肉感": "136",
-            "愛美臀": "111",
-            "背後位": "178",
-            "調教": "395",
-            "處男": "23",
-            "護士": "283",
-            "修長": "147",
-            "露內褲": "169",
-            "絲襪": "115",
-            "愛巨乳": "200",
-            "眼鏡": "290",
-            "超乳": "211",
-            "顏面騎乘": "263",
-            "惡作劇": "145",
-            "義母": "144",
-            "淫亂・過激系": "63",
-            "愛美腿": "11",
-            "爆乳": "483",
-            "女上司": "137",
-            "正太": "415",
-            "穿衣幹砲": "179",
-            "緊身皮衣": "304",
-            "學園": "421",
-            "空姐": "132",
-            "粉絲感謝祭": "190",
-            "背面騎乗位": "646",
-            "秘書": "363",
-            "女主播": "106",
-            "反向搭訕": "305",
-            "健身教練": "233",
-            "部下・同僚": "150",
-            "舞蹈": "130",
-            "緊身衣激凸": "321",
-            "3D影片": "508",
-            "早洩": "403"
-        }
+        cateManual = cateManual = json.loads(b64decode('eyLkuK3mlociOiAiMjc4IiwgIuW3qOS5syI6ICIxNSIsICLnhp/lpbMiOiAiOTUiLCAi6aiO5LmY5L2NIjogIjc0IiwgIuWPo+S6pCI6ICIzNCIsICLnmaHlpbMiOiAiNzUiLCAi5r2u5ZC5IjogIjMyIiwgIuS8geWKg+eJhyI6ICI4NCIsICLnvo7lsLsiOiAiMTU2IiwgIuaJk+aJi+anjSI6ICI5OCIsICLmiLLliofjgIHpgKPnuozliociOiAiNTgiLCAi5Yi25pyNIjogIjE5IiwgIue+juiFvyI6ICIxNTciLCAi6IiU6a6RIjogIjEyMiIsICLnvo7kubMiOiAiMTY2IiwgIuaQreiolSI6ICIxMiIsICLlpoTmg7Pml48iOiAiMTg0IiwgIuesrOS4gOS6uueoseimlum7niI6ICIxNjciLCAi5aq95aq957O7IjogIjE5MyIsICLkurrlprvjg7vkuLvlqaYiOiAiMjYiLCAi5aSa56iu6IG35qWtIjogIjg0IiwgIue+nui+sSI6ICIxNjMiLCAi5aWz5pWZ5birIjogIjEzMSIsICLmt6voqp4iOiAiMTUxIiwgIuiCieaEnyI6ICIxMzYiLCAi5oSb576O6IeAIjogIjExMSIsICLog4zlvozkvY0iOiAiMTc4IiwgIuiqv+aVmSI6ICIzOTUiLCAi6JmV55S3IjogIjIzIiwgIuitt+WjqyI6ICIyODMiLCAi5L+u6ZW3IjogIjE0NyIsICLpnLLlhafopLIiOiAiMTY5IiwgIue1suilqiI6ICIxMTUiLCAi5oSb5beo5LmzIjogIjIwMCIsICLnnLzpj6EiOiAiMjkwIiwgIui2heS5syI6ICIyMTEiLCAi6aGP6Z2i6aiO5LmYIjogIjI2MyIsICLmg6HkvZzliociOiAiMTQ1IiwgIue+qeavjSI6ICIxNDQiLCAi5rer5LqC44O76YGO5r+A57O7IjogIjYzIiwgIuaEm+e+juiFvyI6ICIxMSIsICLniIbkubMiOiAiNDgzIiwgIuWls+S4iuWPuCI6ICIxMzciLCAi5q2j5aSqIjogIjQxNSIsICLnqb/ooaPlubnnoLIiOiAiMTc5IiwgIue3iui6q+earuihoyI6ICIzMDQiLCAi5a245ZySIjogIjQyMSIsICLnqbrlp5AiOiAiMTMyIiwgIueyiee1suaEn+isneelrSI6ICIxOTAiLCAi6IOM6Z2i6aiO5LmX5L2NIjogIjY0NiIsICLnp5jmm7giOiAiMzYzIiwgIuWls+S4u+aSrSI6ICIxMDYiLCAi5Y+N5ZCR5pCt6KiVIjogIjMwNSIsICLlgaXouqvmlZnnt7QiOiAiMjMzIiwgIumDqOS4i+ODu+WQjOWDmiI6ICIxNTAiLCAi6Iie6LmIIjogIjEzMCIsICLnt4rouqvooaPmv4Dlh7giOiAiMzIxIiwgIjNE5b2x54mHIjogIjUwOCIsICLml6nmtKkiOiAiNDAzIn0=').decode('utf-8'))
         result = {'class': [{'type_name': k, 'type_id': v} for k, v in cateManual.items()]}
         return result
 

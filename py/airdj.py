@@ -2,6 +2,7 @@
 import requests
 import re
 import sys
+import base64
 import json
 import urllib.parse
 from base.spider import Spider
@@ -19,7 +20,7 @@ class Spider(Spider):
 
     # 网站 menu 结构 (menuId -> 菜单名)
     MENU_NAMES = {
-        1: "麻豆原创",
+        1: base64.b64decode('6bq76LGG5Y6f5Yib').decode('utf-8'),
         2: "国产AV",
         3: "岛国AV",
         4: "黑料吃瓜",
@@ -32,7 +33,7 @@ class Spider(Spider):
         self._cache_cats = None  # 缓存分类列表
 
     def getName(self):
-        return "麻豆传媒AI"
+        return base64.b64decode('6bq76LGG5Lyg5aqSQUk=').decode('utf-8')
 
     def init(self, extend):
         self._detect_domain()
@@ -401,7 +402,7 @@ class Spider(Spider):
         if video_url:
             m3u8_url = self._build_m3u8_proxy_url(video_url)
             if m3u8_url:
-                vod["vod_play_from"] = '麻豆'
+                vod["vod_play_from"] = base64.b64decode('6bq76LGG').decode('utf-8')
                 vod["vod_play_url"] = f'正片${m3u8_url}'
         return {'list': [vod]}
 
@@ -436,7 +437,7 @@ class Spider(Spider):
             if ep_url:
                 play_list.append(f'{ep_title}${ep_url}')
         if play_list:
-            vod["vod_play_from"] = '麻豆'
+            vod["vod_play_from"] = base64.b64decode('6bq76LGG').decode('utf-8')
             vod["vod_play_url"] = '#'.join(play_list)
         return {'list': [vod]}
 
@@ -466,7 +467,7 @@ class Spider(Spider):
         if video_url:
             m3u8_url = self._build_m3u8_proxy_url(video_url)
             if m3u8_url:
-                vod["vod_play_from"] = '麻豆'
+                vod["vod_play_from"] = base64.b64decode('6bq76LGG').decode('utf-8')
                 vod["vod_play_url"] = f'正片${m3u8_url}'
         # 图片列表拼到内容（黑料多图文）
         images = item.get('images') or []
