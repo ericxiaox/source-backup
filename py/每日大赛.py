@@ -11,6 +11,10 @@ from Crypto.Util.Padding import unpad
 from pyquery import PyQuery as pq
 sys.path.append('..')
 from base.spider import Spider as BaseSpider
+try:
+    from hostresolver import resolve_host
+except Exception:
+    resolve_host = None
 
 img_cache = {}
 
@@ -46,34 +50,29 @@ class Spider(BaseSpider):
         img_cache.clear()
 
     def get_working_host(self):
-        dynamic_urls = [
-            'https://mrdsa2.com/',
-            'https://mrdsa1.com/',
-            'https://www.mrds66.com/',
-            'https://www.uaalvjbyy.cc/',
-        ]
-        for url in dynamic_urls:
-            try:
-                response = requests.get(
-                    url,
-                    headers=self.headers,
-                    proxies=self.proxies,
-                    timeout=6,
-                    verify=False,
-                    allow_redirects=True
-                )
-                if response.status_code == 200:
-                    text = response.text or ''
-                    # 防护壳页（<2KB 含"加载中"JS跳转）：抽真身域名
-                    if len(text) < 2000 and '加载中' in text:
-                        m = re.search(r'href="(https?://[^"]+)"', text)
-                        if m:
-                            return m.group(1).rstrip('/')
-                    if len(text) > 2000:
-                        return response.url.rstrip('/')
-            except Exception:
-                continue
-        return 'https://mrdsa1.com'
+        """动态域名解析：发布页尽力抽链 + 已知候选镜像实时实测 + 跳转壳跟随。
+        发布页 njttvylz.cc 为纯 JS 渲染壳（HTTP 抓不到当前域名），故当前完全依赖
+        候选镜像列表的实时存活检测；发现新活域名补充进 CANDIDATE_HOSTS 即可。"""
+        if resolve_host:
+            host = resolve_host(
+                publish_page='https://www.njttvylz.cc/',
+                candidate_hosts=[
+                    'https://barrel.lsaazihd.cc/',   # 当前活镜像(实测253KB完整站)
+                    'https://big.ktgchwz.xyz/',
+                    'https://adjust.ktgchwz.xyz/',
+                    'https://borrow.ktgchwz.xyz/',
+                    'https://black.ktgchwz.xyz/',
+                    'https://mrds72.com/',            # 跳转壳 -> biryqddqj.cc
+                    'https://mrdsx5.com/',
+                ],
+                headers=self.headers,
+                proxies=self.proxies,
+                timeout=8,
+            )
+            if host:
+                return host
+        # 兜底（resolver 缺失时）：直接用当前已知活镜像
+        return 'https://barrel.lsaazihd.cc'
 
     def homeContent(self, filter):
         try:
@@ -83,19 +82,32 @@ class Spider(BaseSpider):
             data = self.getpq(response.text)
 
             classes = []
-            category_selectors = ['.category-list ul li', '.nav-menu li', '.menu li', 'nav ul li']
+            seen_ids = set()
+
+            def _add(href, name):
+                if not href or href == '#' or not name or href == '/':
+                    return
+                if not href.startswith('http'):
+                    href = href if href.startswith('/') else f"/{href}"
+                if href in seen_ids:
+                    return
+                seen_ids.add(href)
+                classes.append({'type_name': name, 'type_id': href})
+
+            # 1) 常规导航容器（多容器全收集，不再遇到第一个非空就停）
+            category_selectors = ['.category-list ul li', '.nav-menu li', '.menu li',
+                                  'nav ul li', '.category-list a', '.nav a']
             for selector in category_selectors:
                 for k in data(selector).items():
-                    link = k('a')
-                    href = (link.attr('href') or '').strip()
-                    name = (link.text() or '').strip()
-                    if not href or href == '#' or not name or href == '/':
-                        continue
-                    if not href.startswith('http'):
-                        href = href if href.startswith('/') else f"/{href}"
-                    classes.append({'type_name': name, 'type_id': href})
-                if classes:
-                    break
+                    link = k if k.is_('a') else k('a').eq(0)
+                    _add(link.attr('href'), link.text())
+
+            # 2) 兜底：全页扫描 /category/ /tag/ 链接，保证分类取完全（不漏掉次级导航）
+            if len(classes) < 5:
+                for a in data('a').items():
+                    href = a.attr('href') or ''
+                    if re.match(r'^/(category|tag|class)/', href):
+                        _add(href, a.text())
 
             if not classes:
                 classes = [
