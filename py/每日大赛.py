@@ -1,6 +1,7 @@
 import json
 import re
 import sys
+import os
 import hashlib
 from base64 import b64decode, b64encode
 from urllib.parse import urlparse
@@ -12,9 +13,15 @@ from pyquery import PyQuery as pq
 sys.path.append('..')
 from base.spider import Spider as BaseSpider
 try:
-    from hostresolver import resolve_host
+    from hostresolver import resolve_host, parse_ext
 except Exception:
-    resolve_host = None
+    # hostresolver.py 与 py/ 同级的上级目录（source/ 根），按脚本自身位置定位，不依赖 cwd
+    try:
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from hostresolver import resolve_host, parse_ext
+    except Exception:
+        resolve_host = None
+        parse_ext = None
 
 img_cache = {}
 
@@ -51,10 +58,30 @@ class Spider(BaseSpider):
         return s
 
     def init(self, extend=""):
-        try:
-            self.proxies = json.loads(extend)
-        except:
-            self.proxies = {}
+        self.proxies = {}
+        self._ext = {}
+        ext_str = (extend or '').strip()
+        if ext_str:
+            # 两种 ext 写法都支持：
+            #   1) 纯文本:  publish@https://...;hosts@https://a,https://b;host@https://...
+            #   2) JSON:    {"publish":"...","hosts":["..."],"host":"...","proxies":{...}}
+            try:
+                cfg = json.loads(ext_str)
+                if isinstance(cfg, dict):
+                    self.proxies = cfg.get('proxies') or {}
+                    for k in ('publish', 'host'):
+                        if cfg.get(k):
+                            self._ext[k] = str(cfg[k]).strip()
+                    if cfg.get('hosts'):
+                        hs = cfg['hosts'] if isinstance(cfg['hosts'], list) else [cfg['hosts']]
+                        self._ext['hosts'] = [str(h).strip() for h in hs if str(h).strip()]
+            except Exception:
+                self.proxies = {}
+                if parse_ext:
+                    try:
+                        self._ext = parse_ext(ext_str)
+                    except Exception:
+                        self._ext = {}
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -80,29 +107,36 @@ class Spider(BaseSpider):
         img_cache.clear()
 
     def get_working_host(self):
-        """动态域名解析：发布页尽力抽链 + 已知候选镜像实时实测 + 跳转壳跟随。
-        发布页 njttvylz.cc 为纯 JS 渲染壳（HTTP 抓不到当前域名），故当前完全依赖
-        候选镜像列表的实时存活检测；发现新活域名补充进 CANDIDATE_HOSTS 即可。"""
+        """动态域名解析：ext 覆盖(影视.json) → 发布页尽力抽链 → 内置候选镜像实测 → 跳转壳跟随。
+        发布页 njttvylz.cc 为纯 JS 渲染壳（HTTP 抓不到当前域名），故平时完全依赖
+        候选镜像列表的实时存活检测；发布页/域名变更改 影视.json 里本源条目的 ext 字段。"""
+        ext = getattr(self, '_ext', {}) or {}
+        # 0) ext 锁定主页：最高优先级，跳过一切探测（站点结构大改时的终极兜底）
+        if ext.get('host'):
+            return ext['host'].rstrip('/')
+        publish = ext.get('publish') or 'https://www.njttvylz.cc/'
+        # ext 里加的新域名排在内置列表前面优先实测；内置列表仍作兜底
+        builtin_hosts = [
+            'https://barrel.lsaazihd.cc/',   # 当前活镜像(实测253KB完整站)
+            'https://big.ktgchwz.xyz/',
+            'https://adjust.ktgchwz.xyz/',
+            'https://borrow.ktgchwz.xyz/',
+            'https://black.ktgchwz.xyz/',
+            'https://mrds72.com/',            # 跳转壳 -> biryqddqj.cc
+            'https://mrdsx5.com/',
+        ]
         if resolve_host:
             host = resolve_host(
-                publish_page='https://www.njttvylz.cc/',
-                candidate_hosts=[
-                    'https://barrel.lsaazihd.cc/',   # 当前活镜像(实测253KB完整站)
-                    'https://big.ktgchwz.xyz/',
-                    'https://adjust.ktgchwz.xyz/',
-                    'https://borrow.ktgchwz.xyz/',
-                    'https://black.ktgchwz.xyz/',
-                    'https://mrds72.com/',            # 跳转壳 -> biryqddqj.cc
-                    'https://mrdsx5.com/',
-                ],
+                publish_page=publish,
+                candidate_hosts=list(ext.get('hosts') or []) + builtin_hosts,
                 headers=self.headers,
                 proxies=self.proxies,
                 timeout=8,
             )
             if host:
                 return host
-        # 兜底（resolver 缺失时）：直接用当前已知活镜像
-        return 'https://barrel.lsaazihd.cc'
+        # 兜底（resolver 缺失时）：ext 指定 → 内置首个
+        return (ext.get('hosts') or ['https://barrel.lsaazihd.cc'])[0].rstrip('/')
 
     def homeContent(self, filter):
         try:

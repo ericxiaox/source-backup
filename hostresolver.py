@@ -24,6 +24,35 @@ except Exception:
     requests = None
 
 
+def parse_ext(ext_str):
+    """解析影视.json 站点条目的 ext 字段（用户在 gitee 网页上直接改的就是它）。
+
+    格式：分号分隔片段，@ 连接键值，逗号分隔多域名；顺序随意、只写需要的键：
+      publish@https://发布页;hosts@https://新域名1,https://新域名2;host@https://锁定的主页
+      - host@   锁定主页（最高优先级，跳过一切探测，站点结构大改时用）
+      - publish@ 发布页地址（发布页换了改这里）
+      - hosts@  新增候选镜像（追加在内置列表前面优先实测；只写新域名即可）
+    无法识别的片段自动忽略；解析失败返回 {}（py 回退内置默认值，不会崩源）。
+    """
+    out = {}
+    for part in str(ext_str or '').split(';'):
+        part = part.strip()
+        if not part or '@' not in part:
+            continue
+        k, _, v = part.partition('@')
+        k = k.strip().lower()
+        v = v.strip().rstrip('/')
+        if not v:
+            continue
+        if k == 'hosts':
+            items = [x.strip().rstrip('/') for x in v.split(',') if x.strip()]
+            if items:
+                out.setdefault('hosts', []).extend(items)
+        elif k in ('publish', 'host'):
+            out[k] = v
+    return out
+
+
 def resolve_host(publish_page=None, candidate_hosts=None, headers=None, proxies=None, timeout=8):
     """
     返回当前可用 host（去尾斜杠字符串）。全部失败返回候选首项去尾斜杠。
