@@ -21,8 +21,8 @@ class Spider(Spider):
     # 网站 menu 结构 (menuId -> 菜单名)
     MENU_NAMES = {
         1: base64.b64decode('6bq76LGG5Y6f5Yib').decode('utf-8'),
-        2: "国产AV",
-        3: "岛国AV",
+        2: base64.b64decode('5Zu95LqnQVY=').decode('utf-8'),
+        3: base64.b64decode('5bKb5Zu9QVY=').decode('utf-8'),
         4: "黑料吃瓜",
     }
 
