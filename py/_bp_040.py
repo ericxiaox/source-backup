@@ -1,0 +1,10 @@
+    {"type_id": "Asian_Woman-32", "type_name": "亚洲"},
+    {"type_id": "Amateur-65", "type_name": "业余"},
+    {"type_id": "Interracial-27", "type_name": "异族"},
+    {"type_id": "Indian-89", "type_name": "印度"},
+    {"type_id": "Creampie-40", "type_name": "中出"},
+    {"type_id": "Solo_and_Masturbation-33", "type_name": "自慰"},
+    {"type_id": "AI-239", "type_name": "AI"},
+    {"type_id": "ASMR-229", "type_name": "ASMR"},
+]
+
