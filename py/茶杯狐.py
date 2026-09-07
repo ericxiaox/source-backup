@@ -65,60 +65,40 @@ class Spider(Spider):
         pass
 
     def homeContent(self, filter):
+        # 数字分类路由(/type1~5.html、cupfox-list)被站方验证码墙拦截，仅 label 精选通道免验证可用
         classes = [
-            {"type_id": "1", "type_name": "电影"},
-            {"type_id": "2", "type_name": "电视剧"},
-            {"type_id": "4", "type_name": "动漫"},
-            {"type_id": "3", "type_name": "综艺"},
-            {"type_id": "5", "type_name": "热门短剧"},
+            {"type_id": "/label/qq", "type_name": "腾讯VIP精选"},
+            {"type_id": "/label/yk", "type_name": "优酷VIP精选"},
+            {"type_id": "/label/bli", "type_name": "B站VIP精选"},
         ]
-
-        filter_dict = {}
-        years = [{"n": "全部", "v": ""}] + [{"n": str(y), "v": str(y)} for y in range(2026, 2003, -1)]
-        orders = [
-            {"n": "按最新", "v": "time"},
-            {"n": "按最热", "v": "hits"},
-            {"n": "按评分", "v": "score"}
-        ]
-
-        movie_classes = ["动作", "喜剧", "爱情", "科幻", "恐怖", "剧情", "战争", "惊悚", "悬疑", "犯罪", "奇幻", "冒险",
-                         "动画", "武侠"]
-        movie_areas = ["大陆", "香港", "台湾", "美国", "韩国", "日本", "泰国", "新加坡", "马来西亚", "印度", "英国",
-                       "法国", "加拿大", "西班牙", "俄罗斯", "其它"]
-
-        tv_classes = ["古装", "战争", "青春偶像", "喜剧", "家庭", "犯罪", "动作", "奇幻", "剧情", "历史", "经典",
-                      "乡村", "情景", "商战", "网剧", "其他"]
-        tv_areas = ["内地", "韩国", "香港", "台湾", "日本", "美国", "泰国", "英国", "新加坡", "其他"]
-
-        comic_classes = ["科幻", "热血", "推理", "搞笑", "冒险", "萝莉", "校园", "动作", "机战", "运动", "战争", "少年",
-                         "少女"]
-        show_classes = ["脱口秀", "真人秀", "搞笑", "访谈", "生活", "晚会", "美食", "游戏", "亲子", "旅游", "音乐",
-                        "舞蹈"]
-
-        def create_filter(classes_list, areas_list):
-            return [
-                {"key": "class", "name": "类型",
-                 "value": [{"n": "全部", "v": ""}] + [{"n": c, "v": c} for c in classes_list]},
-                {"key": "area", "name": "地区",
-                 "value": [{"n": "全部", "v": ""}] + [{"n": a, "v": a} for a in areas_list]},
-                {"key": "year", "name": "年份", "value": years},
-                {"key": "by", "name": "排序", "value": orders}
-            ]
-
-        filter_dict["1"] = create_filter(movie_classes, movie_areas)
-        filter_dict["2"] = create_filter(tv_classes, tv_areas)
-        filter_dict["4"] = create_filter(comic_classes, tv_areas)
-        filter_dict["3"] = create_filter(show_classes, tv_areas)
-        filter_dict["5"] = create_filter(["女频", "男频", "复仇", "甜宠", "穿越", "逆袭", "战神", "脑洞"],
-                                         ["内地", "其他"])
-
-        return {"class": classes, "filters": filter_dict}
+        return {"class": classes}
 
     def homeVideoContent(self):
         return {'list': []}
 
     def categoryContent(self, cid, pg, filter, ext):
         page = int(pg)
+        # label 精选通道（免验证）：/label/{name}/page/{pg}.html
+        if cid.startswith('/label'):
+            url = f"{self.host}{cid}/page/{pg}.html"
+            res = self.session.get(url, headers=self.headers, timeout=10)
+            soup = BeautifulSoup(res.text, 'html.parser')
+            videos = []
+            for item in soup.select('.public-list-box'):
+                link = item.select_one('.public-list-exp')
+                if not link: continue
+                vid_match = re.search(r'/chabeihu/(\d+)\.html', link.get('href', ''))
+                if not vid_match: continue
+                pic_img = link.select_one('img')
+                note_tag = item.select_one('.public-list-prb')
+                videos.append({
+                    "vod_id": vid_match.group(1),
+                    "vod_name": link.get('title', '').strip(),
+                    "vod_pic": pic_img.get('data-src') or pic_img.get('src') or '' if pic_img else '',
+                    "vod_remarks": note_tag.text.strip() if note_tag else ''
+                })
+            pagecount = page if len(videos) < 24 else page + 2
+            return {'list': videos, 'page': page, 'pagecount': pagecount, 'limit': 24, 'total': 999999}
         ext = ext or {}
         area = urllib.parse.quote(ext.get('area', '')) if ext.get('area') else ''
         by = ext.get('by', '')
