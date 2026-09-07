@@ -1,0 +1,9 @@
+# 系统垃圾
+.DS_Store
+Thumbs.db
+*.local
+
+# 凭证防护（账号/密码/令牌文件绝不入库）
+*账号*.txt
+*密码*.txt
+*token*.txt
