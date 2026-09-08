@@ -319,6 +319,18 @@
         "ratio": 1
       },
       "changeable": 1
+    },
+    {
+      "key": "py_wxts",
+      "name": "📱无限臀山",
+      "type": 3,
+      "api": "./py/wxts.py",
+      "ext": "publish@https://wuxiants.github.io/",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
     }
   ],
   "parses": [],
