@@ -1,5 +1,5 @@
 {
-  "sites_count": 17,
+  "sites_count": 19,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -204,6 +204,28 @@
         "ratio": 1
       },
       "changeable": 1
+    },
+    {
+      "key": "py_直播",
+      "name": "📱直播ᵖʸ｜夜晚",
+      "type": 3,
+      "api": "./xbpq/直播.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2
+    },
+    {
+      "key": "聚合",
+      "name": "📱聚合ʲˢᵒⁿ｜夜晚",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/聚合.json"
     }
   ],
   "parses": [],
