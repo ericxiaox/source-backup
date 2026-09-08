@@ -76,18 +76,29 @@ class Spider(BaseSpider):
         img_cache.clear()
 
     def get_working_host(self):
-        dynamic_urls = [
-            'https://border.bshzjjgq.cc/',
-            'https://blood.bshzjjgq.cc/'
+        """动态域名解析 v2（hostresolver）：ext 锁定 → 发布页静态镜像并行实测
+        → 旧域302跟随兜底 → 成功缓存30分钟。全失败返回 ''（接口层兜空）。
+        2026-09-08 实测：bshzjjgq 基域已轮换为 loewkgyyv.cc（border 302 仍活）；
+        站方发布门户 idld65.com 静态列出 capture/carrier/center.loewkgyyv.cc 现役镜像。"""
+        ext = getattr(self, '_ext', {}) or {}
+        if ext.get('host'):
+            return ext['host'].rstrip('/')
+        publish = ext.get('publish') or 'https://idld65.com/'
+        builtin_hosts = [
+            'https://border.loewkgyyv.cc/',   # 2026-09-08 实测现役镜像(190KB完整站)
+            'https://capture.loewkgyyv.cc/',
+            'https://fe7.loewkgyyv.cc/',
+            'https://border.bshzjjgq.cc/',    # 旧基域，302 -> loewkgyyv.cc
         ]
-        for url in dynamic_urls:
-            try:
-                response = requests.get(url, headers=self.headers, proxies=self.proxies, timeout=10)
-                if response.status_code == 200:
-                    return url
-            except Exception:
-                continue
-        return dynamic_urls[0]
+        if resolve_host:
+            return resolve_host(
+                publish_page=publish,
+                candidate_hosts=list(ext.get('hosts') or []) + builtin_hosts,
+                headers=self.headers,
+                proxies=self.proxies,
+                timeout=8,
+            )
+        return (ext.get('hosts') or builtin_hosts)[0].rstrip('/')
 
     def homeContent(self, filter):
         try:
