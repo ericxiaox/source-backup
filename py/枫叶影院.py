@@ -35,6 +35,18 @@ class Spider(BaseSpider):
         self.host = (self._ext.get('host') or '').rstrip('/') or self._detect_host()
 
     def _detect_host(self):
+        # v2 resolver：并行探测 + 成功缓存30分钟；全败返回 ''（接口层 except 兜空，不静默回死域）
+        try:
+            from hostresolver import resolve_host
+            return resolve_host(
+                publish_page=None,
+                candidate_hosts=list(self.CANDIDATE_HOSTS),
+                headers=self.headers,
+                timeout=6,
+            )
+        except Exception:
+            pass
+        # resolver 缺失时（不应发生）：退回串行探测
         for h in self.CANDIDATE_HOSTS:
             try:
                 r = requests.head(h, headers=self.headers, timeout=6, allow_redirects=True)
@@ -42,7 +54,7 @@ class Spider(BaseSpider):
                     return h
             except Exception:
                 continue
-        return self.CANDIDATE_HOSTS[0]
+        return ''
 
     def getName(self):
         return '枫叶影院'

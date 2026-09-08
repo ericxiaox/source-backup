@@ -99,15 +99,15 @@ class Spider(BaseSpider):
         img_cache.clear()
 
     def get_working_host(self):
-        """动态域名解析：ext 覆盖(影视.json) → 发布页尽力抽链 → 内置候选镜像实测 → 跳转壳跟随。
-        发布页 njttvylz.cc 为纯 JS 渲染壳（HTTP 抓不到当前域名），故平时完全依赖
-        候选镜像列表的实时存活检测；发布页/域名变更改 影视.json 里本源条目的 ext 字段。"""
+        """动态域名解析 v2（hostresolver）：ext 锁定 → 发布页深度抽链(b64壳解码+泛解析基域
+        自动生成候选) → 内置候选并行实测 → 成功缓存30分钟。全部失败返回 ''（接口层兜空，
+        坏得明明白白，不回退死域静默空转）。"""
         ext = getattr(self, '_ext', {}) or {}
         # 0) ext 锁定主页：最高优先级，跳过一切探测（站点结构大改时的终极兜底）
         if ext.get('host'):
             return ext['host'].rstrip('/')
         publish = ext.get('publish') or 'https://www.njttvylz.cc/'
-        # ext 里加的新域名排在内置列表前面优先实测；内置列表仍作兜底
+        # 发布页会自动深度抽链生成 iljzezhab 泛解析候选；内置列表仅作发布页失联时的备份
         builtin_hosts = [
             'https://big.iljzezhab.cc/',      # 2026-09-08 实测活镜像(254KB完整站,20分类)
             'https://adjust.iljzezhab.cc/',
@@ -121,17 +121,15 @@ class Spider(BaseSpider):
             'https://mrdsx5.com/',
         ]
         if resolve_host:
-            host = resolve_host(
+            return resolve_host(
                 publish_page=publish,
                 candidate_hosts=list(ext.get('hosts') or []) + builtin_hosts,
                 headers=self.headers,
                 proxies=self.proxies,
                 timeout=8,
             )
-            if host:
-                return host
-        # 兜底（resolver 缺失时）：ext 指定 → 内置首个
-        return (ext.get('hosts') or ['https://barrel.lsaazihd.cc'])[0].rstrip('/')
+        # resolver 缺失时（不应发生）：ext 指定 → 内置首个
+        return (ext.get('hosts') or builtin_hosts)[0].rstrip('/')
 
     def homeContent(self, filter):
         try:

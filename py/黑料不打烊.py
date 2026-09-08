@@ -55,21 +55,23 @@ class Spider(Spider):
         self.host=self.HOST
         print(f"使用站点: {self.HOST}")
     def get_working_host(self):
-        """动态域名解析：ext 锁定 → 发布页抽链(尽力) + 候选镜像实测 → 候选首项兜底"""
+        """动态域名解析 v2（hostresolver）：ext 锁定 → 发布页深度抽链(b64壳解码+泛解析基域
+        自动生成候选) → 内置候选并行实测 → 成功缓存30分钟。全部失败返回 ''（接口层兜空，
+        不回退死域静默空转）。"""
         ext=getattr(self,'_ext',{}) or {}
         if ext.get('host'):
             return ext['host'].rstrip('/')
         if resolve_host:
             try:
-                h=resolve_host(
+                return resolve_host(
                     publish_page=ext.get('publish') or PUBLISH_PAGE,
                     candidate_hosts=list(ext.get('hosts') or [])+BUILTIN_HOSTS,
                     headers={'User-Agent':_UA},
                     proxies=getattr(self,'proxies',{}) or {},
                     timeout=8,
                 )
-                if h:return h
-            except Exception:pass
+            except Exception:
+                return ''
         return (ext.get('hosts') or BUILTIN_HOSTS)[0].rstrip('/')
     # 兜底分类（2026-09-07 改版后导航实测，b64 存储防托管平台内容扫描误判）——
     # 仅当首页实时抓取失败时使用，正常情况分类一律从网站实时获取
