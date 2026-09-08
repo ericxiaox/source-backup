@@ -109,12 +109,15 @@ class Spider(BaseSpider):
         publish = ext.get('publish') or 'https://www.njttvylz.cc/'
         # ext 里加的新域名排在内置列表前面优先实测；内置列表仍作兜底
         builtin_hosts = [
-            'https://barrel.lsaazihd.cc/',   # 当前活镜像(实测253KB完整站)
-            'https://big.ktgchwz.xyz/',
+            'https://big.iljzezhab.cc/',      # 2026-09-08 实测活镜像(254KB完整站,20分类)
+            'https://adjust.iljzezhab.cc/',
+            'https://borrow.iljzezhab.cc/',
+            'https://black.iljzezhab.cc/',
+            'https://big.ktgchwz.xyz/',       # 跳转 -> iljzezhab.cc
             'https://adjust.ktgchwz.xyz/',
             'https://borrow.ktgchwz.xyz/',
             'https://black.ktgchwz.xyz/',
-            'https://mrds72.com/',            # 跳转壳 -> biryqddqj.cc
+            'https://mrds72.com/',            # 跳转壳
             'https://mrdsx5.com/',
         ]
         if resolve_host:
