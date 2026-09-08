@@ -25,6 +25,70 @@ except Exception:
 
 img_cache = {}
 
+# ---- 封面图代理提速（列表加载慢的主因：每图一次 TLS 握手 + 无缓存 + 无条件解密）----
+from collections import OrderedDict
+_img_session = requests.Session()          # 连接复用：同图床 TLS keep-alive
+_img_session.verify = False
+try:                                       # 连接池（App 侧并发拉图时不排队）
+    from requests.adapters import HTTPAdapter
+    _ad = HTTPAdapter(pool_connections=4, pool_maxsize=12)
+    _img_session.mount('https://', _ad)
+    _img_session.mount('http://', _ad)
+except Exception:
+    pass
+_img_cache = OrderedDict()                 # 解密结果 LRU：滚动回看/重复封面秒出
+_IMG_CACHE_MAX = 60
+
+
+def _img_fetch(real_url, headers, proxies):
+    """取图+按需解密+缓存，返回 [status, content_type, bytes]。"""
+    if real_url in _img_cache:
+        _img_cache.move_to_end(real_url)
+        ct, b = _img_cache[real_url]
+        return [200, ct, b]
+    res = _img_session.get(real_url, headers=headers, proxies=proxies, timeout=10)
+    raw = res.content or b''
+    ct = 'image/jpeg'
+    if raw[:3] == b'\xff\xd8\xff':
+        b = raw                                        # 裸 JPEG 免解密
+    elif raw[:8] == b'\x89PNG\r\n\x1a\n':
+        b, ct = raw, 'image/png'
+    elif raw[:4] == b'GIF8':
+        b, ct = raw, 'image/gif'
+    else:                                              # CDN 级 AES 加密图
+        b = _aesimg(raw)
+        if b[:8] == b'\x89PNG\r\n\x1a\n':
+            ct = 'image/png'
+        elif b[:4] == b'GIF8':
+            ct = 'image/gif'
+    if b:
+        _img_cache[real_url] = (ct, b)
+        if len(_img_cache) > _IMG_CACHE_MAX:
+            _img_cache.popitem(last=False)
+    return [200, ct, b]
+
+
+def _aesimg(data):
+    """模块级 AES 图片解密（CDN 加密图，多 key 自动尝试）。与 Spider.aesimg 同逻辑。"""
+    if len(data) < 16:
+        return data
+    keys = [(b'f5d965df75336270', b'97b60394abc2fbe1'), (b'75336270f5d965df', b'abc2fbe197b60394')]
+    for k, v in keys:
+        try:
+            dec = unpad(AES.new(k, AES.MODE_CBC, v).decrypt(data), 16)
+            if dec.startswith(b'\xff\xd8') or dec.startswith(b'\x89PNG'):
+                return dec
+        except Exception:
+            pass
+        try:
+            dec = unpad(AES.new(k, AES.MODE_ECB).decrypt(data), 16)
+            if dec.startswith(b'\xff\xd8'):
+                return dec
+        except Exception:
+            pass
+    return data
+
+
 class Spider(BaseSpider):
 
     # 广告/站务名黑名单（分集名/标签用·全量）——词表以 b64 存储运行时解码，防托管平台内容扫描误判
@@ -397,9 +461,7 @@ class Spider(BaseSpider):
                 return [404, 'text/plain', b'Expired']
             elif type_ == 'img':
                 real_url = self.d64(url) if not url.startswith('http') else url
-                res = requests.get(real_url, headers=self.headers, proxies=self.proxies, timeout=10)
-                content = self.aesimg(res.content)
-                return [200, 'image/jpeg', content]
+                return _img_fetch(real_url, self.headers, self.proxies)
             elif type_ == 'm3u8':
                 return self.m3Proxy(url)
             else:

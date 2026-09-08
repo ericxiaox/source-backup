@@ -19,6 +19,40 @@ except Exception:
 
 _UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.7049.96 Safari/537.36'
 
+# ---- 封面图代理提速（列表加载慢的主因：每图一次 TLS 握手 + 无缓存 + 无条件解密）----
+from collections import OrderedDict
+_img_session=requests.Session()          # 连接复用：同图床 TLS keep-alive
+_img_session.verify=False
+try:                                      # 连接池（App 侧并发拉图时不排队）
+    from requests.adapters import HTTPAdapter
+    _ad=HTTPAdapter(pool_connections=4,pool_maxsize=12)
+    _img_session.mount('https://',_ad); _img_session.mount('http://',_ad)
+except Exception:pass
+_img_cache=OrderedDict()                  # 解密结果 LRU：滚动回看/重复封面秒出
+_IMG_CACHE_MAX=60
+
+def _img_fetch(url,referer):
+    """取图+按需解密+缓存，返回 (content_type, bytes)。url 需已是绝对地址。"""
+    if url in _img_cache:
+        _img_cache.move_to_end(url)
+        return _img_cache[url]
+    h={'User-Agent':_UA,'Referer':referer}
+    r=_img_session.get(url,headers=h,timeout=10)
+    if r.status_code!=200:return[404,'text/plain',b'']
+    raw=r.content
+    ct='image/jpeg'
+    if raw[:3]==b'\xff\xd8\xff':b=raw                 # 裸 JPEG 免解密
+    elif raw[:8]==b'\x89PNG\r\n\x1a\n':b,ct=raw,'image/png'
+    elif raw[:4]==b'GIF8':b,ct=raw,'image/gif'
+    else:                                             # CDN 级 AES 加密图
+        b=AES.new(b'f5d965df75336270',AES.MODE_CBC,b'97b60394abc2fbe1').decrypt(raw)
+        if b[:8]==b'\x89PNG\r\n\x1a\n':ct='image/png'
+        elif b[:4]==b'GIF8':ct='image/gif'
+    if b:
+        _img_cache[url]=(ct,b)
+        if len(_img_cache)>_IMG_CACHE_MAX:_img_cache.popitem(last=False)
+    return[200,ct,b]
+
 # 官方地址发布页（稳定，站点换域名只动这里或 ext 的 publish@）
 PUBLISH_PAGE='https://wkcdhiqk.cc/'
 # 发布页 JS 每次随机取英文单词拼泛子域（{word}.bqmnxlid.cc 主线 / {word}.xstcnjbf.cc 备线），
@@ -103,7 +137,10 @@ class Spider(Spider):
     def homeVideoContent(self):return{}
     def categoryContent(self,tid,pg,filter,extend):
         # 2026-09-07 改版后分类路由为 /category/{slug}/，分页为 /category/{slug}/{pg}/
-        url=f'{self.HOST}/category/{tid}/'if int(pg)==1 else f'{self.HOST}/category/{tid}/{pg}/'
+        # tid 兼容两种形态：实时扫描('/category/slug/'全路径) 与 b64兜底表(裸slug)
+        if not str(tid).startswith('/'):
+            tid=f'/category/{tid}'
+        url=f'{self.HOST}{tid}/'if int(pg)==1 else f'{self.HOST}{tid}/{pg}/'
         videos=self.get_list(url)
         return{'list':videos,'page':pg,'pagecount':9999,'limit':90,'total':999999}
     def fetch_and_decrypt_image(self,url):
@@ -247,13 +284,7 @@ class Spider(Spider):
                 url=self.d64(param.get('url'))
                 if url.startswith('//'):url='https:'+url
                 elif url.startswith('/'):url=self.HOST+url
-                r=requests.get(url,headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.7049.96 Safari/537.36","Referer":self.HOST+'/'},timeout=15,verify=False)
-                if r.status_code!=200:return[404,'text/plain','']
-                b=AES.new(b'f5d965df75336270',AES.MODE_CBC,b'97b60394abc2fbe1').decrypt(r.content)
-                ct='image/jpeg'
-                if b.startswith(b'\x89PNG'):ct='image/png'
-                elif b.startswith(b'GIF8'):ct='image/gif'
-                return[200,ct,b]
+                return _img_fetch(url,self.HOST+'/')
             elif xtype == 'm3u8':
                 # Handle danmaku-enabled video
                 path, url = unquote(param['pdid']).split('_dm_', 1)
