@@ -9,12 +9,25 @@ from base.spider import Spider
 from urllib.parse import urljoin
 
 sys.path.append('..')
+from base.spider import Spider
+from urllib.parse import urljoin
+try:
+    from hostresolver import ext_of
+except Exception:
+    try:
+        import os as _os
+        sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+        from hostresolver import ext_of
+    except Exception:
+        ext_of = None
 
 
 class Spider(Spider):
     CANDIDATE_DOMAINS = [
         "https://mdcmai4.xyz",
         "https://mdcmai5.xyz",
+        "https://mdcmai3.xyz",
+        "https://mdcmai2.xyz",
     ]
     decode_mode = 0
 
@@ -35,11 +48,20 @@ class Spider(Spider):
     def getName(self):
         return base64.b64decode('6bq76LGG5Lyg5aqSQUk=').decode('utf-8')
 
-    def init(self, extend):
+    def init(self, extend=""):
+        # ext 支持：host@ 锁定 / hosts@ 追加候选 / publish@ 预留（站方暂无稳定发布页）
+        self._ext = ext_of(extend) if ext_of else {}
         self._detect_domain()
 
     def _detect_domain(self):
-        for domain in self.CANDIDATE_DOMAINS:
+        ext = getattr(self, '_ext', {}) or {}
+        # 候选顺序：ext host 锁定 > ext hosts > 内置候选（2026-09-08 实测 4/5/3/2 全活）
+        hosts = []
+        if ext.get('host'):
+            hosts.append(ext['host'].rstrip('/'))
+        hosts += [h.rstrip('/') for h in (ext.get('hosts') or [])]
+        hosts += [d.rstrip('/') for d in self.CANDIDATE_DOMAINS]
+        for domain in hosts:
             try:
                 h = {
                     'User-Agent': 'Mozilla/5.0 (Linux; Android 13; M2102J2SC Build/TKQ1.221114.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.31 Mobile Safari/537.36',

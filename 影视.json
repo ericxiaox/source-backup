@@ -45,6 +45,7 @@
       "name": "📱51吃瓜",
       "type": 3,
       "api": "./py/51吸瓜动态版.py",
+      "ext": "publish@https://advise.nlwkmsv.cc;hosts@https://advise.ucorfqmp.cc",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -56,6 +57,7 @@
       "name": "📱每日大乱斗",
       "type": 3,
       "api": "./py/每日大乱斗.py",
+      "ext": "publish@https://idld65.com;hosts@https://border.loewkgyyv.cc,https://capture.loewkgyyv.cc,https://fe7.loewkgyyv.cc",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -78,6 +80,7 @@
       "name": "📱禁片天堂",
       "type": 3,
       "api": "./py/jptt.py",
+      "ext": "publish@https://jptt.tv;hosts@https://2026ajptttv.work,https://jptttv2026a.work",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -89,6 +92,7 @@
       "name": "📱AI人短剧",
       "type": 3,
       "api": "./py/airdj.py",
+      "ext": "hosts@https://mdcmai4.xyz,https://mdcmai5.xyz,https://mdcmai3.xyz,https://mdcmai2.xyz",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -100,6 +104,7 @@
       "name": "📱香蕉视频",
       "type": 3,
       "api": "./py/xjsp.py",
+      "ext": "host@https://618013.xyz",
       "style": {
         "type": "rect",
         "ratio": 1

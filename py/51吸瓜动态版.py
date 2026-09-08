@@ -24,13 +24,36 @@ except Exception:
         from imgfetch import fetch_img as _shared_fetch_img
     except Exception:
         _shared_fetch_img = None
+try:
+    from hostresolver import resolve_host, parse_ext
+except Exception:
+    resolve_host = None
+    parse_ext = None
 
 
 class Spider(Spider):
 
     def init(self, extend=""):
-        try:self.proxies = json.loads(extend)
-        except:self.proxies = {}
+        self.proxies = {}
+        self._ext = {}
+        ext_str = (extend or '').strip()
+        if ext_str:
+            try:
+                cfg = json.loads(ext_str)
+                if isinstance(cfg, dict):
+                    self.proxies = cfg.get('proxies') or {}
+                    for k in ('publish', 'host'):
+                        if cfg.get(k):
+                            self._ext[k] = str(cfg[k]).strip()
+                    if cfg.get('hosts'):
+                        hs = cfg['hosts'] if isinstance(cfg['hosts'], list) else [cfg['hosts']]
+                        self._ext['hosts'] = [str(h).strip() for h in hs if str(h).strip()]
+            except Exception:
+                if parse_ext:
+                    try:
+                        self._ext = parse_ext(ext_str)
+                    except Exception:
+                        self._ext = {}
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -332,33 +355,27 @@ class Spider(Spider):
             return ""
 
     def get_working_host(self):
-        """Get working host from known dynamic URLs"""
-        # Known working URLs from the dynamic gateway
-        dynamic_urls = [
-            'https://advise.nlwkmsv.cc/',
-            'advise.nlwkmsv.cc', 
-          #  'https://am.vgwtswi.xyz'
+        """动态域名解析 v2（hostresolver）：ext 锁定 → 旧域302跟随 + 泛解析候选并行实测
+        → 成功缓存30分钟。全部失败返回 ''（接口层兜空，坏得明明白白）。
+        2026-09-08 实测：nlwkmsv 基域已轮换为 ucorfqmp.cc，旧域 302 跳转仍活；
+        泛解析特征确认（任意词子域均出全站），resolver 泛生成候选适用。"""
+        ext = getattr(self, '_ext', {}) or {}
+        if ext.get('host'):
+            return ext['host'].rstrip('/')
+        publish = ext.get('publish') or 'https://advise.nlwkmsv.cc/'
+        builtin_hosts = [
+            'https://advise.ucorfqmp.cc/',    # 2026-09-08 实测现役镜像(266KB完整站)
+            'https://advise.nlwkmsv.cc/',     # 旧基域，302 -> ucorfqmp.cc
         ]
-        
-        # Test each URL to find a working one
-        for url in dynamic_urls:
-            try:
-                response = requests.get(url, headers=self.headers, proxies=self.proxies, timeout=10)
-                if response.status_code == 200:
-                    # Verify it has the expected content structure
-                    data = self.getpq(response.text)
-                    articles = data('#index article a')
-                    if len(articles) > 0:
-                        self.log(f"选用可用站点: {url}")
-                        print(f"选用可用站点: {url}")
-                        return url
-            except Exception as e:
-                continue
-        
-        # Fallback to first URL if none work (better than crashing)
-        self.log(f"未检测到可用站点，回退: {dynamic_urls[0]}")
-        print(f"未检测到可用站点，回退: {dynamic_urls[0]}")
-        return dynamic_urls[0]
+        if resolve_host:
+            return resolve_host(
+                publish_page=publish,
+                candidate_hosts=list(ext.get('hosts') or []) + builtin_hosts,
+                headers=self.headers,
+                proxies=self.proxies,
+                timeout=8,
+            )
+        return (ext.get('hosts') or builtin_hosts)[0].rstrip('/')
 
 
     def getlist(self, data, tid=''):

@@ -134,6 +134,13 @@ _WILD_PAT = re.compile(
     r"[\w.]*random\s*\(\s*\)\s*\+\s*['\"]\.([a-z0-9-]+(?:\.[a-z0-9-]+)+)['\"]", re.I)
 # 发布页 b64 壳（document.write(Base64.decode('...')) 整页 HTML 藏 base64）
 _B64_SHELL_PAT = re.compile(r"Base64\.decode\(\s*['\"]([A-Za-z0-9+/=]{100,})['\"]")
+# 发布页里必然混入的第三方大平台/统计/广告域——探测它们会把大页面误判成"站点可用"
+_JUNK_HOST_PAT = re.compile(
+    r'(googletagmanager|google-analytics|googleads|gstatic|google\.|gitlab\.|github\.|'
+    r'youtube\.|ytimg\.|twitter\.|x\.com|t\.me|telegram\.|addtoany\.|yandex\.|'
+    r'browsehappy|schema\.org|w3\.org|qq\.com|apple\.com|bing\.com|baidu\.com|'
+    r'magsrv\.|adsrv|ad-provider|chnsrv|stripchat|jsdelivr|unpkg|npmjs|shields\.io|'
+    r'699pic|meituan|fontawesome|jquery|bootstrap)', re.I)
 
 
 def _expand_b64_shells(text):
@@ -164,11 +171,26 @@ def extract_publish_domains(publish_page, headers, proxies, timeout):
     for t in texts:
         for l in re.findall(r'href=["\'](https?://[^"\']+)["\']', t, re.I):
             m = re.match(r'https?://([a-z0-9.-]+\.[a-z]{2,})', l, re.I)
-            if m:
+            if m and not _JUNK_HOST_PAT.search(m.group(1)):
                 static.append('https://' + m.group(1))
         for m in _WILD_PAT.finditer(t):
             wilds.add(m.group(1))
     return list(dict.fromkeys(static)), list(wilds)
+
+
+def _dedupe(urls):
+    """保序去重 + 补协议头。"""
+    seen, out = set(), []
+    for u in urls:
+        u2 = (u or '').strip().rstrip('/')
+        if not u2:
+            continue
+        if not re.match(r'^https?://', u2):
+            u2 = 'https://' + u2
+        if u2 not in seen:
+            seen.add(u2)
+            out.append(u2)
+    return out
 
 
 # ---------------------------------------------------------------- 探测
@@ -247,22 +269,19 @@ def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
     words = random.sample(_WILD_WORDS, min(4, len(_WILD_WORDS)))
     wild_candidates = ['https://%s.%s' % (w, b) for b in wild_bases for w in words]
 
-    # 2) 合并候选（保序去重）：泛解析 > 外部候选 > 发布页静态链接
-    combined = wild_candidates + list(candidate_hosts) + pub_domains
-    seen = set()
-    ordered = []
-    for u in combined:
-        u2 = (u or '').strip().rstrip('/')
-        if not re.match(r'^https?://', u2):
-            u2 = 'https://' + u2
-        if u2 and u2 not in seen:
-            seen.add(u2)
-            ordered.append(u2)
-    if not ordered:
+    # 2) 分层候选（各层保序去重）：
+    #    第一层 = 泛解析候选 + ext/内置候选（新鲜且可信，绝大多数场景此层即命中）
+    #    第二层 = 发布页静态链接（仅第一层全败时才测，防第三方大页面误判成站点）
+    tier1 = _dedupe(wild_candidates + list(candidate_hosts))
+    tier2 = [u for u in _dedupe(pub_domains) if u not in set(tier1)]
+
+    if not tier1 and not tier2:
         return ''
 
-    # 3) 并行实测（use_cache=False=强制刷新，但成功结果仍写缓存供后续 init 秒开）
-    host = _probe_all(ordered, headers, proxies, timeout)
+    # 3) 分波实测（use_cache=False=强制刷新，但成功结果仍写缓存供后续 init 秒开）
+    host = _probe_all(tier1, headers, proxies, timeout)
+    if not host and tier2:
+        host = _probe_all(tier2, headers, proxies, timeout)
     if host:
         _CACHE[key] = (host, time.time() + _CACHE_TTL)
     return host

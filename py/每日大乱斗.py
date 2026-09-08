@@ -20,16 +20,37 @@ except Exception:
         from imgfetch import fetch_img as _shared_fetch_img
     except Exception:
         _shared_fetch_img = None
+try:
+    from hostresolver import resolve_host, parse_ext
+except Exception:
+    resolve_host = None
+    parse_ext = None
 
 img_cache = {}
 
 class Spider(BaseSpider):
 
     def init(self, extend=""):
-        try:
-            self.proxies = json.loads(extend)
-        except:
-            self.proxies = {}
+        self.proxies = {}
+        self._ext = {}
+        ext_str = (extend or '').strip()
+        if ext_str:
+            try:
+                cfg = json.loads(ext_str)
+                if isinstance(cfg, dict):
+                    self.proxies = cfg.get('proxies') or {}
+                    for k in ('publish', 'host'):
+                        if cfg.get(k):
+                            self._ext[k] = str(cfg[k]).strip()
+                    if cfg.get('hosts'):
+                        hs = cfg['hosts'] if isinstance(cfg['hosts'], list) else [cfg['hosts']]
+                        self._ext['hosts'] = [str(h).strip() for h in hs if str(h).strip()]
+            except Exception:
+                if parse_ext:
+                    try:
+                        self._ext = parse_ext(ext_str)
+                    except Exception:
+                        self._ext = {}
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',

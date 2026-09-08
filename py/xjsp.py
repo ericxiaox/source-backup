@@ -19,6 +19,23 @@ class Spider(Spider):
     def init(self, extend=""):
         self.host = "https://618013.xyz"
         self.api_host = "https://h5.xxoo168.org"
+        # ext 支持：host@ 覆盖主站（域名被墙/更换时在影视.json 改 ext 即可救活，无需改代码）
+        try:
+            from hostresolver import ext_of
+        except Exception:
+            try:
+                import os as _os, sys as _sys
+                _sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+                from hostresolver import ext_of
+            except Exception:
+                ext_of = None
+        if ext_of:
+            try:
+                _ext = ext_of(extend)
+                if _ext.get('host'):
+                    self.host = _ext['host'].rstrip('/')
+            except Exception:
+                pass
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
