@@ -1,5 +1,5 @@
 {
-  "sites_count": 34,
+  "sites_count": 35,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -385,6 +385,18 @@
       "type": 3,
       "api": "./py/dy.py",
       "ext": "publish@https://github.com/kissav12/douyin",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_91bl",
+      "name": "📱91爆料",
+      "type": 3,
+      "api": "./py/91bl.py",
+      "ext": "publish@https://t91bl.com/",
       "style": {
         "type": "rect",
         "ratio": 1

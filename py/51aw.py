@@ -65,8 +65,12 @@ class Spider(BaseSpider):
 
     # 入口落地页（b64 壳，解码后含现役内容站直链；随品牌换域即更新）
     PUBLISH_PAGE = 'https://51aw34.com/'
-    # 内置候选（2026-09-08 落地页实测内容站，Cloudflare）
+    # 内置候选（2026-09-08 实测）：壳页 JS 泛解析备线 {word}.haqwhuwn.cc 任意词可用，
+    # awcg48.com 主线时活时死（App 端曾全挂=零数据），故泛解析线排前
     BUILTIN_HOSTS = [
+        'https://main.haqwhuwn.cc',
+        'https://apple.haqwhuwn.cc',
+        'https://being.djvvxecgc.cc',
         'https://awcg48.com',
     ]
 

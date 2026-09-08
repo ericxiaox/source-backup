@@ -13,6 +13,7 @@ import os
 import html as _html
 import time
 import base64
+from collections import OrderedDict
 from urllib.parse import quote, urljoin
 
 import requests
@@ -33,6 +34,54 @@ except Exception:
 # 站名（托管平台内容扫描规避：b64 运行时解码）
 _D = base64.b64decode('5oqW6Zi0').decode('utf-8')
 _DN = base64.b64decode('5oqW6Zi05oiQ5Lq6572R').decode('utf-8')
+
+# ---- 封面代理（imgfetch 纪律：Session keep-alive + LRU + magic 预检 + 解密兜底）----
+_img_session = requests.Session()
+_img_session.verify = False
+try:
+    from requests.adapters import HTTPAdapter
+    _ad = HTTPAdapter(pool_connections=4, pool_maxsize=12)
+    _img_session.mount('https://', _ad)
+    _img_session.mount('http://', _ad)
+except Exception:
+    pass
+_img_cache = OrderedDict()
+_IMG_CACHE_MAX = 60
+
+
+def _img_fetch(url, referer):
+    """取图+按需解密+缓存，返回 [status, content_type, bytes]。"""
+    if url in _img_cache:
+        _img_cache.move_to_end(url)
+        return _img_cache[url]
+    try:
+        h = {'User-Agent': _UA, 'Referer': referer}
+        r = _img_session.get(url, headers=h, timeout=10)
+        if r.status_code != 200:
+            return [404, 'text/plain', b'']
+        raw = r.content
+        ct = 'image/jpeg'
+        if raw[:3] == b'\xff\xd8\xff':
+            b = raw                                   # 裸 JPEG 免解密
+        elif raw[:8] == b'\x89PNG\r\n\x1a\n':
+            b, ct = raw, 'image/png'
+        elif raw[:4] == b'GIF8':
+            b, ct = raw, 'image/gif'
+        else:                                         # CDN 级 AES 加密图（同黑料系 key）
+            from Crypto.Cipher import AES
+            b = AES.new(b'f5d965df75336270', AES.MODE_CBC, b'97b60394abc2fbe1').decrypt(raw)
+            if b[:8] == b'\x89PNG\r\n\x1a\n':
+                ct = 'image/png'
+            elif b[:4] == b'GIF8':
+                ct = 'image/gif'
+        if b:
+            _img_cache[url] = [200, ct, b]
+            if len(_img_cache) > _IMG_CACHE_MAX:
+                _img_cache.popitem(last=False)
+            return [200, ct, b]
+        return [404, 'text/plain', b'']
+    except Exception:
+        return [404, 'text/plain', b'']
 
 _UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'
 _CH36 = '0123456789abcdefghijklmnopqrstuvwxyz'
@@ -121,6 +170,37 @@ class Spider(BaseSpider):
     def getName(self):
         return _D
 
+    def e64(self, s):
+        try:
+            return base64.b64encode((s or '').encode('utf-8')).decode('utf-8')
+        except Exception:
+            return ''
+
+    def d64(self, s):
+        try:
+            return base64.b64decode((s or '').encode('utf-8')).decode('utf-8')
+        except Exception:
+            return ''
+
+    def localProxy(self, param):
+        try:
+            if param.get('type') == 'dyimg':
+                url = self.d64(param.get('url'))
+                if url.startswith('//'):
+                    url = 'https:' + url
+                elif url.startswith('/'):
+                    url = self.host + url
+                return _img_fetch(url, self.host + '/')
+        except Exception:
+            pass
+        return [404, 'text/plain', b'']
+
+    def _pic(self, u):
+        """封面统一走代理（consistent header+缓存+加密兜底）。"""
+        if not u:
+            return ''
+        return f'{self.getProxyUrl()}&url={self.e64(u)}&type=dyimg'
+
     def isVideoFormat(self, url):
         return any(ext in (url or '') for ext in ['.m3u8', '.mp4', '.ts'])
 
@@ -166,8 +246,7 @@ class Spider(BaseSpider):
         return requests.get(url, headers=self.headers, proxies=self.proxies,
                             timeout=15, verify=False, allow_redirects=True, **kw)
 
-    @staticmethod
-    def _parse_list(html_text):
+    def _parse_list(self, html_text):
         out = []
         seen = set()
         for m in _RE_ITEM.finditer(html_text):
@@ -188,7 +267,7 @@ class Spider(BaseSpider):
             out.append({
                 'vod_id': vid,
                 'vod_name': title,
-                'vod_pic': pic,
+                'vod_pic': self._pic(pic),
                 'vod_remarks': '',
             })
         return out
@@ -290,7 +369,7 @@ class Spider(BaseSpider):
             pic = ''
             mo = _RE_OGIMG.search(body)
             if mo:
-                pic = _html.unescape(mo.group(1)).strip()
+                pic = self._pic(_html.unescape(mo.group(1)).strip())
             result['list'].append({
                 'vod_id': vid,
                 'vod_name': title or vid,

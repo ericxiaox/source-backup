@@ -157,7 +157,11 @@ class Spider(Spider):
             return m.group(1)if m else''
         except:return''
     def _should_decrypt(self,url:str)->bool:
-        u=(url or'').lower();return any(x in u for x in['pic.gylhaa.cn','new.slfpld.cn','/upload_01/','/upload/'])
+        # 2026-09-08 改版: 新图床 pic.hdhwqx.cn（/hc237/ 路径）同为 CDN 级 AES 加密图，
+        # 与旧图床同 key；generic 按 pic.* 域名 + /hc237/ 路径兜住后续换域
+        u=(url or'').lower()
+        host=u.split('/')[2]if u.startswith('http')and u.count('/')>2 else''
+        return any(x in u for x in['pic.gylhaa.cn','new.slfpld.cn','pic.hdhwqx.cn','/upload_01/','/upload/','/hc237/'])or host.startswith('pic.')
     def _abs(self,u:str)->str:
         if not u:return''
         if u.startswith('//'):return'https:'+u
@@ -170,7 +174,7 @@ class Spider(Spider):
         try:return base64.b64decode((s or'').encode()).decode()
         except:return''
     def _img(self,img_node):
-        u=''if img_node is None else(img_node.attr('src')or img_node.attr('data-src')or'')
+        u=''if img_node is None else(img_node.attr('z-image-loader-url')or img_node.attr('src')or img_node.attr('data-src')or'')
         enc=''if img_node is None else self._extract_img_from_onload(img_node)
         t=enc or u
         return f"{self.getProxyUrl()}&url={self.e64(t)}&type=hlimg"if t and(enc or self._should_decrypt(t))else self._abs(t)
@@ -179,6 +183,7 @@ class Spider(Spider):
         for sel in self.SELECTORS:
             for it in root(sel).items():
                 if 'ad-item' in (it.attr('class') or ''):continue
+                if it.find('.corner-badge--ad'):continue  # 2026-09-08 改版广告卡（角标"广告"）
                 title=it.find('.title, h3, h4, .video-title, .post-card-bottom-title, .post-card-bottom-text').text()
                 if not title:continue
                 link=it.find('a').attr('href')or it.closest('a').attr('href')or''
@@ -197,57 +202,48 @@ class Spider(Spider):
         except:root_content=None
         title=(root_text('title').text()if root_text else'')or''
         if' - 黑料网'in title:title=title.replace(' - 黑料网','')
+        if' - 黑料不打烊'in title:title=title.replace(' - 黑料不打烊','')
         pic=''
-        if root_text:
-            og=root_text('meta[property="og:image"]').attr('content')
-            if og and(og.endswith('.png')or og.endswith('.jpg')or og.endswith('.jpeg')):pic=og
-            else:pic=self._img(root_text('.video-item-img img'))
+        # 2026-09-08: 详情页 og:image=主题社交图标、页面内 img 全是顶部广告 banner/推荐位缩略图，
+        # 均不适合当封面，宁空勿错（列表进详情时 App 侧通常沿用列表封面）
         detail=''
         if root_text:
             detail=root_text('meta[name="description"]').attr('content')or''
             if not detail:detail=root_text('.content').text()[:200]
         play_from,play_url=[],[]
+        article_id = self._extract_article_id(tid)
         if root_content:
-            for i,p in enumerate(root_content('.dplayer').items()):
-                c=p.attr('config')
+            # 2026-09-08: 分集在 .dplayer 的 data-config 属性（旧版读 config 已失效），
+            # 广告贴片视频只存在于页面广告 JSON（advert_player_*），不在 dplayer 里，
+            # 因此只认 dplayer 分集即可天然免广告；不再用宽松 js 正则兜底（会把广告 m3u8 捞进分集）
+            parts=[]
+            for p in root_content('.dplayer').items():
+                c=p.attr('data-config')or p.attr('config')
                 if not c:continue
                 try:s=(c.replace('&quot;','"').replace('&#34;','"').replace('&amp;','&').replace('&#38;','&').replace('&lt;','<').replace('&#60;','<').replace('&gt;','>').replace('&#62;','>'));u=(json.loads(s).get('video',{})or{}).get('url','')
                 except:m=re.search(r'"url"\s*:\s*"([^"]+)"',c);u=m.group(1)if m else''
-                if u:
-                    u=u.replace('\\/','/');u=self._abs(u)
-                    # Extract article ID for danmaku
-                    article_id = self._extract_article_id(tid)
-                    if article_id:
-                        play_from.append(f'视频{i+1}');play_url.append(f"{article_id}_dm_{u}")
-                    else:
-                        play_from.append(f'视频{i+1}');play_url.append(u)
+                if not u:continue
+                u=u.replace('\\/','/');u=self._abs(u)
+                idx=p.attr('data-video_index')
+                try:idx=int(idx)
+                except:idx=len(parts)
+                parts.append((idx,u))
+            parts.sort(key=lambda x:x[0])
+            for idx,u in parts:
+                if article_id:
+                    play_from.append(f'视频{len(play_from)+1}');play_url.append(f"{article_id}_dm_{u}")
+                else:
+                    play_from.append(f'视频{len(play_from)+1}');play_url.append(u)
         if not play_url:
+            # 兜底仅限 hls 专属形态的裸 m3u8（贴片广告素材 host 不同，不会命中 hls. 前缀特征）
             for pat in[r'https://hls\.[^"\']+\.m3u8[^"\']*',r'https://[^"\']+\.m3u8\?auth_key=[^"\']+',r'//hls\.[^"\']+\.m3u8[^"\']*']:
                 for u in re.findall(pat,html_text):
                     u=self._abs(u)
-                    article_id = self._extract_article_id(tid)
                     if article_id:
                         play_from.append(f'视频{len(play_from)+1}');play_url.append(f"{article_id}_dm_{u}")
                     else:
                         play_from.append(f'视频{len(play_from)+1}');play_url.append(u)
                     if len(play_url)>=3:break
-                if play_url:break
-        if not play_url:
-            js_patterns=[r'video[\s\S]{0,500}?url[\s"\'`:=]+([^"\'`\s]+)',r'videoUrl[\s"\'`:=]+([^"\'`\s]+)',r'src[\s"\'`:=]+([^"\'`\s]+\.m3u8[^"\'`\s]*)']
-            for pattern in js_patterns:
-                js_urls=re.findall(pattern,html_text)
-                for js_url in js_urls:
-                    if'.m3u8'in js_url:
-                        js_url=js_url.replace('\\/','/')  # 2026-09-07 改版后页面内 m3u8 全为 JSON 转义形态 https:\/\/，先清洗
-                        if js_url.startswith('//'):js_url='https:'+js_url
-                        elif js_url.startswith('/'):js_url=self.HOST+js_url
-                        elif not js_url.startswith('http'):js_url='https://'+js_url
-                        article_id = self._extract_article_id(tid)
-                        if article_id:
-                            play_from.append(f'视频{len(play_from)+1}');play_url.append(f"{article_id}_dm_{js_url}")
-                        else:
-                            play_from.append(f'视频{len(play_from)+1}');play_url.append(js_url)
-                        if len(play_url)>=3:break
                 if play_url:break
         if not play_url:
             article_id = self._extract_article_id(tid)
