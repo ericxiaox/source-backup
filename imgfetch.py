@@ -4,7 +4,7 @@
 供各 py 源 localProxy 封面通道统一复用（与 hostresolver 同级、同接入模式）：
 - 模块级 requests.Session：TLS keep-alive + HTTPAdapter 连接池，免每图握手
 - 抓取+解密结果 LRU 缓存（默认 60 张）：滚动回看/重复封面 0s 秒出
-- magic 预检：裸图（JPEG/PNG/GIF/WEBP）自动跳过解密，坏解密不污染缓存
+- magic 预检：明文图（JPEG/PNG/GIF/WEBP）自动跳过解密，坏解密不污染缓存
 
 用法（源内）：
     from imgfetch import fetch_img
@@ -29,7 +29,7 @@ _CACHE_MAX = 60
 
 
 def is_plain_image(data):
-    """裸图 magic 预检：JPEG/PNG/GIF/WEBP"""
+    """明文图 magic 预检：JPEG/PNG/GIF/WEBP"""
     if not data or len(data) < 12:
         return False
     if data[:3] == b'\xff\xd8\xff' or data[:8] == b'\x89PNG\r\n\x1a\n':
@@ -77,7 +77,7 @@ def _mime_of(d):
 def fetch_img(url, headers=None, decrypt=None, timeout=15, proxies=None, verify=False):
     """抓图（可选解密），带 LRU 缓存。返回 (mime, bytes)；失败返回 (None, b'')。
 
-    decrypt: callable(bytes)->bytes；传入时若响应已是裸图则自动跳过解密。
+    decrypt: callable(bytes)->bytes；传入时若响应已是明文图则自动跳过解密。
     """
     if requests is None or not url:
         return None, b''

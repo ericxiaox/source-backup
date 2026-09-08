@@ -781,7 +781,7 @@ class Spider(Spider):
                 return None
             host = self._safe_host()
             headers = {"User-Agent": UA, "Referer": host + "/", "Accept": "image/*"}
-            # 共享加速通道：Session 复用 + 缓存 + 解密（裸图自动跳过）
+            # 共享加速通道：Session 复用 + 缓存 + 解密（明文图自动跳过）
             if _shared_fetch_img is not None:
                 try:
                     mime, data = _shared_fetch_img(url, headers=headers,
