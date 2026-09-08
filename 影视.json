@@ -316,8 +316,8 @@
       "changeable": 1
     },
     {
-      "key": "py_uaa有声",
-      "name": "📱uaa有声",
+      "key": "py_uaa音画",
+      "name": "📱UAA音画",
       "type": 3,
       "api": "./py/uays.py",
       "style": {

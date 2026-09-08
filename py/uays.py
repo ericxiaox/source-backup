@@ -36,7 +36,7 @@ except Exception:
 
 class Spider(Spider):
     def getName(self):
-        return "UAA[音·视]"
+        return "UAA音画"
 
     def init(self, extend=""):
         self._ext = ext_of(extend) if ext_of else {}
