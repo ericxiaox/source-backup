@@ -52,17 +52,6 @@
       "changeable": 1
     },
     {
-      "key": "py_mitao",
-      "name": "📱蜜桃视频",
-      "type": 3,
-      "api": "./py/mitao.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
       "key": "py_daluandou",
       "name": "📱每日大乱斗",
       "type": 3,
@@ -945,6 +934,17 @@
       "changeable": 1,
       "off_reason": "可达但仅'欢迎页'跳板(红豆生南国),导航站暂不收",
       "api_missing": true
+    },
+    {
+      "key": "py_mitao",
+      "name": "📱蜜桃视频",
+      "type": 3,
+      "api": "./py/mitao.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
     }
   ]
 }
