@@ -22,6 +22,15 @@ import urllib.parse
 
 sys.path.append('..')
 try:
+    from imgfetch import fetch_img as _shared_fetch_img
+except Exception:
+    try:
+        import os as _os
+        sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+        from imgfetch import fetch_img as _shared_fetch_img
+    except Exception:
+        _shared_fetch_img = None
+try:
     from base.spider import Spider
 except ImportError:
     class Spider:
@@ -83,6 +92,15 @@ try:
     def _fetch_img_raw(u, referer):
         headers = {"User-Agent": UA, "Referer": referer,
                    "Accept": "image/*"}
+        # 共享加速通道：Session 连接复用 + LRU 缓存（2026-09-08 列表提速）
+        if _shared_fetch_img is not None:
+            try:
+                mime, data = _shared_fetch_img(u, headers=headers, timeout=15)
+                if data and len(data) > 50:
+                    return data
+                return b''
+            except Exception:
+                pass
         try:
             rr = rq.get(u, headers=headers, timeout=15, verify=False,
                         allow_redirects=True)
@@ -763,6 +781,16 @@ class Spider(Spider):
                 return None
             host = self._safe_host()
             headers = {"User-Agent": UA, "Referer": host + "/", "Accept": "image/*"}
+            # 共享加速通道：Session 复用 + 缓存 + 解密（裸图自动跳过）
+            if _shared_fetch_img is not None:
+                try:
+                    mime, data = _shared_fetch_img(url, headers=headers,
+                                                   decrypt=_decrypt_img, timeout=15)
+                    if data and len(data) > 50:
+                        return [200, mime, data]
+                    return None
+                except Exception:
+                    pass
             rr = rq.get(url, headers=headers, timeout=15, verify=False, allow_redirects=True)
             if rr.status_code == 200 and rr.content and len(rr.content) > 50:
                 data = _decrypt_img(rr.content)
@@ -784,6 +812,15 @@ class Spider(Spider):
                 return None
             host = self._safe_host()
             headers = {"User-Agent": UA, "Referer": host + "/"}
+            if _shared_fetch_img is not None:
+                try:
+                    mime, data = _shared_fetch_img(raw, headers=headers,
+                                                   decrypt=_decrypt_img, timeout=15)
+                    if data and len(data) > 50:
+                        return [200, mime, data]
+                    return None
+                except Exception:
+                    pass
             data = rq.get(raw, headers=headers, timeout=15, verify=False).content
             data = _decrypt_img(data)
             mime = _detect_mime(data)

@@ -15,6 +15,15 @@ from Crypto.Util.Padding import unpad
 from pyquery import PyQuery as pq
 sys.path.append('..')
 from base.spider import Spider
+try:
+    from imgfetch import fetch_img as _shared_fetch_img
+except Exception:
+    try:
+        import os as _os
+        sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+        from imgfetch import fetch_img as _shared_fetch_img
+    except Exception:
+        _shared_fetch_img = None
 
 
 class Spider(Spider):
@@ -254,6 +263,14 @@ class Spider(Spider):
 
     def localProxy(self, param):
         if param.get('type') == 'img':
+            # 共享加速通道：Session 连接复用 + 解密 LRU 缓存（2026-09-08 列表提速）
+            if _shared_fetch_img is not None:
+                mime, data = _shared_fetch_img(param['url'], headers=self.headers,
+                                               decrypt=self.aesimg, timeout=15,
+                                               proxies=self.proxies or None)
+                if data:
+                    return [200, mime, data]
+                return [404, 'text/plain', b'']
             res=requests.get(param['url'], headers=self.headers, proxies=self.proxies, timeout=10)
             return [200,res.headers.get('Content-Type'),self.aesimg(res.content)]
         elif param.get('type') == 'm3u8':return self.m3Proxy(param['url'])
