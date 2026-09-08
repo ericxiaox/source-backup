@@ -4,15 +4,20 @@
 #       即现役入口，2026-09-08 实测 200（Cloudflare）；站内互链 twin 域同样可用
 # 结构: 分类 = newlist.php?p={n}(今日更新) / toplist.php?p={n}(今日热播Top100)
 #       条目 <a href="content/{md5}.html"> + cover 背景图 + ctitle 标题 + vodtime
-#       详情 m3u8 在 <a playdata="..."> 明文属性；搜索为 AES 加密词条，不做
+#       详情 m3u8 在 <a playdata="..."> 明文属性
+#       搜索 /search-0-{pg}-{AES密文b64}.html：词条 AES-CBC(key/iv 均 16 字节 ASCII)
+#       加密→base64→URL 编码（2026-09-08 实测 200，与列表页同款 li 结构可复用解析）
 import json
 import re
 import sys
 import os
+import base64
 import html as _html
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 
 import requests
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad
 sys.path.append('..')
 from base.spider import Spider as BaseSpider
 
@@ -190,12 +195,29 @@ class Spider(BaseSpider):
             pass
         return result
 
+    def _search_ct(self, key):
+        """搜索词条 AES-CBC 加密 → base64（key/iv 与站方 JS 同参数）。"""
+        ct = AES.new(b'2d4ebb7cb767dab1', AES.MODE_CBC, b'7563ca4af41bd0fb')
+        return base64.b64encode(ct.encrypt(pad(key.encode('utf-8'), 16))).decode()
+
+    def _search(self, key, pg):
+        result = {'list': []}
+        try:
+            kw = (key or '').strip()
+            if not kw:
+                return result
+            n = int(pg) if str(pg).isdigit() else 1
+            path = f'/search-0-{n}-{quote(self._search_ct(kw), safe="")}.html'
+            result['list'] = self._parse_list(self._get(path).text or '')
+        except Exception:
+            pass
+        return result
+
     def searchContent(self, key, quick, pg='1'):
-        # 站方搜索词条为 AES 加密 JS 生成（与阅读源同决策：不做搜索）
-        return {'list': []}
+        return self._search(key, pg)
 
     def searchContentPage(self, key, quick, pg):
-        return {'list': []}
+        return self._search(key, pg)
 
     def detailContent(self, ids):
         result = {'list': []}
