@@ -10,9 +10,12 @@ import re
 import sys
 import os
 import html as _html
+import base64
+from collections import OrderedDict
 from urllib.parse import quote
 
 import requests
+from Crypto.Cipher import AES
 sys.path.append('..')
 from base.spider import Spider as BaseSpider
 
@@ -28,6 +31,49 @@ except Exception:
         parse_ext = None
 
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+
+# ── 封面图床：pic.hdhwqx.cn 为 CDN 级 AES 加密图（与黑料不打烊同款 key），
+#    App 直接加载是密文=封面全空，统一走 localProxy 取图+按需解密+LRU 缓存
+_img_session = requests.Session()
+_img_session.verify = False
+_img_cache = OrderedDict()
+_IMG_CACHE_MAX = 60
+
+
+def _img_fetch(url, referer):
+    """取图+magic 预检+按需解密+缓存，返回 (status, content_type, bytes)。"""
+    if url in _img_cache:
+        _img_cache.move_to_end(url)
+        return (200,) + _img_cache[url]
+    h = {'User-Agent': _UA, 'Referer': referer}
+    try:
+        r = _img_session.get(url, headers=h, timeout=10)
+    except Exception:
+        return [404, 'text/plain', b'']
+    if r.status_code != 200:
+        return [404, 'text/plain', b'']
+    raw = r.content
+    ct = 'image/jpeg'
+    if raw[:3] == b'\xff\xd8\xff':
+        b = raw
+    elif raw[:8] == b'\x89PNG\r\n\x1a\n':
+        b, ct = raw, 'image/png'
+    elif raw[:4] == b'GIF8':
+        b, ct = raw, 'image/gif'
+    else:
+        try:
+            b = AES.new(b'f5d965df75336270', AES.MODE_CBC, b'97b60394abc2fbe1').decrypt(raw)
+        except Exception:
+            return [404, 'text/plain', b'']
+        if b[:8] == b'\x89PNG\r\n\x1a\n':
+            ct = 'image/png'
+        elif b[:4] == b'GIF8':
+            ct = 'image/gif'
+    if b:
+        _img_cache[url] = (ct, b)
+        if len(_img_cache) > _IMG_CACHE_MAX:
+            _img_cache.popitem(last=False)
+    return [200, ct, b]
 
 # 列表条目: <a class="cursor-pointer" href="/archives/{id}/"> ... z-image-loader-url="封面" alt="标题"
 _RE_CARD = re.compile(
@@ -130,13 +176,39 @@ class Spider(BaseSpider):
                 continue
         return builtin[0]
 
+    def _should_pic(self, url):
+        """加密图床判定：pic.* 域名 + 已知加密路径前缀。"""
+        u = (url or '').lower()
+        host = u.split('/')[2] if u.startswith('http') and u.count('/') > 2 else ''
+        return any(x in u for x in ['pic.hdhwqx.cn', '/upload_01/', '/hc237/']) or host.startswith('pic.')
+
+    def e64(self, s):
+        try:
+            return base64.b64encode((s or '').encode()).decode()
+        except Exception:
+            return ''
+
+    def d64(self, s):
+        try:
+            return base64.b64decode((s or '').encode()).decode()
+        except Exception:
+            return ''
+
+    def _pic(self, u):
+        """加密图床封面统一走代理；其余直连。"""
+        u = _html.unescape(u or '').strip()
+        if not u:
+            return ''
+        if self._should_pic(u):
+            return f'{self.getProxyUrl()}&url={self.e64(u)}&type=hlwimg'
+        return u
+
     def _get(self, path):
         url = path if path.startswith('http') else self.host + path
         return requests.get(url, headers=self.headers, proxies=self.proxies,
                             timeout=15, verify=False)
 
-    @staticmethod
-    def _parse_cards(html_text):
+    def _parse_cards(self, html_text):
         out = []
         seen = set()
         for m in _RE_CARD.finditer(html_text):
@@ -147,7 +219,7 @@ class Spider(BaseSpider):
             out.append({
                 'vod_id': vid,
                 'vod_name': _html.unescape(m.group(4)).strip() or vid,
-                'vod_pic': _html.unescape(m.group(3)).strip(),
+                'vod_pic': self._pic(m.group(3)),
                 'vod_remarks': '',
             })
         return out
@@ -231,7 +303,7 @@ class Spider(BaseSpider):
             pic = ''
             mi = re.search(r'z-image-loader-url="([^"]+)"', body)
             if mi:
-                pic = _html.unescape(mi.group(1)).strip()
+                pic = self._pic(mi.group(1))
             vids = self._videos(body)
             if vids:
                 play = '#'.join(f'第{i + 1}集${vid}-{i}' for i in range(len(vids)))
@@ -268,3 +340,16 @@ class Spider(BaseSpider):
         except Exception:
             pass
         return result
+
+    def localProxy(self, param):
+        try:
+            if param.get('type') == 'hlwimg':
+                url = self.d64(param.get('url'))
+                if url.startswith('//'):
+                    url = 'https:' + url
+                elif url.startswith('/'):
+                    url = self.host + url
+                return _img_fetch(url, self.host + '/')
+        except Exception as e:
+            print(f'[ERROR] localProxy: {e}')
+        return [404, 'text/plain', b'']
