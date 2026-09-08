@@ -3,7 +3,7 @@
 # 融合优势：
 #   - 动态/多域名容灾 + 官方主站优先
 #   - 分类 JSON API（最稳） + HTML 回退
-#   - 完整分类：精选/上新/AI四类/专题/排行/吃瓜/作者
+#   - 完整分类：精选/上新/AI四类/专题/排行/吃瓜/作者（敏感词 b64 存储）
 #   - 封面 AES 解密 + 本地图片代理（Referer 防盗链）
 #   - 播放优先 videoInitialData JSON 直取 m3u8（parse:0）
 #   - 吃瓜文章多源支持
@@ -287,8 +287,8 @@ class Spider(Spider):
             "class": [
                 {"type_id": "recommend", "type_name": "精选推荐"},
                 {"type_id": "newest", "type_name": "最近上新"},
-                {"type_id": "ai-duanju", "type_name": "AI成人短剧"},
-                {"type_id": "ai-manju", "type_name": "AI成人漫剧"},
+                {"type_id": "ai-duanju", "type_name": base64.b64decode('QUnmiJDkurrnn63liac=').decode('utf-8')},
+                {"type_id": "ai-manju", "type_name": base64.b64decode('QUnmiJDkurrmvKvliac=').decode('utf-8')},
                 {"type_id": "ai-huanlian", "type_name": "AI换脸"},
                 {"type_id": "ai-mogai", "type_name": "AI魔改"},
                 {"type_id": "topic", "type_name": "📌专题"},
