@@ -1,5 +1,5 @@
 {
-  "sites_count": 30,
+  "sites_count": 34,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -326,6 +326,65 @@
       "type": 3,
       "api": "./py/wxts.py",
       "ext": "publish@https://wuxiants.github.io/",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_hlw",
+      "name": "📱黑料网",
+      "type": 3,
+      "api": "./py/hlw.py",
+      "ext": "publish@https://hlwf6.com/",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_51aw",
+      "name": "📱51暗网",
+      "type": 3,
+      "api": "./py/51aw.py",
+      "ext": "publish@https://51aw34.com/",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_yxy",
+      "name": "📱玉羞园",
+      "type": 3,
+      "api": "./py/yxy.py",
+      "ext": "publish@https://dizhi8.cc/yxy/",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_jfg",
+      "name": "📱集芳阁",
+      "type": 3,
+      "api": "./py/jfg.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_dy",
+      "name": "📱抖阴",
+      "type": 3,
+      "api": "./py/dy.py",
+      "ext": "publish@https://github.com/kissav12/douyin",
       "style": {
         "type": "rect",
         "ratio": 1

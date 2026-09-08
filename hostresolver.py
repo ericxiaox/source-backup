@@ -194,8 +194,9 @@ def _dedupe(urls):
 
 
 # ---------------------------------------------------------------- 探测
-def _probe(url, headers, proxies, timeout, depth=0):
-    """测试单域名：跳转壳则跟随 <a href>（最多2层）；真内容返回最终 host；失败 None。"""
+def _probe(url, headers, proxies, timeout, depth=0, validate=None):
+    """测试单域名：跳转壳则跟随 <a href>（最多2层）；真内容返回最终 host；失败 None。
+    validate(final_host, text) -> bool：内容身份校验（防广告门站/第三方页冒充）。"""
     if requests is None:
         return None
     try:
@@ -210,28 +211,34 @@ def _probe(url, headers, proxies, timeout, depth=0):
             if m:
                 target = m.group(1).rstrip('/')
                 if target and target != final:
-                    return _probe(target, headers, proxies, timeout, depth + 1)
+                    return _probe(target, headers, proxies, timeout, depth + 1, validate)
         if len(t) > 5000 or ('article' in t and 'category' in t):
+            if validate is not None:
+                try:
+                    if not validate(final, t):
+                        return None
+                except Exception:
+                    return None
             return final
         return None
     except Exception:
         return None
 
 
-def _probe_all(urls, headers, proxies, timeout):
+def _probe_all(urls, headers, proxies, timeout, validate=None):
     """并行探测，任一候选成功即刻返回（取消其余任务）；全败返回 ''。
     总耗时 ≈ 单次超时，不再随候选数量叠加。"""
     if not urls:
         return ''
     if not (ThreadPoolExecutor and as_completed) or len(urls) == 1:
         for u in urls:
-            h = _probe(u, headers, proxies, timeout)
+            h = _probe(u, headers, proxies, timeout, 0, validate)
             if h:
                 return h
         return ''
     ex = ThreadPoolExecutor(max_workers=min(12, len(urls)))
     try:
-        futs = [ex.submit(_probe, u, headers, proxies, timeout) for u in urls]
+        futs = [ex.submit(_probe, u, headers, proxies, timeout, 0, validate) for u in urls]
         for f in as_completed(futs):
             try:
                 r = f.result()
@@ -248,9 +255,11 @@ def _probe_all(urls, headers, proxies, timeout):
 
 # ---------------------------------------------------------------- 主入口
 def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
-                 proxies=None, timeout=8, use_cache=True):
+                 proxies=None, timeout=8, use_cache=True, validate=None):
     """返回当前可用 host（去尾斜杠）。全部失败返回 ''（调用方接口层自行兜空）。
-    顺序：发布页泛解析候选(最新鲜) > ext/内置候选 > 发布页静态链接。"""
+    validate(final_host, text)->bool：站点身份校验回调，防发布页混入的广告门站
+    （如 18se 导航）被当成真站缓存。顺序：发布页泛解析候选(最新鲜) > ext/内置候选
+    > 发布页静态链接。"""
     candidate_hosts = candidate_hosts or []
     key = (publish_page or '', tuple(candidate_hosts))
     if use_cache:
@@ -279,9 +288,9 @@ def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
         return ''
 
     # 3) 分波实测（use_cache=False=强制刷新，但成功结果仍写缓存供后续 init 秒开）
-    host = _probe_all(tier1, headers, proxies, timeout)
+    host = _probe_all(tier1, headers, proxies, timeout, validate)
     if not host and tier2:
-        host = _probe_all(tier2, headers, proxies, timeout)
+        host = _probe_all(tier2, headers, proxies, timeout, validate)
     if host:
         _CACHE[key] = (host, time.time() + _CACHE_TTL)
     return host
