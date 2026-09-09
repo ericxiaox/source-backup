@@ -30,6 +30,12 @@ except Exception:
         resolve_host = None
         parse_ext = None
 
+# explorer.py（source 根）：池全挂时从导航站自动探索活域（与 hostresolver 同目录）
+try:
+    from explorer import explore_hosts
+except Exception:
+    explore_hosts = None
+
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 # ── 封面图床：pic.hdhwqx.cn 为 CDN 级 AES 加密图（与黑料不打烊同款 key），
@@ -174,6 +180,20 @@ class Spider(BaseSpider):
                     return h.rstrip('/')
             except Exception:
                 continue
+        # 终极兜底：导航站自动探索（跳转壳/门户/泛解析跟随 + 站名身份验证）
+        if explore_hosts:
+            try:
+                def _probe(u):
+                    r = requests.get(u.rstrip('/') + '/', headers=self.headers,
+                                     proxies=self.proxies, timeout=8, verify=False)
+                    t = r.text or ''
+                    # 加密封面主题特征 + 站名双条件（防「818黑料网」等同名站混入）
+                    return r.status_code == 200 and '黑料网' in t and 'z-image-loader-url' in t
+                hs = explore_hosts(['hlw', '黑料网'], probe=_probe)
+                if hs:
+                    return hs[0]
+            except Exception:
+                pass
         return builtin[0]
 
     def _should_pic(self, url):

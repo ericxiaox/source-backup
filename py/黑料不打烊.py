@@ -17,6 +17,12 @@ except Exception:
         ext_of = None
         resolve_host = None
 
+# explorer.py（source 根）：池全挂时从导航站自动探索活域（与 hostresolver 同目录）
+try:
+    from explorer import explore_hosts
+except Exception:
+    explore_hosts = None
+
 _UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.7049.96 Safari/537.36'
 
 # ---- 封面图代理提速（列表加载慢的主因：每图一次 TLS 握手 + 无缓存 + 无条件解密）----
@@ -97,16 +103,30 @@ class Spider(Spider):
             return ext['host'].rstrip('/')
         if resolve_host:
             try:
-                return resolve_host(
+                h=resolve_host(
                     publish_page=ext.get('publish') or PUBLISH_PAGE,
                     candidate_hosts=list(ext.get('hosts') or [])+BUILTIN_HOSTS,
                     headers={'User-Agent':_UA},
                     proxies=getattr(self,'proxies',{}) or {},
                     timeout=8,
                 )
+                if h:
+                    return h
             except Exception:
-                return ''
-        return (ext.get('hosts') or BUILTIN_HOSTS)[0].rstrip('/')
+                pass
+        # 终极兜底：导航站自动探索（跳转壳/门户/泛解析跟随 + 站名身份验证）
+        if explore_hosts:
+            try:
+                def _probe(u):
+                    r=requests.get(u.rstrip('/')+'/',headers={'User-Agent':_UA},
+                                   proxies=getattr(self,'proxies',{}) or {},timeout=8,verify=False)
+                    return r.status_code==200 and '黑料不打烊' in (r.text or '')
+                hs=explore_hosts(['hlbdy','黑料不打烊'],probe=_probe)
+                if hs:
+                    return hs[0]
+            except Exception:
+                pass
+        return ''
     # 兜底分类（2026-09-07 改版后导航实测，b64 存储防托管平台内容扫描误判）——
     # 仅当首页实时抓取失败时使用，正常情况分类一律从网站实时获取
     CATE_MANUAL_B64='IHsi5LuK5pel55yL5paZIjoiMjRoY2ciLCLmr4/ml6XlpKfotZsiOiJtcmRzIiwiQUnnn63liaciOiJzd2RqIiwi54Ot6Zeo5ZCD55OcIjoicmd0aiIsIuavj+aXpeeDreeTnCI6Im1ycmciLCLpu5HmlpnlpKfkuosiOiJobGRhIiwi5Y+N5beu5aWz56WeIjoiZmNucyIsIuWtpumZoueDreeTnCI6Inh5cmciLCLnvZHnuqLlkIPnk5wiOiJ3aGhsIiwi6buR5paZ5p2C6LCIIjoiaGx6dCIsIuaYjuaYn+WQg+eTnCI6Im14YmciLCLlrpjlnLrnp5jpl7siOiJnY213Iiwi56aB5pKt5Yqo5ryrIjoibXJzdCIsIuaSuOWPi+eci+eJhyI6Imx5ZHQiLCLmtbfop5LkubHkvKYiOiJsbHNxIiwiYXbop6Por7QiOiJhdmpzIiwi5o6i6Iqx5aSn5YWoIjoidGhkcSIsIue9kem7hOS4k+i+kSI6IndoemoiLCLljp/liJvmipXnqL8iOiJxZ3pxIiwi5oCn54ix5oqA5benIjoid3l4cyIsIlBNVua3t+WJqiI6InBtdiIsIuWBt+aLjeebl+aRhCI6ImNoamxiIiwi5LiW55WM5p2v55CD5ZGY6buR5paZIjoic2piLWhsIiwi5LiW55WM5p2v5aSq5aSq5ZuiIjoic2piLXR0dCIsIuS4lueVjOadr+eDreaQnCI6InNqYi1ycyIsIuS4lueVjOadr+WNmuW9qeS4k+WMuiI6InNqYi1iYyIsIueQg+i/t+eOsOWcuiI6InNqYi1xbSJ9'

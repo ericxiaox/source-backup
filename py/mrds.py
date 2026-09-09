@@ -23,6 +23,12 @@ except Exception:
         resolve_host = None
         parse_ext = None
 
+# explorer.py（source 根）：池全挂时从导航站自动探索活域（与 hostresolver 同目录）
+try:
+    from explorer import explore_hosts
+except Exception:
+    explore_hosts = None
+
 img_cache = {}
 
 # ---- 封面图代理提速（列表加载慢的主因：每图一次 TLS 握手 + 无缓存 + 无条件解密）----
@@ -185,13 +191,27 @@ class Spider(BaseSpider):
             'https://mrdsx5.com/',
         ]
         if resolve_host:
-            return resolve_host(
+            h = resolve_host(
                 publish_page=publish,
                 candidate_hosts=list(ext.get('hosts') or []) + builtin_hosts,
                 headers=self.headers,
                 proxies=self.proxies,
                 timeout=8,
             )
+            if h:
+                return h
+        # 终极兜底：导航站自动探索（跳转壳/门户/泛解析跟随 + 站名身份验证）
+        if explore_hosts:
+            try:
+                def _probe(u):
+                    r = requests.get(u.rstrip('/') + '/', headers=self.headers,
+                                     proxies=self.proxies, timeout=8, verify=False)
+                    return r.status_code == 200 and '每日大赛' in (r.text or '')
+                hs = explore_hosts(['mrds', '每日大赛'], probe=_probe)
+                if hs:
+                    return hs[0]
+            except Exception:
+                pass
         # resolver 缺失时（不应发生）：ext 指定 → 内置首个
         return (ext.get('hosts') or builtin_hosts)[0].rstrip('/')
 

@@ -36,6 +36,17 @@ except ImportError:
     class Spider:
         pass
 
+# explorer.py（source 根）：池全挂时从导航站自动探索活域（与 imgfetch 同目录）
+try:
+    from explorer import explore_hosts
+except Exception:
+    try:
+        import os as _os2
+        sys.path.append(_os2.path.dirname(_os2.path.dirname(_os2.path.abspath(__file__))))
+        from explorer import explore_hosts
+    except Exception:
+        explore_hosts = None
+
 try:
     import requests as rq
     rq.packages.urllib3.disable_warnings()
@@ -234,6 +245,17 @@ class Spider(Spider):
                     return h.rstrip('/')
             except Exception:
                 continue
+        # 终极兜底：导航站自动探索（跳转壳/门户/泛解析跟随 + 站名身份验证）
+        if explore_hosts:
+            try:
+                def _probe(u):
+                    r = rq.get(u.rstrip('/') + '/', headers={"User-Agent": UA}, timeout=8, verify=False)
+                    return r.status_code == 200 and '黄果' in (r.text or '')
+                hs = explore_hosts(['huangguo', '黄果'], probe=_probe)
+                if hs:
+                    return hs[0]
+            except Exception:
+                pass
         return HOSTS[0].rstrip('/')
 
     def _safe_host(self):

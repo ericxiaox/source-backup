@@ -33,6 +33,12 @@ except Exception:
         resolve_host = None
         parse_ext = None
 
+# explorer.py（source 根）：池全挂时从导航站自动探索活域（与 hostresolver 同目录）
+try:
+    from explorer import explore_hosts
+except Exception:
+    explore_hosts = None
+
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 # ---- 封面代理（imgfetch 纪律：Session keep-alive + LRU + magic 预检 + 解密兜底）----
@@ -229,6 +235,18 @@ class Spider(BaseSpider):
                     return h.rstrip('/')
             except Exception:
                 continue
+        # 终极兜底：导航站自动探索（跳转壳/门户/泛解析跟随 + 站名身份验证）
+        if explore_hosts:
+            try:
+                def _probe(u):
+                    r = requests.get(u.rstrip('/') + '/', headers=self.headers,
+                                     proxies=self.proxies, timeout=8, verify=False)
+                    return r.status_code == 200 and '91爆料' in (r.text or '')
+                hs = explore_hosts(['91bl', '爆料'], probe=_probe)
+                if hs:
+                    return hs[0]
+            except Exception:
+                pass
         return builtin[0]
 
     def _get(self, path):

@@ -31,6 +31,12 @@ except Exception:
         resolve_host = None
         parse_ext = None
 
+# explorer.py（source 根）：池全挂时从导航站自动探索活域（与 hostresolver 同目录）
+try:
+    from explorer import explore_hosts
+except Exception:
+    explore_hosts = None
+
 # 站名（托管平台内容扫描规避：b64 运行时解码）
 _D = base64.b64decode('5oqW6Zi0').decode('utf-8')
 _DN = base64.b64decode('5oqW6Zi05oiQ5Lq6572R').decode('utf-8')
@@ -239,6 +245,18 @@ class Spider(BaseSpider):
                     return h.rstrip('/')
             except Exception:
                 continue
+        # 终极兜底：导航站自动探索（跳转壳/门户/泛解析跟随 + 站名身份验证）
+        if explore_hosts:
+            try:
+                def _probe(u):
+                    r = requests.get(u.rstrip('/') + '/', headers=self.headers,
+                                     proxies=self.proxies, timeout=8, verify=False)
+                    return r.status_code == 200 and _D in (r.text or '')
+                hs = explore_hosts(['douyin', _D], probe=_probe)
+                if hs:
+                    return hs[0]
+            except Exception:
+                pass
         return builtin[0]
 
     def _get(self, path, **kw):
