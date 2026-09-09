@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+# 黄豆短剧 —— 合并版（原 黄豆擦边.py / 黄豆擦边.py.bak / 黄豆短剧.py 三文件合一）
+# 同一 App 后端（platform_key 一致），三个轮换域名同数据：
+#   lzlukvca.cc / tideember.cc / xqjzvcvt.top   （2026-09-09 实测三域全活、返回同库）
+# 机制：请求失败自动切下一域名；ext 可覆盖 site/platform_key/version/device_type
+# 官方渠道（无传统发布页，仅备忘）：
+#   hddj.tv（官方站，本机 DNS 被污染到 104.244.46.85）
+#   github.com/hddj636（官方每日剧集仓库群，README 只指向 hddj.tv）
+#   www.hdmgdju.cn（下载介绍页，无 API）
 import gzip
 import hashlib
 import hmac
@@ -13,6 +21,8 @@ try:
 except Exception:
     class BaseSpider:
         pass
+
+HOSTS = ["https://lzlukvca.cc", "https://tideember.cc", "https://xqjzvcvt.top"]
 
 class _AESCBC:
     @staticmethod
@@ -50,7 +60,9 @@ class _AESCBC:
 
 class Spider(BaseSpider):
     def __init__(self):
-        self.host = "https://xqjzvcvt.top"
+        self.hosts = list(HOSTS)
+        self._hi = 0
+        self.host = self.hosts[0]
         self.api = self.host + "/api"
         self.name = "黄豆短剧"
         self.platform_key = "7961beb44246e3012ce228d6b5ced05a"
@@ -59,24 +71,49 @@ class Spider(BaseSpider):
         self.session_id = uuid.uuid4().hex
         self.device_id = self.session_id
         self.token = ""
-        self.headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", "Accept": "*/*", "Origin": self.host, "Referer": self.host + "/home", "Content-Type": "application/octet-stream"}
+        self.headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36", "Accept": "*/*", "Origin": self.host, "Referer": self.host + "/home", "Content-Type": "application/octet-stream", "Accept-Encoding": "gzip, deflate, br", "Accept-Language": "zh-CN,zh;q=0.9"}
         self.session = requests.Session()
-        self.session.headers.update(self.headers)
+        try:
+            from requests.adapters import HTTPAdapter
+            from urllib3.util.retry import Retry
+            retry = Retry(total=2, backoff_factor=0.4, status_forcelist=[500, 502, 503, 504])
+            adapter = HTTPAdapter(max_retries=retry)
+            self.session.mount("http://", adapter)
+            self.session.mount("https://", adapter)
+        except Exception:
+            pass
+        self._apply_host(self.host)
         self.class_cache = None
         self.filter_cache = {}
+
+    def _apply_host(self, host):
+        self.host = host.rstrip("/")
+        self.api = self.host + "/api"
+        self.headers["Origin"] = self.host
+        self.headers["Referer"] = self.host + "/home"
+        self.session.headers.update(self.headers)
+
+    def _rotate(self):
+        self._hi = (self._hi + 1) % len(self.hosts)
+        self._apply_host(self.hosts[self._hi])
 
     def init(self, extend=""):
         if extend:
             try:
                 cfg = json.loads(extend)
-                self.host = (cfg.get("site") or cfg.get("base_url") or self.host).rstrip("/")
-                self.api = self.host + "/api"
+                site = (cfg.get("site") or cfg.get("base_url") or "").rstrip("/")
+                if site:
+                    # ext 指定站点：插到池子最前，失效仍可回落到内置池
+                    if site not in self.hosts:
+                        self.hosts.insert(0, site)
+                    self._hi = self.hosts.index(site)
+                    self._apply_host(site)
                 self.token = cfg.get("token", self.token)
-                self.headers["Origin"] = self.host
-                self.headers["Referer"] = self.host + "/home"
-                self.session.headers.update(self.headers)
+                self.platform_key = cfg.get("platform_key", self.platform_key)
+                self.version = cfg.get("version", self.version)
+                self.device_type = cfg.get("device_type", self.device_type)
             except Exception:
-                None
+                pass
 
     def getName(self):
         return self.name
@@ -136,6 +173,9 @@ class Spider(BaseSpider):
         items = self._list(data)
         return {"page": int(pg), "pagecount": int(pg) if len(items) < 18 else int(pg) + 1, "limit": 18, "total": 99999, "list": [self._vod(x) for x in items], "parse": 0, "jx": 0}
 
+    def searchContentPage(self, key, quick, pg="1"):
+        return self.searchContent(key, quick, pg)
+
     def playerContent(self, flag, id, vipFlags):
         vid, seq = self._split(id)
         obj = self._api("/drama/play", {"id": vid, "seq": str(seq)}, True)
@@ -154,12 +194,20 @@ class Spider(BaseSpider):
         sign = hashlib.sha256(("Dart|%s|%s|%s|%s" % (self.session_id, rid, ts, path)).encode("utf-8")).hexdigest() + "-" + str(ts)
         h = dict(self.headers)
         h.update({"version": self.version, "deviceType": self.device_type, "time": str(ts), "sign": sign, "requestId": rid, "sessionId": self.session_id, "deviceBrand": "", "deviceModel": "", "systemName": "", "systemVersion": ""})
-        try:
-            r = self.session.post(self.api + path, data=body, headers=h, timeout=20, verify=False)
-            r.raise_for_status()
-            return self._decode(r.content, rid)
-        except Exception:
-            return {}
+        # 域名池轮换：异常/非 JSON 即切下一个域名，最多试完整池
+        last = {}
+        for _ in range(len(self.hosts)):
+            try:
+                r = self.session.post(self.api + path, data=body, headers=h, timeout=15, verify=False)
+                r.raise_for_status()
+                obj = self._decode(r.content, rid)
+                if obj:
+                    return obj
+                last = {}
+            except Exception:
+                last = {}
+            self._rotate()
+        return last
 
     def _key(self, rid):
         return hmac.new(self.platform_key.encode("utf-8"), bytes.fromhex(str(rid).replace("-", "")), hashlib.sha256).digest()

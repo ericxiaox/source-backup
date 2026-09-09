@@ -1,5 +1,5 @@
 {
-  "sites_count": 19,
+  "sites_count": 20,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -226,6 +226,17 @@
       "quickSearch": 1,
       "filterable": 1,
       "ext": "./xbpq/聚合.json"
+    },
+    {
+      "key": "py_huangdou",
+      "name": "📱黄豆短剧",
+      "type": 3,
+      "api": "./xbpq/黄豆.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2
     }
   ],
   "parses": [],
