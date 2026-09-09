@@ -288,7 +288,8 @@ def user_navs(force=False):
     """用户自配导航站 [{url, note}]。本地文件优先（PC 管理台刚改完的场景），
     设备上无本地文件时走 gitee raw（6h 缓存，失败回落磁盘旧值）。"""
     loc = _cfg_local()
-    if loc and isinstance(loc.get('user_navs'), list) and loc['user_navs']:
+    # 本地文件存在即信任（含空列表）：PC 管理台场景不再每次联网抓 gitee（曾致 status 接口 16s）
+    if loc is not None and isinstance(loc.get('user_navs'), list):
         return [x for x in loc['user_navs'] if isinstance(x, dict) and x.get('url')]
     disk = _load()
     uc = disk.get('ucfg') or {}
@@ -303,9 +304,10 @@ def user_navs(force=False):
             obj = {}
         if isinstance(obj.get('user_navs'), list):
             navs = [x for x in obj['user_navs'] if isinstance(x, dict) and x.get('url')]
-    if navs or uc:
+    if t:
+        # 抓取成功才写缓存（失败不缓存，避免把网络故障当空配置缓存 6h）
         d = _load()
-        d['ucfg'] = {'navs': navs or uc.get('navs') or [], 'ts': time.time() + _TTL}
+        d['ucfg'] = {'navs': navs, 'ts': time.time() + _TTL}
         _save(d)
     return navs or (uc.get('navs') or [])
 
