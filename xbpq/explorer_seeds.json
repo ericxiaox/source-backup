@@ -1,0 +1,4 @@
+{
+  "user_navs": [],
+  "_说明": "explorer_admin.py 管理台维护；push 到 gitee 后设备端 explorer 自动拉取（6h 缓存）"
+}
