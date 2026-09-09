@@ -1,6 +1,6 @@
 # OK影视个人专属包（source）
 
-成人源专属包：`source.json`（整份 base64，客户端自动解码）+ `py/`（python 源）+ `hostresolver.py`（通用动态域名解析模块）。
+影视源专属包：`source.json`（整份 base64，客户端自动解码）+ `py/`（python 源）+ `hostresolver.py`（通用动态域名解析模块）。
 
 ## 目录三区（本机 影视仓源/ 下）
 
