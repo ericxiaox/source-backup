@@ -3,6 +3,7 @@
 # 同一 App 后端（platform_key 一致），三个轮换域名同数据：
 #   lzlukvca.cc / tideember.cc / xqjzvcvt.top   （2026-09-09 实测三域全活、返回同库）
 # 机制：请求失败自动切下一域名；ext 可覆盖 site/platform_key/version/device_type
+# 兜底探索：内置池全挂时调 explorer.py（多导航站抓取 -> 协议验证）自动找活域插池
 # 官方渠道（无传统发布页，仅备忘）：
 #   hddj.tv（官方站，本机 DNS 被污染到 104.244.46.85）
 #   github.com/hddj636（官方每日剧集仓库群，README 只指向 hddj.tv）
@@ -12,6 +13,7 @@ import hashlib
 import hmac
 import json
 import os
+import sys
 import time
 import uuid
 import requests
@@ -23,6 +25,7 @@ except Exception:
         pass
 
 HOSTS = ["https://lzlukvca.cc", "https://tideember.cc", "https://xqjzvcvt.top"]
+ALIAS = "huangdou"          # explorer 探索别名（导航站站名/域名匹配）
 
 class _AESCBC:
     @staticmethod
@@ -85,6 +88,16 @@ class Spider(BaseSpider):
         self._apply_host(self.host)
         self.class_cache = None
         self.filter_cache = {}
+        self._explore_ts = 0
+        # 历史探索成果预载（explorer.py 在上级目录，best-effort）
+        try:
+            sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            from explorer import known
+            for h in known(ALIAS):
+                if h not in self.hosts:
+                    self.hosts.append(h)
+        except Exception:
+            pass
 
     def _apply_host(self, host):
         self.host = host.rstrip("/")
@@ -207,7 +220,56 @@ class Spider(BaseSpider):
             except Exception:
                 last = {}
             self._rotate()
+        # 池内域名全挂：导航站自动探索换域后重试一次
+        if self._explore():
+            try:
+                r = self.session.post(self.api + path, data=body, headers=h, timeout=15, verify=False)
+                r.raise_for_status()
+                obj = self._decode(r.content, rid)
+                if obj:
+                    return obj
+            except Exception:
+                pass
         return last
+
+    def _check_host(self, host):
+        """explorer 验证回调：候选域用本源协议实测（能出列表数据才算活域）"""
+        try:
+            t = Spider()
+            t.hosts = [host.rstrip("/")]
+            t._apply_host(host)
+            t._explore_ts = time.time() + 10 ** 9   # 禁止临时实例再触发探索（防递归）
+            return bool(self._list(t._api("/drama/list", {"page": "1", "page_size": "6"})))
+        except Exception:
+            return False
+
+    def _explore(self):
+        """内置池全挂：多导航站抓取候选域 -> 协议验证 -> 活域插池 + 持久化。
+        10 分钟内只探一次；explorer.py 缺席时静默跳过。"""
+        now = time.time()
+        if now - self._explore_ts < 600:
+            return False
+        self._explore_ts = now
+        try:
+            sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            from explorer import discover, remember
+        except Exception:
+            return False
+        try:
+            found = discover([ALIAS, "黄豆"], validate=self._check_host) or []
+        except Exception:
+            found = []
+        for h in found:
+            if h not in self.hosts:
+                self.hosts.append(h)
+        if found:
+            self._hi = self.hosts.index(found[0])
+            self._apply_host(found[0])
+            try:
+                remember(ALIAS, found)
+            except Exception:
+                pass
+        return bool(found)
 
     def _key(self, rid):
         return hmac.new(self.platform_key.encode("utf-8"), bytes.fromhex(str(rid).replace("-", "")), hashlib.sha256).digest()
