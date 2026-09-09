@@ -13,7 +13,9 @@ explorer.py —— 多导航站自动探索 v1（源站域名池全挂时的兜�
 
 公开接口：
   nav_site_map(force=False)          -> {host: name}（合并多导航站，缓存6h）
-  nav_pool()                         -> 当前导航站列表（种子+自收集）
+  deep_site_map(extra=6)             -> (map, 新抓源) 深度模式，多抓自收集导航站
+  seeds() / nav_pool()               -> 种子池（内置+用户自配+自收集）/ 当前池
+  user_navs()                        -> 用户自配导航站（explorer_admin 维护）
   publish_pages()                    -> {站名: host}（各站入口/发布页，备用）
   discover(aliases, validate, ...)   -> [活域URL]   validate(host)->bool
   remember(alias, hosts)             -> 探索成果持久化（下次 init 预载）
@@ -57,6 +59,9 @@ _NAV_POOL_MAX = 24      # 自收集导航站上限
 _NAV_FETCH_MAX = 4      # 每次构建映射最多实抓的导航站数（控制耗时）
 _PUB_MAX = 40
 _TTL = 6 * 3600         # 站点映射缓存
+
+# 用户自配导航站（explorer_admin.py 管理台维护，push 到 gitee 后设备自动生效）
+_USER_CFG_URL = 'https://gitee.com/mallox/source/raw/master/xbpq/explorer_seeds.json'
 
 # 必然混入的大平台/统计/静态资源域，不当候选
 _JUNK = re.compile(
@@ -198,12 +203,9 @@ def nav_site_map(force=False):
                      'navs': disk.get('navs'), 'pubs': disk.get('pubs')})
         return disk['map']
 
-    seeds = list(_NAV_SEEDS)
-    for n in (disk.get('navs') or []):
-        if n not in seeds:
-            seeds.append(n)
-    mmap, navs_ok, pubs, extra = {}, [], {}, []
-    for u in seeds[:8]:
+    seeds_l = seeds()[:12]
+    mmap, srcmap, navs_ok, pubs, extra = {}, {}, [], {}, []
+    for u in seeds_l:
         try:
             ok, ent, nv, pb = _read_nav(u)
         except Exception:
@@ -212,18 +214,23 @@ def nav_site_map(force=False):
             continue
         for h, n in ent.items():
             mmap.setdefault(h, n)
+            srcmap.setdefault(h, u)
         for k, v in pb.items():
             pubs.setdefault(k, v)
         navs_ok.append(u)
         for x in nv:
-            if x not in seeds and x not in extra:
+            if x not in seeds_l and x not in extra:
                 extra.append(x)
         if len(navs_ok) >= _NAV_FETCH_MAX:
             break
 
     if navs_ok:
-        _MEM.update({'map': mmap, 'ts': now + _TTL, 'navs': navs_ok + extra, 'pubs': pubs})
-        _save({'map': mmap, 'ts': now + _TTL, 'navs': navs_ok + extra, 'pubs': pubs})
+        _MEM.update({'map': mmap, 'ts': now + _TTL, 'navs': navs_ok + extra,
+                     'pubs': pubs, 'src': srcmap})
+        d = _load()                     # 保留 hosts/ucfg，勿整包覆盖
+        d.update({'map': mmap, 'ts': now + _TTL, 'navs': navs_ok + extra,
+                  'pubs': pubs, 'src': srcmap})
+        _save(d)
         return mmap
     if disk.get('map'):
         return disk['map']          # 全挂回落旧缓存
@@ -232,12 +239,96 @@ def nav_site_map(force=False):
 
 def nav_pool():
     d = _MEM.get('navs') if _MEM.get('navs') else _load().get('navs')
-    return list(_NAV_SEEDS) + [n for n in (d or []) if n not in _NAV_SEEDS]
+    out = list(_NAV_SEEDS)
+    for x in user_navs():
+        if x['url'] not in out:
+            out.append(x['url'])
+    for n in (d or []):
+        if n not in out:
+            out.append(n)
+    return out
 
 
 def publish_pages():
     d = _MEM.get('pubs') if _MEM.get('pubs') else _load().get('pubs')
     return d or {}
+
+
+def _cfg_local():
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'xbpq', 'explorer_seeds.json')
+    try:
+        with open(p, encoding='utf-8') as f:
+            obj = json.load(f)
+        return obj if isinstance(obj, dict) else None
+    except Exception:
+        return None
+
+
+def user_navs(force=False):
+    """用户自配导航站 [{url, note}]。本地文件优先（PC 管理台刚改完的场景），
+    设备上无本地文件时走 gitee raw（6h 缓存，失败回落磁盘旧值）。"""
+    loc = _cfg_local()
+    if loc and isinstance(loc.get('user_navs'), list) and loc['user_navs']:
+        return [x for x in loc['user_navs'] if isinstance(x, dict) and x.get('url')]
+    disk = _load()
+    uc = disk.get('ucfg') or {}
+    if not force and isinstance(uc.get('navs'), list) and time.time() < uc.get('ts', 0):
+        return uc['navs']
+    navs = []
+    if requests is not None:
+        t = _get(_USER_CFG_URL, 8)
+        try:
+            obj = json.loads(t) if t else {}
+        except Exception:
+            obj = {}
+        if isinstance(obj.get('user_navs'), list):
+            navs = [x for x in obj['user_navs'] if isinstance(x, dict) and x.get('url')]
+    if navs or uc:
+        d = _load()
+        d['ucfg'] = {'navs': navs or uc.get('navs') or [], 'ts': time.time() + _TTL}
+        _save(d)
+    return navs or (uc.get('navs') or [])
+
+
+def seeds():
+    """完整种子池：内置 + 用户自配（本地/gitee）+ 自收集（磁盘）"""
+    out = list(_NAV_SEEDS)
+    for x in user_navs():
+        if x['url'] not in out:
+            out.append(x['url'])
+    for n in (_load().get('navs') or []):
+        if n not in out:
+            out.append(n)
+    return out
+
+
+def deep_site_map(extra=6):
+    """深度模式：在现有映射上继续实抓种子池中未抓过的导航站（从池尾自收集/用户站开始）。
+    返回 (合并映射, 新抓成功的源列表)。"""
+    base = dict(nav_site_map() or {})
+    src = dict(_load().get('src') or {})
+    got = []
+    for u in reversed(seeds()):
+        if len(got) >= extra:
+            break
+        try:
+            ok, ent, nv, pb = _read_nav(u)
+        except Exception:
+            continue
+        if not ok:
+            continue
+        got.append(u)
+        for h, n in ent.items():
+            if h not in base:
+                base[h] = n
+                src.setdefault(h, u)
+    if got:
+        _MEM.update({'map': base, 'src': src, 'ts': _MEM.get('ts', 0)})
+        d = _load()
+        d['map'] = base
+        d['src'] = src
+        _save(d)
+    return base, got
 
 
 def remember(alias, hosts):
