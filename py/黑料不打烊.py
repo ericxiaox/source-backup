@@ -72,7 +72,7 @@ BUILTIN_HOSTS=[
     'https://lemon.xstcnjbf.cc/',
 ]
 
-# 分类名广告/站务黑名单（发布页导航推广词，非成人词，无需 b64）
+# 分类名广告/站务黑名单（发布页导航推广词，均为中性词，无需 b64）
 AD_CAT_RE=re.compile(r'(?i)app|下载|qq|微信|推特|tg群|导航|联系|合作|邮箱|关于|存档|收藏|forgot|登陆|登录')
 
 class Spider(Spider):

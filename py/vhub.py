@@ -22,7 +22,7 @@ CATEGORIES = json.loads(b64decode('W3sidHlwZV9pZCI6ICJBcmFiLTE1OSIsICJ0eXBlX25hb
 
 class Spider(Spider):
     def getName(self):
-        return "V-HUB[成人]"
+        return "V-HUB[影视]"
 
     def init(self, extend):
         # ext 统一解析：host@ 锁定主页 > JSON/文本 ext > 内置 SITE_URL（见 hostresolver.ext_of）
