@@ -305,10 +305,17 @@ def api_rebuild():
 
 @app.post('/api/push')
 def api_push():
-    cmds = [['git', 'add', 'xbpq/explorer_seeds.json'],
-            ['git', 'commit', '-m', 'explorer_seeds 用户配置更新 (explorer_admin)'],
-            ['git', 'push']]
     log, ok = [], True
+    # ① 先从本地母本生成 gitee 发布版 source.json（母本有变才写盘）
+    gen = subprocess.run([sys.executable, os.path.join(ROOT, 'make_gitee.py')], cwd=ROOT,
+                         capture_output=True, text=True, encoding='utf-8', errors='ignore')
+    log.append('$ make_gitee.py\n' + (((gen.stdout or '') + (gen.stderr or '')).strip()[:500] or '(无输出)'))
+    if gen.returncode != 0:
+        return jsonify(ok=False, log=log)
+    # ② 提交并推送（发布版 source.json + explorer_seeds.json）
+    cmds = [['git', 'add', 'source.json', 'xbpq/explorer_seeds.json'],
+            ['git', 'commit', '-m', 'source.json/explorer_seeds 用户配置更新 (explorer_admin)'],
+            ['git', 'push']]
     for c in cmds:
         r = subprocess.run(c, cwd=ROOT, capture_output=True, text=True, encoding='utf-8', errors='ignore')
         out = ((r.stdout or '') + (r.stderr or '')).strip()

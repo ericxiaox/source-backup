@@ -8,6 +8,9 @@ Thumbs.db
 *密码*.txt
 *token*.txt
 
+# 本地包母本（含明文站名/敏感词，绝不入库——gitee 版由 make_gitee.py 生成下发）
+source_local.json
+
 __pycache__/
 *.pyc
 .probe/
