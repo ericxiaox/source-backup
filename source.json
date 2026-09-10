@@ -8,7 +8,7 @@
   "sites": [
     {
       "key": "py_mrds",
-      "name": "\ud83d\udcf1\u6bcf\u65e5\u5927\u8d5b",
+      "name": "\ud83d\udcf1\u6bcf\u65e5\u5927\u8d5b\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/mrds.py",
       "style": {
@@ -20,7 +20,7 @@
     },
     {
       "key": "py_heiliao",
-      "name": "\ud83d\udcf1\u9ed1\u6599\u4e0d\u6253\u70ca",
+      "name": "\ud83d\udcf1\u9ed1\u6599\u4e0d\u6253\u70ca\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/heiliao.py",
       "style": {
@@ -31,7 +31,7 @@
     },
     {
       "key": "py_huangguo",
-      "name": "\ud83d\udcf1\u9ec4\u679c\u77ed\u5267",
+      "name": "\ud83d\udcf1\u9ec4\u679c\u77ed\u5267\uff5c\u77ed\u5267",
       "type": 3,
       "api": "./py/huangguo.py",
       "style": {
@@ -104,7 +104,7 @@
       "name": "\ud83d\udcf1\u9999\u8549\u89c6\u9891",
       "type": 3,
       "api": "./py/xjsp.py",
-      "ext": "host@https://618013.xyz",
+      "ext": "hosts@https://h5.xxoox35.org,https://h5.xxoo168.org",
       "style": {
         "type": "rect",
         "ratio": 1

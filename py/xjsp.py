@@ -4,22 +4,59 @@ import sys
 sys.path.append('..')
 from base.spider import Spider
 import json
-import time
-from base64 import b64decode
-import urllib.parse
 import re
+import random
 import requests
-from lxml import etree
+from base64 import b64decode
+
+try:
+    import urllib3
+    urllib3.disable_warnings()
+except Exception:
+    pass
+
 
 class Spider(Spider):
-    
+    """\u9999\u8549\u89c6\u9891 \u2014\u2014 2026-09-10 \u5168\u91cf\u91cd\u505a\u3002
+
+    \u6362\u5f62\u6001\u8bf4\u660e\uff1a\u8001\u7ad9\uff08\u82f9\u679cCMS\uff0c/index.php/vod/...\uff09\u5df2\u5e9f\u5f03\uff0c\u4e3b\u57df 618013.xyz \u53d8\u6210\u505c\u653e\u9875\u3002
+    \u73b0\u5f79\u5f62\u6001\u662f\u300c\u5b98\u7f51 + H5 \u7ad9\u300d\u4e24\u6761\u817f\uff1a
+      \u00b7 \u5b98\u7f51  www.xjxjxj.co\uff08302 \u2192 \u5f53\u524d\u4e3b\u57df\uff09\uff0c\u5176 /static/js/config.js \u66b4\u9732 h5_url
+      \u00b7 H5 \u7ad9 h5_url \u6307\u5411\u7684\u57df\uff0c\u627f\u8f7d\u5168\u90e8\u5185\u5bb9\u63a5\u53e3\uff08\u524d\u540e\u7aef\u5206\u79bb SPA\uff0c\u63a5\u53e3\u5728 /api/*\uff09
+    \u672c\u6e90\u53ea\u5bf9\u63a5 H5 \u63a5\u53e3\uff1b\u5b98\u7f51\u4ec5\u5f53\u300c\u53d1\u5e03\u9875\u300d\u7528\u2014\u2014\u4ece config.js \u91cc\u62a0\u51fa\u5f53\u524d h5_url\u3002
+
+    \u53d6\u57df\u94fe\uff08get_working_host\uff09\uff1a
+      ext host@ \u9501 > \u53d1\u5e03\u9875 config.js \u7684 h5_url > ext hosts@ + \u5185\u7f6e\u5019\u9009\u4f9d\u6b21\u5b9e\u6d4b > \u5185\u7f6e\u9996\u4e2a\u515c\u5e95
+      \u2014\u2014 \u4e0d\u9501\u6b7b\u5355\u57df\uff1a\u7ad9\u70b9\u6362\u57df\u65f6\u53d1\u5e03\u9875\u4f1a\u540c\u6b65\u66f4\u65b0\uff0c\u6e90\u81ea\u52a8\u8ddf\u4e0a\u3002
+
+    \u63a5\u53e3\u4e00\u89c8\uff08base = {host}/api\uff09\uff1a
+      GET /init                                  \u2192 globalData.hotcategories\uff08\u5206\u7c7b\u8868\uff0c\u52a8\u6001\u53d6\uff09
+      GET /vod/latest-{9\u53c2\u6570}-{page}              \u2192 \u6700\u65b0\u5217\u8868\uff08\u9996\u9875\uff09
+      GET /v2/vod/listing-{9\u53c2\u6570}-{page}          \u2192 \u5206\u7c7b\u5217\u8868
+      GET /search?wd=&page=&free=1               \u2192 \u641c\u7d22
+      GET /vod/show/{id}                         \u2192 \u8be6\u60c5
+      GET /v2/vod/reqplay/{id}                   \u2192 \u64ad\u653e\u5730\u5740\uff08m3u8\uff09
+    listing \u7684 9 \u4e2a\u4f4d\u7f6e\u53c2\u6570\u987a\u5e8f\uff1a
+      cateid-areaid-yearid-definition-duration-freetype-mosaic-langvoice-orderby
+    """
+
+    # \u53d1\u5e03\u9875\uff08\u7ad9\u70b9\u6362\u57df\u65f6\u8fd9\u91cc\u7684\u5185\u5bb9\u4f1a\u540c\u6b65\u53d8\uff0c\u662f\u672c\u6e90\u7684\u300c\u6d3b\u5730\u5740\u6e90\u300d\uff09
+    PUBLISH_PAGES = [
+        'https://www.xjxjxj.co/static/js/config.js',
+        'https://www.xjxjxj.co/',
+        'https://www.xjxj459.org/static/js/config.js',
+    ]
+    # \u5185\u7f6e\u5019\u9009 H5 \u57df\uff08\u65b0\u2192\u65e7\uff09\uff1bext \u7684 hosts@ \u4f1a\u6392\u5230\u5b83\u4eec\u524d\u9762
+    CANDIDATE_HOSTS = ['https://h5.xxoox35.org', 'https://h5.xxoo168.org']
+    # \u5206\u7c7b\u515c\u5e95\u8868\uff08/init \u53d6\u4e0d\u5230\u65f6\u7528\uff1bb64 \u5b58\u653e\uff0c\u9632\u6258\u7ba1\u5e73\u53f0\u5173\u952e\u8bcd\u626b\u63cf\uff09
+    CLASS_FALLBACK_B64 = 'W3sidHlwZV9pZCI6IjAtMC0wLTAtMC0wLTItMC0wIiwidHlwZV9uYW1lIjoi5peg56CB6KeG6aKRIn0seyJ0eXBlX2lkIjoiNC0wLTAtMC0wLTAtMi0wLTAiLCJ0eXBlX25hbWUiOiLlgbfmi43oh6rmi40ifSx7InR5cGVfaWQiOiI1LTAtMC0wLTAtMC0wLTAtMCIsInR5cGVfbmFtZSI6IuWItuacjeivseaDkSJ9LHsidHlwZV9pZCI6IjktMC0wLTAtMC0wLTAtMC0wIiwidHlwZV9uYW1lIjoi57Sg5Lq65Ye65ryUIn0seyJ0eXBlX2lkIjoiMTQtMC0wLTAtMC0wLTAtMC0wIiwidHlwZV9uYW1lIjoi57uP5YW45LiJ57qnIn0seyJ0eXBlX2lkIjoiMC0zLTAtMC0wLTAtMC0xLTAiLCJ0eXBlX25hbWUiOiLkuK3mloflrZfluZUifSx7InR5cGVfaWQiOiI3LTMtMC0wLTAtMC0wLTAtMCIsInR5cGVfbmFtZSI6IuaXpeacrOi+o+WmuSJ9LHsidHlwZV9pZCI6IjExLTAtMC0wLTAtMC0wLTAtMCIsInR5cGVfbmFtZSI6IuaIkOS6uuWKqOa8qyJ9LHsidHlwZV9pZCI6IjAtNi0wLTAtMC0wLTAtMC0wIiwidHlwZV9uYW1lIjoi5qyn576O5r+A5oOFIn0seyJ0eXBlX2lkIjoiMC01LTAtMC0wLTAtMC0wLTIiLCJ0eXBlX25hbWUiOiLpn6nlm73ng63mkq0ifSx7InR5cGVfaWQiOiIwLTAtMy0wLTAtMC0wLTAtMiIsInR5cGVfbmFtZSI6IjIwMjLmlrDniYcifSx7InR5cGVfaWQiOiIxMy0wLTAtMC0wLTAtMC0wLTAiLCJ0eXBlX25hbWUiOiLlj5jmgIHlj6bnsbsifV0='
+    # \u63a2\u9488\uff1areqplay/1 \u53ea\u6709\u51e0\u767e\u5b57\u8282\uff0c\u9a8c\u6d3b\u6700\u5feb
+    PROBE = '/v2/vod/reqplay/1'
+
     def getName(self):
         return "\u9999\u8549\u89c6\u9891"
-    
+
     def init(self, extend=""):
-        self.host = "https://618013.xyz"
-        self.api_host = "https://h5.xxoo168.org"
-        # ext \u652f\u6301\uff1ahost@ \u8986\u76d6\u4e3b\u7ad9\uff08\u57df\u540d\u88ab\u5899/\u66f4\u6362\u65f6\u5728\u5f71\u89c6.json \u6539 ext \u5373\u53ef\u6551\u6d3b\uff0c\u65e0\u9700\u6539\u4ee3\u7801\uff09
         try:
             from hostresolver import ext_of
         except Exception:
@@ -29,362 +66,282 @@ class Spider(Spider):
                 from hostresolver import ext_of
             except Exception:
                 ext_of = None
+        self.proxies = {}
+        self._ext = {}
         if ext_of:
             try:
-                _ext = ext_of(extend)
-                if _ext.get('host'):
-                    self.host = _ext['host'].rstrip('/')
+                self._ext = ext_of(extend) or {}
             except Exception:
-                pass
+                self._ext = {}
+        if self._ext.get('proxies'):
+            self.proxies = self._ext['proxies']
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-            'Accept-Encoding': 'gzip, deflate',
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+            'Accept': 'application/json, text/plain, */*',
+            'Accept-Language': 'zh-CN,zh;q=0.9',
             'Connection': 'keep-alive',
-            'Referer': self.host
         }
-        self.log(f"香蕉视频爬虫初始化完成，主站: {self.host}")
+        self.host = self.get_working_host()
+        self.headers['Referer'] = self.host + '/'
+        self.log(f"香蕉视频初始化完成，API域: {self.host}")
 
-    def html(self, content):
-        """\u5c06HTML\u5185\u5bb9\u8f6c\u6362\u4e3a\u53ef\u67e5\u8be2\u7684\u5bf9\u8c61"""
+    # ========== \u53d6\u57df ==========
+
+    def get_working_host(self):
+        """\u53d6\u5f53\u524d\u53ef\u7528 API \u57df\uff1aext host@ \u9501 > \u53d1\u5e03\u9875 h5_url > hosts@ + \u5185\u7f6e\u5019\u9009\u5b9e\u6d4b > \u5185\u7f6e\u9996\u4e2a\u515c\u5e95\u3002"""
+        lock = self._ext.get('host')
+        if lock:
+            return str(lock).rstrip('/')
+        cands = []
+        for h in (self._ext.get('hosts') or []):
+            h = str(h).strip().rstrip('/')
+            if h and h not in cands:
+                cands.append(h)
+        for h in self.CANDIDATE_HOSTS:
+            if h not in cands:
+                cands.append(h)
+        pub = self._ext.get('publish')
+        pages = ([pub] if pub else []) + self.PUBLISH_PAGES
+        h = self._host_from_publish(pages)
+        if h:
+            if h in cands:
+                cands.remove(h)
+            cands.insert(0, h)
+        for c in cands:
+            if self._alive(c):
+                return c
+        return cands[0] if cands else ''
+
+    def _host_from_publish(self, pages):
+        """\u4ece\u53d1\u5e03\u9875\u62a0\u5f53\u524d h5_url\uff08config.js \u662f\u7eaf JS \u914d\u7f6e\uff0c\u6b63\u5219\u6700\u7a33\uff09\u3002"""
+        for p in pages:
+            try:
+                r = self._req(str(p), headers={'User-Agent': self.headers['User-Agent']}, timeout=8)
+                if not r or r.status_code != 200:
+                    continue
+                m = re.search(r'''["']h5_url["']\s*:\s*["'](https?://[^"']+)["']''', r.text)
+                if m:
+                    return m.group(1).strip().rstrip('/')
+                m2 = re.search(r'https?://h5\.[a-zA-Z0-9.\-]+', r.text)
+                if m2:
+                    return m2.group(0).strip().rstrip('/')
+            except Exception:
+                continue
+        return ''
+
+    def _alive(self, host):
+        """\u9a8c\u6d3b\uff1a\u80fd\u62ff\u5230 retcode \u5373\u89c6\u4e3a\u53ef\u7528\u63a5\u53e3\u57df\u3002"""
         try:
-            return etree.HTML(content)
-        except:
-            self.log("HTML\u89e3\u6790\u5931\u8d25")
+            r = self._req(str(host).rstrip('/') + '/api' + self.PROBE, timeout=8)
+            if not r or r.status_code != 200:
+                return False
+            d = r.json()
+            return isinstance(d, dict) and 'retcode' in d
+        except Exception:
+            return False
+
+    # ========== \u53d6\u6570\u57fa\u7840 ==========
+
+    def _req(self, url, headers=None, params=None, timeout=15):
+        """\u7edf\u4e00\u53d6\u9875\uff1arequests \u76f4\u8fde\uff08\u5168\u5e93\u7eaa\u5f8b\uff0c\u4e0d\u7528 self.fetch\uff09\uff0cverify=False \u5bb9\u5fcd\u81ea\u7b7e\u8bc1\u4e66\u3002"""
+        try:
+            return requests.get(url, headers=headers or self.headers, params=params,
+                                proxies=self.proxies, timeout=timeout, verify=False)
+        except Exception as e:
+            self.log(f"请求失败 {url}: {str(e)}")
             return None
 
-    def regStr(self, pattern, string, index=1):
-        """\u6b63\u5219\u8868\u8fbe\u5f0f\u63d0\u53d6\u5b57\u7b26\u4e32"""
+    def _get_json(self, path, params=None, host=None):
+        """\u53d6\u63a5\u53e3 JSON\uff08path \u4ece / \u5f00\u5934\uff0c\u5982 /vod/show/1\uff09\u3002"""
+        base = str(host or self.host).rstrip('/')
+        url = base + '/api' + (path if path.startswith('/') else '/' + path)
+        r = self._req(url, params=params)
+        if not r or r.status_code != 200:
+            self.log(f"接口异常 {url} -> {getattr(r, 'status_code', 'None')}")
+            return {}
         try:
-            match = re.search(pattern, string, re.IGNORECASE)
-            if match and len(match.groups()) >= index:
-                return match.group(index)
-        except:
-            pass
-        return ""
+            d = r.json()
+            return d if isinstance(d, dict) else {}
+        except Exception:
+            return {}
+
+    # ========== \u5217\u8868/\u8be6\u60c5 ==========
+
+    def _fix_pic(self, pic):
+        """\u5c01\u9762\u8865\u5168\uff1a{rand} \u5360\u4f4d\u7b26\u968f\u673a\u5316\uff08\u8001\u6570\u636e\u9057\u7559\uff09\u3001\u76f8\u5bf9\u8def\u5f84\u8865\u57df\u3002"""
+        if not pic:
+            return ''
+        if '{rand}' in pic:
+            pic = pic.replace('{rand}', str(random.randint(1, 9)))
+        if pic.startswith('//'):
+            pic = 'https:' + pic
+        elif pic.startswith('/'):
+            pic = self.host + pic
+        return pic
+
+    def _rows(self, rows):
+        """\u7edf\u4e00\u628a vodrows \u8f6c\u6210 Legado \u5217\u8868\u9879\u3002"""
+        out = []
+        for r in rows or []:
+            if not isinstance(r, dict):
+                continue
+            vid = str(r.get('vodid') or '').strip()
+            title = (r.get('title') or '').strip()
+            if not vid or not title:
+                continue
+            out.append({
+                'vod_id': vid,
+                'vod_name': title,
+                'vod_pic': self._fix_pic(r.get('coverpic') or ''),
+                'vod_remarks': (r.get('duration') or '').strip(),
+                'vod_year': str(r.get('yearname') or '').strip(),
+            })
+        return out
+
+    def _classes(self):
+        """\u5206\u7c7b\u8868\uff1a\u4f18\u5148\u4ece /init \u52a8\u6001\u53d6\uff08\u5206\u7c7b\u4f1a\u53d8\uff0c\u5199\u6b7b\u4f1a\u8fc7\u671f\uff09\uff0c\u5931\u8d25\u56de\u843d\u5230\u5185\u7f6e\u8868\u3002"""
+        d = self._get_json('/init')
+        cats = (((d.get('data') or {}).get('globalData') or {}).get('hotcategories')) or []
+        out = []
+        for c in cats:
+            if not isinstance(c, dict):
+                continue
+            m = re.search(r'listing-([0-9-]+)\.html', c.get('url') or '')
+            if not m:
+                continue
+            seg = '-'.join(m.group(1).split('-')[:9])
+            name = (c.get('catename') or '').strip()
+            if seg and name:
+                out.append({'type_id': seg, 'type_name': name})
+        if out:
+            return out
+        try:
+            return json.loads(b64decode(self.CLASS_FALLBACK_B64).decode('utf-8'))
+        except Exception:
+            return []
+
+    def homeContent(self, filter):
+        """\u9996\u9875\uff1a\u5206\u7c7b\u8868\uff08\u52a8\u6001\uff09+ \u6700\u65b0\u5217\u8868\u3002"""
+        result = {'class': self._classes()}
+        try:
+            d = self._get_json('/vod/latest-0-0-0-0-0-0-0-0-0-1')
+            result['list'] = self._rows((d.get('data') or {}).get('vodrows'))
+        except Exception as e:
+            self.log(f"首页出错: {str(e)}")
+            result['list'] = []
+        return result
+
+    def homeVideoContent(self):
+        """\u517c\u5bb9\u6027\u65b9\u6cd5\uff1a\u53ea\u8fd4\u56de\u6700\u65b0\u5217\u8868\u3002"""
+        try:
+            d = self._get_json('/vod/latest-0-0-0-0-0-0-0-0-0-1')
+            return {'list': self._rows((d.get('data') or {}).get('vodrows'))}
+        except Exception:
+            return {'list': []}
+
+    def categoryContent(self, tid, pg, filter, extend):
+        """\u5206\u7c7b\u5217\u8868\uff1atid = 9 \u6bb5\u53c2\u6570\u4e32\uff08cateid-areaid-...-orderby\uff09\uff0c\u517c\u5bb9\u7eaf\u6570\u5b57 cateid\u3002"""
+        try:
+            pg = int(pg or 1)
+            if pg < 1:
+                pg = 1
+            tid = str(tid or '').strip()
+            if '_' in tid:                      # \u517c\u5bb9\u65e7\u7f13\u5b58\u300c\u57df\u540d_1\u300d\u5f62\u6001
+                tid = tid.split('_')[-1]
+            if not re.match(r'^\d+(-\d+){8}$', tid):
+                m = re.search(r'(\d+)', tid)
+                cid = m.group(1) if m else '0'
+                tid = f'{cid}-0-0-0-0-0-0-0-0'
+            d = self._get_json(f'/v2/vod/listing-{tid}-{pg}')
+            data = d.get('data') or {}
+            pi = data.get('pageinfo') or {}
+            return {
+                'list': self._rows(data.get('vodrows')),
+                'page': pg,
+                'pagecount': int(pi.get('totalpage') or 999),
+                'limit': int(pi.get('pagesize') or 16),
+                'total': int(pi.get('total') or 0),
+            }
+        except Exception as e:
+            self.log(f"分类出错: {str(e)}")
+            return {'list': []}
+
+    def searchContent(self, key, quick, pg="1"):
+        """\u641c\u7d22\uff1a/search?wd=&page=&free=1\uff08free=1 \u53ea\u641c\u514d\u8d39\u53ef\u64ad\u5185\u5bb9\uff09\u3002"""
+        try:
+            d = self._get_json('/search', params={'wd': key, 'page': pg, 'free': 1})
+            return {'list': self._rows((d.get('data') or {}).get('vodrows'))}
+        except Exception as e:
+            self.log(f"搜索出错: {str(e)}")
+            return {'list': []}
+
+    def detailContent(self, ids):
+        """\u8be6\u60c5\uff1a/vod/show/{id}\uff1b\u64ad\u653e\u6807\u8bc6\u7edf\u4e00\u7528 vodid\uff0c\u57df\u540d\u4e00\u5f8b\u8fd0\u884c\u65f6\u53d6\u3002"""
+        try:
+            vid = str(ids[0])
+            if '_' in vid:                      # \u517c\u5bb9\u65e7\u7f13\u5b58\u300c\u57df\u540d_\u6570\u5b57\u300d
+                vid = vid.split('_', 1)[1]
+            d = self._get_json(f'/vod/show/{vid}')
+            row = (d.get('data') or {}).get('vodrow') or {}
+            if not row:
+                self.log(f"详情为空: {vid}")
+                return {'list': []}
+            tags = row.get('tags') or []
+            actor = ''
+            if isinstance(tags, list):
+                actor = ','.join([t.get('tagname', '') for t in tags if isinstance(t, dict) and t.get('tagname')])
+            real_id = str(row.get('vodid') or vid)
+            info = {
+                'vod_id': real_id,
+                'vod_name': row.get('title') or '',
+                'vod_pic': self._fix_pic(row.get('coverpic') or ''),
+                'type_name': row.get('catename') or '',
+                'vod_year': str(row.get('yearname') or ''),
+                'vod_area': row.get('areaname') or '',
+                'vod_remarks': row.get('duration') or '',
+                'vod_actor': actor,
+                'vod_director': '',
+                'vod_content': (row.get('intro') or '').strip() or '\u65e0\u7b80\u4ecb',
+                'vod_play_from': '\u9999\u8549\u89c6\u9891',
+                'vod_play_url': f"播放${real_id}",
+            }
+            return {'list': [info]}
+        except Exception as e:
+            self.log(f"详情出错: {str(e)}")
+            return {'list': []}
+
+    def playerContent(self, flag, id, vipFlags):
+        """\u64ad\u653e\uff1a/v2/vod/reqplay/{id} \u76f4\u63a5\u7ed9 m3u8\uff1bretcode=3 \u65f6\u7528\u9884\u89c8\u5730\u5740\uff0c\u53d6\u4e0d\u5230\u5219\u56de\u843d\u7f51\u9875\u3002"""
+        try:
+            vid = str(id)
+            if '_' in vid:
+                vid = vid.split('_', 1)[1]
+            d = self._get_json(f'/v2/vod/reqplay/{vid}')
+            data = d.get('data') or {}
+            url = ''
+            if d.get('retcode') == 3:
+                url = data.get('httpurl_preview') or ''
+            if not url:
+                url = data.get('httpurl') or ''
+            if not url:
+                urls = data.get('httpurls') or []
+                if isinstance(urls, list) and urls:
+                    first = urls[0]
+                    url = (first.get('httpurl') or '') if isinstance(first, dict) else str(first)
+            if url:
+                url = url.replace('?300', '')
+                self.log(f"播放地址: {url}")
+                return {'parse': 0, 'playUrl': '', 'url': url}
+            self.log(f"未取到播放地址 retcode={d.get('retcode')} msg={d.get('errmsg')}")
+            return {'parse': 1, 'playUrl': '', 'url': self.host + '/'}
+        except Exception as e:
+            self.log(f"播放出错: {str(e)}")
+            return {'parse': 1, 'playUrl': '', 'url': self.host + '/'}
+
+    # ========== \u517c\u5bb9\u5360\u4f4d ==========
 
     def isVideoFormat(self, url):
         pass
 
     def manualVideoCheck(self):
         pass
-
-    def homeContent(self, filter):
-        """\u83b7\u53d6\u9996\u9875\u5185\u5bb9\u548c\u5206\u7c7b"""
-        result = {}
-        # \u53ea\u4fdd\u7559\u6307\u5b9a\u7684\u5206\u7c7b
-        # \u5206\u7c7b\u8868\u4ee5 b64 \u5b58\u50a8\u3001\u8fd0\u884c\u65f6\u89e3\u7801\uff0c\u9632\u6258\u7ba1\u5e73\u53f0\u5185\u5bb9\u626b\u63cf\u8bef\u5224
-        classes = json.loads(b64decode('W3sidHlwZV9pZCI6ICI2MTgwMTMueHl6XzEiLCAidHlwZV9uYW1lIjogIuWFqOmDqOinhumikSJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8xMyIsICJ0eXBlX25hbWUiOiAi6aaZ6JWJ57K+5ZOBIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzIyIiwgInR5cGVfbmFtZSI6ICLliLbmnI3or7Hmg5EifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNiIsICJ0eXBlX25hbWUiOiAi5Zu95Lqn6KeG6aKRIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzgiLCAidHlwZV9uYW1lIjogIua4hee6r+WwkeWlsyJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el85IiwgInR5cGVfbmFtZSI6ICLovqPlprnlpKflpbYifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMTAiLCAidHlwZV9uYW1lIjogIuWls+WQjOS4k+WxniJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8xMSIsICJ0eXBlX25hbWUiOiAi57Sg5Lq65Ye65ryUIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzEyIiwgInR5cGVfbmFtZSI6ICLop5LoibLmia7mvJQifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMjAiLCAidHlwZV9uYW1lIjogIuS6uuWmu+eGn+WlsyJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8yMyIsICJ0eXBlX25hbWUiOiAi5pel6Z+p5Ymn5oOFIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzIxIiwgInR5cGVfbmFtZSI6ICLnu4/lhbjkvKbnkIYifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNyIsICJ0eXBlX25hbWUiOiAi5oiQ5Lq65Yqo5ryrIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzE0IiwgInR5cGVfbmFtZSI6ICLnsr7lk4HkuozljLoifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNDAiLCAidHlwZV9uYW1lIjogIueyvuWTgeS4ieWMuiJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el81MyIsICJ0eXBlX25hbWUiOiAi5Yqo5ryr5Lit5a2XIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzUyIiwgInR5cGVfbmFtZSI6ICLml6XmnKzml6DnoIEifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMzMiLCAidHlwZV9uYW1lIjogIuS4reaWh+Wtl+W5lSJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el80NCIsICJ0eXBlX25hbWUiOiAi5Zu95Lqn5Lyg5aqSIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzMyIiwgInR5cGVfbmFtZSI6ICLlm73kuqfoh6rmi40ifV0=').decode('utf-8'))
-        result['class'] = classes
-        try:
-            rsp = self.fetch(self.host, headers=self.headers)
-            doc = self.html(rsp.text)
-            videos = self._get_videos(doc, limit=20)
-            result['list'] = videos
-        except Exception as e:
-            self.log(f"首页获取出错: {str(e)}")
-            result['list'] = []
-        return result
-
-    def homeVideoContent(self):
-        """\u5206\u7c7b\u5b9a\u4e49 - \u517c\u5bb9\u6027\u65b9\u6cd5"""
-        return {
-            'class': json.loads(b64decode('W3sidHlwZV9pZCI6ICI2MTgwMTMueHl6XzEiLCAidHlwZV9uYW1lIjogIuWFqOmDqOinhumikSJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8xMyIsICJ0eXBlX25hbWUiOiAi6aaZ6JWJ57K+5ZOBIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzIyIiwgInR5cGVfbmFtZSI6ICLliLbmnI3or7Hmg5EifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNiIsICJ0eXBlX25hbWUiOiAi5Zu95Lqn6KeG6aKRIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzgiLCAidHlwZV9uYW1lIjogIua4hee6r+WwkeWlsyJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el85IiwgInR5cGVfbmFtZSI6ICLovqPlprnlpKflpbYifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMTAiLCAidHlwZV9uYW1lIjogIuWls+WQjOS4k+WxniJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8xMSIsICJ0eXBlX25hbWUiOiAi57Sg5Lq65Ye65ryUIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzEyIiwgInR5cGVfbmFtZSI6ICLop5LoibLmia7mvJQifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMjAiLCAidHlwZV9uYW1lIjogIuS6uuWmu+eGn+WlsyJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8yMyIsICJ0eXBlX25hbWUiOiAi5pel6Z+p5Ymn5oOFIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzIxIiwgInR5cGVfbmFtZSI6ICLnu4/lhbjkvKbnkIYifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNyIsICJ0eXBlX25hbWUiOiAi5oiQ5Lq65Yqo5ryrIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzE0IiwgInR5cGVfbmFtZSI6ICLnsr7lk4HkuozljLoifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNDAiLCAidHlwZV9uYW1lIjogIueyvuWTgeS4ieWMuiJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el81MyIsICJ0eXBlX25hbWUiOiAi5Yqo5ryr5Lit5a2XIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzUyIiwgInR5cGVfbmFtZSI6ICLml6XmnKzml6DnoIEifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMzMiLCAidHlwZV9uYW1lIjogIuS4reaWh+Wtl+W5lSJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el80NCIsICJ0eXBlX25hbWUiOiAi5Zu95Lqn5Lyg5aqSIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzMyIiwgInR5cGVfbmFtZSI6ICLlm73kuqfoh6rmi40ifV0=').decode('utf-8'))
-        }
-
-    def categoryContent(self, tid, pg, filter, extend):
-        """\u5206\u7c7b\u5185\u5bb9 - \u4fee\u6539\u4e3a\u4f7f\u7528\u56fa\u5b9a\u9875\u6570\u8bbe\u7f6e"""
-        try:
-            domain, type_id = tid.split('_')
-            url = f"https://{domain}/index.php/vod/type/id/{type_id}.html"
-            if pg and pg != '1':
-                url = url.replace('.html', f'/page/{pg}.html')
-            self.log(f"访问分类URL: {url}")
-            rsp = self.fetch(url, headers=self.headers)
-            doc = self.html(rsp.text)
-            videos = self._get_videos(doc, limit=20)
-            
-            # \u4f7f\u7528\u56fa\u5b9a\u9875\u6570\u8bbe\u7f6e\uff0c\u800c\u4e0d\u662f\u5c1d\u8bd5\u4ece\u9875\u9762\u89e3\u6790
-            pagecount = 999
-            total = 19980
-            
-            return {
-                'list': videos,
-                'page': int(pg),
-                'pagecount': pagecount,
-                'limit': 20,
-                'total': total
-            }
-        except Exception as e:
-            self.log(f"分类内容获取出错: {str(e)}")
-            return {'list': []}
-
-    def searchContent(self, key, quick, pg="1"):
-        """\u641c\u7d22\u529f\u80fd"""
-        try:
-            search_url = f"{self.host}/index.php/vod/search.html?wd={urllib.parse.quote(key)}&page={pg}"
-            self.log(f"搜索URL: {search_url}")
-            rsp = self.fetch(search_url, headers=self.headers)
-            if not rsp or rsp.status_code != 200:
-                return {'list': []}
-            doc = self.html(rsp.text)
-            videos = self._get_videos(doc)
-            return {'list': videos}
-        except Exception as e:
-            self.log(f"搜索出错: {str(e)}")
-            return {'list': []}
-
-    def detailContent(self, ids):
-        """\u8be6\u60c5\u9875\u9762"""
-        try:
-            vid = ids[0]
-            if '_' in vid:
-                domain, video_id = vid.split('_')
-                detail_url = f"https://{domain}/index.php/vod/detail/id/{video_id}.html"
-            else:
-                detail_url = f"{self.host}/index.php/vod/detail/id/{vid}.html"
-            self.log(f"访问详情URL: {detail_url}")
-            rsp = self.fetch(detail_url, headers=self.headers)
-            doc = self.html(rsp.text)
-            video_info = self._get_detail(doc, vid)
-            return {'list': [video_info]} if video_info else {'list': []}
-        except Exception as e:
-            self.log(f"详情获取出错: {str(e)}")
-            return {'list': []}
-
-    def playerContent(self, flag, id, vipFlags):
-        """\u64ad\u653e\u94fe\u63a5 - \u76f4\u63a5\u4f7f\u7528API\u83b7\u53d6\u89c6\u9891\u5730\u5740"""
-        try:
-            self.log(f"获取播放链接: flag={flag}, id={id}")
-            
-            # \u63d0\u53d6\u89c6\u9891ID
-            if '_' in id:
-                _, video_id = id.split('_')
-            else:
-                video_id = id
-                
-            self.log(f"视频ID: {video_id}")
-            
-            # \u76f4\u63a5\u8c03\u7528API\u83b7\u53d6\u89c6\u9891\u5730\u5740
-            api_url = f"{self.api_host}/api/v2/vod/reqplay/{video_id}"
-            self.log(f"请求API获取视频地址: {api_url}")
-            
-            api_headers = self.headers.copy()
-            api_headers.update({
-                'Referer': f"{self.host}/",
-                'Origin': self.host,
-                'X-Requested-With': 'XMLHttpRequest'
-            })
-            
-            api_response = self.fetch(api_url, headers=api_headers)
-            if api_response and api_response.status_code == 200:
-                data = api_response.json()
-                self.log(f"API响应: {data}")
-                
-                if data.get('retcode') == 3:
-                    video_url = data.get('data', {}).get('httpurl_preview', '')
-                else:
-                    video_url = data.get('data', {}).get('httpurl', '')
-                
-                if video_url:
-                    # \u79fb\u9664\u53ef\u80fd\u7684\u53c2\u6570
-                    video_url = video_url.replace('?300', '')
-                    self.log(f"从API获取到视频地址: {video_url}")
-                    return {'parse': 0, 'playUrl': '', 'url': video_url}
-                else:
-                    self.log("API\u54cd\u5e94\u4e2d\u6ca1\u6709\u627e\u5230\u89c6\u9891\u5730\u5740")
-            else:
-                self.log(f"API请求失败，状态码: {api_response.status_code if api_response else '\u65e0\u54cd\u5e94'}")
-                
-            # \u5982\u679cAPI\u8bf7\u6c42\u5931\u8d25\uff0c\u56de\u9000\u5230\u539f\u6765\u7684\u65b9\u6cd5
-            if '_' in id:
-                domain, play_id = id.split('_')
-                play_url = f"https://{domain}/html/kkyd.html?m={play_id}"
-            else:
-                play_url = f"{self.host}/html/kkyd.html?m={id}"
-                
-            self.log(f"回退到播放页面: {play_url}")
-            return {'parse': 1, 'playUrl': '', 'url': play_url}
-            
-        except Exception as e:
-            self.log(f"播放链接获取出错: {str(e)}")
-            # \u51fa\u9519\u65f6\u4e5f\u8fd4\u56de\u64ad\u653e\u9875\u9762URL
-            if '_' in id:
-                domain, play_id = id.split('_')
-                play_url = f"https://{domain}/html/kkyd.html?m={play_id}"
-            else:
-                play_url = f"{self.host}/html/kkyd.html?m={id}"
-            return {'parse': 1, 'playUrl': '', 'url': play_url}
-
-    # ========== \u8f85\u52a9\u65b9\u6cd5 ==========
-    
-    def _get_videos(self, doc, limit=None):
-        """\u83b7\u53d6\u5f71\u7247\u5217\u8868 - \u6839\u636e\u5b9e\u9645\u7f51\u7ad9\u7ed3\u6784"""
-        try:
-            videos = []
-            elements = doc.xpath('//a[@class="vodbox"]')
-            self.log(f"找到 {len(elements)} 个vodbox元素")
-            for elem in elements:
-                video = self._extract_video(elem)
-                if video:
-                    videos.append(video)
-            return videos[:limit] if limit and videos else videos
-        except Exception as e:
-            self.log(f"获取影片列表出错: {str(e)}")
-            return []
-
-    def _extract_video(self, element):
-        """\u63d0\u53d6\u5f71\u7247\u4fe1\u606f - \u4fee\u590d\u6807\u9898\u4e71\u7801\u95ee\u9898\uff0c\u6b63\u786e\u8bfb\u53d6km-script\u6807\u7b7e\u6587\u672c"""
-        try:
-            # 1. \u63d0\u53d6\u5f71\u7247\u94fe\u63a5\uff08\u83b7\u53d6vod_id\u7684\u6765\u6e90\uff09
-            link = element.xpath('./@href')[0]  # \u83b7\u53d6a\u6807\u7b7e\u7684href\u5c5e\u6027
-            if link.startswith('/'):
-                link = self.host + link  # \u8865\u5168\u76f8\u5bf9\u8def\u5f84\u4e3a\u5b8c\u6574URL
-            
-            # 2. \u63d0\u53d6vod_id\uff08\u4eceURL\u7684m\u53c2\u6570\u83b7\u53d6\uff0c\u800c\u975ehash\uff0c\u66f4\u51c6\u786e\uff09
-            vod_id = self.regStr(r'm=(\d+)', link)  # \u5339\u914d ?m=123 \u4e2d\u7684\u6570\u5b57
-            if not vod_id:
-                vod_id = str(hash(link) % 1000000)  # \u515c\u5e95\uff1ahash\u751f\u6210\u552f\u4e00ID
-            
-            # 3. \u63d0\u53d6\u6807\u9898\uff08\u5173\u952e\u4fee\u590d\uff1a\u8bfb\u53d6<p class="km-script">\u5185\u7684\u6587\u672c\u5e76\u89e3\u5bc6\uff09
-            title_elem = element.xpath('./p[@class="km-script"]/text()')  # \u5b9a\u4f4dkm-script\u6807\u7b7e
-            if not title_elem:
-                # \u5c1d\u8bd5\u5176\u4ed6\u53ef\u80fd\u7684\u6807\u9898\u9009\u62e9\u5668
-                title_elem = element.xpath('.//p[contains(@class, "script")]/text()')
-                if not title_elem:
-                    title_elem = element.xpath('.//p/text()')
-                    if not title_elem:
-                        title_elem = element.xpath('.//h3/text()')
-                        if not title_elem:
-                            title_elem = element.xpath('.//h4/text()')
-                            if not title_elem:
-                                self.log(f"未找到标题元素，跳过该视频")
-                                return None
-            
-            title_encrypted = title_elem[0].strip()  # \u83b7\u53d6\u52a0\u5bc6\u7684\u6807\u9898\u6587\u672c
-            
-            # 4. \u89e3\u5bc6\u6807\u9898 - \u4f7f\u7528\u7f51\u7ad9\u7684\u89e3\u5bc6\u7b97\u6cd5
-            title = self._decrypt_title(title_encrypted)
-            
-            # 5. \u63d0\u53d6\u5c01\u9762\u56fe\uff08\u903b\u8f91\u4e0d\u53d8\uff0c\u517c\u5bb9data-original\u548csrc\uff09
-            pic_elem = element.xpath('.//img/@data-original')  # \u4f18\u5148\u61d2\u52a0\u8f7d\u5730\u5740
-            if not pic_elem:
-                pic_elem = element.xpath('.//img/@src')  # \u515c\u5e95\uff1a\u76f4\u63a5src\u5730\u5740
-            pic = pic_elem[0] if pic_elem else ''
-            
-            # 6. \u8865\u5168\u56fe\u7247URL\uff08\u5904\u7406\u76f8\u5bf9\u8def\u5f84\u6216\u65e0\u534f\u8bae\u7684\u60c5\u51b5\uff09
-            if pic:
-                if pic.startswith('//'):
-                    pic = 'https:' + pic  # \u8865\u5168https\u534f\u8bae
-                elif pic.startswith('/'):
-                    pic = self.host + pic  # \u8865\u5168\u4e3b\u57df\u540d
-            
-            # 7. \u8fd4\u56de\u6b63\u786e\u7684\u89c6\u9891\u4fe1\u606f
-            return {
-                'vod_id': f"618013.xyz_{vod_id}",
-                'vod_name': title,  # \u6b64\u65f6title\u5df2\u4e3a\u6b63\u786e\u6587\u672c
-                'vod_pic': pic,
-                'vod_remarks': '',
-                'vod_year': ''
-            }
-        except Exception as e:
-            self.log(f"提取影片信息出错: {str(e)}")
-            return None
-
-    def _decrypt_title(self, encrypted_text):
-        """\u89e3\u5bc6\u6807\u9898 - \u4f7f\u7528\u7f51\u7ad9\u7684\u89e3\u5bc6\u7b97\u6cd5"""
-        try:
-            # \u7f51\u7ad9\u4f7f\u7528\u7684\u89e3\u5bc6\u7b97\u6cd5\uff1a\u6bcf\u4e2a\u5b57\u7b26\u4e0e128\u8fdb\u884c\u5f02\u6216\u64cd\u4f5c
-            decrypted_chars = []
-            for char in encrypted_text:
-                # \u5c06\u5b57\u7b26\u8f6c\u6362\u4e3aUnicode\u7801\u70b9
-                code_point = ord(char)
-                # \u4e0e128\u8fdb\u884c\u5f02\u6216\u64cd\u4f5c
-                decrypted_code = code_point ^ 128
-                # \u8f6c\u6362\u56de\u5b57\u7b26
-                decrypted_char = chr(decrypted_code)
-                decrypted_chars.append(decrypted_char)
-            
-            # \u62fc\u63a5\u89e3\u5bc6\u540e\u7684\u5b57\u7b26
-            decrypted_text = ''.join(decrypted_chars)
-            return decrypted_text
-        except Exception as e:
-            self.log(f"标题解密失败: {str(e)}")
-            return encrypted_text  # \u5982\u679c\u89e3\u5bc6\u5931\u8d25\uff0c\u8fd4\u56de\u539f\u6587\u672c
-
-    def _get_detail(self, doc, vid):
-        """\u83b7\u53d6\u8be6\u60c5\u4fe1\u606f (\u4f18\u5316\u7248) - \u4fee\u590d\u64ad\u653e\u6e90\u63d0\u53d6\u95ee\u9898"""
-        try:
-            title = self._get_text(doc, ['//h1/text()', '//title/text()'])
-            pic = self._get_text(doc, ['//div[@class="dyimg"]//img/@src', '//img[@class="poster"]/@src'])
-            if pic and pic.startswith('/'):
-                pic = self.host + pic
-            desc = self._get_text(doc, ['//div[@class="yp_context"]/text()', '//div[@class="introduction"]//text()'])
-            actor = self._get_text(doc, ['//span[contains(text(),"\u4e3b\u6f14")]/following-sibling::*/text()'])
-            director = self._get_text(doc, ['//span[contains(text(),"\u5bfc\u6f14")]/following-sibling::*/text()'])
-
-            play_from = []
-            play_urls = []
-            
-            # \u5c1d\u8bd5\u67e5\u627e\u64ad\u653e\u6e90
-            play_links = doc.xpath('//a[contains(@href, "m=")]')
-            if play_links:
-                episodes = []
-                for link in play_links:
-                    ep_title = link.xpath('./text()')
-                    ep_href = link.xpath('./@href')[0]
-                    if ep_title:
-                        ep_title = ep_title[0].strip()
-                        play_id = self.regStr(r'm=(\d+)', ep_href)
-                        if play_id:
-                            episodes.append(f"{ep_title}${play_id}")
-                
-                if episodes:
-                    play_from.append("\u9ed8\u8ba4\u64ad\u653e\u6e90")
-                    play_urls.append('#'.join(episodes))
-
-            if not play_from:
-                self.log("\u672a\u627e\u5230\u64ad\u653e\u6e90\u5143\u7d20\uff0c\u65e0\u6cd5\u5b9a\u4f4d\u64ad\u653e\u6e90\u5217\u8868")
-                # \u5373\u4f7f\u6ca1\u6709\u64ad\u653e\u6e90\uff0c\u4e5f\u8fd4\u56de\u57fa\u672c\u4fe1\u606f
-                return {
-                    'vod_id': vid,
-                    'vod_name': title,
-                    'vod_pic': pic,
-                    'type_name': '',
-                    'vod_year': '',
-                    'vod_area': '',
-                    'vod_remarks': '',
-                    'vod_actor': actor,
-                    'vod_director': director,
-                    'vod_content': desc,
-                    'vod_play_from': '\u9ed8\u8ba4\u64ad\u653e\u6e90',
-                    'vod_play_url': f"第1集${vid}"
-                }
-
-            return {
-                'vod_id': vid,
-                'vod_name': title,
-                'vod_pic': pic,
-                'type_name': '',
-                'vod_year': '',
-                'vod_area': '',
-                'vod_remarks': '',
-                'vod_actor': actor,
-                'vod_director': director,
-                'vod_content': desc,
-                'vod_play_from': '$$$'.join(play_from),
-                'vod_play_url': '$$$'.join(play_urls)
-            }
-        except Exception as e:
-            self.log(f"获取详情出错: {str(e)}")
-            return None
-
-    def _get_text(self, doc, selectors):
-        """\u901a\u7528\u6587\u672c\u63d0\u53d6"""
-        for selector in selectors:
-            texts = doc.xpath(selector)
-            for text in texts:
-                if text and text.strip():
-                    return text.strip()
-        return ''

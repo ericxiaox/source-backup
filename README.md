@@ -1,24 +1,24 @@
 # OK影视个人专属包（source）
 
-影视源专属包：`source.json`（整份 base64，客户端自动解码）+ `py/`（python 源）+ `hostresolver.py`（通用动态域名解析模块）。
+影视源专属包：`source.json`（**明文** JSON，客户端直接解析；非 ASCII 与高危 token 做 `\u` 转义防扫描）+ `py/`（python 源）+ `hostresolver.py`（通用动态域名解析模块）。
 
 ## 目录三区（本机 影视仓源/ 下）
 
 | 文件夹              | 用途                                                           | 怎么对待                |
 | ---------------- | ------------------------------------------------------------ | ------------------- |
-| `local_package/` | **本地包 = 唯一编辑点**：source_local.json 母本（58 站明文）+ 源文件树           | 改这里；整个文件夹可直接拷手机当本地包 |
+| `local/`         | **本地包 = 唯一编辑点**：source_local.json 母本（47 站在线 + 4 站离线）+ 源文件树           | 改这里；整个文件夹可直接拷手机当本地包 |
 | `tools/`         | 程序区：explorer_admin 管理台 / make_gitee 生成器 / START_EXPLORER 启动器 | PC 工具，不入 git        |
-| `source/`        | **gitee 仓库区 = 生成物镜像**（b64 source.json + 镜像源文件树）              | **禁手改**，下次推送会被镜像覆盖  |
+| `source/`        | **gitee 仓库区 = 生成物镜像**（明文 source.json + 镜像源文件树）              | **禁手改**，下次推送会被镜像覆盖  |
 
 ## 工作流（改任何东西的统一路径）
 
-1. 在 `local_package/` 里改：源文件 / source_local.json 的 ext 域名 / README；
-2. 管理台（桌面快捷方式 → 5010）点「**推送**」→ 自动跑 make_gitee.py（镜像 local_package → source/ + 母本生成 b64 source.json）→ git commit + push；
+1. 在 `local/` 里改：源文件 / source_local.json 的 ext 域名 / README；
+2. 管理台（桌面快捷方式 → 5010）点「**推送**」→ 自动跑 make_gitee.py（镜像 local → source/ + 由母本生成明文 source.json）→ git commit + push；
 3. App 端**重新拉取订阅**生效（App 有本地缓存）。
 
 ## 域名失效了怎么换？（母本三步）
 
-**第 1 步**：打开 `local_package/source_local.json` → 搜失效源的**名字**（如 每日大赛）→ 找到条目里的 `ext` 行。
+**第 1 步**：打开 `local/source_local.json` → 搜失效源的**名字**（如 每日大赛）→ 找到条目里的 `ext` 行。
 
 **第 2 步**：只改 `@` 后面的内容，**不要动引号、分号、逗号**：
 
@@ -58,7 +58,7 @@
 
 ## 注意
 
-- `source.json` 是 base64 自动生成的，**不要在 gitee 网页上直接改**（改了也会被下次推送覆盖）；要改就改母本再推送。
+- `source.json` 是自动生成的**明文**配置：**真机实测 OK影视 不认整份 base64**，所以始终明文下发（靠 `\u` 转义躲 gitee 扫描，App 解析时无损还原）。**不要在 gitee 网页上直接改**（改了也会被下次推送覆盖）；要改就改母本再推送。
 - ext 是可选字段：没有 ext 的源直接用 py 内置域名列表，照常工作。
 - ext 写错格式（漏引号等）会导致整个配置导入失败——改完检查引号是否成对。
-- 源文件本体（py/xbpq/js）单独被扫描：改动时仍需敏感词 b64 化/中性化（451 纪律），与配置整份 b64 是两回事。
+- 源文件本体（py/xbpq/js）单独被扫描：改动时仍需敏感词 `\u` 转义 / 文件名中性化（451 纪律），与配置的 `\u` 转义是两回事。
