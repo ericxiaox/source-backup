@@ -1,5 +1,5 @@
 {
-  "sites_count": 22,
+  "sites_count": 20,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -237,28 +237,6 @@
       "quickSearch": 1,
       "filterable": 1,
       "playerType": 2
-    },
-    {
-      "key": "py_91short",
-      "name": "\ud83d\udcf191short",
-      "type": 3,
-      "api": "./py/_nosrc_91short.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_anwang",
-      "name": "\ud83d\udcf1anwang",
-      "type": 3,
-      "api": "./py/_nosrc_anwang.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
     }
   ],
   "parses": [],
@@ -749,6 +727,30 @@
       },
       "changeable": 1,
       "off_reason": "\u88ab\u5899;\u53d1\u5e03\u9875yasefb.xyz\u2192ys.ggyase.shop\u53ef\u8fbe\u4f46\u7ad9\u6539\u7248,\u65e7\u6e90\u4f5c\u5e9f"
+    },
+    {
+      "key": "py_91short",
+      "name": "\ud83d\udcf191short",
+      "type": 3,
+      "api": "./py/_nosrc_91short.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "off_reason": "\u6e90\u6587\u4ef6\u7f3a\u5931\uff08_\u65e0\u6e90_ \u5360\u4f4d\uff09\uff0c\u6682\u65e0\u53ef\u7528\u6e90"
+    },
+    {
+      "key": "py_anwang",
+      "name": "\ud83d\udcf1anwang",
+      "type": 3,
+      "api": "./py/_nosrc_anwang.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "off_reason": "\u6e90\u6587\u4ef6\u7f3a\u5931\uff08_\u65e0\u6e90_ \u5360\u4f4d\uff09\uff0c\u6682\u65e0\u53ef\u7528\u6e90"
     }
   ]
 }
