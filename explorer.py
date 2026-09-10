@@ -70,7 +70,7 @@ _PUB_HINTS = ('入口', '最新地址', '发布')
 _NAV_POOL_MAX = 24      # 自收集导航站上限
 _NAV_FETCH_MAX = 4      # 每次构建映射最多实抓的导航站数（控制耗时）
 _PUB_MAX = 40
-_TTL = 6 * 3600         # 站点映射缓存
+_TTL = 7 * 24 * 3600         # 站点映射缓存
 
 # 用户自配导航站（explorer_admin.py 管理台维护，push 到 gitee 后设备自动生效）
 _USER_CFG_URL = 'https://gitee.com/mallox/source/raw/master/xbpq/explorer_seeds.json'

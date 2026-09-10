@@ -1,5 +1,5 @@
 {
-  "sites_count": 20,
+  "sites_count": 22,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -8,7 +8,7 @@
   "sites": [
     {
       "key": "py_mrds",
-      "name": "📱每日大赛",
+      "name": "📱mrds",
       "type": 3,
       "api": "./py/mrds.py",
       "style": {
@@ -20,7 +20,7 @@
     },
     {
       "key": "py_heiliao",
-      "name": "📱黑料不打烊",
+      "name": "📱heiliao",
       "type": 3,
       "api": "./py/黑料不打烊.py",
       "style": {
@@ -31,7 +31,7 @@
     },
     {
       "key": "py_huangguo",
-      "name": "📱黄果短剧",
+      "name": "📱huangguo",
       "type": 3,
       "api": "./py/黄果短剧.py",
       "style": {
@@ -42,7 +42,7 @@
     },
     {
       "key": "py_51xigua",
-      "name": "📱51吃瓜",
+      "name": "📱51xigua",
       "type": 3,
       "api": "./py/51吸瓜动态版.py",
       "ext": "publish@https://advise.nlwkmsv.cc;hosts@https://advise.ucorfqmp.cc",
@@ -54,7 +54,7 @@
     },
     {
       "key": "py_daluandou",
-      "name": "📱每日大乱斗",
+      "name": "📱daluandou",
       "type": 3,
       "api": "./py/每日大乱斗.py",
       "ext": "publish@https://idld65.com;hosts@https://border.loewkgyyv.cc,https://capture.loewkgyyv.cc,https://fe7.loewkgyyv.cc",
@@ -66,7 +66,7 @@
     },
     {
       "key": "py_vhub",
-      "name": "📱VHUB·Xvideos免墙",
+      "name": "📱vhub",
       "type": 3,
       "api": "./py/vhub.py",
       "style": {
@@ -77,7 +77,7 @@
     },
     {
       "key": "py_jptt",
-      "name": "📱禁片天堂",
+      "name": "📱jptt",
       "type": 3,
       "api": "./py/jptt.py",
       "ext": "publish@https://jptt.tv;hosts@https://2026ajptttv.work,https://jptttv2026a.work",
@@ -89,7 +89,7 @@
     },
     {
       "key": "py_airen",
-      "name": "📱AI人短剧",
+      "name": "📱airdj",
       "type": 3,
       "api": "./py/airdj.py",
       "ext": "hosts@https://mdcmai4.xyz,https://mdcmai5.xyz,https://mdcmai3.xyz,https://mdcmai2.xyz",
@@ -101,7 +101,7 @@
     },
     {
       "key": "py_xjiao",
-      "name": "📱香蕉视频",
+      "name": "📱xjsp",
       "type": 3,
       "api": "./py/xjsp.py",
       "ext": "host@https://618013.xyz",
@@ -113,7 +113,7 @@
     },
     {
       "key": "py_uaa音画",
-      "name": "📱UAA音画",
+      "name": "📱uays",
       "type": 3,
       "api": "./py/uays.py",
       "style": {
@@ -124,7 +124,7 @@
     },
     {
       "key": "py_wxts",
-      "name": "📱无限臀山",
+      "name": "📱wxts",
       "type": 3,
       "api": "./py/wxts.py",
       "ext": "publish@https://wuxiants.github.io/",
@@ -136,7 +136,7 @@
     },
     {
       "key": "py_hlw",
-      "name": "📱黑料网",
+      "name": "📱hlw",
       "type": 3,
       "api": "./py/hlw.py",
       "ext": "publish@https://hlwf6.com/",
@@ -148,7 +148,7 @@
     },
     {
       "key": "py_51aw",
-      "name": "📱51暗网",
+      "name": "📱51aw",
       "type": 3,
       "api": "./py/51aw.py",
       "ext": "publish@https://51aw34.com/",
@@ -160,7 +160,7 @@
     },
     {
       "key": "py_yxy",
-      "name": "📱玉羞园",
+      "name": "📱yxy",
       "type": 3,
       "api": "./py/yxy.py",
       "ext": "publish@https://dizhi8.cc/yxy/",
@@ -172,7 +172,7 @@
     },
     {
       "key": "py_jfg",
-      "name": "📱集芳阁",
+      "name": "📱jfg",
       "type": 3,
       "api": "./py/jfg.py",
       "style": {
@@ -183,7 +183,7 @@
     },
     {
       "key": "py_dy",
-      "name": "📱抖阴",
+      "name": "📱dy",
       "type": 3,
       "api": "./py/dy.py",
       "ext": "publish@https://github.com/kissav12/douyin",
@@ -195,7 +195,7 @@
     },
     {
       "key": "py_91bl",
-      "name": "📱91爆料",
+      "name": "📱91bl",
       "type": 3,
       "api": "./py/91bl.py",
       "ext": "publish@https://t91bl.com/",
@@ -207,7 +207,7 @@
     },
     {
       "key": "py_直播",
-      "name": "📱直播ᵖʸ｜夜晚",
+      "name": "📱zhibo",
       "type": 3,
       "api": "./xbpq/直播.py",
       "searchable": 1,
@@ -218,7 +218,7 @@
     },
     {
       "key": "聚合",
-      "name": "📱聚合ʲˢᵒⁿ｜夜晚",
+      "name": "📱juhe",
       "type": 3,
       "api": "csp_XBPQ",
       "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
@@ -229,7 +229,7 @@
     },
     {
       "key": "py_huangdou",
-      "name": "📱黄豆短剧",
+      "name": "📱huangdou",
       "type": 3,
       "api": "./xbpq/黄豆.py",
       "searchable": 1,
@@ -237,6 +237,28 @@
       "quickSearch": 1,
       "filterable": 1,
       "playerType": 2
+    },
+    {
+      "key": "py_91short",
+      "name": "📱91short",
+      "type": 3,
+      "api": "./py/_无源_91短视频.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_anwang",
+      "name": "📱anwang",
+      "type": 3,
+      "api": "./py/_无源_暗网禁区.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
     }
   ],
   "parses": [],
@@ -705,86 +727,8 @@
   ],
   "sites_off": [
     {
-      "key": "py_douyin",
-      "name": "📱抖阴",
-      "type": 3,
-      "api": "./py/_无源_抖阴.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "站活:dyw18.net(32KB真身,2026-09-06实测) 但无py源待新写",
-      "api_missing": true
-    },
-    {
-      "key": "py_yuxi",
-      "name": "📱玉羞园",
-      "type": 3,
-      "api": "./py/_无源_玉羞园.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "站活:yxy999p.icu(205KB真身) 但无py源待新写",
-      "api_missing": true
-    },
-    {
-      "key": "py_jifangge",
-      "name": "📱集芳阁",
-      "type": 3,
-      "api": "./py/_无源_集芳阁.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "站活:punycode主域(27KB) 无py源,AES搜索待python移植",
-      "api_missing": true
-    },
-    {
-      "key": "py_91short",
-      "name": "📱91短视频",
-      "type": 3,
-      "api": "./py/_无源_91短视频.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "站活:017.prjqoamc.cc(内容hex壳混淆,解码可达) 无py源",
-      "api_missing": true
-    },
-    {
-      "key": "py_anwang",
-      "name": "📱暗网禁区",
-      "type": 3,
-      "api": "./py/_无源_暗网禁区.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "站活:21cc.esupvedu.xyz(hex壳) 无py源",
-      "api_missing": true
-    },
-    {
-      "key": "py_tunshan",
-      "name": "📱无限臀山",
-      "type": 3,
-      "api": "./py/_无源_无限臀山.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "主域名已变,旧节点池全失效,待重新定位",
-      "api_missing": true
-    },
-    {
       "key": "py_xvideo",
-      "name": "📱Xvideos🪜",
+      "name": "📱xvideo",
       "type": 3,
       "api": "./py/Xvideos.py",
       "style": {
@@ -796,7 +740,7 @@
     },
     {
       "key": "py_yase",
-      "name": "📱亚色影库",
+      "name": "📱ysyk",
       "type": 3,
       "api": "./py/ysyk.py",
       "style": {
@@ -805,69 +749,6 @@
       },
       "changeable": 1,
       "off_reason": "被墙;发布页yasefb.xyz→ys.ggyase.shop可达但站改版,旧源作废"
-    },
-    {
-      "key": "py_51anwang",
-      "name": "📱51暗网",
-      "type": 3,
-      "api": "./py/_无源_51暗网.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "站活:begin.ulonpdim.com(199KB真身无壳,2026-09-06实测) 无py源待新写",
-      "api_missing": true
-    },
-    {
-      "key": "py_91bl",
-      "name": "📱91爆料",
-      "type": 3,
-      "api": "./py/_无源_91爆料.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "站活:absorb.pkzuzogx.cc(51KB真身无壳) 无py源待新写",
-      "api_missing": true
-    },
-    {
-      "key": "py_hlw",
-      "name": "📱黑料网",
-      "type": 3,
-      "api": "./py/_无源_黑料网.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "旧域5smrt.kmyqhydp.cc已死(000),待找发布页",
-      "api_missing": true
-    },
-    {
-      "key": "py_lvse",
-      "name": "📱绿色导航",
-      "type": 3,
-      "api": "./py/_无源_绿色导航.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "可达但仅'欢迎页'跳板(红豆生南国),导航站暂不收",
-      "api_missing": true
-    },
-    {
-      "key": "py_mitao",
-      "name": "📱蜜桃视频",
-      "type": 3,
-      "api": "./py/mitao.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
     }
   ]
 }
