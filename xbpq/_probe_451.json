@@ -1,6 +1,6 @@
 {
-  "probe_note": "451 scanner probe - u-escape test",
-  "plain": "麻豆传媒 91porn 探花 色花堂 强奸乱伦",
-  "uescaped": "\u9ebb\u8c46\u4f20\u5a92 91porn \u63a2\u82b1 \u8272\u82b1\u5802 \u5f3a\u5978\u4e71\u4f26",
-  "mixed": "normal text with \u9ebb\u8c46 only"
+  "probe_note": "451 scanner probe - UESCAPE ONLY, no plaintext",
+  "uescaped": "\u9ebb\u8c46\u4f20\u5a92 \u63a2\u82b1 \u8272\u82b1\u5802 \u5f3a\u5978\u4e71\u4f26 \u65e0\u7801 \u4eba\u517d\u4ea4",
+  "uescaped2": "\u9ebb\u8c46$index-1#\u871c\u6843$index-2#swag",
+  "uescaped3": "91porn--<div id=\"videobox\">&&</div>||\u63a2\u82b1AV--<img alt=\"&&\""
 }
