@@ -31,31 +31,31 @@ class Spider(Spider):
     ]
     decode_mode = 0
 
-    # 网站 menu 结构 (menuId -> 菜单名)
+    # \u7f51\u7ad9 menu \u7ed3\u6784 (menuId -> \u83dc\u5355\u540d)
     MENU_NAMES = {
         1: base64.b64decode('6bq76LGG5Y6f5Yib').decode('utf-8'),
         2: base64.b64decode('5Zu95LqnQVY=').decode('utf-8'),
         3: base64.b64decode('5bKb5Zu9QVY=').decode('utf-8'),
-        4: "黑料吃瓜",
+        4: "\u9ed1\u6599\u5403\u74dc",
     }
 
     def __init__(self):
         super().__init__()
         self._xurl = None
         self._headers = None
-        self._cache_cats = None  # 缓存分类列表
+        self._cache_cats = None  # \u7f13\u5b58\u5206\u7c7b\u5217\u8868
 
     def getName(self):
         return base64.b64decode('6bq76LGG5Lyg5aqSQUk=').decode('utf-8')
 
     def init(self, extend=""):
-        # ext 支持：host@ 锁定 / hosts@ 追加候选 / publish@ 预留（站方暂无稳定发布页）
+        # ext \u652f\u6301\uff1ahost@ \u9501\u5b9a / hosts@ \u8ffd\u52a0\u5019\u9009 / publish@ \u9884\u7559\uff08\u7ad9\u65b9\u6682\u65e0\u7a33\u5b9a\u53d1\u5e03\u9875\uff09
         self._ext = ext_of(extend) if ext_of else {}
         self._detect_domain()
 
     def _detect_domain(self):
         ext = getattr(self, '_ext', {}) or {}
-        # 候选顺序：ext host 锁定 > ext hosts > 内置候选（2026-09-08 实测 4/5/3/2 全活）
+        # \u5019\u9009\u987a\u5e8f\uff1aext host \u9501\u5b9a > ext hosts > \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b 4/5/3/2 \u5168\u6d3b\uff09
         hosts = []
         if ext.get('host'):
             hosts.append(ext['host'].rstrip('/'))
@@ -99,7 +99,7 @@ class Spider(Spider):
         return json.loads(resp.text)
 
     def _get_categories(self):
-        """获取并缓存所有分类"""
+        """\u83b7\u53d6\u5e76\u7f13\u5b58\u6240\u6709\u5206\u7c7b"""
         if self._cache_cats is None:
             try:
                 data = self._fetch_api('/categories')
@@ -179,7 +179,7 @@ class Spider(Spider):
         return videos
 
     def _parse_post_items(self, items):
-        """帖子/黑料类内容"""
+        """\u5e16\u5b50/\u9ed1\u6599\u7c7b\u5185\u5bb9"""
         videos = []
         for item in items:
             pid = str(item.get('id', ''))
@@ -202,27 +202,27 @@ class Spider(Spider):
             })
         return videos
 
-    # ============ 首页分类：4 个菜单 folder + AI短剧 ============
+    # ============ \u9996\u9875\u5206\u7c7b\uff1a4 \u4e2a\u83dc\u5355 folder + AI\u77ed\u5267 ============
     def homeContent(self, filter):
         class_items = []
         filters = {}
 
-        # 4 个一级菜单（按 menuId 分组）作为 folder
+        # 4 \u4e2a\u4e00\u7ea7\u83dc\u5355\uff08\u6309 menuId \u5206\u7ec4\uff09\u4f5c\u4e3a folder
         for mid in [1, 2, 3, 4]:
             name = self.MENU_NAMES.get(mid, f"菜单{mid}")
             class_items.append({
                 "type_id": f"menu_{mid}",
                 "type_name": name
             })
-            # 排序筛选（菜单 1/2/3 视频用）
+            # \u6392\u5e8f\u7b5b\u9009\uff08\u83dc\u5355 1/2/3 \u89c6\u9891\u7528\uff09
             if mid in (1, 2, 3):
                 filters[f"menu_{mid}"] = [self._video_sort_filter(), self._time_filter(), self._duration_filter()]
             else:
-                # 黑料吃瓜(帖子)只需时间
+                # \u9ed1\u6599\u5403\u74dc(\u5e16\u5b50)\u53ea\u9700\u65f6\u95f4
                 filters[f"menu_{mid}"] = [self._time_filter()]
 
-        # AI短剧（独立一级）
-        class_items.append({"type_id": "short-dramas", "type_name": "AI短剧"})
+        # AI\u77ed\u5267\uff08\u72ec\u7acb\u4e00\u7ea7\uff09
+        class_items.append({"type_id": "short-dramas", "type_name": "AI\u77ed\u5267"})
         filters["short-dramas"] = [self._time_filter()]
 
         return {"class": class_items, "filters": filters}
@@ -230,41 +230,41 @@ class Spider(Spider):
     def _video_sort_filter(self):
         return {
             "key": "sortBy",
-            "name": "排序",
+            "name": "\u6392\u5e8f",
             "value": [
-                {"n": "最热", "v": "heat"},
-                {"n": "最新", "v": "newest"},
-                {"n": "最早", "v": "oldest"},
-                {"n": "播放最多", "v": "views"},
-                {"n": "点赞最多", "v": "likes"},
+                {"n": "\u6700\u70ed", "v": "heat"},
+                {"n": "\u6700\u65b0", "v": "newest"},
+                {"n": "\u6700\u65e9", "v": "oldest"},
+                {"n": "\u64ad\u653e\u6700\u591a", "v": "views"},
+                {"n": "\u70b9\u8d5e\u6700\u591a", "v": "likes"},
             ]
         }
 
     def _time_filter(self):
         return {
             "key": "timeRange",
-            "name": "更新时间",
+            "name": "\u66f4\u65b0\u65f6\u95f4",
             "value": [
-                {"n": "全部", "v": ""},
-                {"n": "近7天", "v": "7d"},
-                {"n": "近1月", "v": "1m"},
-                {"n": "近3月", "v": "3m"},
+                {"n": "\u5168\u90e8", "v": ""},
+                {"n": "\u8fd17\u5929", "v": "7d"},
+                {"n": "\u8fd11\u6708", "v": "1m"},
+                {"n": "\u8fd13\u6708", "v": "3m"},
             ]
         }
 
     def _duration_filter(self):
         return {
             "key": "minDuration",
-            "name": "视频时长",
+            "name": "\u89c6\u9891\u65f6\u957f",
             "value": [
-                {"n": "全部", "v": ""},
-                {"n": "10分钟以上", "v": "10"},
-                {"n": "20分钟以上", "v": "20"},
+                {"n": "\u5168\u90e8", "v": ""},
+                {"n": "10\u5206\u949f\u4ee5\u4e0a", "v": "10"},
+                {"n": "20\u5206\u949f\u4ee5\u4e0a", "v": "20"},
             ]
         }
 
     def homeVideoContent(self):
-        """推荐页 = 每日更新 (menuId=1 排序)"""
+        """\u63a8\u8350\u9875 = \u6bcf\u65e5\u66f4\u65b0 (menuId=1 \u6392\u5e8f)"""
         try:
             data = self._fetch_api('/videos', params={'page': 1, 'size': 20, 'sortBy': 'heat'})
             items = data.get('data', {}).get('items', [])
@@ -272,31 +272,31 @@ class Spider(Spider):
         except:
             return {'list': []}
 
-    # ============ 分类内容 ============
+    # ============ \u5206\u7c7b\u5185\u5bb9 ============
     def categoryContent(self, cid, pg, filter, ext):
         page = int(pg) if pg else 1
         cid = str(cid)
 
-        # 二级目录：进入菜单 → 列子分类
+        # \u4e8c\u7ea7\u76ee\u5f55\uff1a\u8fdb\u5165\u83dc\u5355 \u2192 \u5217\u5b50\u5206\u7c7b
         if cid.startswith('menu_'):
             return self._category_menu(cid, page, filter, ext)
 
-        # AI短剧
+        # AI\u77ed\u5267
         if cid == 'short-dramas':
             return self._category_short_dramas(page, ext)
 
-        # 视频分类
+        # \u89c6\u9891\u5206\u7c7b
         if cid.isdigit():
             return self._category_videos(int(cid), page, ext)
 
-        # 帖子分类
+        # \u5e16\u5b50\u5206\u7c7b
         if cid.startswith('post_cat_'):
             return self._category_posts(int(cid[9:]), page, ext)
 
         return {'list': [], 'page': page, 'pagecount': 1, 'limit': 20, 'total': 0}
 
     def _category_menu(self, cid, page, filter, ext):
-        """进入菜单，列出子分类作为 folder 项"""
+        """\u8fdb\u5165\u83dc\u5355\uff0c\u5217\u51fa\u5b50\u5206\u7c7b\u4f5c\u4e3a folder \u9879"""
         menu_id = int(cid.split('_')[1])
         all_cats = self._get_categories()
         sub_cats = [c for c in all_cats
@@ -309,7 +309,7 @@ class Spider(Spider):
         for c in sub_cats:
             c_id = c.get('id')
             c_type = c.get('type', 'video')
-            # video/post 用分类 ID，短剧用 short-dramas
+            # video/post \u7528\u5206\u7c7b ID\uff0c\u77ed\u5267\u7528 short-dramas
             if c_type == 'post':
                 vod_id = f'post_cat_{c_id}'
             elif c_type == 'video':
@@ -386,7 +386,7 @@ class Spider(Spider):
         except:
             return {'list': [], 'page': page, 'pagecount': 1, 'limit': size, 'total': 0}
 
-    # ============ 详情 ============
+    # ============ \u8be6\u60c5 ============
     def detailContent(self, ids):
         vid = ids[0]
         if vid.startswith('sd_'):
@@ -444,7 +444,7 @@ class Spider(Spider):
             ym = re.match(r'(\d{4})', published)
             if ym:
                 vod["vod_year"] = ym.group(1)
-        vod["type_name"] = 'AI短剧'
+        vod["type_name"] = 'AI\u77ed\u5267'
         desc = item.get('description', '')
         if desc:
             vod["vod_content"] = desc
@@ -479,19 +479,19 @@ class Spider(Spider):
             ym = re.match(r'(\d{4})', published)
             if ym:
                 vod["vod_year"] = ym.group(1)
-        vod["type_name"] = item.get('categoryName', '黑料吃瓜')
-        # 描述
+        vod["type_name"] = item.get('categoryName', '\u9ed1\u6599\u5403\u74dc')
+        # \u63cf\u8ff0
         desc = item.get('content') or item.get('description') or ''
         if desc:
             vod["vod_content"] = str(desc)[:1000]
-        # 视频（顶层 videoUrl 字段）
+        # \u89c6\u9891\uff08\u9876\u5c42 videoUrl \u5b57\u6bb5\uff09
         video_url = item.get('videoUrl', '')
         if video_url:
             m3u8_url = self._build_m3u8_proxy_url(video_url)
             if m3u8_url:
                 vod["vod_play_from"] = base64.b64decode('6bq76LGG').decode('utf-8')
                 vod["vod_play_url"] = f'正片${m3u8_url}'
-        # 图片列表拼到内容（黑料多图文）
+        # \u56fe\u7247\u5217\u8868\u62fc\u5230\u5185\u5bb9\uff08\u9ed1\u6599\u591a\u56fe\u6587\uff09
         images = item.get('images') or []
         img_urls = []
         for img in images:

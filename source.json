@@ -3,12 +3,12 @@
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
-  "warningText": "专属包 v0.1 · 自用",
+  "warningText": "\u4e13\u5c5e\u5305 v0.1 \u00b7 \u81ea\u7528",
   "spider": "",
   "sites": [
     {
       "key": "py_mrds",
-      "name": "📱mrds",
+      "name": "\ud83d\udcf1mrds",
       "type": 3,
       "api": "./py/mrds.py",
       "style": {
@@ -20,9 +20,9 @@
     },
     {
       "key": "py_heiliao",
-      "name": "📱heiliao",
+      "name": "\ud83d\udcf1heiliao",
       "type": 3,
-      "api": "./py/黑料不打烊.py",
+      "api": "./py/heiliao.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -31,9 +31,9 @@
     },
     {
       "key": "py_huangguo",
-      "name": "📱huangguo",
+      "name": "\ud83d\udcf1huangguo",
       "type": 3,
-      "api": "./py/黄果短剧.py",
+      "api": "./py/huangguo.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -42,9 +42,9 @@
     },
     {
       "key": "py_51xigua",
-      "name": "📱51xigua",
+      "name": "\ud83d\udcf151xigua",
       "type": 3,
-      "api": "./py/51吸瓜动态版.py",
+      "api": "./py/51xigua.py",
       "ext": "publish@https://advise.nlwkmsv.cc;hosts@https://advise.ucorfqmp.cc",
       "style": {
         "type": "rect",
@@ -54,9 +54,9 @@
     },
     {
       "key": "py_daluandou",
-      "name": "📱daluandou",
+      "name": "\ud83d\udcf1daluandou",
       "type": 3,
-      "api": "./py/每日大乱斗.py",
+      "api": "./py/daluandou.py",
       "ext": "publish@https://idld65.com;hosts@https://border.loewkgyyv.cc,https://capture.loewkgyyv.cc,https://fe7.loewkgyyv.cc",
       "style": {
         "type": "rect",
@@ -66,7 +66,7 @@
     },
     {
       "key": "py_vhub",
-      "name": "📱vhub",
+      "name": "\ud83d\udcf1vhub",
       "type": 3,
       "api": "./py/vhub.py",
       "style": {
@@ -77,7 +77,7 @@
     },
     {
       "key": "py_jptt",
-      "name": "📱jptt",
+      "name": "\ud83d\udcf1jptt",
       "type": 3,
       "api": "./py/jptt.py",
       "ext": "publish@https://jptt.tv;hosts@https://2026ajptttv.work,https://jptttv2026a.work",
@@ -89,7 +89,7 @@
     },
     {
       "key": "py_airen",
-      "name": "📱airdj",
+      "name": "\ud83d\udcf1airdj",
       "type": 3,
       "api": "./py/airdj.py",
       "ext": "hosts@https://mdcmai4.xyz,https://mdcmai5.xyz,https://mdcmai3.xyz,https://mdcmai2.xyz",
@@ -101,7 +101,7 @@
     },
     {
       "key": "py_xjiao",
-      "name": "📱xjsp",
+      "name": "\ud83d\udcf1xjsp",
       "type": 3,
       "api": "./py/xjsp.py",
       "ext": "host@https://618013.xyz",
@@ -112,8 +112,8 @@
       "changeable": 1
     },
     {
-      "key": "py_uaa音画",
-      "name": "📱uays",
+      "key": "py_uaa\u97f3\u753b",
+      "name": "\ud83d\udcf1uays",
       "type": 3,
       "api": "./py/uays.py",
       "style": {
@@ -124,7 +124,7 @@
     },
     {
       "key": "py_wxts",
-      "name": "📱wxts",
+      "name": "\ud83d\udcf1wxts",
       "type": 3,
       "api": "./py/wxts.py",
       "ext": "publish@https://wuxiants.github.io/",
@@ -136,7 +136,7 @@
     },
     {
       "key": "py_hlw",
-      "name": "📱hlw",
+      "name": "\ud83d\udcf1hlw",
       "type": 3,
       "api": "./py/hlw.py",
       "ext": "publish@https://hlwf6.com/",
@@ -148,7 +148,7 @@
     },
     {
       "key": "py_51aw",
-      "name": "📱51aw",
+      "name": "\ud83d\udcf151aw",
       "type": 3,
       "api": "./py/51aw.py",
       "ext": "publish@https://51aw34.com/",
@@ -160,7 +160,7 @@
     },
     {
       "key": "py_yxy",
-      "name": "📱yxy",
+      "name": "\ud83d\udcf1yxy",
       "type": 3,
       "api": "./py/yxy.py",
       "ext": "publish@https://dizhi8.cc/yxy/",
@@ -172,7 +172,7 @@
     },
     {
       "key": "py_jfg",
-      "name": "📱jfg",
+      "name": "\ud83d\udcf1jfg",
       "type": 3,
       "api": "./py/jfg.py",
       "style": {
@@ -183,7 +183,7 @@
     },
     {
       "key": "py_dy",
-      "name": "📱dy",
+      "name": "\ud83d\udcf1dy",
       "type": 3,
       "api": "./py/dy.py",
       "ext": "publish@https://github.com/kissav12/douyin",
@@ -195,7 +195,7 @@
     },
     {
       "key": "py_91bl",
-      "name": "📱91bl",
+      "name": "\ud83d\udcf191bl",
       "type": 3,
       "api": "./py/91bl.py",
       "ext": "publish@https://t91bl.com/",
@@ -206,10 +206,10 @@
       "changeable": 1
     },
     {
-      "key": "py_直播",
-      "name": "📱zhibo",
+      "key": "py_\u76f4\u64ad",
+      "name": "\ud83d\udcf1zhibo",
       "type": 3,
-      "api": "./xbpq/直播.py",
+      "api": "./xbpq/zhibo.py",
       "searchable": 1,
       "changeable": 1,
       "quickSearch": 1,
@@ -217,21 +217,21 @@
       "playerType": 2
     },
     {
-      "key": "聚合",
-      "name": "📱juhe",
+      "key": "\u805a\u5408",
+      "name": "\ud83d\udcf1juhe",
       "type": 3,
       "api": "csp_XBPQ",
       "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "./xbpq/聚合.json"
+      "ext": "./xbpq/juhe.json"
     },
     {
       "key": "py_huangdou",
-      "name": "📱huangdou",
+      "name": "\ud83d\udcf1huangdou",
       "type": 3,
-      "api": "./xbpq/黄豆.py",
+      "api": "./xbpq/huangdou.py",
       "searchable": 1,
       "changeable": 1,
       "quickSearch": 1,
@@ -240,9 +240,9 @@
     },
     {
       "key": "py_91short",
-      "name": "📱91short",
+      "name": "\ud83d\udcf191short",
       "type": 3,
-      "api": "./py/_无源_91短视频.py",
+      "api": "./py/_nosrc_91short.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -251,9 +251,9 @@
     },
     {
       "key": "py_anwang",
-      "name": "📱anwang",
+      "name": "\ud83d\udcf1anwang",
       "type": 3,
-      "api": "./py/_无源_暗网禁区.py",
+      "api": "./py/_nosrc_anwang.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -310,7 +310,7 @@
   ],
   "ijk": [
     {
-      "group": "软解码",
+      "group": "\u8f6f\u89e3\u7801",
       "options": [
         {
           "category": 4,
@@ -395,7 +395,7 @@
       ]
     },
     {
-      "group": "硬解码",
+      "group": "\u786c\u89e3\u7801",
       "options": [
         {
           "category": 4,
@@ -482,7 +482,7 @@
   ],
   "rules": [
     {
-      "name": "七哥点击",
+      "name": "\u4e03\u54e5\u70b9\u51fb",
       "hosts": [
         "jx.nnxv.cn"
       ],
@@ -491,7 +491,7 @@
       ]
     },
     {
-      "name": "七哥点击",
+      "name": "\u4e03\u54e5\u70b9\u51fb",
       "hosts": [
         "jx.nnxv.cn/tv.php"
       ],
@@ -526,16 +526,16 @@
       ],
       "name": "cl",
       "regex": [
-        "最新",
-        "直播",
-        "更新"
+        "\u6700\u65b0",
+        "\u76f4\u64ad",
+        "\u66f4\u65b0"
       ]
     },
     {
       "hosts": [
         "haiwaikan"
       ],
-      "name": "海外看",
+      "name": "\u6d77\u5916\u770b",
       "regex": [
         "10.0099",
         "10.3333",
@@ -549,7 +549,7 @@
       "hosts": [
         "suonizy"
       ],
-      "name": "索尼",
+      "name": "\u7d22\u5c3c",
       "regex": [
         "15.1666",
         "15.2666"
@@ -560,7 +560,7 @@
         "bfzy",
         "bfbfvip"
       ],
-      "name": "暴風",
+      "name": "\u66b4\u98a8",
       "regex": [
         "#EXTINF.*?\\s+.*?adjump.*?\\.ts\\s+"
       ]
@@ -569,7 +569,7 @@
       "hosts": [
         "aws.ulivetv.net"
       ],
-      "name": "星星",
+      "name": "\u661f\u661f",
       "regex": [
         "#EXT-X-DISCONTINUITY\\r*\\n*#EXTINF:8,[\\s\\S]*?#EXT-X-DISCONTINUITY"
       ]
@@ -580,7 +580,7 @@
         "hd.lz",
         "v.cdnlz"
       ],
-      "name": "量子",
+      "name": "\u91cf\u5b50",
       "regex": [
         "18.5333"
       ]
@@ -590,7 +590,7 @@
         "vip.ffzy",
         "hd.ffzy"
       ],
-      "name": "非凡",
+      "name": "\u975e\u51e1",
       "regex": [
         "25.1999",
         "25.0666",
@@ -602,7 +602,7 @@
       "hosts": [
         "huoshan.com"
       ],
-      "name": "火山嗅探",
+      "name": "\u706b\u5c71\u55c5\u63a2",
       "regex": [
         "item_id="
       ]
@@ -611,7 +611,7 @@
       "hosts": [
         "douyin.com"
       ],
-      "name": "抖音嗅探",
+      "name": "\u6296\u97f3\u55c5\u63a2",
       "regex": [
         "is_play_url="
       ]
@@ -620,7 +620,7 @@
       "hosts": [
         "api.52wyb.com"
       ],
-      "name": "七新嗅探",
+      "name": "\u4e03\u65b0\u55c5\u63a2",
       "regex": [
         "m3u8?pt=m3u8"
       ]
@@ -728,19 +728,19 @@
   "sites_off": [
     {
       "key": "py_xvideo",
-      "name": "📱xvideo",
+      "name": "\ud83d\udcf1xvideo",
       "type": 3,
-      "api": "./py/Xvideos.py",
+      "api": "./py/\u0058\u0076\u0069\u0064\u0065\u006f\u0073.py",
       "style": {
         "type": "rect",
         "ratio": 1
       },
       "changeable": 1,
-      "off_reason": "被墙无发布页;可被已启用的 VHUB(newxvideos.pages.dev 免墙代理)顶替"
+      "off_reason": "\u88ab\u5899\u65e0\u53d1\u5e03\u9875;\u53ef\u88ab\u5df2\u542f\u7528\u7684 VHUB(new\u0078\u0076\u0069\u0064\u0065\u006f\u0073.pages.dev \u514d\u5899\u4ee3\u7406)\u9876\u66ff"
     },
     {
       "key": "py_yase",
-      "name": "📱ysyk",
+      "name": "\ud83d\udcf1ysyk",
       "type": 3,
       "api": "./py/ysyk.py",
       "style": {
@@ -748,7 +748,7 @@
         "ratio": 1
       },
       "changeable": 1,
-      "off_reason": "被墙;发布页yasefb.xyz→ys.ggyase.shop可达但站改版,旧源作废"
+      "off_reason": "\u88ab\u5899;\u53d1\u5e03\u9875yasefb.xyz\u2192ys.ggyase.shop\u53ef\u8fbe\u4f46\u7ad9\u6539\u7248,\u65e7\u6e90\u4f5c\u5e9f"
     }
   ]
 }

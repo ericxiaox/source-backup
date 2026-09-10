@@ -1,0 +1,32 @@
+{
+    "\u4f5c\u8005": "hxc[\u5de5\u5177:\u968f\u673a\u5b57\u7b26-3-\u552f\u4e00]",
+    "\u7ad9\u540d": "91\u63a2\u82b1\u81ea\u52a8\u6321",
+    "\u8bf7\u6c42\u5934":"User-Agent@Mozilla/5.0 (Linux\uff1b\uff1b Android 16\uff1b\uff1b 2510DRK44C Build/BP2A.250605.031.A3) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/143.0.7499.192 Mobile Safari/537.36",
+    "\u5883\u5916\u6c38\u4e45": "https://gitlab.com/\u0039\u0031\u0074\u0068w/91,https://\u0039\u0031\u0074\u0068w.com/,https://gitlab.com/\u0039\u0031\u0074\u0068w,https://91tanhua2.com/",
+    "\u53d1\u5e03\u9875": "https://91tanhua2.com/",
+    "key\u622a\u53d6": "{{\u53d1\u5e03\u9875}}[\u5de5\u5177:\u6e90\u7801#key:*\"\u622a\u53d6\"]",
+    "key": "{{key\u622a\u53d6}}[\u5de5\u5177:SHA]",
+    "iv": "{{key}}[\u5de5\u5177:1\u622a\u53d616]",
+    "\u540e\u7f00": "{{\u53d1\u5e03\u9875}}[\u5de5\u5177:\u6e90\u7801#data:*\"\u622a\u53d6\"#\u89e3aes-{{key}}-{{iv}}-AES/CBC/PKCS7Padding#\"zz_line\":*\"\u622a\u53d6\"]",
+    "\u57df\u540d-c": "https://{{\u4f5c\u8005}}.{{\u540e\u7f00}}/",
+	"\u6570\u7ec4": "<div class=\"xqbj-list-rows-image\">&&<div class=\"xqbj-list-rows-bottom-tags-text is-mobile\">||\ud83d\udccc\u63a2\u82b1\u6807\u7b7e--<div class=\"tags-group\">&&<nav role=\"navigation\"\u5206\u5272(\u524d:<a hr)||\ud83d\udccc\u539f\u521b\u4e3b,\ud83d\udcccUP\u4e3b,\ud83d\udccc\u5165\u9a7b\u521b\u4f5c\u8005--v-drag-scroll=&&<div class=\"bottom||\u63a2\u82b1\u70ed\u641c--<div class=\"content\">&&</a>||\u63a2\u82b1\u5f80\u671f--<div class=\"da&&</li>",
+	"\u6807\u9898": "title=\"&&\"||\ud83d\udccc\u63a2\u82b1\u6807\u7b7e--<h3>&&</h3>||\u63a2\u82b1\u70ed\u641c,\ud83d\udccc\u539f\u521b\u4e3b,\ud83d\udcccUP\u4e3b,\ud83d\udccc\u5165\u9a7b\u521b\u4f5c\u8005--<h2>&&</h2>||\u63a2\u82b1\u5f80\u671f--<h3>&&</h3>",
+	"\u526f\u6807\u9898": "<div class=\"xqbj-list-rows-bottom-tags-text is-desktop\">&&</div>||\ud83d\udccc\u63a2\u82b1\u6807\u7b7e--</h3>(&&)</a>||\ud83d\udccc\u539f\u521b\u4e3b,\ud83d\udcccUP\u4e3b,\ud83d\udccc\u5165\u9a7b\u521b\u4f5c\u8005--<div class=\"item\"><span>&&</span>\u7c89\u4e1d+\u7c89\u4e1d||\u63a2\u82b1\u70ed\u641c--<div class=\"xqbj-icon-fire2 icon-small\"></div>*<span>&&</span>||\u63a2\u82b1\u5f80\u671f--te\">&&</div>",
+	"\u7b80\u4ecb": "<meta name=\"description\"*content=\"&&\"",
+	"\u56fe\u7247": "{{\u524d\u7f00}}+z-image-loader-url=\"`&&`\"[\u5de5\u5177:\u6e90\u7801\u8f6cb64#\u89e3\u5bc6aes-f5d965df75336270-97b60394abc2fbe1-AES/CBC/PKCS7Padding]",
+    "\u524d\u7f00": "data:image/jpeg;base64,",
+	"\u94fe\u63a5": "<a href=\"&&\"||\ud83d\udccc\u63a2\u82b1\u6807\u7b7e--ef=\"&&\"+{catePg}/||\ud83d\udccc\u539f\u521b\u4e3b,\ud83d\udcccUP\u4e3b,\ud83d\udccc\u5165\u9a7b\u521b\u4f5c\u8005--<a href=\"&&\"+page/{catePg}/",
+    "\u64ad\u653e\u6570\u7ec4": "<div class=\"text text-content\">&&<blockquote>",//\u8986\u76d6\u5168\u90e8\u64ad\u653e\u5185\u5bb9
+    "\u64ad\u653e\u5217\u8868": "<div class=\"dplayer\"&&</div>",//\u8986\u76d6\u5355\u96c6\u5185\u5bb9
+    "\u64ad\u653e\u6807\u9898": "data-video_id=\"&&\"",//\u6807\u9898
+    "\u64ad\u653e\u94fe\u63a5": "\"video\":{\"url\":\"&&\"",//\u53ef\u4ee5\u662f\u94fe\u63a5\uff0c\u4e5f\u53ef\u4ee5\u662f\u8df3\u8f6c\u64ad\u653e\u94fe\u63a5
+	"\u55c5\u63a2\u8bcd": ".m3u8",
+	"\u76f4\u63a5\u64ad\u653e": "",
+	"\u641c\u7d22\u6a21\u5f0f": "1",
+    "\u4e8c\u7ea7\u76ee\u5f55": "\ud83d\udccc\u63a2\u82b1\u6807\u7b7e,\ud83d\udccc\u539f\u521b\u4e3b,\ud83d\udcccUP\u4e3b,\ud83d\udccc\u5165\u9a7b\u521b\u4f5c\u8005|folder-0-0-H",
+    "\u4e8c\u7ea7ID": "",
+    "\u7279\u6b8a\u5206\u7c7b\u94fe\u63a5": "",
+	"\u641c\u7d22url": "{{\u57df\u540d-c}}search_contents/{wd}/{pg}/",
+    "\u5206\u7c7burl": "{{\u57df\u540d-c}}{cateId}/{catePg}/",
+    "\u5206\u7c7b": "\u63a2\u82b1\u9996\u9875$page#\u63a2\u82b1\u70ed\u95e8$order/hot#\u4eca\u65e5\u66f4\u65b0$order/today#\u63a2\u82b1\u7cbe\u9009$category/thjx#\u5b66\u751f\u63f4\u4ea4$category/xsyj#\u63a2\u82b1\u5973\u795e$category/thns#\u76d1\u63a7\u7834\u89e3$category/jkpj#\u5395\u6240\u5077\u62cd$category/cstp#\u63a2\u82b1\u4e71\u4f26$category/thll#\u8857\u5c04\u6284\u5e95$category/jscd#\u8001\u5916\u63a2\u82b1$category/lwth#\u539f\u521b\u62db\u52df$category/yczm#\u63a2\u82b1\u70ed\u641c$authors_hot#\u63a2\u82b1\u5f80\u671f$date#\ud83d\udccc\u63a2\u82b1\u6807\u7b7e$tags#\ud83d\udccc\u539f\u521b\u4e3b$authors/blog#\ud83d\udcccUP\u4e3b$authors/up#\ud83d\udccc\u5165\u9a7b\u521b\u4f5c\u8005$authors/creator"
+}

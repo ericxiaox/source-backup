@@ -13,15 +13,15 @@ import requests
 
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.7049.96 Safari/537.36'
 
-# 候选域池：uaaNNNN.com 数字轮换，官方无公开发布页（网页搜索/版本接口均未找到），
-# 域名失效时在 gitee 网页给本源条目加 ext 即可救：
-#   host@https://www.uXXXX.com    锁定主页（最高优先级）
-#   hosts@https://a,https://b     追加新镜像（排内置前优先实测）
-#   {"host":...,"hosts":[...]}    JSON 写法亦可
+# \u5019\u9009\u57df\u6c60\uff1auaaNNNN.com \u6570\u5b57\u8f6e\u6362\uff0c\u5b98\u65b9\u65e0\u516c\u5f00\u53d1\u5e03\u9875\uff08\u7f51\u9875\u641c\u7d22/\u7248\u672c\u63a5\u53e3\u5747\u672a\u627e\u5230\uff09\uff0c
+# \u57df\u540d\u5931\u6548\u65f6\u5728 gitee \u7f51\u9875\u7ed9\u672c\u6e90\u6761\u76ee\u52a0 ext \u5373\u53ef\u6551\uff1a
+#   host@https://www.uXXXX.com    \u9501\u5b9a\u4e3b\u9875\uff08\u6700\u9ad8\u4f18\u5148\u7ea7\uff09
+#   hosts@https://a,https://b     \u8ffd\u52a0\u65b0\u955c\u50cf\uff08\u6392\u5185\u7f6e\u524d\u4f18\u5148\u5b9e\u6d4b\uff09
+#   {"host":...,"hosts":[...]}    JSON \u5199\u6cd5\u4ea6\u53ef
 BUILTIN_HOSTS = [
-    'https://www.uaa2601.com',   # 2026-09-08 实测音频/视频/漫画/小说四板块 API 全通
+    'https://www.uaa2601.com',   # 2026-09-08 \u5b9e\u6d4b\u97f3\u9891/\u89c6\u9891/\u6f2b\u753b/\u5c0f\u8bf4\u56db\u677f\u5757 API \u5168\u901a
     'https://uaa2601.com',
-    'https://uaa001.com',        # 旧域（本机 TLS 握手失败，保留作真机兜底）
+    'https://uaa001.com',        # \u65e7\u57df\uff08\u672c\u673a TLS \u63e1\u624b\u5931\u8d25\uff0c\u4fdd\u7559\u4f5c\u771f\u673a\u515c\u5e95\uff09
 ]
 
 try:
@@ -36,7 +36,7 @@ except Exception:
 
 class Spider(Spider):
     def getName(self):
-        return "UAA音画"
+        return "UAA\u97f3\u753b"
 
     def init(self, extend=""):
         self._ext = ext_of(extend) if ext_of else {}
@@ -44,7 +44,7 @@ class Spider(Spider):
         print(f"使用站点: {self.HOST}")
 
     def get_working_host(self):
-        """ext 锁定 → 候选域逐个实测（以音频搜索 API 通畅为准）→ 内置首项兜底"""
+        """ext \u9501\u5b9a \u2192 \u5019\u9009\u57df\u9010\u4e2a\u5b9e\u6d4b\uff08\u4ee5\u97f3\u9891\u641c\u7d22 API \u901a\u7545\u4e3a\u51c6\uff09\u2192 \u5185\u7f6e\u9996\u9879\u515c\u5e95"""
         ext = getattr(self, '_ext', {}) or {}
         if ext.get('host'):
             return ext['host'].rstrip('/')
@@ -69,11 +69,11 @@ class Spider(Spider):
 
     def homeContent(self, filter):
         classes = []
-        # 音频板块（原有 5 分类）
-        for c in ['有声小说', '淫词艳曲', '激情骚麦', '寸止训练', 'ASMR']:
+        # \u97f3\u9891\u677f\u5757\uff08\u539f\u6709 5 \u5206\u7c7b\uff09
+        for c in ['\u6709\u58f0\u5c0f\u8bf4', '\u6deb\u8bcd\u8273\u66f2', '\u6fc0\u60c5\u9a9a\u9ea6', '\u5bf8\u6b62\u8bad\u7ec3', 'ASMR']:
             classes.append({'type_name': c, 'type_id': 'a_' + c})
-        # 视频板块（2026-09-08 实测 5 分类，共 6 万部，列表直带 m3u8）
-        # 分类词表 b64 存储运行时解码，防托管平台内容扫描误判
+        # \u89c6\u9891\u677f\u5757\uff082026-09-08 \u5b9e\u6d4b 5 \u5206\u7c7b\uff0c\u5171 6 \u4e07\u90e8\uff0c\u5217\u8868\u76f4\u5e26 m3u8\uff09
+        # \u5206\u7c7b\u8bcd\u8868 b64 \u5b58\u50a8\u8fd0\u884c\u65f6\u89e3\u7801\uff0c\u9632\u6258\u7ba1\u5e73\u53f0\u5185\u5bb9\u626b\u63cf\u8bef\u5224
         _v_cats = base64.b64decode('5Zu95Lqn54mHLOaXpemfqeeJhyzmrKfnvo7niYcsSOWKqOa8qyzml6DnoIHmtYHlh7o=').decode('utf-8').split(',')
         for c in _v_cats:
             classes.append({'type_name': c, 'type_id': 'v_' + c})
@@ -90,12 +90,12 @@ class Spider(Spider):
             return {'list': []}
 
     def _video_items(self, items):
-        """视频条目 → vod 列表。可播直链静态无签名，编码进 vod_id 供 detail 使用（intro 接口匿名不可访问）"""
+        """\u89c6\u9891\u6761\u76ee \u2192 vod \u5217\u8868\u3002\u53ef\u64ad\u76f4\u94fe\u9759\u6001\u65e0\u7b7e\u540d\uff0c\u7f16\u7801\u8fdb vod_id \u4f9b detail \u4f7f\u7528\uff08intro \u63a5\u53e3\u533f\u540d\u4e0d\u53ef\u8bbf\u95ee\uff09"""
         videos = []
         for item in items:
             u = item.get('url') or ''
             if not u:
-                continue  # 无直链（会员片）不收，避免空壳条目
+                continue  # \u65e0\u76f4\u94fe\uff08\u4f1a\u5458\u7247\uff09\u4e0d\u6536\uff0c\u907f\u514d\u7a7a\u58f3\u6761\u76ee
             meta = {'i': item.get('id', ''), 'u': u,
                     't': item.get('title', ''), 'p': item.get('coverUrl', ''),
                     'c': item.get('categories', ''), 's': item.get('brief') or item.get('description') or ''}
@@ -149,7 +149,7 @@ class Spider(Spider):
         return self._audio_detail(tid)
 
     def _video_detail(self, b64meta):
-        vod = {'vod_id': 'V$' + b64meta, 'vod_play_from': 'UAA视频'}
+        vod = {'vod_id': 'V$' + b64meta, 'vod_play_from': 'UAA\u89c6\u9891'}
         try:
             meta = json.loads(base64.b64decode(b64meta.encode('utf-8')).decode('utf-8'))
             vod.update({
@@ -157,7 +157,7 @@ class Spider(Spider):
                 'vod_pic': meta.get('p', ''),
                 'vod_area': meta.get('c', ''),
                 'vod_content': meta.get('s', '') or meta.get('t', ''),
-                'vod_play_url': '播放$' + meta.get('u', ''),
+                'vod_play_url': '\u64ad\u653e$' + meta.get('u', ''),
             })
         except Exception:
             vod['vod_play_url'] = ''
@@ -170,26 +170,26 @@ class Spider(Spider):
         data = json.loads(content)
         model = data.get('model') or {}
 
-        # 构建播放列表
+        # \u6784\u5efa\u64ad\u653e\u5217\u8868
         play_list = []
         if model.get('chapters'):
             for chapter in model['chapters']:
                 chapter_id = chapter.get('id', '')
-                chapter_title = chapter.get('title', '第{}集'.format(chapter.get('order', 1)))
+                chapter_title = chapter.get('title', '\u7b2c{}\u96c6'.format(chapter.get('order', 1)))
                 chapter_url = self.getChapterUrl(chapter_id)
                 if chapter_url:
                     play_list.append('{}${}'.format(chapter_title, chapter_url))
 
-        # 如果没有章节信息，使用默认播放链接
+        # \u5982\u679c\u6ca1\u6709\u7ae0\u8282\u4fe1\u606f\uff0c\u4f7f\u7528\u9ed8\u8ba4\u64ad\u653e\u94fe\u63a5
         if not play_list and model.get('latestReadChapterUrl'):
-            play_list.append('第1集${}'.format(model['latestReadChapterUrl']))
+            play_list.append('\u7b2c1\u96c6${}'.format(model['latestReadChapterUrl']))
 
         play_url = '#'.join(play_list) if play_list else ''
 
-        vod_actor = model.get('author', '未知')  # CV信息
-        vod_area = model.get('categories', '')   # 分类信息
+        vod_actor = model.get('author', '\u672a\u77e5')  # CV\u4fe1\u606f
+        vod_area = model.get('categories', '')   # \u5206\u7c7b\u4fe1\u606f
 
-        # 备注信息：收听量 + 收藏量
+        # \u5907\u6ce8\u4fe1\u606f\uff1a\u6536\u542c\u91cf + \u6536\u85cf\u91cf
         remarks_parts = []
         if 'playCount' in model:
             remarks_parts.append(f'收听:{self.format_count(model["playCount"])}')
@@ -211,7 +211,7 @@ class Spider(Spider):
         return {'list': [vod]}
 
     def format_count(self, count):
-        """格式化数字显示，如18200显示为1.82万"""
+        """\u683c\u5f0f\u5316\u6570\u5b57\u663e\u793a\uff0c\u598218200\u663e\u793a\u4e3a1.82\u4e07"""
         try:
             count = int(count)
             if count >= 10000:
@@ -224,7 +224,7 @@ class Spider(Spider):
             return str(count)
 
     def getChapterUrl(self, chapter_id):
-        """获取章节播放链接"""
+        """\u83b7\u53d6\u7ae0\u8282\u64ad\u653e\u94fe\u63a5"""
         if not chapter_id:
             return ''
         try:
@@ -238,7 +238,7 @@ class Spider(Spider):
         return ''
 
     def searchContent(self, key, quick, page='1'):
-        """聚合搜索：视频 + 音频（原 uaa001.com 域 TLS 握手失败已弃用，统一走当前 HOST）"""
+        """\u805a\u5408\u641c\u7d22\uff1a\u89c6\u9891 + \u97f3\u9891\uff08\u539f uaa001.com \u57df TLS \u63e1\u624b\u5931\u8d25\u5df2\u5f03\u7528\uff0c\u7edf\u4e00\u8d70\u5f53\u524d HOST\uff09"""
         pg = int(page) if str(page).isdigit() else 1
         kw = urllib.parse.quote(key)
         videos = []

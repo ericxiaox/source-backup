@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# JPTT 站源（禁片天堂 · Laravel 风格 + Cloudflare，2026-09-08 现役镜像重写版）
-# 域名: jptt.tv 301 -> 2026ajptttv.work（.work 双镜像）；以 jptt.tv 为发布链
-# 结构: 分类 /tag_list?tid={id}&idx={pg}；搜索 /search?kw={kw}
-#       列表条目 oneVideo 卡片（标题 h3|h5|img@alt 三级兜底，链接 /video/{slug}）
-#       播放 <source data-src="//cdn-*.jptt1.cc/hlsredirect/...m3u8">（签名短效）
-# 纪律: 2026-09-08 App 端零数据根因=全库唯一用 self.fetch() 的源（App base 类返回
-#       类型与 rsp.text 预期不符→各方法 except 吞错返空），改 requests 直连与全库对齐
+# JPTT \u7ad9\u6e90\uff08\u7981\u7247\u5929\u5802 \u00b7 Laravel \u98ce\u683c + Cloudflare\uff0c2026-09-08 \u73b0\u5f79\u955c\u50cf\u91cd\u5199\u7248\uff09
+# \u57df\u540d: jptt.tv 301 -> 2026ajptttv.work\uff08.work \u53cc\u955c\u50cf\uff09\uff1b\u4ee5 jptt.tv \u4e3a\u53d1\u5e03\u94fe
+# \u7ed3\u6784: \u5206\u7c7b /tag_list?tid={id}&idx={pg}\uff1b\u641c\u7d22 /search?kw={kw}
+#       \u5217\u8868\u6761\u76ee oneVideo \u5361\u7247\uff08\u6807\u9898 h3|h5|img@alt \u4e09\u7ea7\u515c\u5e95\uff0c\u94fe\u63a5 /video/{slug}\uff09
+#       \u64ad\u653e <source data-src="//cdn-*.jptt1.cc/hlsredirect/...m3u8">\uff08\u7b7e\u540d\u77ed\u6548\uff09
+# \u7eaa\u5f8b: 2026-09-08 App \u7aef\u96f6\u6570\u636e\u6839\u56e0=\u5168\u5e93\u552f\u4e00\u7528 self.fetch() \u7684\u6e90\uff08App base \u7c7b\u8fd4\u56de
+#       \u7c7b\u578b\u4e0e rsp.text \u9884\u671f\u4e0d\u7b26\u2192\u5404\u65b9\u6cd5 except \u541e\u9519\u8fd4\u7a7a\uff09\uff0c\u6539 requests \u76f4\u8fde\u4e0e\u5168\u5e93\u5bf9\u9f50
 import sys
 import re
 import json
@@ -32,7 +32,7 @@ _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like
 
 class Spider(Spider):
     def getName(self):
-        return "禁片天堂"
+        return "\u7981\u7247\u5929\u5802"
 
     def init(self, extend=""):
         self.proxies = {}
@@ -61,17 +61,17 @@ class Spider(Spider):
             'Accept-Language': 'zh-TW,zh;q=0.9',
             'Connection': 'keep-alive',
         }
-        # 动态域名解析 v2：2026-09-08 实测 jptt.tv 正在退役（302 -> 2026ajptttv.work），
-        # 以 jptt.tv 为发布链（跳转即现役），.work 双镜像为内置候选；全失败返回 '' 兜空。
+        # \u52a8\u6001\u57df\u540d\u89e3\u6790 v2\uff1a2026-09-08 \u5b9e\u6d4b jptt.tv \u6b63\u5728\u9000\u5f79\uff08302 -> 2026ajptttv.work\uff09\uff0c
+        # \u4ee5 jptt.tv \u4e3a\u53d1\u5e03\u94fe\uff08\u8df3\u8f6c\u5373\u73b0\u5f79\uff09\uff0c.work \u53cc\u955c\u50cf\u4e3a\u5185\u7f6e\u5019\u9009\uff1b\u5168\u5931\u8d25\u8fd4\u56de '' \u515c\u7a7a\u3002
         ext = self._ext
         if ext.get('host'):
             self.host = ext['host'].rstrip('/')
         else:
             publish = ext.get('publish') or 'https://jptt.tv/'
             builtin_hosts = [
-                'https://2026ajptttv.work/',      # 2026-09-08 实测现役镜像(222KB完整站)
+                'https://2026ajptttv.work/',      # 2026-09-08 \u5b9e\u6d4b\u73b0\u5f79\u955c\u50cf(222KB\u5b8c\u6574\u7ad9)
                 'https://jptttv2026a.work/',
-                'https://jptt.tv/',               # 旧主域，302 -> 2026ajptttv.work
+                'https://jptt.tv/',               # \u65e7\u4e3b\u57df\uff0c302 -> 2026ajptttv.work
             ]
             if resolve_host:
                 self.host = resolve_host(
@@ -100,9 +100,9 @@ class Spider(Spider):
 
     @staticmethod
     def _parse_cards(root):
-        """oneVideo 卡片统一解析。
-        2026-09-08 改版后每视频含 3-4 个重复 oneVideo 块（完整块/头块/体块/碎片），
-        按链接去重取完整块；分类页标题 h3、搜索页 h5、img alt 三级兜底。"""
+        """oneVideo \u5361\u7247\u7edf\u4e00\u89e3\u6790\u3002
+        2026-09-08 \u6539\u7248\u540e\u6bcf\u89c6\u9891\u542b 3-4 \u4e2a\u91cd\u590d oneVideo \u5757\uff08\u5b8c\u6574\u5757/\u5934\u5757/\u4f53\u5757/\u788e\u7247\uff09\uff0c
+        \u6309\u94fe\u63a5\u53bb\u91cd\u53d6\u5b8c\u6574\u5757\uff1b\u5206\u7c7b\u9875\u6807\u9898 h3\u3001\u641c\u7d22\u9875 h5\u3001img alt \u4e09\u7ea7\u515c\u5e95\u3002"""
         out = []
         seen = set()
         for video in root.xpath('//div[contains(@class,"oneVideo")]'):
@@ -177,7 +177,7 @@ class Spider(Spider):
             root = etree.HTML(rsp.text.encode() if isinstance(rsp.text, str) else rsp.content)
 
             title_elements = root.xpath('//h1[@class="h1_title"]/text()')
-            title = title_elements[0].strip() if title_elements else "未知标题"
+            title = title_elements[0].strip() if title_elements else "\u672a\u77e5\u6807\u9898"
 
             pic_elements = root.xpath('//video/@poster')
             pic = pic_elements[0] if pic_elements else ""
@@ -194,8 +194,8 @@ class Spider(Spider):
                 "vod_name": title,
                 "vod_pic": pic,
                 "vod_content": desc,
-                "vod_play_from": "注意身体",
-                "vod_play_url": "多看少打卡$" + play_url
+                "vod_play_from": "\u6ce8\u610f\u8eab\u4f53",
+                "vod_play_url": "\u591a\u770b\u5c11\u6253\u5361$" + play_url
             }
             return {'list': [vod]}
         except Exception as e:
@@ -204,7 +204,7 @@ class Spider(Spider):
 
     def extractVideoUrl(self, html):
         try:
-            # 2026-09-08: <source src= 改版为 data-src=（懒加载），两种都认
+            # 2026-09-08: <source src= \u6539\u7248\u4e3a data-src=\uff08\u61d2\u52a0\u8f7d\uff09\uff0c\u4e24\u79cd\u90fd\u8ba4
             source_match = re.search(r'<source\s+(?:data-)?src="([^"]+)"', html)
             if source_match:
                 video_url = source_match.group(1)

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-# 91BL 站源（Typecho + Mirages 主题 · HTML 直抓版）
-# 发布页: t91bl.com（b64 壳中转落地页，解码后 zz_line 列泛解析基域线路）
-# 线路: {word}.quibepqh.cc / {word}.matutgbj.cc（泛解析任意词可用）+ cloudfront 兜底
-#       （91bla1.com 主线域名本机实测 000，线路表以泛解析为主）
-# 结构: 分类 /category/{slug}/ 翻页 /category/{slug}/{n}/；搜索 /search/{kw}/
-#       列表条目 <article> 内 <a href="/archives/{id}/"> + 封面 img z-image-loader-url + alt 标题
-#       详情播放 dplayer data-config='{...}' JSON（\/ 转义还原），多视频=多 dplayer
-# 封面图床 pic.hdhwqx.cn 为 CDN 级 AES 加密图，须走 localProxy 解密
-# 分类名不落盘明文（b64 兜底表），实时分类从 nav 获取
+# 91BL \u7ad9\u6e90\uff08Typecho + Mirages \u4e3b\u9898 \u00b7 HTML \u76f4\u6293\u7248\uff09
+# \u53d1\u5e03\u9875: t91bl.com\uff08b64 \u58f3\u4e2d\u8f6c\u843d\u5730\u9875\uff0c\u89e3\u7801\u540e zz_line \u5217\u6cdb\u89e3\u6790\u57fa\u57df\u7ebf\u8def\uff09
+# \u7ebf\u8def: {word}.quibepqh.cc / {word}.matutgbj.cc\uff08\u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u53ef\u7528\uff09+ cloudfront \u515c\u5e95
+#       \uff0891bla1.com \u4e3b\u7ebf\u57df\u540d\u672c\u673a\u5b9e\u6d4b 000\uff0c\u7ebf\u8def\u8868\u4ee5\u6cdb\u89e3\u6790\u4e3a\u4e3b\uff09
+# \u7ed3\u6784: \u5206\u7c7b /category/{slug}/ \u7ffb\u9875 /category/{slug}/{n}/\uff1b\u641c\u7d22 /search/{kw}/
+#       \u5217\u8868\u6761\u76ee <article> \u5185 <a href="/archives/{id}/"> + \u5c01\u9762 img z-image-loader-url + alt \u6807\u9898
+#       \u8be6\u60c5\u64ad\u653e dplayer data-config='{...}' JSON\uff08\/ \u8f6c\u4e49\u8fd8\u539f\uff09\uff0c\u591a\u89c6\u9891=\u591a dplayer
+# \u5c01\u9762\u56fe\u5e8a pic.hdhwqx.cn \u4e3a CDN \u7ea7 AES \u52a0\u5bc6\u56fe\uff0c\u987b\u8d70 localProxy \u89e3\u5bc6
+# \u5206\u7c7b\u540d\u4e0d\u843d\u76d8\u660e\u6587\uff08b64 \u515c\u5e95\u8868\uff09\uff0c\u5b9e\u65f6\u5206\u7c7b\u4ece nav \u83b7\u53d6
 import json
 import re
 import sys
@@ -25,7 +25,7 @@ from base.spider import Spider as BaseSpider
 try:
     from hostresolver import resolve_host, parse_ext
 except Exception:
-    # hostresolver.py 在 source/ 根（py/ 的上级），按脚本自身位置定位，不依赖 cwd
+    # hostresolver.py \u5728 source/ \u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\uff0c\u6309\u811a\u672c\u81ea\u8eab\u4f4d\u7f6e\u5b9a\u4f4d\uff0c\u4e0d\u4f9d\u8d56 cwd
     try:
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from hostresolver import resolve_host, parse_ext
@@ -33,7 +33,7 @@ except Exception:
         resolve_host = None
         parse_ext = None
 
-# explorer.py（source 根）：池全挂时从导航站自动探索活域（与 hostresolver 同目录）
+# explorer.py\uff08source \u6839\uff09\uff1a\u6c60\u5168\u6302\u65f6\u4ece\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\u6d3b\u57df\uff08\u4e0e hostresolver \u540c\u76ee\u5f55\uff09
 try:
     from explorer import explore_hosts
 except Exception:
@@ -41,7 +41,7 @@ except Exception:
 
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-# ---- 封面代理（imgfetch 纪律：Session keep-alive + LRU + magic 预检 + 解密兜底）----
+# ---- \u5c01\u9762\u4ee3\u7406\uff08imgfetch \u7eaa\u5f8b\uff1aSession keep-alive + LRU + magic \u9884\u68c0 + \u89e3\u5bc6\u515c\u5e95\uff09----
 _img_session = requests.Session()
 _img_session.verify = False
 try:
@@ -56,7 +56,7 @@ _IMG_CACHE_MAX = 60
 
 
 def _img_fetch(url, referer):
-    """取图+按需解密+缓存，返回 [status, content_type, bytes]。"""
+    """\u53d6\u56fe+\u6309\u9700\u89e3\u5bc6+\u7f13\u5b58\uff0c\u8fd4\u56de [status, content_type, bytes]\u3002"""
     if url in _img_cache:
         _img_cache.move_to_end(url)
         return _img_cache[url]
@@ -67,12 +67,12 @@ def _img_fetch(url, referer):
         raw = r.content
         ct = 'image/jpeg'
         if raw[:3] == b'\xff\xd8\xff':
-            b = raw                                   # JPEG 直传免解密
+            b = raw                                   # JPEG \u76f4\u4f20\u514d\u89e3\u5bc6
         elif raw[:8] == b'\x89PNG\r\n\x1a\n':
             b, ct = raw, 'image/png'
         elif raw[:4] == b'GIF8':
             b, ct = raw, 'image/gif'
-        else:                                         # CDN 级 AES 加密图（黑料系同 key）
+        else:                                         # CDN \u7ea7 AES \u52a0\u5bc6\u56fe\uff08\u9ed1\u6599\u7cfb\u540c key\uff09
             from Crypto.Cipher import AES
             b = AES.new(b'f5d965df75336270', AES.MODE_CBC, b'97b60394abc2fbe1').decrypt(raw)
             if b[:8] == b'\x89PNG\r\n\x1a\n':
@@ -89,7 +89,7 @@ def _img_fetch(url, referer):
         return [404, 'text/plain', b'']
 
 
-# 分类兜底表 {slug: 名称}（b64 of UTF-8 JSON，2026-09-08 首页 nav 实时采集）
+# \u5206\u7c7b\u515c\u5e95\u8868 {slug: \u540d\u79f0}\uff08b64 of UTF-8 JSON\uff0c2026-09-08 \u9996\u9875 nav \u5b9e\u65f6\u91c7\u96c6\uff09
 def _b64d(s):
     return base64.b64decode(s + '=' * (-len(s) % 4)).decode('utf-8')
 
@@ -104,25 +104,25 @@ _CATS = json.loads(_b64d(
     'grLnm7Tmkq0ifQ=='
 ))
 
-# 列表条目（<article> 块内: /archives/{id}/ 链接 + z-image-loader-url 封面 + alt 标题）
+# \u5217\u8868\u6761\u76ee\uff08<article> \u5757\u5185: /archives/{id}/ \u94fe\u63a5 + z-image-loader-url \u5c01\u9762 + alt \u6807\u9898\uff09
 _RE_ITEM = re.compile(r'<article[^>]*>(.*?)</article>', re.S)
 _RE_LINK = re.compile(r'href="((?:https?://[^"]*?)?/archives/(\d+)/)"')
 _RE_COVER = re.compile(r'z-image-loader-url="([^"]+)"', re.I)
 _RE_TITLE = re.compile(r'alt="([^"]*)"')
-# 分类 nav: <a href="/category/{slug}/">名称</a>
+# \u5206\u7c7b nav: <a href="/category/{slug}/">\u540d\u79f0</a>
 _RE_NAV = re.compile(r'href="(/category/[a-z0-9]+/)"[^>]*>([^<]{2,14})<')
-# 详情播放: dplayer data-config='{...}'（旧版 config= 兼容）
+# \u8be6\u60c5\u64ad\u653e: dplayer data-config='{...}'\uff08\u65e7\u7248 config= \u517c\u5bb9\uff09
 _RE_CONFIG = re.compile(r"data-config='(\{.*?\})'|config='(\{.*?\})'", re.S)
 _RE_VIDURL = re.compile(r'"url"\s*:\s*"([^"]+)"')
 _RE_NEXT = re.compile(r'class="next"[^>]*><a href="([^"]+)"')
-_AD_CAT_RE = re.compile(r'(?i)app|下载|qq|微信|推特|tg群|导航|联系|合作|邮箱|关于|存档|收藏|登陆|登录')
+_AD_CAT_RE = re.compile('(?i)app|\u4e0b\u8f7d|qq|\u5fae\u4fe1|\u63a8\u7279|tg\u7fa4|\u5bfc\u822a|\u8054\u7cfb|\u5408\u4f5c|\u90ae\u7bb1|\u5173\u4e8e|\u5b58\u6863|\u6536\u85cf|\u767b\u9646|\u767b\u5f55')
 
 
 class Spider(BaseSpider):
 
-    # 站方中转发布页（b64 壳，解码后 JS zz_line 列线路基域）
+    # \u7ad9\u65b9\u4e2d\u8f6c\u53d1\u5e03\u9875\uff08b64 \u58f3\uff0c\u89e3\u7801\u540e JS zz_line \u5217\u7ebf\u8def\u57fa\u57df\uff09
     PUBLISH_PAGE = 'https://t91bl.com/'
-    # 内置候选（2026-09-08 实测 200/204KB，泛解析任意词子域可用）
+    # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b 200/204KB\uff0c\u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5b50\u57df\u53ef\u7528\uff09
     BUILTIN_HOSTS = [
         'https://main.quibepqh.cc',
         'https://apple.quibepqh.cc',
@@ -164,7 +164,7 @@ class Spider(BaseSpider):
         print(f'使用站点: {self.host}')
 
     def getName(self):
-        return "91爆料"
+        return "91\u7206\u6599"
 
     def isVideoFormat(self, url):
         return any(ext in (url or '') for ext in ['.m3u8', '.mp4', '.ts'])
@@ -201,7 +201,7 @@ class Spider(BaseSpider):
         return [404, 'text/plain', b'']
 
     def _pic(self, u):
-        """封面统一走代理（图床为加密图，代理内 magic 预检+解密+缓存）。"""
+        """\u5c01\u9762\u7edf\u4e00\u8d70\u4ee3\u7406\uff08\u56fe\u5e8a\u4e3a\u52a0\u5bc6\u56fe\uff0c\u4ee3\u7406\u5185 magic \u9884\u68c0+\u89e3\u5bc6+\u7f13\u5b58\uff09\u3002"""
         if not u:
             return ''
         return f'{self.getProxyUrl()}&url={self.e64(u)}&type=blimg'
@@ -211,7 +211,7 @@ class Spider(BaseSpider):
         builtin = self.BUILTIN_HOSTS
 
         def _validate(host, text):
-            return '91爆料' in (text or '')
+            return '91\u7206\u6599' in (text or '')
 
         if resolve_host:
             try:
@@ -235,14 +235,14 @@ class Spider(BaseSpider):
                     return h.rstrip('/')
             except Exception:
                 continue
-        # 终极兜底：导航站自动探索（跳转壳/门户/泛解析跟随 + 站名身份验证）
+        # \u7ec8\u6781\u515c\u5e95\uff1a\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\uff08\u8df3\u8f6c\u58f3/\u95e8\u6237/\u6cdb\u89e3\u6790\u8ddf\u968f + \u7ad9\u540d\u8eab\u4efd\u9a8c\u8bc1\uff09
         if explore_hosts:
             try:
                 def _probe(u):
                     r = requests.get(u.rstrip('/') + '/', headers=self.headers,
                                      proxies=self.proxies, timeout=8, verify=False)
-                    return r.status_code == 200 and '91爆料' in (r.text or '')
-                hs = explore_hosts(['91bl', '爆料'], probe=_probe)
+                    return r.status_code == 200 and '91\u7206\u6599' in (r.text or '')
+                hs = explore_hosts(['91bl', '\u7206\u6599'], probe=_probe)
                 if hs:
                     return hs[0]
             except Exception:
@@ -335,8 +335,8 @@ class Spider(BaseSpider):
 
     @staticmethod
     def _videos(html_text):
-        """按 dplayer data-config 抽分集（贴片广告素材不在 dplayer 内，天然排除）。
-        url = 站内票据端点 /action/player/get_play_url?cid=..&idx=..（播放时两步取真 m3u8）。"""
+        """\u6309 dplayer data-config \u62bd\u5206\u96c6\uff08\u8d34\u7247\u5e7f\u544a\u7d20\u6750\u4e0d\u5728 dplayer \u5185\uff0c\u5929\u7136\u6392\u9664\uff09\u3002
+        url = \u7ad9\u5185\u7968\u636e\u7aef\u70b9 /action/player/get_play_url?cid=..&idx=..\uff08\u64ad\u653e\u65f6\u4e24\u6b65\u53d6\u771f m3u8\uff09\u3002"""
         vids = []
         for m in _RE_CONFIG.finditer(html_text or ''):
             c = m.group(1) or m.group(2)
@@ -346,7 +346,7 @@ class Spider(BaseSpider):
                 s = c.replace('&quot;', '"').replace('&#34;', '"').replace('&amp;', '&')
                 cfg = json.loads(s)
                 mv = cfg.get('video') or {}
-                # 91爆料为 ArtPlayer 扁平结构（url/poster 顶层）；兼容黑料系 video:{} 嵌套
+                # 91\u7206\u6599\u4e3a ArtPlayer \u6241\u5e73\u7ed3\u6784\uff08url/poster \u9876\u5c42\uff09\uff1b\u517c\u5bb9\u9ed1\u6599\u7cfb video:{} \u5d4c\u5957
                 u = str(mv.get('url') or cfg.get('url') or '').replace('\\/', '/')
                 poster = str(mv.get('poster') or cfg.get('poster') or '').replace('\\/', '/')
             except Exception:
@@ -358,8 +358,8 @@ class Spider(BaseSpider):
         return vids
 
     def _resolve_play(self, url):
-        """两步票据：POST /action/player/ticket 取短期一次性票（120s）→ POST 换签名 m3u8。
-        服务端 env 验签宽松（空 env 可过）。"""
+        """\u4e24\u6b65\u7968\u636e\uff1aPOST /action/player/ticket \u53d6\u77ed\u671f\u4e00\u6b21\u6027\u7968\uff08120s\uff09\u2192 POST \u6362\u7b7e\u540d m3u8\u3002
+        \u670d\u52a1\u7aef env \u9a8c\u7b7e\u5bbd\u677e\uff08\u7a7a env \u53ef\u8fc7\uff09\u3002"""
         m = re.search(r'cid=(\d+)&idx=(\d+)', url)
         if not m:
             return url
@@ -390,7 +390,7 @@ class Spider(BaseSpider):
             m = re.search(r'<title>([^<]+)</title>', body)
             if m:
                 title = _html.unescape(m.group(1)).strip()
-                title = re.sub(r'\s*-\s*91爆料\s*$', '', title).strip()
+                title = re.sub('\\s*-\\s*91\u7206\u6599\\s*$', '', title).strip()
             pic = ''
             vids = self._videos(body)
             if vids and vids[0].get('poster'):

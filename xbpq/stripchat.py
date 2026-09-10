@@ -13,8 +13,8 @@ class Spider(Spider):
         self.host = origin
         self.Doppiocdn = "doppiocdn.org"
         #domains = [
-        #    "doppiocdn.com",       # cf cdn只能图片用，播放不了，可能触发验证码风控
-        #    "doppiocdn.org",       # 靠谱云cdn，国内有节点
+        #    "doppiocdn.com",       # cf cdn\u53ea\u80fd\u56fe\u7247\u7528\uff0c\u64ad\u653e\u4e0d\u4e86\uff0c\u53ef\u80fd\u89e6\u53d1\u9a8c\u8bc1\u7801\u98ce\u63a7
+        #    "doppiocdn.org",       # \u9760\u8c31\u4e91cdn\uff0c\u56fd\u5185\u6709\u8282\u70b9
         #    "doppiocdn.net"        # cft cdn
         #]
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:153.0) Gecko/20100101 Firefox/153.0"
@@ -43,21 +43,21 @@ class Spider(Spider):
         return username.replace('-', '_').lower()
 
     def homeContent(self, filter):
-        CLASSES = [{'type_name': '女主播g', 'type_id': 'girls'}, {'type_name': '情侣c', 'type_id': 'couples'}, {'type_name': '男主播m', 'type_id': 'men'}, {'type_name': '跨性别t', 'type_id': 'trans'}]
-        VALUE = [{'n': '中国', 'v': 'tagLanguageChinese'}, {'n': '亚洲', 'v': 'ethnicityAsian'}, {'n': '白人', 'v': 'ethnicityWhite'}, {'n': '拉丁', 'v': 'ethnicityLatino'}, {'n': '混血', 'v': 'ethnicityMultiracial'}, {'n': '印度', 'v': 'ethnicityIndian'}, {'n': '阿拉伯', 'v': 'ethnicityMiddleEastern'}, {'n': '黑人', 'v': 'ethnicityEbony'}]
-        VALUE_MEN = [{'n': '情侣', 'v': 'sexGayCouples'}, {'n': '直男', 'v': 'orientationStraight'}]
+        CLASSES = [{'type_name': '\u5973\u4e3b\u64adg', 'type_id': 'girls'}, {'type_name': '\u60c5\u4fa3c', 'type_id': 'couples'}, {'type_name': '\u7537\u4e3b\u64adm', 'type_id': 'men'}, {'type_name': '\u8de8\u6027\u522bt', 'type_id': 'trans'}]
+        VALUE = [{'n': '\u4e2d\u56fd', 'v': 'tagLanguageChinese'}, {'n': '\u4e9a\u6d32', 'v': 'ethnicityAsian'}, {'n': '\u767d\u4eba', 'v': 'ethnicityWhite'}, {'n': '\u62c9\u4e01', 'v': 'ethnicityLatino'}, {'n': '\u6df7\u8840', 'v': 'ethnicityMultiracial'}, {'n': '\u5370\u5ea6', 'v': 'ethnicityIndian'}, {'n': '\u963f\u62c9\u4f2f', 'v': 'ethnicityMiddleEastern'}, {'n': '\u9ed1\u4eba', 'v': 'ethnicityEbony'}]
+        VALUE_MEN = [{'n': '\u60c5\u4fa3', 'v': 'sexGayCouples'}, {'n': '\u76f4\u7537', 'v': 'orientationStraight'}]
         TIDS = ('girls', 'couples', 'men', 'trans')
         filters = {tid: [{'key': 'tag', 'value': VALUE_MEN + VALUE if tid == 'men' else VALUE}] for tid in TIDS}
         return {'class': CLASSES, 'filters': filters}
 
     def categoryContent(self, tid, pg, filter, extend):
-        # 🔥 修复：明确定义limit变量
+        # \ud83d\udd25 \u4fee\u590d\uff1a\u660e\u786e\u5b9a\u4e49limit\u53d8\u91cf
         limit = 60
         offset = limit * (int(pg) - 1)
         url = f"{self.host}/api/front/models?improveTs=false&removeShows=false&limit={limit}&offset={offset}&primaryTag={tid}&sortBy=stripRanking&rcmGrp=A&rbCnGr=true&prxCnGr=false&nic=false"
         if 'tag' in extend: url += f'&filterGroupTags=[["{extend["tag"]}"]]'
         rsp = self.session_get(url).json()
-        videos = [{"vod_id": str(v['username']), "vod_name": f"{self.country_code_to_flag(str(v['country']))}{v['username']}", "vod_pic": f"https://img.{self.Doppiocdn}/snapshot/{v['id']}/{v['snapshotTimestamp']}", "vod_remarks": "" if v.get('status') == "public" else "🎫"} for v in rsp.get('models', [])]
+        videos = [{"vod_id": str(v['username']), "vod_name": f"{self.country_code_to_flag(str(v['country']))}{v['username']}", "vod_pic": f"https://img.{self.Doppiocdn}/snapshot/{v['id']}/{v['snapshotTimestamp']}", "vod_remarks": "" if v.get('status') == "public" else "\ud83c\udfab"} for v in rsp.get('models', [])]
         total = int(rsp.get('filteredCount', 0))
         return {"list": videos, "page": pg, "pagecount": (total + limit - 1) // limit, "limit": limit, "total": total}
 
@@ -73,11 +73,11 @@ class Spider(Spider):
                 timestp = int(time.time())
                 self.stripchat_play = f"0 {timestp} {username}"
             flag = self.country_code_to_flag(str(user['country']).strip())
-            remark = "🔴 直播中" if isLive else "⚫ 已下播"
+            remark = "\ud83d\udd34 \u76f4\u64ad\u4e2d" if isLive else "\u26ab \u5df2\u4e0b\u64ad"
             show = info.get('show') or info.get('groupShowAnnouncement')
             if show:
                 startAt = show.get('createdAt') or show.get('startAt')
-                if startAt: remark = f"🎫 始于 {(datetime.strptime(startAt, '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours=8)).strftime('%m月%d日 %H:%M')}"
+                if startAt: remark = f"🎫 始于 {(datetime.strptime(startAt, '%Y-%m-%dT%H:%M:%SZ') + timedelta(hours=8)).strftime('%m\u6708%d\u65e5 %H:%M')}"
             director = f"{flag}{username}"
             return {'list': [{"vod_id": username, "vod_name": str(info['topic'])[:80], "vod_pic": str(user['avatarUrl']), "vod_director": director, "vod_remarks": remark, 'vod_play_from': 'StripChat$$$LemonCams', 'vod_play_url': f"{uid}${uid}$$${uid}$lemon_{uid}"}]}
         except: return {'list': []}
@@ -88,7 +88,7 @@ class Spider(Spider):
         parts = key.split(maxsplit=1)
         tag, key = (tags.get(parts[0].upper()), parts[1].strip()) if len(parts) > 1 and parts[0].upper() in tags else ('girls', key.strip())
         rsp = self.session_get(f"{self.host}/api/front/v4/models/search/group/username?query={key}&limit=900&primaryTag={tag}").json()
-        return {'list': [{"vod_id": str(u['username']), "vod_name": f"{self.country_code_to_flag(str(u['country']))}{u['username']}", "vod_pic": f"https://img.{self.Doppiocdn}/snapshot/{u['id']}/{u['snapshotTimestamp']}", "vod_remarks": "" if u['status'] == "public" else "🎫"} for u in rsp.get('models', []) if u['isLive']]}
+        return {'list': [{"vod_id": str(u['username']), "vod_name": f"{self.country_code_to_flag(str(u['country']))}{u['username']}", "vod_pic": f"https://img.{self.Doppiocdn}/snapshot/{u['id']}/{u['snapshotTimestamp']}", "vod_remarks": "" if u['status'] == "public" else "\ud83c\udfab"} for u in rsp.get('models', []) if u['isLive']]}
 
     def playerContent(self, flag, id, vipFlags):
         if id.startswith('lemon'):
@@ -144,10 +144,10 @@ class Spider(Spider):
         is_code_changed = (int(oldCode) != 0 and rsp.status_code != int(oldCode))
         if is_time_up or is_code_changed:
             self.stripchat_play = f"{rsp.status_code} {timestp} {username}"
-            self.log('计划更新')
+            self.log('\u8ba1\u5212\u66f4\u65b0')
             self.update_vod(username)
             if is_code_changed:
-                self.log('code变更')
+                self.log('code\u53d8\u66f4')
                 self.post("http://127.0.0.1:9978/action?do=refresh&type=player")
                 return [404, "text/plain", ""]
         if rsp.status_code == 403: rsp = self.session_get(re.sub(r'(_\d+p\d*)?\.m3u8', '_160p_blurred.m3u8', url))
@@ -169,7 +169,7 @@ class Spider(Spider):
         return ''.join(chr(ord(c.upper()) - ord('A') + 0x1F1E6) for c in code) if len(code) == 2 and code.isalpha() else code
 
     def _decode(self, encrypted_b64: str, key_b64: str) -> str:
-        # 补齐Base64填充，避免Incorrect padding错误
+        # \u8865\u9f50Base64\u586b\u5145\uff0c\u907f\u514dIncorrect padding\u9519\u8bef
         missing_padding = len(encrypted_b64) % 4
         if missing_padding:
             encrypted_b64 += '=' * (4 - missing_padding)

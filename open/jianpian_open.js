@@ -3,21 +3,21 @@
   searchable: 1,
   filterable: 1,
   quickSearch: 0,
-  title: '荐片',
+  title: '\u8350\u7247',
   lang: 'cat'
 })
 */
 
-let siteName = '荐片', siteKey = '', siteType = 0;
+let siteName = '\u8350\u7247', siteKey = '', siteType = 0;
 let host = 'https://api.ztcgi.com';
 let imghost = '';
 let maxPages = 5;
 let config = {};
 
-let title_remove = ['名称排除', '广告', '破解', '群'];
-let line_remove = ['线路排除', '广告', '666', 'mymv'];
-let line_order = ['线路排序', '蓝光', 'ft', '官', 'ace', '1080p', 'dytt'];
-let cate_remove = ['分类排除', '推荐', '首页'];
+let title_remove = ['\u540d\u79f0\u6392\u9664', '\u5e7f\u544a', '\u7834\u89e3', '\u7fa4'];
+let line_remove = ['\u7ebf\u8def\u6392\u9664', '\u5e7f\u544a', '666', 'mymv'];
+let line_order = ['\u7ebf\u8def\u6392\u5e8f', '\u84dd\u5149', 'ft', '\u5b98', 'ace', '1080p', 'dytt'];
+let cate_remove = ['\u5206\u7c7b\u6392\u9664', '\u63a8\u8350', '\u9996\u9875'];
 
 let rule = {
     homeCategory: '/api/v2/settings/homeCategory',
@@ -62,7 +62,7 @@ async function request(url, options = {}) {
 }
 
 async function init(cfg) {
-    siteName = cfg.skey?.split('_')[1] || cfg.skey || '荐片';
+    siteName = cfg.skey?.split('_')[1] || cfg.skey || '\u8350\u7247';
     siteKey = cfg.skey;
     siteType = cfg.stype;
     
@@ -125,17 +125,17 @@ async function home(filter) {
     });
     
     const commonFilter = [{
-        "key": "cateId", "name": "分类",
-        "value": [{"v": "", "n": "全部"}, {"v": "1", "n": "剧情"}, {"v": "2", "n": "爱情"}, {"v": "3", "n": "动画"}, {"v": "4", "n": "喜剧"}, {"v": "5", "n": "战争"}, {"v": "6", "n": "歌舞"}, {"v": "7", "n": "古装"}, {"v": "8", "n": "奇幻"}, {"v": "9", "n": "冒险"}, {"v": "10", "n": "动作"}, {"v": "11", "n": "科幻"}, {"v": "12", "n": "悬疑"}, {"v": "13", "n": "犯罪"}, {"v": "14", "n": "家庭"}, {"v": "15", "n": "传记"}, {"v": "16", "n": "运动"}, {"v": "18", "n": "惊悚"}, {"v": "20", "n": "短片"}, {"v": "21", "n": "历史"}, {"v": "22", "n": "音乐"}, {"v": "23", "n": "西部"}, {"v": "24", "n": "武侠"}, {"v": "25", "n": "恐怖"}]
+        "key": "cateId", "name": "\u5206\u7c7b",
+        "value": [{"v": "", "n": "\u5168\u90e8"}, {"v": "1", "n": "\u5267\u60c5"}, {"v": "2", "n": "\u7231\u60c5"}, {"v": "3", "n": "\u52a8\u753b"}, {"v": "4", "n": "\u559c\u5267"}, {"v": "5", "n": "\u6218\u4e89"}, {"v": "6", "n": "\u6b4c\u821e"}, {"v": "7", "n": "\u53e4\u88c5"}, {"v": "8", "n": "\u5947\u5e7b"}, {"v": "9", "n": "\u5192\u9669"}, {"v": "10", "n": "\u52a8\u4f5c"}, {"v": "11", "n": "\u79d1\u5e7b"}, {"v": "12", "n": "\u60ac\u7591"}, {"v": "13", "n": "\u72af\u7f6a"}, {"v": "14", "n": "\u5bb6\u5ead"}, {"v": "15", "n": "\u4f20\u8bb0"}, {"v": "16", "n": "\u8fd0\u52a8"}, {"v": "18", "n": "\u60ca\u609a"}, {"v": "20", "n": "\u77ed\u7247"}, {"v": "21", "n": "\u5386\u53f2"}, {"v": "22", "n": "\u97f3\u4e50"}, {"v": "23", "n": "\u897f\u90e8"}, {"v": "24", "n": "\u6b66\u4fa0"}, {"v": "25", "n": "\u6050\u6016"}]
     }, {
-        "key": "area", "name": "地区",
-        "value": [{"v": "", "n": "全部"}, {"v": "1", "n": "国产"}, {"v": "3", "n": "中国香港"}, {"v": "6", "n": "中国台湾"}, {"v": "5", "n": "美国"}, {"v": "18", "n": "韩国"}, {"v": "2", "n": "日本"}]
+        "key": "area", "name": "\u5730\u533a",
+        "value": [{"v": "", "n": "\u5168\u90e8"}, {"v": "1", "n": "\u56fd\u4ea7"}, {"v": "3", "n": "\u4e2d\u56fd\u9999\u6e2f"}, {"v": "6", "n": "\u4e2d\u56fd\u53f0\u6e7e"}, {"v": "5", "n": "\u7f8e\u56fd"}, {"v": "18", "n": "\u97e9\u56fd"}, {"v": "2", "n": "\u65e5\u672c"}]
     }, {
-        "key": "year", "name": "年代",
-        "value": [{"v": "", "n": "全部"}, {"v": "162", "n": "2026"}, {"v": "107", "n": "2025"}, {"v": "119", "n": "2024"}, {"v": "153", "n": "2023"}, {"v": "101", "n": "2022"}, {"v": "118", "n": "2021"}, {"v": "16", "n": "2020"}, {"v": "7", "n": "2019"}, {"v": "2", "n": "2018"}, {"v": "3", "n": "2017"}, {"v": "22", "n": "2016"}, {"v": "2015", "n": "2015以前"}]
+        "key": "year", "name": "\u5e74\u4ee3",
+        "value": [{"v": "", "n": "\u5168\u90e8"}, {"v": "162", "n": "2026"}, {"v": "107", "n": "2025"}, {"v": "119", "n": "2024"}, {"v": "153", "n": "2023"}, {"v": "101", "n": "2022"}, {"v": "118", "n": "2021"}, {"v": "16", "n": "2020"}, {"v": "7", "n": "2019"}, {"v": "2", "n": "2018"}, {"v": "3", "n": "2017"}, {"v": "22", "n": "2016"}, {"v": "2015", "n": "2015\u4ee5\u524d"}]
     }, {
-        "key": "sort", "name": "排序",
-        "value": [{"v": "update", "n": "最新"}, {"v": "hot", "n": "最热"}, {"v": "rating", "n": "评分"}]
+        "key": "sort", "name": "\u6392\u5e8f",
+        "value": [{"v": "update", "n": "\u6700\u65b0"}, {"v": "hot", "n": "\u6700\u70ed"}, {"v": "rating", "n": "\u8bc4\u5206"}]
     }];
 
     let filterObj = {};
@@ -176,7 +176,7 @@ async function homeVod() {
         if (item && item.jump_id) {
             videos.push({
                 vod_id: item.jump_id,
-                vod_name: item.title || '未知标题',
+                vod_name: item.title || '\u672a\u77e5\u6807\u9898',
                 vod_pic: imghost ? `${imghost}${item.thumbnail || ''}` : (item.thumbnail || ''),
                 vod_remarks: "",
             });
@@ -210,7 +210,7 @@ async function DyTag(id, pg) {
         if (item) {
             videos.push({
                 vod_id: item.id,
-                vod_name: item.title || '未知标题',
+                vod_name: item.title || '\u672a\u77e5\u6807\u9898',
                 vod_pic: imghost ? `${imghost}${item.path || ''}` : (item.path || ''),
                 vod_remarks: item.mask || '',
             });
@@ -238,7 +238,7 @@ async function category(tid, pg, filter, extend) {
                     if (item) {
                         videos.push({
                             vod_id: item.id,
-                            vod_name: item.title || '未知标题',
+                            vod_name: item.title || '\u672a\u77e5\u6807\u9898',
                             vod_pic: imghost ? `${imghost}${item.path || ''}` : (item.path || ''),
                             vod_remarks: item.mask || '',
                         });
@@ -285,7 +285,7 @@ async function detail(id) {
     if (res.source_list_source && Array.isArray(res.source_list_source)) {
         res.source_list_source.forEach(item => {
             if (!item) return;
-            const form = item.name || '未知线路';
+            const form = item.name || '\u672a\u77e5\u7ebf\u8def';
             let finalForm = form;
             
             if (item.source_list && item.source_list.length > 0 && item.source_list[0] && item.source_list[0].url) {
@@ -335,12 +335,12 @@ async function detail(id) {
     
     let play_from = [];
     sortedPlayForm.forEach(item => {
-        play_from.push(item.replace(/常规线路/g, '边下边播'));
+        play_from.push(item.replace(/常规线路/g, '\u8fb9\u4e0b\u8fb9\u64ad'));
     });
     
     const vod = {
         "vod_id": id,
-        "vod_name": res.title || '未知标题',
+        "vod_name": res.title || '\u672a\u77e5\u6807\u9898',
         "vod_year": res.year || '',
         "vod_area": res.area || '',
         "vod_remarks": res.mask || '',
@@ -359,7 +359,7 @@ async function play(flag, id, flags) {
     } else if (id) {
         return JSON.stringify({ parse: 0, url: `tvbox-xg:${id}` });
     }
-    return JSON.stringify({ parse: 0, url: '', msg: '播放地址为空' });
+    return JSON.stringify({ parse: 0, url: '', msg: '\u64ad\u653e\u5730\u5740\u4e3a\u7a7a' });
 }
 
 async function search(wd, quick, pg) {
@@ -383,7 +383,7 @@ async function search(wd, quick, pg) {
                 if (item && item.id) {
                     allVideos.push({
                         vod_id: item.id,
-                        vod_name: item.title || '未知标题',
+                        vod_name: item.title || '\u672a\u77e5\u6807\u9898',
                         vod_pic: imghost ? `${imghost}${item.thumbnail || ''}` : (item.thumbnail || ''),
                         vod_remarks: item.mask || '',
                     });

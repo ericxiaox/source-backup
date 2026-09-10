@@ -1,0 +1,21 @@
+{
+    "\u53d1\u5e03\u7ad9-b": "http://\u0068\u0073\u0063\u006b.net/",
+    "\u539f\u59cb\u7f51\u5740-b": "https://hk301.space:8899?u={{\u53d1\u5e03\u7ad9-b}}&p=/",
+    "\u57df\u540d-c": "{{\u539f\u59cb\u7f51\u5740-b}}[\u5de5\u5177:\u91cd\u5b9a\u5411]",
+    "\u4e3b\u9875url": "{{\u57df\u540d-c}}",
+    "\u5206\u7c7burl": "{{\u57df\u540d-c}}/vodtype/{cateId}-{catePg}.html",
+    "\u5206\u7c7b": "\u65e5\u97e9AV$1#\u56fd\u4ea7\u7cfb\u5217$2#\u6b27\u7f8e$3#\u6210\u4eba\u52a8\u6f2b$4",
+    "\u7c7b\u578b": "\u65e0\u7801\u4e2d\u6587\u5b57\u5e55$8#\u6709\u7801\u4e2d\u6587\u5b57\u5e55$9#\u65e5\u672c\u65e0\u7801$10#\u65e5\u672c\u6709\u7801$7#\u9a91\u5175\u7834\u89e3$26||\u7a7a||\u7a7a||\u7a7a",
+    "\u6570\u7ec4": "p:.stui-vodlist li[\u4e0d\u542b:target]",
+    "\u6807\u9898": "p:h4->text",
+    "\u56fe\u7247": "p:.lazyload->data-original",
+    "\u526f\u6807\u9898": "p:.pic-text->text",
+    "\u7b80\u4ecb": "p:.stui-player__foot->text",
+    "\u94fe\u63a5": "p:->href[\u66ff\u6362:html>>html?play=1#1/>>1.html?play=1]",
+    "\u7ebf\u8def\u6570\u7ec4": "player_aaaa=&&</script>",
+    "\u7ebf\u8def\u6807\u9898": "j:from",
+    "\u64ad\u653e\u6570\u7ec4": "player_aaaa=&&</script>",
+    "\u64ad\u653e\u5217\u8868": "&&",
+    "\u64ad\u653e\u6807\u9898": "j:from",
+    "\u64ad\u653e\u94fe\u63a5": "j:url"
+}

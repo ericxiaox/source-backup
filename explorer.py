@@ -1,44 +1,44 @@
 # -*- coding: utf-8 -*-
 """
-explorer.py —— 多导航站自动探索 v1（源站域名池全挂时的兜底发现渠道）
+explorer.py \u2014\u2014 \u591a\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22 v1\uff08\u6e90\u7ad9\u57df\u540d\u6c60\u5168\u6302\u65f6\u7684\u515c\u5e95\u53d1\u73b0\u6e20\u9053\uff09
 
-背景：站方域名轮换快，内置候选池 + 发布页(hostresolver v2)之外，
-导航站（绿色小导航等）长期存活且实时收录各家最新域名。把导航站本身
-做成「发现渠道池」：
-  种子导航(含其发布页镜像) -> 抓全量外链得 {域名: 站名} 映射
-  -> 按源别名过滤候选 -> 调用方协议级验证 -> 活域插池
+\u80cc\u666f\uff1a\u7ad9\u65b9\u57df\u540d\u8f6e\u6362\u5feb\uff0c\u5185\u7f6e\u5019\u9009\u6c60 + \u53d1\u5e03\u9875(hostresolver v2)\u4e4b\u5916\uff0c
+\u5bfc\u822a\u7ad9\uff08\u7eff\u8272\u5c0f\u5bfc\u822a\u7b49\uff09\u957f\u671f\u5b58\u6d3b\u4e14\u5b9e\u65f6\u6536\u5f55\u5404\u5bb6\u6700\u65b0\u57df\u540d\u3002\u628a\u5bfc\u822a\u7ad9\u672c\u8eab
+\u505a\u6210\u300c\u53d1\u73b0\u6e20\u9053\u6c60\u300d\uff1a
+  \u79cd\u5b50\u5bfc\u822a(\u542b\u5176\u53d1\u5e03\u9875\u955c\u50cf) -> \u6293\u5168\u91cf\u5916\u94fe\u5f97 {\u57df\u540d: \u7ad9\u540d} \u6620\u5c04
+  -> \u6309\u6e90\u522b\u540d\u8fc7\u6ee4\u5019\u9009 -> \u8c03\u7528\u65b9\u534f\u8bae\u7ea7\u9a8c\u8bc1 -> \u6d3b\u57df\u63d2\u6c60
 
-自收集：导航页互挂的其它导航站（站名含"导航"）动态扩充种子池并持久化；
-"入口/最新地址/发布"类页面（各站发布页）记入 publish_pages() 备用。
+\u81ea\u6536\u96c6\uff1a\u5bfc\u822a\u9875\u4e92\u6302\u7684\u5176\u5b83\u5bfc\u822a\u7ad9\uff08\u7ad9\u540d\u542b\"\u5bfc\u822a\"\uff09\u52a8\u6001\u6269\u5145\u79cd\u5b50\u6c60\u5e76\u6301\u4e45\u5316\uff1b
+\"\u5165\u53e3/\u6700\u65b0\u5730\u5740/\u53d1\u5e03\"\u7c7b\u9875\u9762\uff08\u5404\u7ad9\u53d1\u5e03\u9875\uff09\u8bb0\u5165 publish_pages() \u5907\u7528\u3002
 
-公开接口：
-  nav_site_map(force=False)          -> {host: name}（合并多导航站，缓存6h）
-  deep_site_map(extra=6)             -> (map, 新抓源) 深度模式，多抓自收集导航站
-  seeds() / nav_pool()               -> 种子池（内置+用户自配+自收集）/ 当前池
-  user_navs()                        -> 用户自配导航站（explorer_admin 维护）
-  publish_pages()                    -> {站名: host}（各站入口/发布页，备用）
-  discover(aliases, validate, ...)   -> [活域URL]   validate(host)->bool
-  remember(alias, hosts)             -> 探索成果持久化（下次 init 预载）
-  known(alias)                       -> 历史探索成果（可能过期，调用方自会实测）
+\u516c\u5f00\u63a5\u53e3\uff1a
+  nav_site_map(force=False)          -> {host: name}\uff08\u5408\u5e76\u591a\u5bfc\u822a\u7ad9\uff0c\u7f13\u5b586h\uff09
+  deep_site_map(extra=6)             -> (map, \u65b0\u6293\u6e90) \u6df1\u5ea6\u6a21\u5f0f\uff0c\u591a\u6293\u81ea\u6536\u96c6\u5bfc\u822a\u7ad9
+  seeds() / nav_pool()               -> \u79cd\u5b50\u6c60\uff08\u5185\u7f6e+\u7528\u6237\u81ea\u914d+\u81ea\u6536\u96c6\uff09/ \u5f53\u524d\u6c60
+  user_navs()                        -> \u7528\u6237\u81ea\u914d\u5bfc\u822a\u7ad9\uff08explorer_admin \u7ef4\u62a4\uff09
+  publish_pages()                    -> {\u7ad9\u540d: host}\uff08\u5404\u7ad9\u5165\u53e3/\u53d1\u5e03\u9875\uff0c\u5907\u7528\uff09
+  discover(aliases, validate, ...)   -> [\u6d3b\u57dfURL]   validate(host)->bool
+  remember(alias, hosts)             -> \u63a2\u7d22\u6210\u679c\u6301\u4e45\u5316\uff08\u4e0b\u6b21 init \u9884\u8f7d\uff09
+  known(alias)                       -> \u5386\u53f2\u63a2\u7d22\u6210\u679c\uff08\u53ef\u80fd\u8fc7\u671f\uff0c\u8c03\u7528\u65b9\u81ea\u4f1a\u5b9e\u6d4b\uff09
 
-接入示例（xbpq/黄豆.py，API 型）：
+\u63a5\u5165\u793a\u4f8b\uff08xbpq/\u9ec4\u8c46.py\uff0cAPI \u578b\uff09\uff1a
   try:
       from explorer import discover, remember, known
   except Exception:
       discover = None
   # init():      self.hosts += [h for h in known('huangdou') if h not in self.hosts]
-  # _api() 池全挂: discover(['huangdou','黄豆'], validate=self._check_host) -> 插池重试
+  # _api() \u6c60\u5168\u6302: discover(['huangdou','\u9ec4\u8c46'], validate=self._check_host) -> \u63d2\u6c60\u91cd\u8bd5
 
-接入示例（py/ 下 web 型源，统一走 explore_hosts）：
+\u63a5\u5165\u793a\u4f8b\uff08py/ \u4e0b web \u578b\u6e90\uff0c\u7edf\u4e00\u8d70 explore_hosts\uff09\uff1a
   try:
       from explorer import explore_hosts
   except Exception:
       explore_hosts = None
-  # get_working_host() 终极兜底（内置池+发布页全失败后）：
-  #   hs = explore_hosts(['douyin','抖阴'], probe=_probe)   # probe 抓首页验站名
+  # get_working_host() \u7ec8\u6781\u515c\u5e95\uff08\u5185\u7f6e\u6c60+\u53d1\u5e03\u9875\u5168\u5931\u8d25\u540e\uff09\uff1a
+  #   hs = explore_hosts(['douyin','\u6296\u9634'], probe=_probe)   # probe \u6293\u9996\u9875\u9a8c\u7ad9\u540d
   #   if hs: return hs[0]
-  # explore_hosts 内置：known 历史快验 → 原始候选并行「锚点壳跟随→Base64门户
-  # 解码→泛解析基域生成」两级穿透 → 入口门户复核（拒 SEO 门站）→ remember
+  # explore_hosts \u5185\u7f6e\uff1aknown \u5386\u53f2\u5feb\u9a8c \u2192 \u539f\u59cb\u5019\u9009\u5e76\u884c\u300c\u951a\u70b9\u58f3\u8ddf\u968f\u2192Base64\u95e8\u6237
+  # \u89e3\u7801\u2192\u6cdb\u89e3\u6790\u57fa\u57df\u751f\u6210\u300d\u4e24\u7ea7\u7a7f\u900f \u2192 \u5165\u53e3\u95e8\u6237\u590d\u6838\uff08\u62d2 SEO \u95e8\u7ad9\uff09\u2192 remember
 """
 import base64
 import json
@@ -59,23 +59,23 @@ except Exception:
 
 _UA = {'User-Agent': 'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36'}
 
-# 种子导航池：绿色小导航主域 + 其发布页镜像（about 页「地址发布」栏）
+# \u79cd\u5b50\u5bfc\u822a\u6c60\uff1a\u7eff\u8272\u5c0f\u5bfc\u822a\u4e3b\u57df + \u5176\u53d1\u5e03\u9875\u955c\u50cf\uff08about \u9875\u300c\u5730\u5740\u53d1\u5e03\u300d\u680f\uff09
 _NAV_SEEDS = [
     'https://xn--m-3h9b.lvse71.date/%E9%A3%8E%E6%99%AF/',
     'https://green61.net/',
     'https://1800ga.com/',
 ]
-_NAV_HINT = '导航'
-_PUB_HINTS = ('入口', '最新地址', '发布')
-_NAV_POOL_MAX = 24      # 自收集导航站上限
-_NAV_FETCH_MAX = 4      # 每次构建映射最多实抓的导航站数（控制耗时）
+_NAV_HINT = '\u5bfc\u822a'
+_PUB_HINTS = ('\u5165\u53e3', '\u6700\u65b0\u5730\u5740', '\u53d1\u5e03')
+_NAV_POOL_MAX = 24      # \u81ea\u6536\u96c6\u5bfc\u822a\u7ad9\u4e0a\u9650
+_NAV_FETCH_MAX = 4      # \u6bcf\u6b21\u6784\u5efa\u6620\u5c04\u6700\u591a\u5b9e\u6293\u7684\u5bfc\u822a\u7ad9\u6570\uff08\u63a7\u5236\u8017\u65f6\uff09
 _PUB_MAX = 40
-_TTL = 7 * 24 * 3600         # 站点映射缓存
+_TTL = 7 * 24 * 3600         # \u7ad9\u70b9\u6620\u5c04\u7f13\u5b58
 
-# 用户自配导航站（explorer_admin.py 管理台维护，push 到 gitee 后设备自动生效）
+# \u7528\u6237\u81ea\u914d\u5bfc\u822a\u7ad9\uff08explorer_admin.py \u7ba1\u7406\u53f0\u7ef4\u62a4\uff0cpush \u5230 gitee \u540e\u8bbe\u5907\u81ea\u52a8\u751f\u6548\uff09
 _USER_CFG_URL = 'https://gitee.com/mallox/source/raw/master/xbpq/explorer_seeds.json'
 
-# 必然混入的大平台/统计/静态资源域，不当候选
+# \u5fc5\u7136\u6df7\u5165\u7684\u5927\u5e73\u53f0/\u7edf\u8ba1/\u9759\u6001\u8d44\u6e90\u57df\uff0c\u4e0d\u5f53\u5019\u9009
 _JUNK = re.compile(
     r'(googletagmanager|google-analytics|gstatic|google\.|gmail\.|cloudfront|gitlab\.|github\.|'
     r'youtube\.|twitter\.|x\.com|t\.me|telegram\.|schema\.org|w3\.org|'
@@ -84,20 +84,20 @@ _JUNK = re.compile(
 
 _A_RE = re.compile(r'<a\s[^>]*href="(https?://[^"\s]+)"[^>]*>(.*?)</a>', re.S | re.I)
 _HOST_RE = re.compile(r'^https?://([a-z0-9][a-z0-9.\-]*\.[a-z]{2,})', re.I)
-# 锚点跳转壳：~300B，<a href=目标>加载中...</a><script>…location.replace…）
+# \u951a\u70b9\u8df3\u8f6c\u58f3\uff1a~300B\uff0c<a href=\u76ee\u6807>\u52a0\u8f7d\u4e2d...</a><script>\u2026location.replace\u2026\uff09
 _RE_ANCHOR = re.compile(r'<a[^>]{0,120}?href="(https?://[^"\s]+)"', re.I)
-# Base64 入口壳：解码出的官方门户页里列的域名（入口域/泛解析基域）
+# Base64 \u5165\u53e3\u58f3\uff1a\u89e3\u7801\u51fa\u7684\u5b98\u65b9\u95e8\u6237\u9875\u91cc\u5217\u7684\u57df\u540d\uff08\u5165\u53e3\u57df/\u6cdb\u89e3\u6790\u57fa\u57df\uff09
 _RE_DOM = re.compile(r'[a-z0-9][a-z0-9\-]{2,25}\.(?:cc|top|com|net|xyz|vip|icu|cyou|club|fun|me|tv|info|ltd|buzz)', re.I)
-# 泛解析探测词（站方普遍任意词子域全站，如 {word}.bqmnxlid.cc）
+# \u6cdb\u89e3\u6790\u63a2\u6d4b\u8bcd\uff08\u7ad9\u65b9\u666e\u904d\u4efb\u610f\u8bcd\u5b50\u57df\u5168\u7ad9\uff0c\u5982 {word}.bqmnxlid.cc\uff09
 _WILD_WORDS = ['apple', 'berry', 'kiwi', 'lemon', 'mango', 'melon', 'pear', 'peach']
-# 入口门户特征（「XX-官方入口/更新入口」SEO 门站也带站名，单靠身份串会误收）
-_PORTAL_KW = re.compile(r'更新入口|官方入口|地址发布|回家的路|永久地址|线路[一二三四五六七八九]')
+# \u5165\u53e3\u95e8\u6237\u7279\u5f81\uff08\u300cXX-\u5b98\u65b9\u5165\u53e3/\u66f4\u65b0\u5165\u53e3\u300dSEO \u95e8\u7ad9\u4e5f\u5e26\u7ad9\u540d\uff0c\u5355\u9760\u8eab\u4efd\u4e32\u4f1a\u8bef\u6536\uff09
+_PORTAL_KW = re.compile('\u66f4\u65b0\u5165\u53e3|\u5b98\u65b9\u5165\u53e3|\u5730\u5740\u53d1\u5e03|\u56de\u5bb6\u7684\u8def|\u6c38\u4e45\u5730\u5740|\u7ebf\u8def[\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d]')
 
 _FP = None
 _MEM = {'map': None, 'ts': 0, 'navs': None, 'pubs': None}
 
 
-# ---------------------------------------------------------------- 持久化（best-effort）
+# ---------------------------------------------------------------- \u6301\u4e45\u5316\uff08best-effort\uff09
 def _file():
     global _FP
     if _FP:
@@ -146,9 +146,9 @@ def _save(d):
         pass
 
 
-# ---------------------------------------------------------------- 抓取与解析
+# ---------------------------------------------------------------- \u6293\u53d6\u4e0e\u89e3\u6790
 def _cfemail(text):
-    """Cloudflare email-protection 混淆还原（导航页公告邮箱/联系方式用）"""
+    """Cloudflare email-protection \u6df7\u6dc6\u8fd8\u539f\uff08\u5bfc\u822a\u9875\u516c\u544a\u90ae\u7bb1/\u8054\u7cfb\u65b9\u5f0f\u7528\uff09"""
     def rep(m):
         try:
             raw = bytes.fromhex(m.group(1))
@@ -173,7 +173,7 @@ def _get(url, timeout=10):
 
 
 def _entries(html):
-    """页面全部外链 -> {host: 站名}"""
+    """\u9875\u9762\u5168\u90e8\u5916\u94fe -> {host: \u7ad9\u540d}"""
     out = {}
     for u, inner in _A_RE.findall(_cfemail(html)):
         m = _HOST_RE.match(u)
@@ -187,8 +187,8 @@ def _entries(html):
 
 
 def _read_nav(url, depth=0):
-    """读一个导航站：返回 (是否有效导航, {host: name}, 其它导航站列表, 发布页dict)。
-    链接极少则视为跳转壳，跟随第一个外链（如 1800ga.com -> 最新导航域）。"""
+    """\u8bfb\u4e00\u4e2a\u5bfc\u822a\u7ad9\uff1a\u8fd4\u56de (\u662f\u5426\u6709\u6548\u5bfc\u822a, {host: name}, \u5176\u5b83\u5bfc\u822a\u7ad9\u5217\u8868, \u53d1\u5e03\u9875dict)\u3002
+    \u94fe\u63a5\u6781\u5c11\u5219\u89c6\u4e3a\u8df3\u8f6c\u58f3\uff0c\u8ddf\u968f\u7b2c\u4e00\u4e2a\u5916\u94fe\uff08\u5982 1800ga.com -> \u6700\u65b0\u5bfc\u822a\u57df\uff09\u3002"""
     html = _get(url, 10)
     if not html:
         return False, {}, [], {}
@@ -210,10 +210,10 @@ def _read_nav(url, depth=0):
     return True, ent, navs, pubs
 
 
-# ---------------------------------------------------------------- 主接口
+# ---------------------------------------------------------------- \u4e3b\u63a5\u53e3
 def nav_site_map(force=False):
-    """合并多导航站的外链映射 {host: 站名}。内存+磁盘缓存 6h；
-    全部导航站失败时回落磁盘旧缓存（旧数据好过没有）。"""
+    """\u5408\u5e76\u591a\u5bfc\u822a\u7ad9\u7684\u5916\u94fe\u6620\u5c04 {host: \u7ad9\u540d}\u3002\u5185\u5b58+\u78c1\u76d8\u7f13\u5b58 6h\uff1b
+    \u5168\u90e8\u5bfc\u822a\u7ad9\u5931\u8d25\u65f6\u56de\u843d\u78c1\u76d8\u65e7\u7f13\u5b58\uff08\u65e7\u6570\u636e\u597d\u8fc7\u6ca1\u6709\uff09\u3002"""
     now = time.time()
     if not force and _MEM.get('map') is not None and now < _MEM.get('ts', 0):
         return _MEM['map']
@@ -247,13 +247,13 @@ def nav_site_map(force=False):
     if navs_ok:
         _MEM.update({'map': mmap, 'ts': now + _TTL, 'navs': navs_ok + extra,
                      'pubs': pubs, 'src': srcmap})
-        d = _load()                     # 保留 hosts/ucfg，勿整包覆盖
+        d = _load()                     # \u4fdd\u7559 hosts/ucfg\uff0c\u52ff\u6574\u5305\u8986\u76d6
         d.update({'map': mmap, 'ts': now + _TTL, 'navs': navs_ok + extra,
                   'pubs': pubs, 'src': srcmap})
         _save(d)
         return mmap
     if disk.get('map'):
-        return disk['map']          # 全挂回落旧缓存
+        return disk['map']          # \u5168\u6302\u56de\u843d\u65e7\u7f13\u5b58
     return mmap or {}
 
 
@@ -285,10 +285,10 @@ def _cfg_local():
 
 
 def user_navs(force=False):
-    """用户自配导航站 [{url, note}]。本地文件优先（PC 管理台刚改完的场景），
-    设备上无本地文件时走 gitee raw（6h 缓存，失败回落磁盘旧值）。"""
+    """\u7528\u6237\u81ea\u914d\u5bfc\u822a\u7ad9 [{url, note}]\u3002\u672c\u5730\u6587\u4ef6\u4f18\u5148\uff08PC \u7ba1\u7406\u53f0\u521a\u6539\u5b8c\u7684\u573a\u666f\uff09\uff0c
+    \u8bbe\u5907\u4e0a\u65e0\u672c\u5730\u6587\u4ef6\u65f6\u8d70 gitee raw\uff086h \u7f13\u5b58\uff0c\u5931\u8d25\u56de\u843d\u78c1\u76d8\u65e7\u503c\uff09\u3002"""
     loc = _cfg_local()
-    # 本地文件存在即信任（含空列表）：PC 管理台场景不再每次联网抓 gitee（曾致 status 接口 16s）
+    # \u672c\u5730\u6587\u4ef6\u5b58\u5728\u5373\u4fe1\u4efb\uff08\u542b\u7a7a\u5217\u8868\uff09\uff1aPC \u7ba1\u7406\u53f0\u573a\u666f\u4e0d\u518d\u6bcf\u6b21\u8054\u7f51\u6293 gitee\uff08\u66fe\u81f4 status \u63a5\u53e3 16s\uff09
     if loc is not None and isinstance(loc.get('user_navs'), list):
         return [x for x in loc['user_navs'] if isinstance(x, dict) and x.get('url')]
     disk = _load()
@@ -305,7 +305,7 @@ def user_navs(force=False):
         if isinstance(obj.get('user_navs'), list):
             navs = [x for x in obj['user_navs'] if isinstance(x, dict) and x.get('url')]
     if t:
-        # 抓取成功才写缓存（失败不缓存，避免把网络故障当空配置缓存 6h）
+        # \u6293\u53d6\u6210\u529f\u624d\u5199\u7f13\u5b58\uff08\u5931\u8d25\u4e0d\u7f13\u5b58\uff0c\u907f\u514d\u628a\u7f51\u7edc\u6545\u969c\u5f53\u7a7a\u914d\u7f6e\u7f13\u5b58 6h\uff09
         d = _load()
         d['ucfg'] = {'navs': navs, 'ts': time.time() + _TTL}
         _save(d)
@@ -313,7 +313,7 @@ def user_navs(force=False):
 
 
 def seeds():
-    """完整种子池：内置 + 用户自配（本地/gitee）+ 自收集（磁盘）"""
+    """\u5b8c\u6574\u79cd\u5b50\u6c60\uff1a\u5185\u7f6e + \u7528\u6237\u81ea\u914d\uff08\u672c\u5730/gitee\uff09+ \u81ea\u6536\u96c6\uff08\u78c1\u76d8\uff09"""
     out = list(_NAV_SEEDS)
     for x in user_navs():
         if x['url'] not in out:
@@ -325,8 +325,8 @@ def seeds():
 
 
 def deep_site_map(extra=6):
-    """深度模式：在现有映射上继续实抓种子池中未抓过的导航站（从池尾自收集/用户站开始）。
-    返回 (合并映射, 新抓成功的源列表)。"""
+    """\u6df1\u5ea6\u6a21\u5f0f\uff1a\u5728\u73b0\u6709\u6620\u5c04\u4e0a\u7ee7\u7eed\u5b9e\u6293\u79cd\u5b50\u6c60\u4e2d\u672a\u6293\u8fc7\u7684\u5bfc\u822a\u7ad9\uff08\u4ece\u6c60\u5c3e\u81ea\u6536\u96c6/\u7528\u6237\u7ad9\u5f00\u59cb\uff09\u3002
+    \u8fd4\u56de (\u5408\u5e76\u6620\u5c04, \u65b0\u6293\u6210\u529f\u7684\u6e90\u5217\u8868)\u3002"""
     base = dict(nav_site_map() or {})
     src = dict(_load().get('src') or {})
     got = []
@@ -354,7 +354,7 @@ def deep_site_map(extra=6):
 
 
 def remember(alias, hosts):
-    """探索成果持久化（每个别名最多留 8 条，供下次 init 预载）"""
+    """\u63a2\u7d22\u6210\u679c\u6301\u4e45\u5316\uff08\u6bcf\u4e2a\u522b\u540d\u6700\u591a\u7559 8 \u6761\uff0c\u4f9b\u4e0b\u6b21 init \u9884\u8f7d\uff09"""
     if not hosts:
         return
     d = _load()
@@ -374,12 +374,12 @@ def known(alias):
 
 
 def is_portal(u, timeout=8):
-    """入口门户判定：页面含门户特征词 且 站内结构链接极少。
-    真站即使带「下载app」等推广词，站内链接也远超阈值，不会误杀。"""
+    """\u5165\u53e3\u95e8\u6237\u5224\u5b9a\uff1a\u9875\u9762\u542b\u95e8\u6237\u7279\u5f81\u8bcd \u4e14 \u7ad9\u5185\u7ed3\u6784\u94fe\u63a5\u6781\u5c11\u3002
+    \u771f\u7ad9\u5373\u4f7f\u5e26\u300c\u4e0b\u8f7dapp\u300d\u7b49\u63a8\u5e7f\u8bcd\uff0c\u7ad9\u5185\u94fe\u63a5\u4e5f\u8fdc\u8d85\u9608\u503c\uff0c\u4e0d\u4f1a\u8bef\u6740\u3002"""
     t = _get(u, timeout)
     if not t:
-        return False            # 抓不到不强判（交回身份验证结果决定）
-    if not _PORTAL_KW.search(t):    # 全文匹配：门户特征词常在页脚
+        return False            # \u6293\u4e0d\u5230\u4e0d\u5f3a\u5224\uff08\u4ea4\u56de\u8eab\u4efd\u9a8c\u8bc1\u7ed3\u679c\u51b3\u5b9a\uff09
+    if not _PORTAL_KW.search(t):    # \u5168\u6587\u5339\u914d\uff1a\u95e8\u6237\u7279\u5f81\u8bcd\u5e38\u5728\u9875\u811a
         return False
     m = _HOST_RE.match(u)
     host = m.group(1) if m else ''
@@ -389,8 +389,8 @@ def is_portal(u, timeout=8):
 
 
 def alias_candidates(aliases, max_candidates=12):
-    """导航映射里按别名筛出的**原始候选** URL（未验证——可能是活域/跳转壳/入口门户）。
-    与 discover 的区别：不做任何探测过滤，交给调用方做壳跟随+身份验证。"""
+    """\u5bfc\u822a\u6620\u5c04\u91cc\u6309\u522b\u540d\u7b5b\u51fa\u7684**\u539f\u59cb\u5019\u9009** URL\uff08\u672a\u9a8c\u8bc1\u2014\u2014\u53ef\u80fd\u662f\u6d3b\u57df/\u8df3\u8f6c\u58f3/\u5165\u53e3\u95e8\u6237\uff09\u3002
+    \u4e0e discover \u7684\u533a\u522b\uff1a\u4e0d\u505a\u4efb\u4f55\u63a2\u6d4b\u8fc7\u6ee4\uff0c\u4ea4\u7ed9\u8c03\u7528\u65b9\u505a\u58f3\u8ddf\u968f+\u8eab\u4efd\u9a8c\u8bc1\u3002"""
     mmap = nav_site_map() or {}
     pats = [str(a).lower() for a in (aliases or []) if a]
     cands = []
@@ -406,13 +406,13 @@ def alias_candidates(aliases, max_candidates=12):
 
 
 def explore_hosts(aliases, probe=None, timeout=8):
-    """web 型源统一接入入口（域名池/发布页全挂后调用）。
-    aliases: ['douyin','抖阴']，首个作为持久化主键
-    probe(host_url)->bool: 源自身身份验证（抓首页查站名等）；
-    流程：① known() 历史成果逐个快验（活域直接复用，省一次全量探索）
-         → ② 全量 discover + 壳跟随（锚点壳→Base64门户→泛解析基域）
-         → ③ remember 持久化。
-    返回 [活域URL]（按优先级排序），失败返回 []。"""
+    """web \u578b\u6e90\u7edf\u4e00\u63a5\u5165\u5165\u53e3\uff08\u57df\u540d\u6c60/\u53d1\u5e03\u9875\u5168\u6302\u540e\u8c03\u7528\uff09\u3002
+    aliases: ['douyin','\u6296\u9634']\uff0c\u9996\u4e2a\u4f5c\u4e3a\u6301\u4e45\u5316\u4e3b\u952e
+    probe(host_url)->bool: \u6e90\u81ea\u8eab\u8eab\u4efd\u9a8c\u8bc1\uff08\u6293\u9996\u9875\u67e5\u7ad9\u540d\u7b49\uff09\uff1b
+    \u6d41\u7a0b\uff1a\u2460 known() \u5386\u53f2\u6210\u679c\u9010\u4e2a\u5feb\u9a8c\uff08\u6d3b\u57df\u76f4\u63a5\u590d\u7528\uff0c\u7701\u4e00\u6b21\u5168\u91cf\u63a2\u7d22\uff09
+         \u2192 \u2461 \u5168\u91cf discover + \u58f3\u8ddf\u968f\uff08\u951a\u70b9\u58f3\u2192Base64\u95e8\u6237\u2192\u6cdb\u89e3\u6790\u57fa\u57df\uff09
+         \u2192 \u2462 remember \u6301\u4e45\u5316\u3002
+    \u8fd4\u56de [\u6d3b\u57dfURL]\uff08\u6309\u4f18\u5148\u7ea7\u6392\u5e8f\uff09\uff0c\u5931\u8d25\u8fd4\u56de []\u3002"""
     primary = str(aliases[0]) if aliases else ''
 
     def _ok(u):
@@ -426,12 +426,12 @@ def explore_hosts(aliases, probe=None, timeout=8):
         if not base:
             return False
         try:
-            return not is_portal(u, timeout)    # 入口门户复核（防 SEO 门站假阳性）
+            return not is_portal(u, timeout)    # \u5165\u53e3\u95e8\u6237\u590d\u6838\uff08\u9632 SEO \u95e8\u7ad9\u5047\u9633\u6027\uff09
         except Exception:
             return True
 
     def _par(urls):
-        """并行验证，返回活域列表（原序）。"""
+        """\u5e76\u884c\u9a8c\u8bc1\uff0c\u8fd4\u56de\u6d3b\u57df\u5217\u8868\uff08\u539f\u5e8f\uff09\u3002"""
         urls = [u for u in urls if u]
         if not urls:
             return []
@@ -452,7 +452,7 @@ def explore_hosts(aliases, probe=None, timeout=8):
         return [u for u in urls if _ok(u)]
 
     def _wild_variants(urls):
-        """裸基域(xxx.cc)生成泛解析候选。"""
+        """\u88f8\u57fa\u57df(xxx.cc)\u751f\u6210\u6cdb\u89e3\u6790\u5019\u9009\u3002"""
         out = []
         for u in urls:
             m = _HOST_RE.match(u)
@@ -462,10 +462,10 @@ def explore_hosts(aliases, probe=None, timeout=8):
         return out
 
     def _shell_targets(u):
-        """u 是跳转/入口壳时返回指向候选：
-        ① 锚点壳(<1200B 自动跳转) -> href 目标
-        ② Base64 入口壳 -> 解码抽域名（官方门户，列入口域/泛解析基域）
-        正常页面返回 []。"""
+        """u \u662f\u8df3\u8f6c/\u5165\u53e3\u58f3\u65f6\u8fd4\u56de\u6307\u5411\u5019\u9009\uff1a
+        \u2460 \u951a\u70b9\u58f3(<1200B \u81ea\u52a8\u8df3\u8f6c) -> href \u76ee\u6807
+        \u2461 Base64 \u5165\u53e3\u58f3 -> \u89e3\u7801\u62bd\u57df\u540d\uff08\u5b98\u65b9\u95e8\u6237\uff0c\u5217\u5165\u53e3\u57df/\u6cdb\u89e3\u6790\u57fa\u57df\uff09
+        \u6b63\u5e38\u9875\u9762\u8fd4\u56de []\u3002"""
         t = _get(u, timeout)
         if not t:
             return []
@@ -495,15 +495,15 @@ def explore_hosts(aliases, probe=None, timeout=8):
         return []
 
     def _resolve(u):
-        """候选 -> 活域：直接验 → 壳跟随(≤2层，每层附泛解析候选) → 返回首个活域。
-        泛解析候选排在裸基域前（裸 apex 通常死，任意词子域才是真站形态）。"""
+        """\u5019\u9009 -> \u6d3b\u57df\uff1a\u76f4\u63a5\u9a8c \u2192 \u58f3\u8ddf\u968f(\u22642\u5c42\uff0c\u6bcf\u5c42\u9644\u6cdb\u89e3\u6790\u5019\u9009) \u2192 \u8fd4\u56de\u9996\u4e2a\u6d3b\u57df\u3002
+        \u6cdb\u89e3\u6790\u5019\u9009\u6392\u5728\u88f8\u57fa\u57df\u524d\uff08\u88f8 apex \u901a\u5e38\u6b7b\uff0c\u4efb\u610f\u8bcd\u5b50\u57df\u624d\u662f\u771f\u7ad9\u5f62\u6001\uff09\u3002"""
         if _ok(u):
             return u.rstrip('/')
         lvl1 = _shell_targets(u)[:5]
         cand1 = (_wild_variants(lvl1) + lvl1)[:16]
         for live in _par(cand1):
             return live.rstrip('/')
-        for t in lvl1[:3]:                      # 二层：门户列的域可能又是锚点壳
+        for t in lvl1[:3]:                      # \u4e8c\u5c42\uff1a\u95e8\u6237\u5217\u7684\u57df\u53ef\u80fd\u53c8\u662f\u951a\u70b9\u58f3
             lvl2 = _shell_targets(t)[:5]
             cand2 = (_wild_variants(lvl2) + lvl2)[:16]
             live = _par(cand2)
@@ -522,7 +522,7 @@ def explore_hosts(aliases, probe=None, timeout=8):
     if live:
         remember(primary, live)
         return live
-    # 全量探索：原始候选（可能是活域/锚点壳/Base64门户）并行做壳跟随解析
+    # \u5168\u91cf\u63a2\u7d22\uff1a\u539f\u59cb\u5019\u9009\uff08\u53ef\u80fd\u662f\u6d3b\u57df/\u951a\u70b9\u58f3/Base64\u95e8\u6237\uff09\u5e76\u884c\u505a\u58f3\u8ddf\u968f\u89e3\u6790
     got = alias_candidates(aliases)
 
     def _task(u):
@@ -552,10 +552,10 @@ def explore_hosts(aliases, probe=None, timeout=8):
 
 
 def discover(aliases, validate=None, timeout=8, max_candidates=12, max_results=3):
-    """从导航站映射里按别名筛候选并验证，返回活域 URL 列表。
-    aliases: ['huangdou','黄豆'] 同时匹配域名与站名（忽略大小写）
-    validate(host)->bool: 调用方协议级验证（API 型源必传，防广告壳冒充）；
-    缺省退化为 HTTP 探测（200 且正文 >3000 字）。"""
+    """\u4ece\u5bfc\u822a\u7ad9\u6620\u5c04\u91cc\u6309\u522b\u540d\u7b5b\u5019\u9009\u5e76\u9a8c\u8bc1\uff0c\u8fd4\u56de\u6d3b\u57df URL \u5217\u8868\u3002
+    aliases: ['huangdou','\u9ec4\u8c46'] \u540c\u65f6\u5339\u914d\u57df\u540d\u4e0e\u7ad9\u540d\uff08\u5ffd\u7565\u5927\u5c0f\u5199\uff09
+    validate(host)->bool: \u8c03\u7528\u65b9\u534f\u8bae\u7ea7\u9a8c\u8bc1\uff08API \u578b\u6e90\u5fc5\u4f20\uff0c\u9632\u5e7f\u544a\u58f3\u5192\u5145\uff09\uff1b
+    \u7f3a\u7701\u9000\u5316\u4e3a HTTP \u63a2\u6d4b\uff08200 \u4e14\u6b63\u6587 >3000 \u5b57\uff09\u3002"""
     mmap = nav_site_map() or {}
     pats = [str(a).lower() for a in (aliases or []) if a]
     cands = []

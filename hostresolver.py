@@ -1,31 +1,31 @@
 # -*- coding: utf-8 -*-
 """
-hostresolver.py —— 通用动态域名解析 v2（发布页深度抽链 + 候选镜像并行实测 + 成功缓存）
+hostresolver.py \u2014\u2014 \u901a\u7528\u52a8\u6001\u57df\u540d\u89e3\u6790 v2\uff08\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe + \u5019\u9009\u955c\u50cf\u5e76\u884c\u5b9e\u6d4b + \u6210\u529f\u7f13\u5b58\uff09
 
-解决：影视类站点域名频繁轮换（泛子域 + 发布页动态生成），py 源内置候选池滞后失效。
+\u89e3\u51b3\uff1a\u5f71\u89c6\u7c7b\u7ad9\u70b9\u57df\u540d\u9891\u7e41\u8f6e\u6362\uff08\u6cdb\u5b50\u57df + \u53d1\u5e03\u9875\u52a8\u6001\u751f\u6210\uff09\uff0cpy \u6e90\u5185\u7f6e\u5019\u9009\u6c60\u6ede\u540e\u5931\u6548\u3002
 
-v2 相对 v1 的根因级升级：
-  1.【深度抽链】发布页若把内容藏进 document.write(Base64.decode('...'))（每日大赛/黑料
-     不打烊同款），先解码再扫；并识别「随机词 + '.泛解析基域'」生成算法（words.random()
-     + '.xxx.cc'），自动按词表生成 4 条候选线路——站方换基域时发布页解码即得新域，候选池
-     永不过期。
-  2.【并行探测】全部候选并发实测（总耗时≈单次超时，不再串行叠加 8s×N）。
-  3.【成功缓存】选站结果缓存 30 分钟，同一次会话内重复 init 不再探测，秒开。
-  4.【失败显式化】全部候选失败时返回 ''（不回退死域首项静默空转）。调用方应让各接口
-     走自身 try/except 返回空结果，App 端表现为明确的失败而非假加载。
+v2 \u76f8\u5bf9 v1 \u7684\u6839\u56e0\u7ea7\u5347\u7ea7\uff1a
+  1.\u3010\u6df1\u5ea6\u62bd\u94fe\u3011\u53d1\u5e03\u9875\u82e5\u628a\u5185\u5bb9\u85cf\u8fdb document.write(Base64.decode('...'))\uff08\u6bcf\u65e5\u5927\u8d5b/\u9ed1\u6599
+     \u4e0d\u6253\u70ca\u540c\u6b3e\uff09\uff0c\u5148\u89e3\u7801\u518d\u626b\uff1b\u5e76\u8bc6\u522b\u300c\u968f\u673a\u8bcd + '.\u6cdb\u89e3\u6790\u57fa\u57df'\u300d\u751f\u6210\u7b97\u6cd5\uff08words.random()
+     + '.xxx.cc'\uff09\uff0c\u81ea\u52a8\u6309\u8bcd\u8868\u751f\u6210 4 \u6761\u5019\u9009\u7ebf\u8def\u2014\u2014\u7ad9\u65b9\u6362\u57fa\u57df\u65f6\u53d1\u5e03\u9875\u89e3\u7801\u5373\u5f97\u65b0\u57df\uff0c\u5019\u9009\u6c60
+     \u6c38\u4e0d\u8fc7\u671f\u3002
+  2.\u3010\u5e76\u884c\u63a2\u6d4b\u3011\u5168\u90e8\u5019\u9009\u5e76\u53d1\u5b9e\u6d4b\uff08\u603b\u8017\u65f6\u2248\u5355\u6b21\u8d85\u65f6\uff0c\u4e0d\u518d\u4e32\u884c\u53e0\u52a0 8s\u00d7N\uff09\u3002
+  3.\u3010\u6210\u529f\u7f13\u5b58\u3011\u9009\u7ad9\u7ed3\u679c\u7f13\u5b58 30 \u5206\u949f\uff0c\u540c\u4e00\u6b21\u4f1a\u8bdd\u5185\u91cd\u590d init \u4e0d\u518d\u63a2\u6d4b\uff0c\u79d2\u5f00\u3002
+  4.\u3010\u5931\u8d25\u663e\u5f0f\u5316\u3011\u5168\u90e8\u5019\u9009\u5931\u8d25\u65f6\u8fd4\u56de ''\uff08\u4e0d\u56de\u9000\u6b7b\u57df\u9996\u9879\u9759\u9ed8\u7a7a\u8f6c\uff09\u3002\u8c03\u7528\u65b9\u5e94\u8ba9\u5404\u63a5\u53e3
+     \u8d70\u81ea\u8eab try/except \u8fd4\u56de\u7a7a\u7ed3\u679c\uff0cApp \u7aef\u8868\u73b0\u4e3a\u660e\u786e\u7684\u5931\u8d25\u800c\u975e\u5047\u52a0\u8f7d\u3002
 
-调用方（各 py 源）只需声明：
-  PUBLISH_PAGE = 'https://xxx.xxx/'          # 稳定发布页（可空）
-  CANDIDATE_HOSTS = ['https://a/', ...]      # 已知镜像，按存活排序
+\u8c03\u7528\u65b9\uff08\u5404 py \u6e90\uff09\u53ea\u9700\u58f0\u660e\uff1a
+  PUBLISH_PAGE = 'https://xxx.xxx/'          # \u7a33\u5b9a\u53d1\u5e03\u9875\uff08\u53ef\u7a7a\uff09
+  CANDIDATE_HOSTS = ['https://a/', ...]      # \u5df2\u77e5\u955c\u50cf\uff0c\u6309\u5b58\u6d3b\u6392\u5e8f
   self.host = resolve_host(PUBLISH_PAGE, CANDIDATE_HOSTS, headers=..., proxies=...)
-  # 返回可能是 ''，调用方接口层 try/except 兜住即可
+  # \u8fd4\u56de\u53ef\u80fd\u662f ''\uff0c\u8c03\u7528\u65b9\u63a5\u53e3\u5c42 try/except \u515c\u4f4f\u5373\u53ef
 
-ext 机制（影视.json 站点条目 ext 字段，gitee 网页可直接改）：
-  文本: publish@https://...;hosts@https://a,https://b;host@https://...
-  JSON: {"publish":"...","hosts":["..."],"host":"...","proxies":{...}}
-  - host@   锁定主页（最高优先级，跳过一切探测，站点结构大改时用）
-  - publish@ 发布页地址（发布页换了改这里）
-  - hosts@  新增候选镜像（实测顺序仅排在发布页泛解析候选之后）
+ext \u673a\u5236\uff08\u5f71\u89c6.json \u7ad9\u70b9\u6761\u76ee ext \u5b57\u6bb5\uff0cgitee \u7f51\u9875\u53ef\u76f4\u63a5\u6539\uff09\uff1a
+  \u6587\u672c: publish@https://...;hosts@https://a,https://b;host@https://...
+  JSON: {\"publish\":\"...\",\"hosts\":[\"...\"],\"host\":\"...\",\"proxies\":{...}}
+  - host@   \u9501\u5b9a\u4e3b\u9875\uff08\u6700\u9ad8\u4f18\u5148\u7ea7\uff0c\u8df3\u8fc7\u4e00\u5207\u63a2\u6d4b\uff0c\u7ad9\u70b9\u7ed3\u6784\u5927\u6539\u65f6\u7528\uff09
+  - publish@ \u53d1\u5e03\u9875\u5730\u5740\uff08\u53d1\u5e03\u9875\u6362\u4e86\u6539\u8fd9\u91cc\uff09
+  - hosts@  \u65b0\u589e\u5019\u9009\u955c\u50cf\uff08\u5b9e\u6d4b\u987a\u5e8f\u4ec5\u6392\u5728\u53d1\u5e03\u9875\u6cdb\u89e3\u6790\u5019\u9009\u4e4b\u540e\uff09
 """
 import re
 import time
@@ -43,20 +43,20 @@ except Exception:
     ThreadPoolExecutor = None
     as_completed = None
 
-# ---------------------------------------------------------------- 缓存
+# ---------------------------------------------------------------- \u7f13\u5b58
 _CACHE = {}
-_CACHE_TTL = 1800  # 成功选站缓存 30 分钟
+_CACHE_TTL = 1800  # \u6210\u529f\u9009\u7ad9\u7f13\u5b58 30 \u5206\u949f
 
 
 def clear_cache():
-    """清空选站缓存（调试用；调用方一般不需要）"""
+    """\u6e05\u7a7a\u9009\u7ad9\u7f13\u5b58\uff08\u8c03\u8bd5\u7528\uff1b\u8c03\u7528\u65b9\u4e00\u822c\u4e0d\u9700\u8981\uff09"""
     _CACHE.clear()
 
 
-# ---------------------------------------------------------------- ext 解析
+# ---------------------------------------------------------------- ext \u89e3\u6790
 def parse_ext(ext_str):
-    """解析影视.json 站点条目的 ext 字段（文本格式，分号分隔 @ 键值）。
-    无法识别的片段自动忽略；解析失败返回 {}（py 回退内置默认值，不会崩源）。"""
+    """\u89e3\u6790\u5f71\u89c6.json \u7ad9\u70b9\u6761\u76ee\u7684 ext \u5b57\u6bb5\uff08\u6587\u672c\u683c\u5f0f\uff0c\u5206\u53f7\u5206\u9694 @ \u952e\u503c\uff09\u3002
+    \u65e0\u6cd5\u8bc6\u522b\u7684\u7247\u6bb5\u81ea\u52a8\u5ffd\u7565\uff1b\u89e3\u6790\u5931\u8d25\u8fd4\u56de {}\uff08py \u56de\u9000\u5185\u7f6e\u9ed8\u8ba4\u503c\uff0c\u4e0d\u4f1a\u5d29\u6e90\uff09\u3002"""
     out = {}
     for part in str(ext_str or '').split(';'):
         part = part.strip()
@@ -77,8 +77,8 @@ def parse_ext(ext_str):
 
 
 def ext_of(extend):
-    """App 传给 Spider.init() 的 extend 统一解析入口。
-    兼容 None / dict(JSON) / str(文本或JSON)。任何异常返回 {}（不崩源）。"""
+    """App \u4f20\u7ed9 Spider.init() \u7684 extend \u7edf\u4e00\u89e3\u6790\u5165\u53e3\u3002
+    \u517c\u5bb9 None / dict(JSON) / str(\u6587\u672c\u6216JSON)\u3002\u4efb\u4f55\u5f02\u5e38\u8fd4\u56de {}\uff08\u4e0d\u5d29\u6e90\uff09\u3002"""
     import json as _json
     try:
         if not extend:
@@ -106,8 +106,8 @@ def ext_of(extend):
         return {}
 
 
-# ---------------------------------------------------------------- 发布页深度抽链
-# 泛解析随机词池（与站方发布页同源取常用英文词；泛解析 DNS 下任意词均可解析）
+# ---------------------------------------------------------------- \u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe
+# \u6cdb\u89e3\u6790\u968f\u673a\u8bcd\u6c60\uff08\u4e0e\u7ad9\u65b9\u53d1\u5e03\u9875\u540c\u6e90\u53d6\u5e38\u7528\u82f1\u6587\u8bcd\uff1b\u6cdb\u89e3\u6790 DNS \u4e0b\u4efb\u610f\u8bcd\u5747\u53ef\u89e3\u6790\uff09
 _WILD_WORDS = (
     'abandon,ability,able,above,absence,accept,access,achieve,across,action,active,'
     'actual,adapt,address,adjust,admit,adopt,adult,advance,advice,afford,afraid,'
@@ -129,12 +129,12 @@ _WILD_WORDS = (
     'cell,center,central,century,certain,chain,chair'
 ).split(',')
 
-# 「随机词 + '.泛解析基域'」生成算法（如 words.random() + '.iljzezhab.cc'）
+# \u300c\u968f\u673a\u8bcd + '.\u6cdb\u89e3\u6790\u57fa\u57df'\u300d\u751f\u6210\u7b97\u6cd5\uff08\u5982 words.random() + '.iljzezhab.cc'\uff09
 _WILD_PAT = re.compile(
     r"[\w.]*random\s*\(\s*\)\s*\+\s*['\"]\.([a-z0-9-]+(?:\.[a-z0-9-]+)+)['\"]", re.I)
-# 发布页 b64 壳（document.write(Base64.decode('...')) 整页 HTML 藏 base64）
+# \u53d1\u5e03\u9875 b64 \u58f3\uff08document.write(Base64.decode('...')) \u6574\u9875 HTML \u85cf base64\uff09
 _B64_SHELL_PAT = re.compile(r"Base64\.decode\(\s*['\"]([A-Za-z0-9+/=]{100,})['\"]")
-# 发布页里必然混入的第三方大平台/统计/广告域——探测它们会把大页面误判成"站点可用"
+# \u53d1\u5e03\u9875\u91cc\u5fc5\u7136\u6df7\u5165\u7684\u7b2c\u4e09\u65b9\u5927\u5e73\u53f0/\u7edf\u8ba1/\u5e7f\u544a\u57df\u2014\u2014\u63a2\u6d4b\u5b83\u4eec\u4f1a\u628a\u5927\u9875\u9762\u8bef\u5224\u6210"\u7ad9\u70b9\u53ef\u7528"
 _JUNK_HOST_PAT = re.compile(
     r'(googletagmanager|google-analytics|googleads|gstatic|google\.|gitlab\.|github\.|'
     r'youtube\.|ytimg\.|twitter\.|x\.com|t\.me|telegram\.|addtoany\.|yandex\.|'
@@ -144,7 +144,7 @@ _JUNK_HOST_PAT = re.compile(
 
 
 def _expand_b64_shells(text):
-    """展开发布页里的 Base64 壳，返回 [原文, 解码页1, 解码页2...]"""
+    """\u5c55\u5f00\u53d1\u5e03\u9875\u91cc\u7684 Base64 \u58f3\uff0c\u8fd4\u56de [\u539f\u6587, \u89e3\u7801\u98751, \u89e3\u7801\u98752...]"""
     texts = [text]
     for m in _B64_SHELL_PAT.finditer(text):
         try:
@@ -155,8 +155,8 @@ def _expand_b64_shells(text):
 
 
 def extract_publish_domains(publish_page, headers, proxies, timeout):
-    """发布页深度抽链。返回 (静态镜像链接列表, 泛解析基域列表)。
-    JS 渲染但无 b64 壳的页面静态链接仍可能为空——泛解析基域识别是主通道。"""
+    """\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe\u3002\u8fd4\u56de (\u9759\u6001\u955c\u50cf\u94fe\u63a5\u5217\u8868, \u6cdb\u89e3\u6790\u57fa\u57df\u5217\u8868)\u3002
+    JS \u6e32\u67d3\u4f46\u65e0 b64 \u58f3\u7684\u9875\u9762\u9759\u6001\u94fe\u63a5\u4ecd\u53ef\u80fd\u4e3a\u7a7a\u2014\u2014\u6cdb\u89e3\u6790\u57fa\u57df\u8bc6\u522b\u662f\u4e3b\u901a\u9053\u3002"""
     if requests is None or not publish_page:
         return [], []
     try:
@@ -179,7 +179,7 @@ def extract_publish_domains(publish_page, headers, proxies, timeout):
 
 
 def _dedupe(urls):
-    """保序去重 + 补协议头。"""
+    """\u4fdd\u5e8f\u53bb\u91cd + \u8865\u534f\u8bae\u5934\u3002"""
     seen, out = set(), []
     for u in urls:
         u2 = (u or '').strip().rstrip('/')
@@ -193,10 +193,10 @@ def _dedupe(urls):
     return out
 
 
-# ---------------------------------------------------------------- 探测
+# ---------------------------------------------------------------- \u63a2\u6d4b
 def _probe(url, headers, proxies, timeout, depth=0, validate=None):
-    """测试单域名：跳转壳则跟随 <a href>（最多2层）；真内容返回最终 host；失败 None。
-    validate(final_host, text) -> bool：内容身份校验（防广告门站/第三方页冒充）。"""
+    """\u6d4b\u8bd5\u5355\u57df\u540d\uff1a\u8df3\u8f6c\u58f3\u5219\u8ddf\u968f <a href>\uff08\u6700\u591a2\u5c42\uff09\uff1b\u771f\u5185\u5bb9\u8fd4\u56de\u6700\u7ec8 host\uff1b\u5931\u8d25 None\u3002
+    validate(final_host, text) -> bool\uff1a\u5185\u5bb9\u8eab\u4efd\u6821\u9a8c\uff08\u9632\u5e7f\u544a\u95e8\u7ad9/\u7b2c\u4e09\u65b9\u9875\u5192\u5145\uff09\u3002"""
     if requests is None:
         return None
     try:
@@ -226,8 +226,8 @@ def _probe(url, headers, proxies, timeout, depth=0, validate=None):
 
 
 def _probe_all(urls, headers, proxies, timeout, validate=None):
-    """并行探测，任一候选成功即刻返回（取消其余任务）；全败返回 ''。
-    总耗时 ≈ 单次超时，不再随候选数量叠加。"""
+    """\u5e76\u884c\u63a2\u6d4b\uff0c\u4efb\u4e00\u5019\u9009\u6210\u529f\u5373\u523b\u8fd4\u56de\uff08\u53d6\u6d88\u5176\u4f59\u4efb\u52a1\uff09\uff1b\u5168\u8d25\u8fd4\u56de ''\u3002
+    \u603b\u8017\u65f6 \u2248 \u5355\u6b21\u8d85\u65f6\uff0c\u4e0d\u518d\u968f\u5019\u9009\u6570\u91cf\u53e0\u52a0\u3002"""
     if not urls:
         return ''
     if not (ThreadPoolExecutor and as_completed) or len(urls) == 1:
@@ -253,13 +253,13 @@ def _probe_all(urls, headers, proxies, timeout, validate=None):
         ex.shutdown(wait=False)
 
 
-# ---------------------------------------------------------------- 主入口
+# ---------------------------------------------------------------- \u4e3b\u5165\u53e3
 def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
                  proxies=None, timeout=8, use_cache=True, validate=None):
-    """返回当前可用 host（去尾斜杠）。全部失败返回 ''（调用方接口层自行兜空）。
-    validate(final_host, text)->bool：站点身份校验回调，防发布页混入的广告门站
-    （如 18se 导航）被当成真站缓存。顺序：发布页泛解析候选(最新鲜) > ext/内置候选
-    > 发布页静态链接。"""
+    """\u8fd4\u56de\u5f53\u524d\u53ef\u7528 host\uff08\u53bb\u5c3e\u659c\u6760\uff09\u3002\u5168\u90e8\u5931\u8d25\u8fd4\u56de ''\uff08\u8c03\u7528\u65b9\u63a5\u53e3\u5c42\u81ea\u884c\u515c\u7a7a\uff09\u3002
+    validate(final_host, text)->bool\uff1a\u7ad9\u70b9\u8eab\u4efd\u6821\u9a8c\u56de\u8c03\uff0c\u9632\u53d1\u5e03\u9875\u6df7\u5165\u7684\u5e7f\u544a\u95e8\u7ad9
+    \uff08\u5982 18se \u5bfc\u822a\uff09\u88ab\u5f53\u6210\u771f\u7ad9\u7f13\u5b58\u3002\u987a\u5e8f\uff1a\u53d1\u5e03\u9875\u6cdb\u89e3\u6790\u5019\u9009(\u6700\u65b0\u9c9c) > ext/\u5185\u7f6e\u5019\u9009
+    > \u53d1\u5e03\u9875\u9759\u6001\u94fe\u63a5\u3002"""
     candidate_hosts = candidate_hosts or []
     key = (publish_page or '', tuple(candidate_hosts))
     if use_cache:
@@ -267,7 +267,7 @@ def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
         if hit and time.time() < hit[1]:
             return hit[0]
 
-    # 1) 发布页深度抽链（泛解析基域自动生成候选 + 静态镜像链接）
+    # 1) \u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe\uff08\u6cdb\u89e3\u6790\u57fa\u57df\u81ea\u52a8\u751f\u6210\u5019\u9009 + \u9759\u6001\u955c\u50cf\u94fe\u63a5\uff09
     pub_domains, wild_bases = [], []
     if publish_page:
         try:
@@ -278,16 +278,16 @@ def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
     words = random.sample(_WILD_WORDS, min(4, len(_WILD_WORDS)))
     wild_candidates = ['https://%s.%s' % (w, b) for b in wild_bases for w in words]
 
-    # 2) 分层候选（各层保序去重）：
-    #    第一层 = 泛解析候选 + ext/内置候选（新鲜且可信，绝大多数场景此层即命中）
-    #    第二层 = 发布页静态链接（仅第一层全败时才测，防第三方大页面误判成站点）
+    # 2) \u5206\u5c42\u5019\u9009\uff08\u5404\u5c42\u4fdd\u5e8f\u53bb\u91cd\uff09\uff1a
+    #    \u7b2c\u4e00\u5c42 = \u6cdb\u89e3\u6790\u5019\u9009 + ext/\u5185\u7f6e\u5019\u9009\uff08\u65b0\u9c9c\u4e14\u53ef\u4fe1\uff0c\u7edd\u5927\u591a\u6570\u573a\u666f\u6b64\u5c42\u5373\u547d\u4e2d\uff09
+    #    \u7b2c\u4e8c\u5c42 = \u53d1\u5e03\u9875\u9759\u6001\u94fe\u63a5\uff08\u4ec5\u7b2c\u4e00\u5c42\u5168\u8d25\u65f6\u624d\u6d4b\uff0c\u9632\u7b2c\u4e09\u65b9\u5927\u9875\u9762\u8bef\u5224\u6210\u7ad9\u70b9\uff09
     tier1 = _dedupe(wild_candidates + list(candidate_hosts))
     tier2 = [u for u in _dedupe(pub_domains) if u not in set(tier1)]
 
     if not tier1 and not tier2:
         return ''
 
-    # 3) 分波实测（use_cache=False=强制刷新，但成功结果仍写缓存供后续 init 秒开）
+    # 3) \u5206\u6ce2\u5b9e\u6d4b\uff08use_cache=False=\u5f3a\u5236\u5237\u65b0\uff0c\u4f46\u6210\u529f\u7ed3\u679c\u4ecd\u5199\u7f13\u5b58\u4f9b\u540e\u7eed init \u79d2\u5f00\uff09
     host = _probe_all(tier1, headers, proxies, timeout, validate)
     if not host and tier2:
         host = _probe_all(tier2, headers, proxies, timeout, validate)

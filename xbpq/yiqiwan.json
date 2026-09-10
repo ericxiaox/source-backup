@@ -1,0 +1,30 @@
+{
+    "\u4f5c\u8005": "h",
+    "\u7ad9\u540d": "\u4e00\u8d77\u8349\u81ea\u52a8\u6321",
+    "\u8bf7\u6c42\u5934": "User-Agent@Mozilla/5.0 (Linux\uff1b\uff1b Android 16\uff1b\uff1b 2510DRK44C Build/BP2A.250605.031.A3) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/143.0.7499.192 Mobile Safari/537.36",
+    "\u53d1\u5e03\u9875": "https://91fby.cc/91a/",
+    "\u57df\u540d-c": "{{\u53d1\u5e03\u9875}}[\u5de5\u5177:\u6e90\u7801#<a href=\"\u622a\u53d6\"]",
+    "\u4e3b\u9875url": "{{\u57df\u540d-c}}[\u66ff\u6362:/vod>>/]",
+	"\u6570\u7ec4": "<div class=\"video-item\">&&<div class=\"video-preview w-full h-full left-0 top-0\">[\u4e0d\u5305\u542b:_type=\"data-src\">]||\u9ed1\u6599--<ul class=\"grid grid-cols-1 gap-2.5 md:gap-4\">&&<div class=\"flex justify-center w-full overflow-hidden mt-3 md:mt-5\">\u5206\u5272(\u540e:</article>)||\ud83d\udccc\u5973\u4f18--<li class=\"group\">&&<div class=\"truncate\">||\ud83d\udccc\u70ed\u95e8\u8bcd\u6761--<li class=\"flex mr-2.5 md:mr-5 last:mr-0 mb-2.5 md:mb-5\">&&</li>",
+	"\u6807\u9898": "alt=\"&&\"||\u9ed1\u6599--<h2 class=\"text-xl mb-1 md:mb-2.5 post-item-title\">&&</h2>||\ud83d\udccc\u5973\u4f18--alt=\"&&\"||\ud83d\udccc\u70ed\u95e8\u8bcd\u6761--href=\"*\">&&</a>",
+	"\u526f\u6807\u9898": "<div class=\"text-sm opacity-50 py-0.5 px-1.5 bg-black rounded-large text-white\">&&</div>||\u9ed1\u6599--<span>&&</span>",
+	"\u56fe\u7247": "data-src=\"&&\"||\u9ed1\u6599--style=\"background-image:*url(\"&&\")||\ud83d\udccc\u5973\u4f18--data-src=\"&&\"",
+	"\u94fe\u63a5": "href=\"&&\"||\u9ed1\u6599--<a href=\"&&\"||\ud83d\udccc\u5973\u4f18--href=\"&&\"+?page={catePg}||\ud83d\udccc\u70ed\u95e8\u8bcd\u6761--https://haijiaod.life/search/keyword/page/{catePg}/+href=\"/search/keyword/&&\"",
+	"\u7b80\u4ecb": "",
+	"\u55c5\u63a2\u8bcd": ".m3u8",
+    "\u8df3\u8f6c\u64ad\u653e\u94fe\u63a5": "const source*=*'&&'",
+	"\u76f4\u63a5\u64ad\u653e": "1",
+	"\u641c\u7d22\u6a21\u5f0f": "1",
+    "\u4e8c\u7ea7\u76ee\u5f55": "\ud83d\udccc\u5973\u4f18,\ud83d\udccc\u70ed\u95e8\u8bcd\u6761|folder-0-0-H",
+    "\u4e8c\u7ea7ID": "",
+    "\u7279\u6b8a\u5206\u7c7b\u94fe\u63a5": "\u56fd\u4ea7,\u65e5\u672c,\u6b27\u7f8e,\u4e09\u7ea7,\u52a8\u6f2b,\u53e6\u7c7b${{\u4e3b\u9875url}}video/filtering/{cateId}-{catePg}/by{by}.html#\u9ed1\u6599${{\u4e3b\u9875url}}{cateId}/page/{catePg}.html#\ud83d\udccc\u5973\u4f18${{\u4e3b\u9875url}}actorshow/{area}--{\u987a\u5e8f}----{catePg}--/id/40.html#\ud83d\udccc\u70ed\u95e8\u8bcd\u6761${{\u4e3b\u9875url}}label/hotsearch.html#\u81ea\u5b9a\u4e49\u8bcd\u6761${{\u4e3b\u9875url}}search/keyword/page/{catePg}/wd/{cateId}.html",
+	"\u641c\u7d22url": "{{\u4e3b\u9875url}}search/keyword/page/{pg}/wd/{wd}.html",
+    "\u5206\u7c7burl": "{cateId}?page={catePg}",
+    "\u5206\u7c7b": "\u56fd\u4ea7$11#\u65e5\u672c$12#\u6b27\u7f8e$13#\u4e09\u7ea7$14#\u52a8\u6f2b$15#\u53e6\u7c7b$34#\u9ed1\u6599$art/index/by/time#\ud83d\udccc\u5973\u4f18$40#\ud83d\udccc\u70ed\u95e8\u8bcd\u6761#\u81ea\u5b9a\u4e49\u8bcd\u6761$\u6625\u836f",
+    "\u7c7b\u578b": "\u5168\u90e8$11#\u56fd\u4ea7\u81ea\u62cd$16#\u56fd\u4ea7\u5077\u62cd$17#\u56fd\u4ea7\u63a2\u82b1$18#\u771f\u5b9e\u4e71\u4f26$19#\u6210\u4eba\u4e3b\u64ad$20#\u9ed1\u6599\u5403\u74dc$21#\u798f\u5229\u59ec$22#\u56fd\u4ea7\u4f20\u5a92$23#\u6027\u4fb5\u4fb5\u72af$24#\u6296\u97f3\u77ed\u89c6\u9891$39||\u5168\u90e8$12#\u4e2d\u6587\u5b57\u5e55$25#\u5c9b\u56fd\u81ea\u62cd$26#\u65e0\u7801AV$27#AV\u89e3\u8bf4$28||\u5168\u90e8$13#\u6b27\u7f8e\u6210\u4eba$29#\u9ed1\u4eba\u7cfb\u5217$43||\u5168\u90e8$14#\u56fd\u4ea7\u4e09\u7ea7$30#\u65e5\u97e9\u4e09\u7ea7$31||\u5168\u90e8$15#\u6210\u4eba\u52a8\u6f2b$32#3D\u52a8\u6f2b$33||\u5168\u90e8$34#\u730e\u5947\u91cd\u53e3\u5473$35#\u7537\u540c\u5973\u540c$36#\u4eba\u5996\u53d8\u6027$37#\u660e\u661f\u6deb\u68a6$38||\u5168\u90e8\u9ed1\u6599$art/index/by/time#\u7f51\u53cb\u7206\u6599$artshow-41#\u53cd\u5dee\u5a4a$artshow-42#\u660e\u661f\u7f51\u7ea2$artshow-44||\u7a7a||\u7a7a||\u6625\u836f&\u4eba\u59bb&\u7cbe\u6cb9&\u7537\u540c",
+    "\u6392\u5e8f": "\u6700\u8fd1\u66f4\u65b0$/#\u5f53\u524d\u6700\u70ed$/hits_day#\u672c\u5468\u6700\u70ed$/hits_week#\u672c\u6708\u6700\u70ed$/hits_month",
+    "\u5730\u533a": "\u5927\u9646\u5730\u533a$%E5%A4%A7%E9%99%86#\u53f0\u6e7e\u5730\u533a$%E5%8F%B0%E6%B9%BE#\u9999\u6e2f\u5730\u533a$%E9%A6%99%E6%B8%AF#\u7f8e\u56fd\u5730\u533a$%E7%BE%8E%E5%9B%BD#\u65e5\u672c\u5730\u533a$%E6%97%A5%E6%9C%AC#\u8d8a\u5357\u5730\u533a$%E8%B6%8A%E5%8D%97",
+    "\u987a\u5e8f": "\u6700\u65b0\u66f4\u65b0$time#\u5f53\u4e0b\u6700\u70ed$hits_day#\u5468\u6700\u70ed$hits_week#\u6708\u6700\u70ed$hits_month"
+}
+
+

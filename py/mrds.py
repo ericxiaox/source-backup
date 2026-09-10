@@ -15,7 +15,7 @@ from base.spider import Spider as BaseSpider
 try:
     from hostresolver import resolve_host, parse_ext
 except Exception:
-    # hostresolver.py 与 py/ 同级的上级目录（source/ 根），按脚本自身位置定位，不依赖 cwd
+    # hostresolver.py \u4e0e py/ \u540c\u7ea7\u7684\u4e0a\u7ea7\u76ee\u5f55\uff08source/ \u6839\uff09\uff0c\u6309\u811a\u672c\u81ea\u8eab\u4f4d\u7f6e\u5b9a\u4f4d\uff0c\u4e0d\u4f9d\u8d56 cwd
     try:
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from hostresolver import resolve_host, parse_ext
@@ -23,7 +23,7 @@ except Exception:
         resolve_host = None
         parse_ext = None
 
-# explorer.py（source 根）：池全挂时从导航站自动探索活域（与 hostresolver 同目录）
+# explorer.py\uff08source \u6839\uff09\uff1a\u6c60\u5168\u6302\u65f6\u4ece\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\u6d3b\u57df\uff08\u4e0e hostresolver \u540c\u76ee\u5f55\uff09
 try:
     from explorer import explore_hosts
 except Exception:
@@ -31,23 +31,23 @@ except Exception:
 
 img_cache = {}
 
-# ---- 封面图代理提速（列表加载慢的主因：每图一次 TLS 握手 + 无缓存 + 无条件解密）----
+# ---- \u5c01\u9762\u56fe\u4ee3\u7406\u63d0\u901f\uff08\u5217\u8868\u52a0\u8f7d\u6162\u7684\u4e3b\u56e0\uff1a\u6bcf\u56fe\u4e00\u6b21 TLS \u63e1\u624b + \u65e0\u7f13\u5b58 + \u65e0\u6761\u4ef6\u89e3\u5bc6\uff09----
 from collections import OrderedDict
-_img_session = requests.Session()          # 连接复用：同图床 TLS keep-alive
+_img_session = requests.Session()          # \u8fde\u63a5\u590d\u7528\uff1a\u540c\u56fe\u5e8a TLS keep-alive
 _img_session.verify = False
-try:                                       # 连接池（App 侧并发拉图时不排队）
+try:                                       # \u8fde\u63a5\u6c60\uff08App \u4fa7\u5e76\u53d1\u62c9\u56fe\u65f6\u4e0d\u6392\u961f\uff09
     from requests.adapters import HTTPAdapter
     _ad = HTTPAdapter(pool_connections=4, pool_maxsize=12)
     _img_session.mount('https://', _ad)
     _img_session.mount('http://', _ad)
 except Exception:
     pass
-_img_cache = OrderedDict()                 # 解密结果 LRU：滚动回看/重复封面秒出
+_img_cache = OrderedDict()                 # \u89e3\u5bc6\u7ed3\u679c LRU\uff1a\u6eda\u52a8\u56de\u770b/\u91cd\u590d\u5c01\u9762\u79d2\u51fa
 _IMG_CACHE_MAX = 60
 
 
 def _img_fetch(real_url, headers, proxies):
-    """取图+按需解密+缓存，返回 [status, content_type, bytes]。"""
+    """\u53d6\u56fe+\u6309\u9700\u89e3\u5bc6+\u7f13\u5b58\uff0c\u8fd4\u56de [status, content_type, bytes]\u3002"""
     if real_url in _img_cache:
         _img_cache.move_to_end(real_url)
         ct, b = _img_cache[real_url]
@@ -56,12 +56,12 @@ def _img_fetch(real_url, headers, proxies):
     raw = res.content or b''
     ct = 'image/jpeg'
     if raw[:3] == b'\xff\xd8\xff':
-        b = raw                                        # 裸 JPEG 免解密
+        b = raw                                        # \u88f8 JPEG \u514d\u89e3\u5bc6
     elif raw[:8] == b'\x89PNG\r\n\x1a\n':
         b, ct = raw, 'image/png'
     elif raw[:4] == b'GIF8':
         b, ct = raw, 'image/gif'
-    else:                                              # CDN 级 AES 加密图
+    else:                                              # CDN \u7ea7 AES \u52a0\u5bc6\u56fe
         b = _aesimg(raw)
         if b[:8] == b'\x89PNG\r\n\x1a\n':
             ct = 'image/png'
@@ -75,7 +75,7 @@ def _img_fetch(real_url, headers, proxies):
 
 
 def _aesimg(data):
-    """模块级 AES 图片解密（CDN 加密图，多 key 自动尝试）。与 Spider.aesimg 同逻辑。"""
+    """\u6a21\u5757\u7ea7 AES \u56fe\u7247\u89e3\u5bc6\uff08CDN \u52a0\u5bc6\u56fe\uff0c\u591a key \u81ea\u52a8\u5c1d\u8bd5\uff09\u3002\u4e0e Spider.aesimg \u540c\u903b\u8f91\u3002"""
     if len(data) < 16:
         return data
     keys = [(b'f5d965df75336270', b'97b60394abc2fbe1'), (b'75336270f5d965df', b'abc2fbe197b60394')]
@@ -97,21 +97,21 @@ def _aesimg(data):
 
 class Spider(BaseSpider):
 
-    # 广告/站务名黑名单（分集名/标签用·全量）——词表以 b64 存储运行时解码，防托管平台内容扫描误判
+    # \u5e7f\u544a/\u7ad9\u52a1\u540d\u9ed1\u540d\u5355\uff08\u5206\u96c6\u540d/\u6807\u7b7e\u7528\u00b7\u5168\u91cf\uff09\u2014\u2014\u8bcd\u8868\u4ee5 b64 \u5b58\u50a8\u8fd0\u884c\u65f6\u89e3\u7801\uff0c\u9632\u6258\u7ba1\u5e73\u53f0\u5185\u5bb9\u626b\u63cf\u8bef\u5224
     AD_NAME_RE = re.compile(b64decode('6IGU57O7fOWQiOS9nHzlub/lkYp85Y+R5biD6aG1fOacgOaWsOWcsOWdgHzmsLjkuYXlnLDlnYB85aSH55So5Zyw5Z2AfOWvvOiIqnzniYjmnYN85YWN6LSjfOWjsOaYjnzmipXnqL986LWe5YqpfOaLm+WVhnzov5TliKl85o6o5bm/fOWuouacjXzlvq7kv6F8UVF8cXF8576kfOmikemBk3xUR3znlLXmiqV8W1R0XWVsZWdyYW185a6Y572RfOeZu+W9lXzms6jlhox855WZ6KiAfOivhOiuunzmoIfnrb7kupF85b2S5qGjfOaQnOe0onzlhbPkuo585biu5YqpfOaJk+i1j3zmjZDotaB85YWF5YC8fOW8gOmAmuS8muWRmHzllYbln458572R6LStfOW9qeelqHzmo4vniYx85pSv5LuYfOaxh+asvnxBUFB8QXBwfGFwcHzkuIvovb185ZWG5YqhfOWPi+mTvnznlLPor7fpk77mjqV85Y+N6aaIfOS4vuaKpXznlKjmiLd85aS05YOPfOetvuWIsHzmuKnppqjmj5DnpLp86YeN6KaB5o+Q56S6fOW+gOacn3zlm57lrrbnmoTot68=').decode('utf-8'))
 
-    # 分类专用精简黑名单（防误杀"原创投稿"这类真分类），同上 b64 方式
+    # \u5206\u7c7b\u4e13\u7528\u7cbe\u7b80\u9ed1\u540d\u5355\uff08\u9632\u8bef\u6740"\u539f\u521b\u6295\u7a3f"\u8fd9\u7c7b\u771f\u5206\u7c7b\uff09\uff0c\u540c\u4e0a b64 \u65b9\u5f0f
     AD_CAT_RE = re.compile(b64decode('6IGU57O7fOWQiOS9nHzlub/lkYp85Y+R5biD6aG1fOacgOaWsOWcsOWdgHzmsLjkuYXlnLDlnYB85aSH55So5Zyw5Z2AfOWvvOiIqnzlrqLmnI185b6u5L+hfFFRfHFxfOe+pHzpopHpgZN8VEd855S15oqlfFtUdF1lbGVncmFtfOWumOe9kXznmbvlvZV85rOo5YaMfEFQUHxBcHB8YXBwfOS4i+i9vXzllYbliqF85Y+L6ZO+fOWVhuWfjnznvZHotK185b2p56WofOaji+eJjHzmlK/ku5h85rGH5qy+fOaJk+i1j3zmjZDotaB85YWF5YC8').decode('utf-8'))
 
     img_cache = {}
 
     @staticmethod
     def _clean_name(s):
-        """剔除未渲染的前端模板串（如 {{u.username}}）"""
+        """\u5254\u9664\u672a\u6e32\u67d3\u7684\u524d\u7aef\u6a21\u677f\u4e32\uff08\u5982 {{u.username}}\uff09"""
         return re.sub(r'\{\{[^}]*\}\}', '', s or '').strip()
 
     def _valid_ep_name(self, s, max_len=40):
-        """清洗分集/标签名：模板串剔除后为空、超长、命中广告黑名单 → 返回 ''"""
+        """\u6e05\u6d17\u5206\u96c6/\u6807\u7b7e\u540d\uff1a\u6a21\u677f\u4e32\u5254\u9664\u540e\u4e3a\u7a7a\u3001\u8d85\u957f\u3001\u547d\u4e2d\u5e7f\u544a\u9ed1\u540d\u5355 \u2192 \u8fd4\u56de ''"""
         s = self._clean_name(s)
         if not s or len(s) > max_len:
             return ''
@@ -124,8 +124,8 @@ class Spider(BaseSpider):
         self._ext = {}
         ext_str = (extend or '').strip()
         if ext_str:
-            # 两种 ext 写法都支持：
-            #   1) 纯文本:  publish@https://...;hosts@https://a,https://b;host@https://...
+            # \u4e24\u79cd ext \u5199\u6cd5\u90fd\u652f\u6301\uff1a
+            #   1) \u7eaf\u6587\u672c:  publish@https://...;hosts@https://a,https://b;host@https://...
             #   2) JSON:    {"publish":"...","hosts":["..."],"host":"...","proxies":{...}}
             try:
                 cfg = json.loads(ext_str)
@@ -156,7 +156,7 @@ class Spider(BaseSpider):
         print(f"使用站点: {self.host}")
 
     def getName(self):
-        return "🌈 每日大赛|终极完美版"
+        return "\ud83c\udf08 \u6bcf\u65e5\u5927\u8d5b|\u7ec8\u6781\u5b8c\u7f8e\u7248"
 
     def isVideoFormat(self, url):
         return any(ext in (url or '') for ext in ['.m3u8', '.mp4', '.ts'])
@@ -169,25 +169,25 @@ class Spider(BaseSpider):
         img_cache.clear()
 
     def get_working_host(self):
-        """动态域名解析 v2（hostresolver）：ext 锁定 → 发布页深度抽链(b64壳解码+泛解析基域
-        自动生成候选) → 内置候选并行实测 → 成功缓存30分钟。全部失败返回 ''（接口层兜空，
-        坏得明明白白，不回退死域静默空转）。"""
+        """\u52a8\u6001\u57df\u540d\u89e3\u6790 v2\uff08hostresolver\uff09\uff1aext \u9501\u5b9a \u2192 \u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe(b64\u58f3\u89e3\u7801+\u6cdb\u89e3\u6790\u57fa\u57df
+        \u81ea\u52a8\u751f\u6210\u5019\u9009) \u2192 \u5185\u7f6e\u5019\u9009\u5e76\u884c\u5b9e\u6d4b \u2192 \u6210\u529f\u7f13\u5b5830\u5206\u949f\u3002\u5168\u90e8\u5931\u8d25\u8fd4\u56de ''\uff08\u63a5\u53e3\u5c42\u515c\u7a7a\uff0c
+        \u574f\u5f97\u660e\u660e\u767d\u767d\uff0c\u4e0d\u56de\u9000\u6b7b\u57df\u9759\u9ed8\u7a7a\u8f6c\uff09\u3002"""
         ext = getattr(self, '_ext', {}) or {}
-        # 0) ext 锁定主页：最高优先级，跳过一切探测（站点结构大改时的终极兜底）
+        # 0) ext \u9501\u5b9a\u4e3b\u9875\uff1a\u6700\u9ad8\u4f18\u5148\u7ea7\uff0c\u8df3\u8fc7\u4e00\u5207\u63a2\u6d4b\uff08\u7ad9\u70b9\u7ed3\u6784\u5927\u6539\u65f6\u7684\u7ec8\u6781\u515c\u5e95\uff09
         if ext.get('host'):
             return ext['host'].rstrip('/')
         publish = ext.get('publish') or 'https://www.njttvylz.cc/'
-        # 发布页会自动深度抽链生成 iljzezhab 泛解析候选；内置列表仅作发布页失联时的备份
+        # \u53d1\u5e03\u9875\u4f1a\u81ea\u52a8\u6df1\u5ea6\u62bd\u94fe\u751f\u6210 iljzezhab \u6cdb\u89e3\u6790\u5019\u9009\uff1b\u5185\u7f6e\u5217\u8868\u4ec5\u4f5c\u53d1\u5e03\u9875\u5931\u8054\u65f6\u7684\u5907\u4efd
         builtin_hosts = [
-            'https://big.iljzezhab.cc/',      # 2026-09-08 实测活镜像(254KB完整站,20分类)
+            'https://big.iljzezhab.cc/',      # 2026-09-08 \u5b9e\u6d4b\u6d3b\u955c\u50cf(254KB\u5b8c\u6574\u7ad9,20\u5206\u7c7b)
             'https://adjust.iljzezhab.cc/',
             'https://borrow.iljzezhab.cc/',
             'https://black.iljzezhab.cc/',
-            'https://big.ktgchwz.xyz/',       # 跳转 -> iljzezhab.cc
+            'https://big.ktgchwz.xyz/',       # \u8df3\u8f6c -> iljzezhab.cc
             'https://adjust.ktgchwz.xyz/',
             'https://borrow.ktgchwz.xyz/',
             'https://black.ktgchwz.xyz/',
-            'https://mrds72.com/',            # 跳转壳
+            'https://mrds72.com/',            # \u8df3\u8f6c\u58f3
             'https://mrdsx5.com/',
         ]
         if resolve_host:
@@ -200,19 +200,19 @@ class Spider(BaseSpider):
             )
             if h:
                 return h
-        # 终极兜底：导航站自动探索（跳转壳/门户/泛解析跟随 + 站名身份验证）
+        # \u7ec8\u6781\u515c\u5e95\uff1a\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\uff08\u8df3\u8f6c\u58f3/\u95e8\u6237/\u6cdb\u89e3\u6790\u8ddf\u968f + \u7ad9\u540d\u8eab\u4efd\u9a8c\u8bc1\uff09
         if explore_hosts:
             try:
                 def _probe(u):
                     r = requests.get(u.rstrip('/') + '/', headers=self.headers,
                                      proxies=self.proxies, timeout=8, verify=False)
-                    return r.status_code == 200 and '每日大赛' in (r.text or '')
-                hs = explore_hosts(['mrds', '每日大赛'], probe=_probe)
+                    return r.status_code == 200 and '\u6bcf\u65e5\u5927\u8d5b' in (r.text or '')
+                hs = explore_hosts(['mrds', '\u6bcf\u65e5\u5927\u8d5b'], probe=_probe)
                 if hs:
                     return hs[0]
             except Exception:
                 pass
-        # resolver 缺失时（不应发生）：ext 指定 → 内置首个
+        # resolver \u7f3a\u5931\u65f6\uff08\u4e0d\u5e94\u53d1\u751f\uff09\uff1aext \u6307\u5b9a \u2192 \u5185\u7f6e\u9996\u4e2a
         return (ext.get('hosts') or builtin_hosts)[0].rstrip('/')
 
     def homeContent(self, filter):
@@ -226,8 +226,8 @@ class Spider(BaseSpider):
             seen_ids = set()
 
             def _add(href, name):
-                # 广告清理：外链(联系方式/外站推广)、非内容路径(关于/归档/下载页)、
-                # 命中广告黑名单或超长的名称，一律不收
+                # \u5e7f\u544a\u6e05\u7406\uff1a\u5916\u94fe(\u8054\u7cfb\u65b9\u5f0f/\u5916\u7ad9\u63a8\u5e7f)\u3001\u975e\u5185\u5bb9\u8def\u5f84(\u5173\u4e8e/\u5f52\u6863/\u4e0b\u8f7d\u9875)\u3001
+                # \u547d\u4e2d\u5e7f\u544a\u9ed1\u540d\u5355\u6216\u8d85\u957f\u7684\u540d\u79f0\uff0c\u4e00\u5f8b\u4e0d\u6536
                 if not href or href == '#':
                     return
                 if not href.startswith('/'):
@@ -242,7 +242,7 @@ class Spider(BaseSpider):
                 seen_ids.add(href)
                 classes.append({'type_name': name, 'type_id': href})
 
-            # 1) 常规导航容器（多容器全收集，不再遇到第一个非空就停）
+            # 1) \u5e38\u89c4\u5bfc\u822a\u5bb9\u5668\uff08\u591a\u5bb9\u5668\u5168\u6536\u96c6\uff0c\u4e0d\u518d\u9047\u5230\u7b2c\u4e00\u4e2a\u975e\u7a7a\u5c31\u505c\uff09
             category_selectors = ['.category-list ul li', '.nav-menu li', '.menu li',
                                   'nav ul li', '.category-list a', '.nav a']
             for selector in category_selectors:
@@ -250,14 +250,14 @@ class Spider(BaseSpider):
                     link = k if k.is_('a') else k('a').eq(0)
                     _add(link.attr('href'), link.text())
 
-            # 2) 兜底：全页扫描 /category/ /tag/ 链接，保证分类取完全（不漏掉次级导航）
+            # 2) \u515c\u5e95\uff1a\u5168\u9875\u626b\u63cf /category/ /tag/ \u94fe\u63a5\uff0c\u4fdd\u8bc1\u5206\u7c7b\u53d6\u5b8c\u5168\uff08\u4e0d\u6f0f\u6389\u6b21\u7ea7\u5bfc\u822a\uff09
             if len(classes) < 5:
                 for a in data('a').items():
                     _add(a.attr('href') or '', a.text())
 
             if not classes:
                 classes = [
-                    {'type_name': '每日大赛', 'type_id': '/category/mrds/'},
+                    {'type_name': '\u6bcf\u65e5\u5927\u8d5b', 'type_id': '/category/mrds/'},
                 ]
 
             return {
@@ -331,7 +331,7 @@ class Spider(BaseSpider):
             plist = []
             used_names = set()
 
-            # 策略1: 提取 DPlayer 配置
+            # \u7b56\u75651: \u63d0\u53d6 DPlayer \u914d\u7f6e
             if data('.dplayer'):
                 for c, k in enumerate(data('.dplayer').items(), start=1):
                     try:
@@ -363,15 +363,15 @@ class Spider(BaseSpider):
                     except:
                         continue
 
-            # 策略2: 提取正文中的文本链接
+            # \u7b56\u75652: \u63d0\u53d6\u6b63\u6587\u4e2d\u7684\u6587\u672c\u94fe\u63a5
             if not plist:
                 content_area = data('.post-content, article')
                 for i, link in enumerate(content_area('a').items(), start=1):
                     link_text = link.text().strip()
                     link_href = link.attr('href')
 
-                    if link_href and any(kw in link_text for kw in ['点击观看', '观看', '播放', '视频', '第一弹']):
-                        ep_name = self._valid_ep_name(link_text.replace('点击观看：', '').replace('点击观看', ''))
+                    if link_href and any(kw in link_text for kw in ['\u70b9\u51fb\u89c2\u770b', '\u89c2\u770b', '\u64ad\u653e', '\u89c6\u9891', '\u7b2c\u4e00\u5f39']):
+                        ep_name = self._valid_ep_name(link_text.replace('\u70b9\u51fb\u89c2\u770b\uff1a', '').replace('\u70b9\u51fb\u89c2\u770b', ''))
                         if not ep_name:
                             ep_name = f"视频{i}"
 
@@ -382,15 +382,15 @@ class Spider(BaseSpider):
             
             play_url = '#'.join(plist) if plist else f"未找到视频源，请访问网页${url}"
 
-            # ★★★ 标签点击功能修复核心区域 ★★★
-            # 采用 reference 代码中的 [a=cr:...] 格式
+            # \u2605\u2605\u2605 \u6807\u7b7e\u70b9\u51fb\u529f\u80fd\u4fee\u590d\u6838\u5fc3\u533a\u57df \u2605\u2605\u2605
+            # \u91c7\u7528 reference \u4ee3\u7801\u4e2d\u7684 [a=cr:...] \u683c\u5f0f
             vod_content = ''
             try:
                 tags = []
                 seen_names = set()
                 seen_ids = set()
                 
-                # 每日大赛的标签选择器
+                # \u6bcf\u65e5\u5927\u8d5b\u7684\u6807\u7b7e\u9009\u62e9\u5668
                 tag_links = data('.post-tags a, .tags a, .keywords a')
                 
                 candidates = []
@@ -398,12 +398,12 @@ class Spider(BaseSpider):
                     title = self._valid_ep_name(k.text(), max_len=20)
                     href = k.attr('href')
                     if title and href:
-                        # 修正相对链接为绝对链接
+                        # \u4fee\u6b63\u76f8\u5bf9\u94fe\u63a5\u4e3a\u7edd\u5bf9\u94fe\u63a5
                         if not href.startswith('http'):
                             href = f"{self.host}{href}" if href.startswith('/') else f"{self.host}/{href}"
                         candidates.append({'name': title, 'id': href})
                 
-                # 按长度排序，与参考代码保持一致
+                # \u6309\u957f\u5ea6\u6392\u5e8f\uff0c\u4e0e\u53c2\u8003\u4ee3\u7801\u4fdd\u6301\u4e00\u81f4
                 candidates.sort(key=lambda x: len(x['name']), reverse=True)
                 
                 for item in candidates:
@@ -411,25 +411,25 @@ class Spider(BaseSpider):
                     id_ = item['id']
                     
                     if id_ in seen_ids: continue
-                    # 简单的去重逻辑
+                    # \u7b80\u5355\u7684\u53bb\u91cd\u903b\u8f91
                     is_duplicate = False
                     for seen in seen_names:
                         if name in seen: 
                             is_duplicate = True
                             break
-                    if is_duplicate and name not in seen_names: pass # 允许完全匹配的标签
+                    if is_duplicate and name not in seen_names: pass # \u5141\u8bb8\u5b8c\u5168\u5339\u914d\u7684\u6807\u7b7e
                     elif is_duplicate: pass
 
-                    # 生成播放器专用跳转代码：[a=cr:{json}/]名称[/a]
+                    # \u751f\u6210\u64ad\u653e\u5668\u4e13\u7528\u8df3\u8f6c\u4ee3\u7801\uff1a[a=cr:{json}/]\u540d\u79f0[/a]
                     target = json.dumps({'id': id_, 'name': name})
                     tags.append(f'[a=cr:{target}/]{name}[/a]')
                     
                     seen_names.add(name)
                     seen_ids.add(id_)
                 
-                # 如果有标签，拼接显示
+                # \u5982\u679c\u6709\u6807\u7b7e\uff0c\u62fc\u63a5\u663e\u793a
                 if tags:
-                    # 参考代码只显示标签，这里为了体验更好，我加上了正文摘要
+                    # \u53c2\u8003\u4ee3\u7801\u53ea\u663e\u793a\u6807\u7b7e\uff0c\u8fd9\u91cc\u4e3a\u4e86\u4f53\u9a8c\u66f4\u597d\uff0c\u6211\u52a0\u4e0a\u4e86\u6b63\u6587\u6458\u8981
                     tags_str = ' '.join(tags)
                     summary = data('.post-content').text() or ''
                     summary = summary[:150] + '...' if len(summary) > 150 else summary
@@ -438,18 +438,18 @@ class Spider(BaseSpider):
                     vod_content = data('.post-title').text() or data('h1').text()
 
             except Exception:
-                vod_content = '每日大赛'
+                vod_content = '\u6bcf\u65e5\u5927\u8d5b'
 
             if not vod_content:
-                vod_content = '每日大赛'
+                vod_content = '\u6bcf\u65e5\u5927\u8d5b'
 
             return {'list': [{
-                'vod_play_from': '每日大赛',
+                'vod_play_from': '\u6bcf\u65e5\u5927\u8d5b',
                 'vod_play_url': play_url,
                 'vod_content': vod_content
             }]}
         except:
-            return {'list': [{'vod_play_from': '每日大赛', 'vod_play_url': '获取失败'}]}
+            return {'list': [{'vod_play_from': '\u6bcf\u65e5\u5927\u8d5b', 'vod_play_url': '\u83b7\u53d6\u5931\u8d25'}]}
 
     def searchContent(self, key, quick, pg="1"):
         try:
@@ -547,7 +547,7 @@ class Spider(BaseSpider):
                 remarks = k('time').text()
                 if not remarks:
                     full_text = k.text()
-                    m = re.search(r'(\d{4}\s*年\s*\d{1,2}\s*月\s*\d{1,2}\s*日)', full_text)
+                    m = re.search('(\\d{4}\\s*\u5e74\\s*\\d{1,2}\\s*\u6708\\s*\\d{1,2}\\s*\u65e5)', full_text)
                     if m:
                         remarks = m.group(1)
                     else:

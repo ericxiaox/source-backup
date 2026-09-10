@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-# JFG 站源（集芳阁云搜 · HTML 直抓版）
-# 域名: sourceUrl 自带的 punycode 花式域名（"请记住-jifangge点com.云搜福利.com"）
-#       即现役入口，2026-09-08 实测 200（Cloudflare）；站内互链 twin 域同样可用
-# 结构: 分类 = newlist.php?p={n}(今日更新) / toplist.php?p={n}(今日热播Top100)
-#       条目 <a href="content/{md5}.html"> + cover 背景图 + ctitle 标题 + vodtime
-#       详情 m3u8 在 <a playdata="..."> 明文属性
-#       搜索 /search-0-{pg}-{AES密文b64}.html：词条 AES-CBC(key/iv 均 16 字节 ASCII)
-#       加密→base64→URL 编码（2026-09-08 实测 200，与列表页同款 li 结构可复用解析）
+# JFG \u7ad9\u6e90\uff08\u96c6\u82b3\u9601\u4e91\u641c \u00b7 HTML \u76f4\u6293\u7248\uff09
+# \u57df\u540d: sourceUrl \u81ea\u5e26\u7684 punycode \u82b1\u5f0f\u57df\u540d\uff08"\u8bf7\u8bb0\u4f4f-jifangge\u70b9com.\u4e91\u641c\u798f\u5229.com"\uff09
+#       \u5373\u73b0\u5f79\u5165\u53e3\uff0c2026-09-08 \u5b9e\u6d4b 200\uff08Cloudflare\uff09\uff1b\u7ad9\u5185\u4e92\u94fe twin \u57df\u540c\u6837\u53ef\u7528
+# \u7ed3\u6784: \u5206\u7c7b = newlist.php?p={n}(\u4eca\u65e5\u66f4\u65b0) / toplist.php?p={n}(\u4eca\u65e5\u70ed\u64adTop100)
+#       \u6761\u76ee <a href="content/{md5}.html"> + cover \u80cc\u666f\u56fe + ctitle \u6807\u9898 + vodtime
+#       \u8be6\u60c5 m3u8 \u5728 <a playdata="..."> \u660e\u6587\u5c5e\u6027
+#       \u641c\u7d22 /search-0-{pg}-{AES\u5bc6\u6587b64}.html\uff1a\u8bcd\u6761 AES-CBC(key/iv \u5747 16 \u5b57\u8282 ASCII)
+#       \u52a0\u5bc6\u2192base64\u2192URL \u7f16\u7801\uff082026-09-08 \u5b9e\u6d4b 200\uff0c\u4e0e\u5217\u8868\u9875\u540c\u6b3e li \u7ed3\u6784\u53ef\u590d\u7528\u89e3\u6790\uff09
 import json
 import re
 import sys
@@ -24,7 +24,7 @@ from base.spider import Spider as BaseSpider
 try:
     from hostresolver import resolve_host, parse_ext
 except Exception:
-    # hostresolver.py 在 source/ 根（py/ 的上级），按脚本自身位置定位，不依赖 cwd
+    # hostresolver.py \u5728 source/ \u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\uff0c\u6309\u811a\u672c\u81ea\u8eab\u4f4d\u7f6e\u5b9a\u4f4d\uff0c\u4e0d\u4f9d\u8d56 cwd
     try:
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from hostresolver import resolve_host, parse_ext
@@ -34,8 +34,8 @@ except Exception:
 
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-# 列表条目: 按 <li> 分块；块内 <a href="content/{md5}.html..."> + cover 背景图
-#           + <p>标题</p> + vodtime
+# \u5217\u8868\u6761\u76ee: \u6309 <li> \u5206\u5757\uff1b\u5757\u5185 <a href="content/{md5}.html..."> + cover \u80cc\u666f\u56fe
+#           + <p>\u6807\u9898</p> + vodtime
 _RE_LINK = re.compile(r'<a[^>]*href="(content/[a-f0-9]+\.html[^"]*)"')
 _RE_COVER = re.compile(r"background-image:\s*url\('([^']+)'\)")
 _RE_CTITLE = re.compile(r'<div class="ctitle">\s*<p>([^<]+)</p>')
@@ -47,12 +47,12 @@ _RE_PLAY = re.compile(r'<a[^>]*playdata="([^"]+\.m3u8[^"]*)"')
 
 class Spider(BaseSpider):
 
-    # 内置候选（2026-09-08 实测 200；punycode = 请记住-jifangge点com.云搜福利.com）
+    # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b 200\uff1bpunycode = \u8bf7\u8bb0\u4f4f-jifangge\u70b9com.\u4e91\u641c\u798f\u5229.com\uff09
     BUILTIN_HOSTS = [
         'https://xn---jifanggecom-ud8sv658aesydp6a.xn--9kq80g37uthu.com',
         'https://xn--u2uy07cd3d2mxd2a.com',
     ]
-    # 无独立发布页：入口域名即花式域名（站方设计为好记不易封）
+    # \u65e0\u72ec\u7acb\u53d1\u5e03\u9875\uff1a\u5165\u53e3\u57df\u540d\u5373\u82b1\u5f0f\u57df\u540d\uff08\u7ad9\u65b9\u8bbe\u8ba1\u4e3a\u597d\u8bb0\u4e0d\u6613\u5c01\uff09
     PUBLISH_PAGE = ''
 
     def init(self, extend=""):
@@ -88,7 +88,7 @@ class Spider(BaseSpider):
         print(f'使用站点: {self.host}')
 
     def getName(self):
-        return "集芳阁"
+        return "\u96c6\u82b3\u9601"
 
     def isVideoFormat(self, url):
         return any(ext in (url or '') for ext in ['.m3u8', '.mp4', '.ts'])
@@ -105,7 +105,7 @@ class Spider(BaseSpider):
 
         def _validate(host, text):
             t = text or ''
-            return '集芳阁' in t or 'h_d_key' in t
+            return '\u96c6\u82b3\u9601' in t or 'h_d_key' in t
 
         if resolve_host:
             try:
@@ -174,8 +174,8 @@ class Spider(BaseSpider):
 
     def homeContent(self, flag):
         result = {'class': [
-            {'type_id': 'newlist', 'type_name': '今日更新'},
-            {'type_id': 'toplist', 'type_name': '今日热播Top100'},
+            {'type_id': 'newlist', 'type_name': '\u4eca\u65e5\u66f4\u65b0'},
+            {'type_id': 'toplist', 'type_name': '\u4eca\u65e5\u70ed\u64adTop100'},
         ], 'list': []}
         try:
             result['list'] = self._parse_list(self._get('/newlist.php?p=1').text or '')
@@ -196,7 +196,7 @@ class Spider(BaseSpider):
         return result
 
     def _search_ct(self, key):
-        """搜索词条 AES-CBC 加密 → base64（key/iv 与站方 JS 同参数）。"""
+        """\u641c\u7d22\u8bcd\u6761 AES-CBC \u52a0\u5bc6 \u2192 base64\uff08key/iv \u4e0e\u7ad9\u65b9 JS \u540c\u53c2\u6570\uff09\u3002"""
         ct = AES.new(b'2d4ebb7cb767dab1', AES.MODE_CBC, b'7563ca4af41bd0fb')
         return base64.b64encode(ct.encrypt(pad(key.encode('utf-8'), 16))).decode()
 
@@ -228,7 +228,7 @@ class Spider(BaseSpider):
             m = re.search(r'<title>([^<]+)</title>', body)
             if m:
                 title = _html.unescape(m.group(1)).strip()
-                title = re.sub(r'\s*[-|]\s*集芳阁.*$', '', title).strip()
+                title = re.sub('\\s*[-|]\\s*\u96c6\u82b3\u9601.*$', '', title).strip()
             pic = ''
             mp = _RE_POSTER.search(body)
             if mp:

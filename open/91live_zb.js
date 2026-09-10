@@ -3,7 +3,7 @@
   searchable: 1,
   filterable: 1,
   quickSearch: 1,
-  title: '91电视[直]',
+  title: '91\u7535\u89c6[\u76f4]',
   lang: 'cat',
 })
 */
@@ -11,7 +11,7 @@
 import { Crypto as CryptoJS } from 'assets://js/lib/cat.js';
 
 let host = 'http://sj.91kds.cn';
-let siteName = '91电视', siteKey = '', siteType = 0;
+let siteName = '91\u7535\u89c6', siteKey = '', siteType = 0;
 
 let UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (Chrome/126.0.0.0 Safari/537.36)";
 
@@ -21,7 +21,7 @@ const headers = {
 };
 
 function init(cfg) {
-    siteName = cfg.skey?.split('_')[1] || cfg.skey || '91电视';
+    siteName = cfg.skey?.split('_')[1] || cfg.skey || '91\u7535\u89c6';
     siteKey = cfg.skey;
     siteType = cfg.stype;
     
@@ -65,14 +65,14 @@ async function request(url, options = {}) {
 
 async function home(filter) {
     const classes = [
-        { type_id: "央视", type_name: "央视" }, { type_id: "卫视", type_name: "卫视" },
-        { type_id: "高清", type_name: "高清" }, { type_id: "4K", type_name: "4K" },
-        { type_id: "影视", type_name: "影视" }, { type_id: "体育", type_name: "体育" },
-        { type_id: "动漫", type_name: "动漫" }, { type_id: "财经", type_name: "财经" },
-        { type_id: "综艺", type_name: "综艺" }, { type_id: "教育", type_name: "教育" },
-        { type_id: "新闻", type_name: "新闻" }, { type_id: "纪录", type_name: "纪录" },
-        { type_id: "国际", type_name: "国际" }, { type_id: "网络", type_name: "网络" },
-        { type_id: "购物", type_name: "购物" }, { type_id: "虎牙", type_name: "虎牙" }
+        { type_id: "\u592e\u89c6", type_name: "\u592e\u89c6" }, { type_id: "\u536b\u89c6", type_name: "\u536b\u89c6" },
+        { type_id: "\u9ad8\u6e05", type_name: "\u9ad8\u6e05" }, { type_id: "4K", type_name: "4K" },
+        { type_id: "\u5f71\u89c6", type_name: "\u5f71\u89c6" }, { type_id: "\u4f53\u80b2", type_name: "\u4f53\u80b2" },
+        { type_id: "\u52a8\u6f2b", type_name: "\u52a8\u6f2b" }, { type_id: "\u8d22\u7ecf", type_name: "\u8d22\u7ecf" },
+        { type_id: "\u7efc\u827a", type_name: "\u7efc\u827a" }, { type_id: "\u6559\u80b2", type_name: "\u6559\u80b2" },
+        { type_id: "\u65b0\u95fb", type_name: "\u65b0\u95fb" }, { type_id: "\u7eaa\u5f55", type_name: "\u7eaa\u5f55" },
+        { type_id: "\u56fd\u9645", type_name: "\u56fd\u9645" }, { type_id: "\u7f51\u7edc", type_name: "\u7f51\u7edc" },
+        { type_id: "\u8d2d\u7269", type_name: "\u8d2d\u7269" }, { type_id: "\u864e\u7259", type_name: "\u864e\u7259" }
     ];
     
     const filters = {};
@@ -82,7 +82,7 @@ async function home(filter) {
 }
 
 async function homeVod() {
-    return await category('湖北', 1, null, {});
+    return await category('\u6e56\u5317', 1, null, {});
 }
 
 async function category(tid, pg, filter, extend) {
@@ -107,7 +107,7 @@ async function category(tid, pg, filter, extend) {
                 vod_id: detailUrl + '@' + item.name,
                 vod_name: item.name,
                 vod_pic: item.icon,
-                vod_remarks: '直播'
+                vod_remarks: '\u76f4\u64ad'
             };
         });
         
@@ -125,10 +125,10 @@ async function detail(id) {
         
         const vod = {
             vod_id: purl,
-            vod_name: vod_name || data.name || data.title || "直播频道",
+            vod_name: vod_name || data.name || data.title || "\u76f4\u64ad\u9891\u9053",
             vod_pic: data.icon || "",
-            vod_content: data.desc || "暂无简介",
-            vod_remarks: "直播"
+            vod_content: data.desc || "\u6682\u65e0\u7b80\u4ecb",
+            vod_remarks: "\u76f4\u64ad"
         };
         
         let list = data.liveSource || [];
@@ -141,7 +141,7 @@ async function detail(id) {
         list.forEach((item, j) => {
             let rawInput = item;
             let inputUrl = rawInput.replace(/^kdsvod:\/\//, '');
-            let urlName = names[j] || '线路' + lineCounter;
+            let urlName = names[j] || '\u7ebf\u8def' + lineCounter;
             
             if (inputUrl.includes('pwd=jsdecode') && inputUrl.includes('id=')) {
                 let parts = inputUrl.split('?');
@@ -186,7 +186,7 @@ async function detail(id) {
                 });
                 
                 let finalUrl = baseUrl + '?' + finalQuery.join('&');
-                let lineName = '线路' + lineCounter;
+                let lineName = '\u7ebf\u8def' + lineCounter;
                 playFrom.push(lineName);
                 playUrl.push(urlName + '$' + finalUrl);
                 lineCounter++;
@@ -209,7 +209,7 @@ async function detail(id) {
                     referer = tmp[1] || '';
                 }
                 
-                let lineName = '线路' + lineCounter;
+                let lineName = '\u7ebf\u8def' + lineCounter;
                 
                 if (referer) {
                     let playObj = JSON.stringify({ url: videoUrl, header: { Referer: referer } });

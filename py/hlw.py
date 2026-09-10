@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# HLW 站源（黑料网 · Typecho 风格 HTML 直抓版）
-# 发布页: hlwf6.com（"黑料网最新入口-实时更新访问线路"，2026-09-08 实测 200，
-#         列 4 个 .cc 泛基域线路 + cloudfront 兜底，基域轮换后发布页即更新）
-# 结构: 分类 /{slug}/ 翻页 /{slug}/page/{n}/；详情 /archives/{id}/
-#       列表条目 video-item（封面 img 的 z-image-loader-url 属性 + alt 标题）
-#       播放 dplayer config='{...}' JSON（\/ 转义须还原），多视频=多 config 块
+# HLW \u7ad9\u6e90\uff08\u9ed1\u6599\u7f51 \u00b7 Typecho \u98ce\u683c HTML \u76f4\u6293\u7248\uff09
+# \u53d1\u5e03\u9875: hlwf6.com\uff08"\u9ed1\u6599\u7f51\u6700\u65b0\u5165\u53e3-\u5b9e\u65f6\u66f4\u65b0\u8bbf\u95ee\u7ebf\u8def"\uff0c2026-09-08 \u5b9e\u6d4b 200\uff0c
+#         \u5217 4 \u4e2a .cc \u6cdb\u57fa\u57df\u7ebf\u8def + cloudfront \u515c\u5e95\uff0c\u57fa\u57df\u8f6e\u6362\u540e\u53d1\u5e03\u9875\u5373\u66f4\u65b0\uff09
+# \u7ed3\u6784: \u5206\u7c7b /{slug}/ \u7ffb\u9875 /{slug}/page/{n}/\uff1b\u8be6\u60c5 /archives/{id}/
+#       \u5217\u8868\u6761\u76ee video-item\uff08\u5c01\u9762 img \u7684 z-image-loader-url \u5c5e\u6027 + alt \u6807\u9898\uff09
+#       \u64ad\u653e dplayer config='{...}' JSON\uff08\/ \u8f6c\u4e49\u987b\u8fd8\u539f\uff09\uff0c\u591a\u89c6\u9891=\u591a config \u5757
 import json
 import re
 import sys
@@ -22,7 +22,7 @@ from base.spider import Spider as BaseSpider
 try:
     from hostresolver import resolve_host, parse_ext
 except Exception:
-    # hostresolver.py 在 source/ 根（py/ 的上级），按脚本自身位置定位，不依赖 cwd
+    # hostresolver.py \u5728 source/ \u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\uff0c\u6309\u811a\u672c\u81ea\u8eab\u4f4d\u7f6e\u5b9a\u4f4d\uff0c\u4e0d\u4f9d\u8d56 cwd
     try:
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from hostresolver import resolve_host, parse_ext
@@ -30,7 +30,7 @@ except Exception:
         resolve_host = None
         parse_ext = None
 
-# explorer.py（source 根）：池全挂时从导航站自动探索活域（与 hostresolver 同目录）
+# explorer.py\uff08source \u6839\uff09\uff1a\u6c60\u5168\u6302\u65f6\u4ece\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\u6d3b\u57df\uff08\u4e0e hostresolver \u540c\u76ee\u5f55\uff09
 try:
     from explorer import explore_hosts
 except Exception:
@@ -38,8 +38,8 @@ except Exception:
 
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-# ── 封面图床：pic.hdhwqx.cn 为 CDN 级 AES 加密图（与黑料不打烊同款 key），
-#    App 直接加载是密文=封面全空，统一走 localProxy 取图+按需解密+LRU 缓存
+# \u2500\u2500 \u5c01\u9762\u56fe\u5e8a\uff1apic.hdhwqx.cn \u4e3a CDN \u7ea7 AES \u52a0\u5bc6\u56fe\uff08\u4e0e\u9ed1\u6599\u4e0d\u6253\u70ca\u540c\u6b3e key\uff09\uff0c
+#    App \u76f4\u63a5\u52a0\u8f7d\u662f\u5bc6\u6587=\u5c01\u9762\u5168\u7a7a\uff0c\u7edf\u4e00\u8d70 localProxy \u53d6\u56fe+\u6309\u9700\u89e3\u5bc6+LRU \u7f13\u5b58
 _img_session = requests.Session()
 _img_session.verify = False
 _img_cache = OrderedDict()
@@ -47,7 +47,7 @@ _IMG_CACHE_MAX = 60
 
 
 def _img_fetch(url, referer):
-    """取图+magic 预检+按需解密+缓存，返回 (status, content_type, bytes)。"""
+    """\u53d6\u56fe+magic \u9884\u68c0+\u6309\u9700\u89e3\u5bc6+\u7f13\u5b58\uff0c\u8fd4\u56de (status, content_type, bytes)\u3002"""
     if url in _img_cache:
         _img_cache.move_to_end(url)
         return (200,) + _img_cache[url]
@@ -81,24 +81,24 @@ def _img_fetch(url, referer):
             _img_cache.popitem(last=False)
     return [200, ct, b]
 
-# 列表条目: <a class="cursor-pointer" href="/archives/{id}/"> ... z-image-loader-url="封面" alt="标题"
+# \u5217\u8868\u6761\u76ee: <a class="cursor-pointer" href="/archives/{id}/"> ... z-image-loader-url="\u5c01\u9762" alt="\u6807\u9898"
 _RE_CARD = re.compile(
     r'<a[^>]*href="(/archives/(\d+)/)"[^>]*>\s*<div[^>]*>.*?z-image-loader-url="([^"]+)"[^>]*alt="([^"]*)"',
     re.S)
-# 搜索结果条目: <li class="tag-item"><a href="/archives/{id}/">标题</a>
+# \u641c\u7d22\u7ed3\u679c\u6761\u76ee: <li class="tag-item"><a href="/archives/{id}/">\u6807\u9898</a>
 _RE_SEARCH = re.compile(r'<a[^>]*href="(/archives/(\d+)/)"[^>]*>([^<]{2,80})</a>')
-# 播放 config JSON（单引号包裹）
+# \u64ad\u653e config JSON\uff08\u5355\u5f15\u53f7\u5305\u88f9\uff09
 _RE_CONFIG = re.compile(r"config='(\{.*?\})'", re.S)
-# 分类导航: <a class="slider-item ..." href="/{slug}/"><div class="span">名称</div>
+# \u5206\u7c7b\u5bfc\u822a: <a class="slider-item ..." href="/{slug}/"><div class="span">\u540d\u79f0</div>
 _RE_NAV = re.compile(r'href="(/[a-z0-9\-]{2,10}/)"[^>]*>\s*<div class="span">([^<]{2,12})</div>')
 
 
 class Spider(BaseSpider):
 
-    # 站方发布页
+    # \u7ad9\u65b9\u53d1\u5e03\u9875
     PUBLISH_PAGE = 'https://hlwf6.com/'
-    # 内置候选（2026-09-08 发布页实测：发布页 5 条线路中仅 3 条是真站镜像，
-    # rkrnimmm=18se导航广告站、bxouulcs=68字节空壳，已剔除；以"标题含黑料网"验身）
+    # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u53d1\u5e03\u9875\u5b9e\u6d4b\uff1a\u53d1\u5e03\u9875 5 \u6761\u7ebf\u8def\u4e2d\u4ec5 3 \u6761\u662f\u771f\u7ad9\u955c\u50cf\uff0c
+    # rkrnimmm=18se\u5bfc\u822a\u5e7f\u544a\u7ad9\u3001bxouulcs=68\u5b57\u8282\u7a7a\u58f3\uff0c\u5df2\u5254\u9664\uff1b\u4ee5"\u6807\u9898\u542b\u9ed1\u6599\u7f51"\u9a8c\u8eab\uff09
     BUILTIN_HOSTS = [
         'https://fzyxd.vhksymsv.cc',
         'https://d3oyu.zbzrembr.cc',
@@ -138,7 +138,7 @@ class Spider(BaseSpider):
         print(f'使用站点: {self.host}')
 
     def getName(self):
-        return "黑料网"
+        return "\u9ed1\u6599\u7f51"
 
     def isVideoFormat(self, url):
         return any(ext in (url or '') for ext in ['.m3u8', '.mp4', '.ts'])
@@ -153,9 +153,9 @@ class Spider(BaseSpider):
         publish = self._ext.get('publish') or self.PUBLISH_PAGE
         builtin = self.BUILTIN_HOSTS
 
-        # 身份校验：发布页混有广告门站（如 18se导航），标题/正文不含站名的不算真站
+        # \u8eab\u4efd\u6821\u9a8c\uff1a\u53d1\u5e03\u9875\u6df7\u6709\u5e7f\u544a\u95e8\u7ad9\uff08\u5982 18se\u5bfc\u822a\uff09\uff0c\u6807\u9898/\u6b63\u6587\u4e0d\u542b\u7ad9\u540d\u7684\u4e0d\u7b97\u771f\u7ad9
         def _validate(host, text):
-            return '黑料网' in (text or '')
+            return '\u9ed1\u6599\u7f51' in (text or '')
 
         if resolve_host:
             try:
@@ -175,21 +175,21 @@ class Spider(BaseSpider):
             try:
                 r = requests.get(h.rstrip('/') + '/', headers=self.headers,
                                  proxies=self.proxies, timeout=8, verify=False)
-                # 身份校验：发布页混有广告门站（如 18se导航），标题不含站名的不算
-                if r.status_code == 200 and '黑料网' in (r.text or ''):
+                # \u8eab\u4efd\u6821\u9a8c\uff1a\u53d1\u5e03\u9875\u6df7\u6709\u5e7f\u544a\u95e8\u7ad9\uff08\u5982 18se\u5bfc\u822a\uff09\uff0c\u6807\u9898\u4e0d\u542b\u7ad9\u540d\u7684\u4e0d\u7b97
+                if r.status_code == 200 and '\u9ed1\u6599\u7f51' in (r.text or ''):
                     return h.rstrip('/')
             except Exception:
                 continue
-        # 终极兜底：导航站自动探索（跳转壳/门户/泛解析跟随 + 站名身份验证）
+        # \u7ec8\u6781\u515c\u5e95\uff1a\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\uff08\u8df3\u8f6c\u58f3/\u95e8\u6237/\u6cdb\u89e3\u6790\u8ddf\u968f + \u7ad9\u540d\u8eab\u4efd\u9a8c\u8bc1\uff09
         if explore_hosts:
             try:
                 def _probe(u):
                     r = requests.get(u.rstrip('/') + '/', headers=self.headers,
                                      proxies=self.proxies, timeout=8, verify=False)
                     t = r.text or ''
-                    # 加密封面主题特征 + 站名双条件（防「818黑料网」等同名站混入）
-                    return r.status_code == 200 and '黑料网' in t and 'z-image-loader-url' in t
-                hs = explore_hosts(['hlw', '黑料网'], probe=_probe)
+                    # \u52a0\u5bc6\u5c01\u9762\u4e3b\u9898\u7279\u5f81 + \u7ad9\u540d\u53cc\u6761\u4ef6\uff08\u9632\u300c818\u9ed1\u6599\u7f51\u300d\u7b49\u540c\u540d\u7ad9\u6df7\u5165\uff09
+                    return r.status_code == 200 and '\u9ed1\u6599\u7f51' in t and 'z-image-loader-url' in t
+                hs = explore_hosts(['hlw', '\u9ed1\u6599\u7f51'], probe=_probe)
                 if hs:
                     return hs[0]
             except Exception:
@@ -197,7 +197,7 @@ class Spider(BaseSpider):
         return builtin[0]
 
     def _should_pic(self, url):
-        """加密图床判定：pic.* 域名 + 已知加密路径前缀。"""
+        """\u52a0\u5bc6\u56fe\u5e8a\u5224\u5b9a\uff1apic.* \u57df\u540d + \u5df2\u77e5\u52a0\u5bc6\u8def\u5f84\u524d\u7f00\u3002"""
         u = (url or '').lower()
         host = u.split('/')[2] if u.startswith('http') and u.count('/') > 2 else ''
         return any(x in u for x in ['pic.hdhwqx.cn', '/upload_01/', '/hc237/']) or host.startswith('pic.')
@@ -215,7 +215,7 @@ class Spider(BaseSpider):
             return ''
 
     def _pic(self, u):
-        """加密图床封面统一走代理；其余直连。"""
+        """\u52a0\u5bc6\u56fe\u5e8a\u5c01\u9762\u7edf\u4e00\u8d70\u4ee3\u7406\uff1b\u5176\u4f59\u76f4\u8fde\u3002"""
         u = _html.unescape(u or '').strip()
         if not u:
             return ''
@@ -297,7 +297,7 @@ class Spider(BaseSpider):
 
     @staticmethod
     def _videos(html_text):
-        """从详情页提取全部视频 config → [{url,pic}...]"""
+        """\u4ece\u8be6\u60c5\u9875\u63d0\u53d6\u5168\u90e8\u89c6\u9891 config \u2192 [{url,pic}...]"""
         vids = []
         for m in _RE_CONFIG.finditer(html_text):
             try:
@@ -319,7 +319,7 @@ class Spider(BaseSpider):
             m = re.search(r'<title>([^<]+)</title>', body)
             if m:
                 title = _html.unescape(m.group(1)).strip()
-                title = re.sub(r'-黑料网\s*$', '', title).strip()
+                title = re.sub('-\u9ed1\u6599\u7f51\\s*$', '', title).strip()
             pic = ''
             mi = re.search(r'z-image-loader-url="([^"]+)"', body)
             if mi:

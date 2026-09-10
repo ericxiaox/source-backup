@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# WXTS 站源（MacCMS 模板 · HTML 直抓版）
-# 发布页: 站方 github.io（静态列出 966~969 四镜像，2026-09-08 实测全活）
-# 结构: 分类 /index.php/vod/type/id/{tid}/page/{pg}.html（列表直链播放页）
-#       播放页 var player_aaaa = {...} 内含 url(m3u8)/poster/link
-# 分类名不落盘，homeContent 从首页实时获取（词表 b64 也不需要）
+# WXTS \u7ad9\u6e90\uff08MacCMS \u6a21\u677f \u00b7 HTML \u76f4\u6293\u7248\uff09
+# \u53d1\u5e03\u9875: \u7ad9\u65b9 github.io\uff08\u9759\u6001\u5217\u51fa 966~969 \u56db\u955c\u50cf\uff0c2026-09-08 \u5b9e\u6d4b\u5168\u6d3b\uff09
+# \u7ed3\u6784: \u5206\u7c7b /index.php/vod/type/id/{tid}/page/{pg}.html\uff08\u5217\u8868\u76f4\u94fe\u64ad\u653e\u9875\uff09
+#       \u64ad\u653e\u9875 var player_aaaa = {...} \u5185\u542b url(m3u8)/poster/link
+# \u5206\u7c7b\u540d\u4e0d\u843d\u76d8\uff0chomeContent \u4ece\u9996\u9875\u5b9e\u65f6\u83b7\u53d6\uff08\u8bcd\u8868 b64 \u4e5f\u4e0d\u9700\u8981\uff09
 import json
 import re
 import sys
@@ -18,7 +18,7 @@ from base.spider import Spider as BaseSpider
 try:
     from hostresolver import resolve_host, parse_ext
 except Exception:
-    # hostresolver.py 在 source/ 根（py/ 的上级），按脚本自身位置定位，不依赖 cwd
+    # hostresolver.py \u5728 source/ \u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\uff0c\u6309\u811a\u672c\u81ea\u8eab\u4f4d\u7f6e\u5b9a\u4f4d\uff0c\u4e0d\u4f9d\u8d56 cwd
     try:
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from hostresolver import resolve_host, parse_ext
@@ -28,8 +28,8 @@ except Exception:
 
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-# 列表条目: <a class="thumbnail" href="..."><img src=封面 alt=标题>
-# 分类页 href=播放页(/vod/play/id/N/sid/N/nid/N.html)；搜索页 href=详情页(/vod/detail/id/N.html)
+# \u5217\u8868\u6761\u76ee: <a class="thumbnail" href="..."><img src=\u5c01\u9762 alt=\u6807\u9898>
+# \u5206\u7c7b\u9875 href=\u64ad\u653e\u9875(/vod/play/id/N/sid/N/nid/N.html)\uff1b\u641c\u7d22\u9875 href=\u8be6\u60c5\u9875(/vod/detail/id/N.html)
 _RE_ITEM = re.compile(
     r'<a[^>]*class="[^"]*thumbnail[^"]*"[^>]*href="(/index\.php/vod/(?:play/id/(\d+)/sid/(\d+)/nid/(\d+)|detail/id/(\d+))\.html)"[^>]*>\s*<img([^>]*)>')
 _RE_ATTR = re.compile(r'(src|alt)\s*=\s*"([^"]*)"')
@@ -38,9 +38,9 @@ _RE_PLAY_HREF = re.compile(r'/index\.php/vod/play/id/(\d+)/sid/(\d+)/nid/(\d+)\.
 
 class Spider(BaseSpider):
 
-    # 站方发布页（github.io 静态页，列最新镜像域名）
+    # \u7ad9\u65b9\u53d1\u5e03\u9875\uff08github.io \u9759\u6001\u9875\uff0c\u5217\u6700\u65b0\u955c\u50cf\u57df\u540d\uff09
     PUBLISH_PAGE = 'https://wuxiants.github.io/'
-    # 内置候选（2026-09-08 实测，发布页列出的四个镜像）
+    # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b\uff0c\u53d1\u5e03\u9875\u5217\u51fa\u7684\u56db\u4e2a\u955c\u50cf\uff09
     BUILTIN_HOSTS = [
         'https://wxts.wuxiants966.com',
         'https://wxts.wuxiants967.com',
@@ -81,7 +81,7 @@ class Spider(BaseSpider):
         print(f'使用站点: {self.host}')
 
     def getName(self):
-        return "无限臀山"
+        return "\u65e0\u9650\u81c0\u5c71"
 
     def isVideoFormat(self, url):
         return any(ext in (url or '') for ext in ['.m3u8', '.mp4', '.ts'])
@@ -108,7 +108,7 @@ class Spider(BaseSpider):
                     return h
             except Exception:
                 pass
-        # resolver 缺失兜底：ext 指定 → 内置逐个试
+        # resolver \u7f3a\u5931\u515c\u5e95\uff1aext \u6307\u5b9a \u2192 \u5185\u7f6e\u9010\u4e2a\u8bd5
         for h in list(self._ext.get('hosts') or []) + builtin:
             try:
                 r = requests.get(h.rstrip('/') + '/', headers=self.headers,
@@ -138,7 +138,7 @@ class Spider(BaseSpider):
                     alt = _html.unescape(a.group(2)).strip()
             if not alt:
                 continue
-            # vod_id 两种形态：播放页直链 = vid-sid-nid；搜索详情页 = d{vid}
+            # vod_id \u4e24\u79cd\u5f62\u6001\uff1a\u64ad\u653e\u9875\u76f4\u94fe = vid-sid-nid\uff1b\u641c\u7d22\u8be6\u60c5\u9875 = d{vid}
             if m.group(2):
                 vod_id = f'{m.group(2)}-{m.group(3)}-{m.group(4)}'
             else:
@@ -165,7 +165,7 @@ class Spider(BaseSpider):
         for m in re.finditer(
                 r'href="(/index\.php/vod/type/id/(\d+)\.html)"[^>]*>([^<]+)<', body):
             tid, name = m.group(2), _html.unescape(m.group(3)).strip()
-            if tid in seen or not name or name == '更多':
+            if tid in seen or not name or name == '\u66f4\u591a':
                 continue
             seen.add(tid)
             result['class'].append({'type_id': tid, 'type_name': name})
@@ -210,13 +210,13 @@ class Spider(BaseSpider):
         start = html_text.find('{', j)
         if start < 0:
             return {}
-        # 找含 "url" 键的对象终点：从 m3u8/mp4 处向后找 "sid" 后的收尾 }
+        # \u627e\u542b "url" \u952e\u7684\u5bf9\u8c61\u7ec8\u70b9\uff1a\u4ece m3u8/mp4 \u5904\u5411\u540e\u627e "sid" \u540e\u7684\u6536\u5c3e }
         end = html_text.find('</script>', start)
         seg = html_text[start:end if end > 0 else start + 8000]
         try:
             return json.loads(seg.strip().rstrip(';').replace('\\/', '/'))
         except Exception:
-            # 兜底：截到最后一个 } 前
+            # \u515c\u5e95\uff1a\u622a\u5230\u6700\u540e\u4e00\u4e2a } \u524d
             k = seg.rfind('}')
             if k > 0:
                 try:
@@ -226,7 +226,7 @@ class Spider(BaseSpider):
             return {}
 
     def _resolve_play(self, vod_id):
-        """归一 vod_id → (vid, sid, nid)。'd{vid}' 形态先抓详情页解析播放链接。"""
+        """\u5f52\u4e00 vod_id \u2192 (vid, sid, nid)\u3002'd{vid}' \u5f62\u6001\u5148\u6293\u8be6\u60c5\u9875\u89e3\u6790\u64ad\u653e\u94fe\u63a5\u3002"""
         vod_id = str(vod_id)
         if vod_id.startswith('d'):
             body = self._get(f'/index.php/vod/detail/id/{vod_id[1:]}.html').text or ''
@@ -249,7 +249,7 @@ class Spider(BaseSpider):
             m = re.search(r'<title>([^<]+)</title>', body)
             if m:
                 title = _html.unescape(m.group(1)).strip()
-                title = re.sub(r'^在线观看', '', title).replace('_无限臀山', '').strip()
+                title = re.sub('^\u5728\u7ebf\u89c2\u770b', '', title).replace('_\u65e0\u9650\u81c0\u5c71', '').strip()
             pic = str(cfg.get('poster') or '').strip()
             if not pic:
                 m2 = re.search(r'<img[^>]*src="([^"]*(?:upload|vod)[^"]*)"', body)

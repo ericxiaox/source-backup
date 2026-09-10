@@ -14,12 +14,12 @@ from lxml import etree
 class Spider(Spider):
     
     def getName(self):
-        return "香蕉视频"
+        return "\u9999\u8549\u89c6\u9891"
     
     def init(self, extend=""):
         self.host = "https://618013.xyz"
         self.api_host = "https://h5.xxoo168.org"
-        # ext 支持：host@ 覆盖主站（域名被墙/更换时在影视.json 改 ext 即可救活，无需改代码）
+        # ext \u652f\u6301\uff1ahost@ \u8986\u76d6\u4e3b\u7ad9\uff08\u57df\u540d\u88ab\u5899/\u66f4\u6362\u65f6\u5728\u5f71\u89c6.json \u6539 ext \u5373\u53ef\u6551\u6d3b\uff0c\u65e0\u9700\u6539\u4ee3\u7801\uff09
         try:
             from hostresolver import ext_of
         except Exception:
@@ -47,15 +47,15 @@ class Spider(Spider):
         self.log(f"香蕉视频爬虫初始化完成，主站: {self.host}")
 
     def html(self, content):
-        """将HTML内容转换为可查询的对象"""
+        """\u5c06HTML\u5185\u5bb9\u8f6c\u6362\u4e3a\u53ef\u67e5\u8be2\u7684\u5bf9\u8c61"""
         try:
             return etree.HTML(content)
         except:
-            self.log("HTML解析失败")
+            self.log("HTML\u89e3\u6790\u5931\u8d25")
             return None
 
     def regStr(self, pattern, string, index=1):
-        """正则表达式提取字符串"""
+        """\u6b63\u5219\u8868\u8fbe\u5f0f\u63d0\u53d6\u5b57\u7b26\u4e32"""
         try:
             match = re.search(pattern, string, re.IGNORECASE)
             if match and len(match.groups()) >= index:
@@ -71,10 +71,10 @@ class Spider(Spider):
         pass
 
     def homeContent(self, filter):
-        """获取首页内容和分类"""
+        """\u83b7\u53d6\u9996\u9875\u5185\u5bb9\u548c\u5206\u7c7b"""
         result = {}
-        # 只保留指定的分类
-        # 分类表以 b64 存储、运行时解码，防托管平台内容扫描误判
+        # \u53ea\u4fdd\u7559\u6307\u5b9a\u7684\u5206\u7c7b
+        # \u5206\u7c7b\u8868\u4ee5 b64 \u5b58\u50a8\u3001\u8fd0\u884c\u65f6\u89e3\u7801\uff0c\u9632\u6258\u7ba1\u5e73\u53f0\u5185\u5bb9\u626b\u63cf\u8bef\u5224
         classes = json.loads(b64decode('W3sidHlwZV9pZCI6ICI2MTgwMTMueHl6XzEiLCAidHlwZV9uYW1lIjogIuWFqOmDqOinhumikSJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8xMyIsICJ0eXBlX25hbWUiOiAi6aaZ6JWJ57K+5ZOBIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzIyIiwgInR5cGVfbmFtZSI6ICLliLbmnI3or7Hmg5EifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNiIsICJ0eXBlX25hbWUiOiAi5Zu95Lqn6KeG6aKRIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzgiLCAidHlwZV9uYW1lIjogIua4hee6r+WwkeWlsyJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el85IiwgInR5cGVfbmFtZSI6ICLovqPlprnlpKflpbYifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMTAiLCAidHlwZV9uYW1lIjogIuWls+WQjOS4k+WxniJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8xMSIsICJ0eXBlX25hbWUiOiAi57Sg5Lq65Ye65ryUIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzEyIiwgInR5cGVfbmFtZSI6ICLop5LoibLmia7mvJQifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMjAiLCAidHlwZV9uYW1lIjogIuS6uuWmu+eGn+WlsyJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8yMyIsICJ0eXBlX25hbWUiOiAi5pel6Z+p5Ymn5oOFIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzIxIiwgInR5cGVfbmFtZSI6ICLnu4/lhbjkvKbnkIYifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNyIsICJ0eXBlX25hbWUiOiAi5oiQ5Lq65Yqo5ryrIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzE0IiwgInR5cGVfbmFtZSI6ICLnsr7lk4HkuozljLoifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNDAiLCAidHlwZV9uYW1lIjogIueyvuWTgeS4ieWMuiJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el81MyIsICJ0eXBlX25hbWUiOiAi5Yqo5ryr5Lit5a2XIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzUyIiwgInR5cGVfbmFtZSI6ICLml6XmnKzml6DnoIEifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMzMiLCAidHlwZV9uYW1lIjogIuS4reaWh+Wtl+W5lSJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el80NCIsICJ0eXBlX25hbWUiOiAi5Zu95Lqn5Lyg5aqSIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzMyIiwgInR5cGVfbmFtZSI6ICLlm73kuqfoh6rmi40ifV0=').decode('utf-8'))
         result['class'] = classes
         try:
@@ -88,13 +88,13 @@ class Spider(Spider):
         return result
 
     def homeVideoContent(self):
-        """分类定义 - 兼容性方法"""
+        """\u5206\u7c7b\u5b9a\u4e49 - \u517c\u5bb9\u6027\u65b9\u6cd5"""
         return {
             'class': json.loads(b64decode('W3sidHlwZV9pZCI6ICI2MTgwMTMueHl6XzEiLCAidHlwZV9uYW1lIjogIuWFqOmDqOinhumikSJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8xMyIsICJ0eXBlX25hbWUiOiAi6aaZ6JWJ57K+5ZOBIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzIyIiwgInR5cGVfbmFtZSI6ICLliLbmnI3or7Hmg5EifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNiIsICJ0eXBlX25hbWUiOiAi5Zu95Lqn6KeG6aKRIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzgiLCAidHlwZV9uYW1lIjogIua4hee6r+WwkeWlsyJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el85IiwgInR5cGVfbmFtZSI6ICLovqPlprnlpKflpbYifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMTAiLCAidHlwZV9uYW1lIjogIuWls+WQjOS4k+WxniJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8xMSIsICJ0eXBlX25hbWUiOiAi57Sg5Lq65Ye65ryUIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzEyIiwgInR5cGVfbmFtZSI6ICLop5LoibLmia7mvJQifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMjAiLCAidHlwZV9uYW1lIjogIuS6uuWmu+eGn+WlsyJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el8yMyIsICJ0eXBlX25hbWUiOiAi5pel6Z+p5Ymn5oOFIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzIxIiwgInR5cGVfbmFtZSI6ICLnu4/lhbjkvKbnkIYifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNyIsICJ0eXBlX25hbWUiOiAi5oiQ5Lq65Yqo5ryrIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzE0IiwgInR5cGVfbmFtZSI6ICLnsr7lk4HkuozljLoifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfNDAiLCAidHlwZV9uYW1lIjogIueyvuWTgeS4ieWMuiJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el81MyIsICJ0eXBlX25hbWUiOiAi5Yqo5ryr5Lit5a2XIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzUyIiwgInR5cGVfbmFtZSI6ICLml6XmnKzml6DnoIEifSwgeyJ0eXBlX2lkIjogIjYxODAxMy54eXpfMzMiLCAidHlwZV9uYW1lIjogIuS4reaWh+Wtl+W5lSJ9LCB7InR5cGVfaWQiOiAiNjE4MDEzLnh5el80NCIsICJ0eXBlX25hbWUiOiAi5Zu95Lqn5Lyg5aqSIn0sIHsidHlwZV9pZCI6ICI2MTgwMTMueHl6XzMyIiwgInR5cGVfbmFtZSI6ICLlm73kuqfoh6rmi40ifV0=').decode('utf-8'))
         }
 
     def categoryContent(self, tid, pg, filter, extend):
-        """分类内容 - 修改为使用固定页数设置"""
+        """\u5206\u7c7b\u5185\u5bb9 - \u4fee\u6539\u4e3a\u4f7f\u7528\u56fa\u5b9a\u9875\u6570\u8bbe\u7f6e"""
         try:
             domain, type_id = tid.split('_')
             url = f"https://{domain}/index.php/vod/type/id/{type_id}.html"
@@ -105,7 +105,7 @@ class Spider(Spider):
             doc = self.html(rsp.text)
             videos = self._get_videos(doc, limit=20)
             
-            # 使用固定页数设置，而不是尝试从页面解析
+            # \u4f7f\u7528\u56fa\u5b9a\u9875\u6570\u8bbe\u7f6e\uff0c\u800c\u4e0d\u662f\u5c1d\u8bd5\u4ece\u9875\u9762\u89e3\u6790
             pagecount = 999
             total = 19980
             
@@ -121,7 +121,7 @@ class Spider(Spider):
             return {'list': []}
 
     def searchContent(self, key, quick, pg="1"):
-        """搜索功能"""
+        """\u641c\u7d22\u529f\u80fd"""
         try:
             search_url = f"{self.host}/index.php/vod/search.html?wd={urllib.parse.quote(key)}&page={pg}"
             self.log(f"搜索URL: {search_url}")
@@ -136,7 +136,7 @@ class Spider(Spider):
             return {'list': []}
 
     def detailContent(self, ids):
-        """详情页面"""
+        """\u8be6\u60c5\u9875\u9762"""
         try:
             vid = ids[0]
             if '_' in vid:
@@ -154,11 +154,11 @@ class Spider(Spider):
             return {'list': []}
 
     def playerContent(self, flag, id, vipFlags):
-        """播放链接 - 直接使用API获取视频地址"""
+        """\u64ad\u653e\u94fe\u63a5 - \u76f4\u63a5\u4f7f\u7528API\u83b7\u53d6\u89c6\u9891\u5730\u5740"""
         try:
             self.log(f"获取播放链接: flag={flag}, id={id}")
             
-            # 提取视频ID
+            # \u63d0\u53d6\u89c6\u9891ID
             if '_' in id:
                 _, video_id = id.split('_')
             else:
@@ -166,7 +166,7 @@ class Spider(Spider):
                 
             self.log(f"视频ID: {video_id}")
             
-            # 直接调用API获取视频地址
+            # \u76f4\u63a5\u8c03\u7528API\u83b7\u53d6\u89c6\u9891\u5730\u5740
             api_url = f"{self.api_host}/api/v2/vod/reqplay/{video_id}"
             self.log(f"请求API获取视频地址: {api_url}")
             
@@ -188,16 +188,16 @@ class Spider(Spider):
                     video_url = data.get('data', {}).get('httpurl', '')
                 
                 if video_url:
-                    # 移除可能的参数
+                    # \u79fb\u9664\u53ef\u80fd\u7684\u53c2\u6570
                     video_url = video_url.replace('?300', '')
                     self.log(f"从API获取到视频地址: {video_url}")
                     return {'parse': 0, 'playUrl': '', 'url': video_url}
                 else:
-                    self.log("API响应中没有找到视频地址")
+                    self.log("API\u54cd\u5e94\u4e2d\u6ca1\u6709\u627e\u5230\u89c6\u9891\u5730\u5740")
             else:
-                self.log(f"API请求失败，状态码: {api_response.status_code if api_response else '无响应'}")
+                self.log(f"API请求失败，状态码: {api_response.status_code if api_response else '\u65e0\u54cd\u5e94'}")
                 
-            # 如果API请求失败，回退到原来的方法
+            # \u5982\u679cAPI\u8bf7\u6c42\u5931\u8d25\uff0c\u56de\u9000\u5230\u539f\u6765\u7684\u65b9\u6cd5
             if '_' in id:
                 domain, play_id = id.split('_')
                 play_url = f"https://{domain}/html/kkyd.html?m={play_id}"
@@ -209,7 +209,7 @@ class Spider(Spider):
             
         except Exception as e:
             self.log(f"播放链接获取出错: {str(e)}")
-            # 出错时也返回播放页面URL
+            # \u51fa\u9519\u65f6\u4e5f\u8fd4\u56de\u64ad\u653e\u9875\u9762URL
             if '_' in id:
                 domain, play_id = id.split('_')
                 play_url = f"https://{domain}/html/kkyd.html?m={play_id}"
@@ -217,10 +217,10 @@ class Spider(Spider):
                 play_url = f"{self.host}/html/kkyd.html?m={id}"
             return {'parse': 1, 'playUrl': '', 'url': play_url}
 
-    # ========== 辅助方法 ==========
+    # ========== \u8f85\u52a9\u65b9\u6cd5 ==========
     
     def _get_videos(self, doc, limit=None):
-        """获取影片列表 - 根据实际网站结构"""
+        """\u83b7\u53d6\u5f71\u7247\u5217\u8868 - \u6839\u636e\u5b9e\u9645\u7f51\u7ad9\u7ed3\u6784"""
         try:
             videos = []
             elements = doc.xpath('//a[@class="vodbox"]')
@@ -235,22 +235,22 @@ class Spider(Spider):
             return []
 
     def _extract_video(self, element):
-        """提取影片信息 - 修复标题乱码问题，正确读取km-script标签文本"""
+        """\u63d0\u53d6\u5f71\u7247\u4fe1\u606f - \u4fee\u590d\u6807\u9898\u4e71\u7801\u95ee\u9898\uff0c\u6b63\u786e\u8bfb\u53d6km-script\u6807\u7b7e\u6587\u672c"""
         try:
-            # 1. 提取影片链接（获取vod_id的来源）
-            link = element.xpath('./@href')[0]  # 获取a标签的href属性
+            # 1. \u63d0\u53d6\u5f71\u7247\u94fe\u63a5\uff08\u83b7\u53d6vod_id\u7684\u6765\u6e90\uff09
+            link = element.xpath('./@href')[0]  # \u83b7\u53d6a\u6807\u7b7e\u7684href\u5c5e\u6027
             if link.startswith('/'):
-                link = self.host + link  # 补全相对路径为完整URL
+                link = self.host + link  # \u8865\u5168\u76f8\u5bf9\u8def\u5f84\u4e3a\u5b8c\u6574URL
             
-            # 2. 提取vod_id（从URL的m参数获取，而非hash，更准确）
-            vod_id = self.regStr(r'm=(\d+)', link)  # 匹配 ?m=123 中的数字
+            # 2. \u63d0\u53d6vod_id\uff08\u4eceURL\u7684m\u53c2\u6570\u83b7\u53d6\uff0c\u800c\u975ehash\uff0c\u66f4\u51c6\u786e\uff09
+            vod_id = self.regStr(r'm=(\d+)', link)  # \u5339\u914d ?m=123 \u4e2d\u7684\u6570\u5b57
             if not vod_id:
-                vod_id = str(hash(link) % 1000000)  # 兜底：hash生成唯一ID
+                vod_id = str(hash(link) % 1000000)  # \u515c\u5e95\uff1ahash\u751f\u6210\u552f\u4e00ID
             
-            # 3. 提取标题（关键修复：读取<p class="km-script">内的文本并解密）
-            title_elem = element.xpath('./p[@class="km-script"]/text()')  # 定位km-script标签
+            # 3. \u63d0\u53d6\u6807\u9898\uff08\u5173\u952e\u4fee\u590d\uff1a\u8bfb\u53d6<p class="km-script">\u5185\u7684\u6587\u672c\u5e76\u89e3\u5bc6\uff09
+            title_elem = element.xpath('./p[@class="km-script"]/text()')  # \u5b9a\u4f4dkm-script\u6807\u7b7e
             if not title_elem:
-                # 尝试其他可能的标题选择器
+                # \u5c1d\u8bd5\u5176\u4ed6\u53ef\u80fd\u7684\u6807\u9898\u9009\u62e9\u5668
                 title_elem = element.xpath('.//p[contains(@class, "script")]/text()')
                 if not title_elem:
                     title_elem = element.xpath('.//p/text()')
@@ -262,28 +262,28 @@ class Spider(Spider):
                                 self.log(f"未找到标题元素，跳过该视频")
                                 return None
             
-            title_encrypted = title_elem[0].strip()  # 获取加密的标题文本
+            title_encrypted = title_elem[0].strip()  # \u83b7\u53d6\u52a0\u5bc6\u7684\u6807\u9898\u6587\u672c
             
-            # 4. 解密标题 - 使用网站的解密算法
+            # 4. \u89e3\u5bc6\u6807\u9898 - \u4f7f\u7528\u7f51\u7ad9\u7684\u89e3\u5bc6\u7b97\u6cd5
             title = self._decrypt_title(title_encrypted)
             
-            # 5. 提取封面图（逻辑不变，兼容data-original和src）
-            pic_elem = element.xpath('.//img/@data-original')  # 优先懒加载地址
+            # 5. \u63d0\u53d6\u5c01\u9762\u56fe\uff08\u903b\u8f91\u4e0d\u53d8\uff0c\u517c\u5bb9data-original\u548csrc\uff09
+            pic_elem = element.xpath('.//img/@data-original')  # \u4f18\u5148\u61d2\u52a0\u8f7d\u5730\u5740
             if not pic_elem:
-                pic_elem = element.xpath('.//img/@src')  # 兜底：直接src地址
+                pic_elem = element.xpath('.//img/@src')  # \u515c\u5e95\uff1a\u76f4\u63a5src\u5730\u5740
             pic = pic_elem[0] if pic_elem else ''
             
-            # 6. 补全图片URL（处理相对路径或无协议的情况）
+            # 6. \u8865\u5168\u56fe\u7247URL\uff08\u5904\u7406\u76f8\u5bf9\u8def\u5f84\u6216\u65e0\u534f\u8bae\u7684\u60c5\u51b5\uff09
             if pic:
                 if pic.startswith('//'):
-                    pic = 'https:' + pic  # 补全https协议
+                    pic = 'https:' + pic  # \u8865\u5168https\u534f\u8bae
                 elif pic.startswith('/'):
-                    pic = self.host + pic  # 补全主域名
+                    pic = self.host + pic  # \u8865\u5168\u4e3b\u57df\u540d
             
-            # 7. 返回正确的视频信息
+            # 7. \u8fd4\u56de\u6b63\u786e\u7684\u89c6\u9891\u4fe1\u606f
             return {
                 'vod_id': f"618013.xyz_{vod_id}",
-                'vod_name': title,  # 此时title已为正确文本
+                'vod_name': title,  # \u6b64\u65f6title\u5df2\u4e3a\u6b63\u786e\u6587\u672c
                 'vod_pic': pic,
                 'vod_remarks': '',
                 'vod_year': ''
@@ -293,41 +293,41 @@ class Spider(Spider):
             return None
 
     def _decrypt_title(self, encrypted_text):
-        """解密标题 - 使用网站的解密算法"""
+        """\u89e3\u5bc6\u6807\u9898 - \u4f7f\u7528\u7f51\u7ad9\u7684\u89e3\u5bc6\u7b97\u6cd5"""
         try:
-            # 网站使用的解密算法：每个字符与128进行异或操作
+            # \u7f51\u7ad9\u4f7f\u7528\u7684\u89e3\u5bc6\u7b97\u6cd5\uff1a\u6bcf\u4e2a\u5b57\u7b26\u4e0e128\u8fdb\u884c\u5f02\u6216\u64cd\u4f5c
             decrypted_chars = []
             for char in encrypted_text:
-                # 将字符转换为Unicode码点
+                # \u5c06\u5b57\u7b26\u8f6c\u6362\u4e3aUnicode\u7801\u70b9
                 code_point = ord(char)
-                # 与128进行异或操作
+                # \u4e0e128\u8fdb\u884c\u5f02\u6216\u64cd\u4f5c
                 decrypted_code = code_point ^ 128
-                # 转换回字符
+                # \u8f6c\u6362\u56de\u5b57\u7b26
                 decrypted_char = chr(decrypted_code)
                 decrypted_chars.append(decrypted_char)
             
-            # 拼接解密后的字符
+            # \u62fc\u63a5\u89e3\u5bc6\u540e\u7684\u5b57\u7b26
             decrypted_text = ''.join(decrypted_chars)
             return decrypted_text
         except Exception as e:
             self.log(f"标题解密失败: {str(e)}")
-            return encrypted_text  # 如果解密失败，返回原文本
+            return encrypted_text  # \u5982\u679c\u89e3\u5bc6\u5931\u8d25\uff0c\u8fd4\u56de\u539f\u6587\u672c
 
     def _get_detail(self, doc, vid):
-        """获取详情信息 (优化版) - 修复播放源提取问题"""
+        """\u83b7\u53d6\u8be6\u60c5\u4fe1\u606f (\u4f18\u5316\u7248) - \u4fee\u590d\u64ad\u653e\u6e90\u63d0\u53d6\u95ee\u9898"""
         try:
             title = self._get_text(doc, ['//h1/text()', '//title/text()'])
             pic = self._get_text(doc, ['//div[@class="dyimg"]//img/@src', '//img[@class="poster"]/@src'])
             if pic and pic.startswith('/'):
                 pic = self.host + pic
             desc = self._get_text(doc, ['//div[@class="yp_context"]/text()', '//div[@class="introduction"]//text()'])
-            actor = self._get_text(doc, ['//span[contains(text(),"主演")]/following-sibling::*/text()'])
-            director = self._get_text(doc, ['//span[contains(text(),"导演")]/following-sibling::*/text()'])
+            actor = self._get_text(doc, ['//span[contains(text(),"\u4e3b\u6f14")]/following-sibling::*/text()'])
+            director = self._get_text(doc, ['//span[contains(text(),"\u5bfc\u6f14")]/following-sibling::*/text()'])
 
             play_from = []
             play_urls = []
             
-            # 尝试查找播放源
+            # \u5c1d\u8bd5\u67e5\u627e\u64ad\u653e\u6e90
             play_links = doc.xpath('//a[contains(@href, "m=")]')
             if play_links:
                 episodes = []
@@ -341,12 +341,12 @@ class Spider(Spider):
                             episodes.append(f"{ep_title}${play_id}")
                 
                 if episodes:
-                    play_from.append("默认播放源")
+                    play_from.append("\u9ed8\u8ba4\u64ad\u653e\u6e90")
                     play_urls.append('#'.join(episodes))
 
             if not play_from:
-                self.log("未找到播放源元素，无法定位播放源列表")
-                # 即使没有播放源，也返回基本信息
+                self.log("\u672a\u627e\u5230\u64ad\u653e\u6e90\u5143\u7d20\uff0c\u65e0\u6cd5\u5b9a\u4f4d\u64ad\u653e\u6e90\u5217\u8868")
+                # \u5373\u4f7f\u6ca1\u6709\u64ad\u653e\u6e90\uff0c\u4e5f\u8fd4\u56de\u57fa\u672c\u4fe1\u606f
                 return {
                     'vod_id': vid,
                     'vod_name': title,
@@ -358,7 +358,7 @@ class Spider(Spider):
                     'vod_actor': actor,
                     'vod_director': director,
                     'vod_content': desc,
-                    'vod_play_from': '默认播放源',
+                    'vod_play_from': '\u9ed8\u8ba4\u64ad\u653e\u6e90',
                     'vod_play_url': f"第1集${vid}"
                 }
 
@@ -381,7 +381,7 @@ class Spider(Spider):
             return None
 
     def _get_text(self, doc, selectors):
-        """通用文本提取"""
+        """\u901a\u7528\u6587\u672c\u63d0\u53d6"""
         for selector in selectors:
             texts = doc.xpath(selector)
             for text in texts:

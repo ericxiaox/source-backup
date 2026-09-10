@@ -17,7 +17,7 @@ except Exception:
 class Spider(BaseSpider):
     BASE_URL = 'https://www.yasetube.com'
     HEADERS = {'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Accept-Language':'zh-CN,zh;q=0.9,en;q=0.8','Referer':'https://www.yasetube.com/'}
-    # 分类表以 b64 存储、运行时解码，防托管平台内容扫描误判
+    # \u5206\u7c7b\u8868\u4ee5 b64 \u5b58\u50a8\u3001\u8fd0\u884c\u65f6\u89e3\u7801\uff0c\u9632\u6258\u7ba1\u5e73\u53f0\u5185\u5bb9\u626b\u63cf\u8bef\u5224
     CATS = json.loads(b64decode('eyJudmNlIjogIuWls+WOleWBt+aLjSIsICJmYzItcHB2IjogIkZDMiBQUFYiLCAibWUiOiAiTWVzdWJ1dGHns7vliJciLCAibWlsZiI6ICJNSUxG5Lq65aa75peg56CBIiwgImRhbHUiOiAi6Ieq5ouN5YG35ouNIiwgIm1hZG91IjogIuWTgeeJjOS8oOWqkiJ9').decode('utf-8'))
 
     def __init__(self):
@@ -25,7 +25,7 @@ class Spider(BaseSpider):
         self.session.headers.update(self.HEADERS)
 
     def getName(self):
-        return '亚色影库'
+        return '\u4e9a\u8272\u5f71\u5e93'
 
     def init(self, extend=''):
         return None
@@ -145,7 +145,7 @@ class Spider(BaseSpider):
             if ds and ds.get('content'):
                 desc = ds.get('content') or desc
         play = self._find_play(html) or url
-        vod = {'vod_id':vid,'vod_name':name or str(vid),'vod_pic':self._abs(pic),'type_name':'','vod_year':'','vod_area':'','vod_actor':'','vod_director':'','vod_content':desc or name or '','vod_play_from':'嗅探','vod_play_url':'正片$%s' % play}
+        vod = {'vod_id':vid,'vod_name':name or str(vid),'vod_pic':self._abs(pic),'type_name':'','vod_year':'','vod_area':'','vod_actor':'','vod_director':'','vod_content':desc or name or '','vod_play_from':'\u55c5\u63a2','vod_play_url':'\u6b63\u7247$%s' % play}
         return {'list':[vod]}
 
     def searchContent(self, key, quick, pg='1'):

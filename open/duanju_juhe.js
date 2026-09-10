@@ -3,7 +3,7 @@
   searchable: 1,
   filterable: 1,
   quickSearch: 1,
-  title: '聚合短剧',
+  title: '\u805a\u5408\u77ed\u5267',
   lang: 'cat'
 })
 */
@@ -12,15 +12,15 @@
 import { Crypto as CryptoJS } from 'assets://js/lib/cat.js';
 
 let shuaCache = [];
-let siteName = '聚合短剧';
+let siteName = '\u805a\u5408\u77ed\u5267';
 let xingya_headers = {};
 let niuniu_headers = {}; 
 let niuniu_token = '';
 let niuniu_access_token = ''; 
 let hema_headers = {};
 
-// 分类排除规则
-const cate_remove = ['分类排除', '软鸭','碎片', '锦鲤', '番茄', '甜圈']; 
+// \u5206\u7c7b\u6392\u9664\u89c4\u5219
+const cate_remove = ['\u5206\u7c7b\u6392\u9664', '\u8f6f\u9e2d','\u788e\u7247', '\u9526\u9ca4', '\u756a\u8304', '\u751c\u5708']; 
 
 const aggConfig = {
   keys: 'd3dGiJc651gSQ8w1',
@@ -49,7 +49,7 @@ const aggConfig = {
   }
 };
 
-// ==================== URL配置集中管理 ====================
+// ==================== URL\u914d\u7f6e\u96c6\u4e2d\u7ba1\u7406 ====================
 const rule = {
   百度: {
     host: 'https://mbd.baidu.com',
@@ -134,357 +134,357 @@ const rule = {
 };
 
 const platformList = [
-  { name: '锦鲤短剧', id: '锦鲤' },
-  { name: '番茄短剧', id: '番茄' },
-  { name: '星芽短剧', id: '星芽' },
-  { name: '西饭短剧', id: '西饭' },
-  { name: '七猫短剧', id: '七猫' },
-  { name: '甜圈短剧', id: '甜圈' },
-  { name: '牛牛短剧', id: '牛牛' },
-  { name: '百度短剧', id: '百度' },
-  { name: '围观短剧', id: '围观' },
-  { name: '软鸭短剧', id: '软鸭' },
-  { name: '碎片剧场', id: '碎片' },
-  { name: '河马短剧', id: '河马' }
+  { name: '\u9526\u9ca4\u77ed\u5267', id: '\u9526\u9ca4' },
+  { name: '\u756a\u8304\u77ed\u5267', id: '\u756a\u8304' },
+  { name: '\u661f\u82bd\u77ed\u5267', id: '\u661f\u82bd' },
+  { name: '\u897f\u996d\u77ed\u5267', id: '\u897f\u996d' },
+  { name: '\u4e03\u732b\u77ed\u5267', id: '\u4e03\u732b' },
+  { name: '\u751c\u5708\u77ed\u5267', id: '\u751c\u5708' },
+  { name: '\u725b\u725b\u77ed\u5267', id: '\u725b\u725b' },
+  { name: '\u767e\u5ea6\u77ed\u5267', id: '\u767e\u5ea6' },
+  { name: '\u56f4\u89c2\u77ed\u5267', id: '\u56f4\u89c2' },
+  { name: '\u8f6f\u9e2d\u77ed\u5267', id: '\u8f6f\u9e2d' },
+  { name: '\u788e\u7247\u5267\u573a', id: '\u788e\u7247' },
+  { name: '\u6cb3\u9a6c\u77ed\u5267', id: '\u6cb3\u9a6c' }
 ];
 
 const ruleFilterDef = {
-  百度: { area: '新剧' },
-  甜圈: { area: '逆袭' },
+  百度: { area: '\u65b0\u5267' },
+  甜圈: { area: '\u9006\u88ad' },
   锦鲤: { area: '' },
   番茄: { area: 'videoseries_hot' },
   星芽: { area: '1' },
   西饭: { area: '' },
-  软鸭: { area: '战神' },
+  软鸭: { area: '\u6218\u795e' },
   七猫: { area: '0' },
-  牛牛: { area: '现言' },
+  牛牛: { area: '\u73b0\u8a00' },
   围观: { area: '' },
   碎片: { area: '' },
   河马: { area: '308' }
 };
 
 const filterOptions = {
-  "甜圈": [{
+  "\u751c\u5708": [{
     "key": "area",
-    "name": "剧情",
+    "name": "\u5267\u60c5",
     "value": [
-      {"n": "逆袭", "v": "逆袭"},
-      {"n": "霸总", "v": "霸总"},
-      {"n": "现代言情", "v": "现代言情"},
-      {"n": "打脸虐渣", "v": "打脸虐渣"},
-      {"n": "豪门恩怨", "v": "豪门恩怨"},
-      {"n": "神豪", "v": "神豪"},
-      {"n": "马甲", "v": "马甲"},
-      {"n": "都市日常", "v": "都市日常"},
-      {"n": "战神归来", "v": "战神归来"},
-      {"n": "小人物", "v": "小人物"},
-      {"n": "女性成长", "v": "女性成长"},
-      {"n": "大女主", "v": "大女主"},
-      {"n": "穿越", "v": "穿越"},
-      {"n": "都市修仙", "v": "都市修仙"},
-      {"n": "强者回归", "v": "强者回归"},
-      {"n": "亲情", "v": "亲情"},
-      {"n": "古装", "v": "古装"},
-      {"n": "重生", "v": "重生"},
-      {"n": "闪婚", "v": "闪婚"},
-      {"n": "赘婿逆袭", "v": "赘婿逆袭"},
-      {"n": "虐恋", "v": "虐恋"},
-      {"n": "追妻", "v": "追妻"},
-      {"n": "天下无敌", "v": "天下无敌"},
-      {"n": "家庭伦理", "v": "家庭伦理"},
-      {"n": "萌宝", "v": "萌宝"},
-      {"n": "古风权谋", "v": "古风权谋"},
-      {"n": "职场", "v": "职场"},
-      {"n": "奇幻脑洞", "v": "奇幻脑洞"},
-      {"n": "异能", "v": "异能"},
-      {"n": "无敌神医", "v": "无敌神医"},
-      {"n": "古风言情", "v": "古风言情"},
-      {"n": "传承觉醒", "v": "传承觉醒"},
-      {"n": "现言甜宠", "v": "现言甜宠"},
-      {"n": "奇幻爱情", "v": "奇幻爱情"},
-      {"n": "乡村", "v": "乡村"},
-      {"n": "历史古代", "v": "历史古代"},
-      {"n": "王妃", "v": "王妃"},
-      {"n": "高手下山", "v": "高手下山"},
-      {"n": "娱乐圈", "v": "娱乐圈"},
-      {"n": "强强联合", "v": "强强联合"},
-      {"n": "破镜重圆", "v": "破镜重圆"},
-      {"n": "暗恋成真", "v": "暗恋成真"},
-      {"n": "民国", "v": "民国"},
-      {"n": "欢喜冤家", "v": "欢喜冤家"},
-      {"n": "系统", "v": "系统"},
-      {"n": "真假千金", "v": "真假千金"},
-      {"n": "龙王", "v": "龙王"},
-      {"n": "校园", "v": "校园"},
-      {"n": "穿书", "v": "穿书"},
-      {"n": "女帝", "v": "女帝"},
-      {"n": "团宠", "v": "团宠"},
-      {"n": "年代爱情", "v": "年代爱情"},
-      {"n": "玄幻仙侠", "v": "玄幻仙侠"},
-      {"n": "青梅竹马", "v": "青梅竹马"},
-      {"n": "悬疑推理", "v": "悬疑推理"},
-      {"n": "皇后", "v": "皇后"},
-      {"n": "替身", "v": "替身"},
-      {"n": "大叔", "v": "大叔"},
-      {"n": "喜剧", "v": "喜剧"},
-      {"n": "剧情", "v": "剧情"}
+      {"n": "\u9006\u88ad", "v": "\u9006\u88ad"},
+      {"n": "\u9738\u603b", "v": "\u9738\u603b"},
+      {"n": "\u73b0\u4ee3\u8a00\u60c5", "v": "\u73b0\u4ee3\u8a00\u60c5"},
+      {"n": "\u6253\u8138\u8650\u6e23", "v": "\u6253\u8138\u8650\u6e23"},
+      {"n": "\u8c6a\u95e8\u6069\u6028", "v": "\u8c6a\u95e8\u6069\u6028"},
+      {"n": "\u795e\u8c6a", "v": "\u795e\u8c6a"},
+      {"n": "\u9a6c\u7532", "v": "\u9a6c\u7532"},
+      {"n": "\u90fd\u5e02\u65e5\u5e38", "v": "\u90fd\u5e02\u65e5\u5e38"},
+      {"n": "\u6218\u795e\u5f52\u6765", "v": "\u6218\u795e\u5f52\u6765"},
+      {"n": "\u5c0f\u4eba\u7269", "v": "\u5c0f\u4eba\u7269"},
+      {"n": "\u5973\u6027\u6210\u957f", "v": "\u5973\u6027\u6210\u957f"},
+      {"n": "\u5927\u5973\u4e3b", "v": "\u5927\u5973\u4e3b"},
+      {"n": "\u7a7f\u8d8a", "v": "\u7a7f\u8d8a"},
+      {"n": "\u90fd\u5e02\u4fee\u4ed9", "v": "\u90fd\u5e02\u4fee\u4ed9"},
+      {"n": "\u5f3a\u8005\u56de\u5f52", "v": "\u5f3a\u8005\u56de\u5f52"},
+      {"n": "\u4eb2\u60c5", "v": "\u4eb2\u60c5"},
+      {"n": "\u53e4\u88c5", "v": "\u53e4\u88c5"},
+      {"n": "\u91cd\u751f", "v": "\u91cd\u751f"},
+      {"n": "\u95ea\u5a5a", "v": "\u95ea\u5a5a"},
+      {"n": "\u8d58\u5a7f\u9006\u88ad", "v": "\u8d58\u5a7f\u9006\u88ad"},
+      {"n": "\u8650\u604b", "v": "\u8650\u604b"},
+      {"n": "\u8ffd\u59bb", "v": "\u8ffd\u59bb"},
+      {"n": "\u5929\u4e0b\u65e0\u654c", "v": "\u5929\u4e0b\u65e0\u654c"},
+      {"n": "\u5bb6\u5ead\u4f26\u7406", "v": "\u5bb6\u5ead\u4f26\u7406"},
+      {"n": "\u840c\u5b9d", "v": "\u840c\u5b9d"},
+      {"n": "\u53e4\u98ce\u6743\u8c0b", "v": "\u53e4\u98ce\u6743\u8c0b"},
+      {"n": "\u804c\u573a", "v": "\u804c\u573a"},
+      {"n": "\u5947\u5e7b\u8111\u6d1e", "v": "\u5947\u5e7b\u8111\u6d1e"},
+      {"n": "\u5f02\u80fd", "v": "\u5f02\u80fd"},
+      {"n": "\u65e0\u654c\u795e\u533b", "v": "\u65e0\u654c\u795e\u533b"},
+      {"n": "\u53e4\u98ce\u8a00\u60c5", "v": "\u53e4\u98ce\u8a00\u60c5"},
+      {"n": "\u4f20\u627f\u89c9\u9192", "v": "\u4f20\u627f\u89c9\u9192"},
+      {"n": "\u73b0\u8a00\u751c\u5ba0", "v": "\u73b0\u8a00\u751c\u5ba0"},
+      {"n": "\u5947\u5e7b\u7231\u60c5", "v": "\u5947\u5e7b\u7231\u60c5"},
+      {"n": "\u4e61\u6751", "v": "\u4e61\u6751"},
+      {"n": "\u5386\u53f2\u53e4\u4ee3", "v": "\u5386\u53f2\u53e4\u4ee3"},
+      {"n": "\u738b\u5983", "v": "\u738b\u5983"},
+      {"n": "\u9ad8\u624b\u4e0b\u5c71", "v": "\u9ad8\u624b\u4e0b\u5c71"},
+      {"n": "\u5a31\u4e50\u5708", "v": "\u5a31\u4e50\u5708"},
+      {"n": "\u5f3a\u5f3a\u8054\u5408", "v": "\u5f3a\u5f3a\u8054\u5408"},
+      {"n": "\u7834\u955c\u91cd\u5706", "v": "\u7834\u955c\u91cd\u5706"},
+      {"n": "\u6697\u604b\u6210\u771f", "v": "\u6697\u604b\u6210\u771f"},
+      {"n": "\u6c11\u56fd", "v": "\u6c11\u56fd"},
+      {"n": "\u6b22\u559c\u51a4\u5bb6", "v": "\u6b22\u559c\u51a4\u5bb6"},
+      {"n": "\u7cfb\u7edf", "v": "\u7cfb\u7edf"},
+      {"n": "\u771f\u5047\u5343\u91d1", "v": "\u771f\u5047\u5343\u91d1"},
+      {"n": "\u9f99\u738b", "v": "\u9f99\u738b"},
+      {"n": "\u6821\u56ed", "v": "\u6821\u56ed"},
+      {"n": "\u7a7f\u4e66", "v": "\u7a7f\u4e66"},
+      {"n": "\u5973\u5e1d", "v": "\u5973\u5e1d"},
+      {"n": "\u56e2\u5ba0", "v": "\u56e2\u5ba0"},
+      {"n": "\u5e74\u4ee3\u7231\u60c5", "v": "\u5e74\u4ee3\u7231\u60c5"},
+      {"n": "\u7384\u5e7b\u4ed9\u4fa0", "v": "\u7384\u5e7b\u4ed9\u4fa0"},
+      {"n": "\u9752\u6885\u7af9\u9a6c", "v": "\u9752\u6885\u7af9\u9a6c"},
+      {"n": "\u60ac\u7591\u63a8\u7406", "v": "\u60ac\u7591\u63a8\u7406"},
+      {"n": "\u7687\u540e", "v": "\u7687\u540e"},
+      {"n": "\u66ff\u8eab", "v": "\u66ff\u8eab"},
+      {"n": "\u5927\u53d4", "v": "\u5927\u53d4"},
+      {"n": "\u559c\u5267", "v": "\u559c\u5267"},
+      {"n": "\u5267\u60c5", "v": "\u5267\u60c5"}
     ]
   }],
-  "锦鲤": [{
+  "\u9526\u9ca4": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "全部", "v": ""},
-      {"n": "情感关系", "v": "1"},
-      {"n": "成长逆袭", "v": "2"},
-      {"n": "奇幻异能", "v": "3"},
-      {"n": "战斗热血", "v": "4"},
-      {"n": "伦理现实", "v": "5"},
-      {"n": "时空穿越", "v": "6"},
-      {"n": "权谋身份", "v": "7"}
+      {"n": "\u5168\u90e8", "v": ""},
+      {"n": "\u60c5\u611f\u5173\u7cfb", "v": "1"},
+      {"n": "\u6210\u957f\u9006\u88ad", "v": "2"},
+      {"n": "\u5947\u5e7b\u5f02\u80fd", "v": "3"},
+      {"n": "\u6218\u6597\u70ed\u8840", "v": "4"},
+      {"n": "\u4f26\u7406\u73b0\u5b9e", "v": "5"},
+      {"n": "\u65f6\u7a7a\u7a7f\u8d8a", "v": "6"},
+      {"n": "\u6743\u8c0b\u8eab\u4efd", "v": "7"}
     ]
   }],
-  "番茄": [{
+  "\u756a\u8304": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "热剧", "v": "videoseries_hot"},
-      {"n": "新剧", "v": "firstonlinetime_new"},
-      {"n": "逆袭", "v": "cate_739"},
-      {"n": "总裁", "v": "cate_29"},
-      {"n": "现言", "v": "cate_3"},
-      {"n": "打脸", "v": "cate_1051"},
-      {"n": "马甲", "v": "cate_266"},
-      {"n": "豪门", "v": "cate_1053"},
-      {"n": "都市", "v": "cate_261"},
-      {"n": "神豪", "v": "cate_20"}
+      {"n": "\u70ed\u5267", "v": "videoseries_hot"},
+      {"n": "\u65b0\u5267", "v": "firstonlinetime_new"},
+      {"n": "\u9006\u88ad", "v": "cate_739"},
+      {"n": "\u603b\u88c1", "v": "cate_29"},
+      {"n": "\u73b0\u8a00", "v": "cate_3"},
+      {"n": "\u6253\u8138", "v": "cate_1051"},
+      {"n": "\u9a6c\u7532", "v": "cate_266"},
+      {"n": "\u8c6a\u95e8", "v": "cate_1053"},
+      {"n": "\u90fd\u5e02", "v": "cate_261"},
+      {"n": "\u795e\u8c6a", "v": "cate_20"}
     ]
   }],
-  "星芽": [{
+  "\u661f\u82bd": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "剧场", "v": "1"},
-      {"n": "热播剧", "v": "2"},
-      {"n": "会员专享", "v": "8"},
-      {"n": "星选好剧", "v": "7"},
-      {"n": "新剧", "v": "3"},
-      {"n": "阳光剧场", "v": "5"}
+      {"n": "\u5267\u573a", "v": "1"},
+      {"n": "\u70ed\u64ad\u5267", "v": "2"},
+      {"n": "\u4f1a\u5458\u4e13\u4eab", "v": "8"},
+      {"n": "\u661f\u9009\u597d\u5267", "v": "7"},
+      {"n": "\u65b0\u5267", "v": "3"},
+      {"n": "\u9633\u5149\u5267\u573a", "v": "5"}
     ]
   }],
-  "西饭": [{
+  "\u897f\u996d": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "全部", "v": ""},
-      {"n": "都市", "v": "68@都市"},
-      {"n": "青春", "v": "68@青春"},
-      {"n": "现代言情", "v": "81@现代言情"},
-      {"n": "豪门", "v": "81@豪门"},
-      {"n": "大女主", "v": "80@大女主"},
-      {"n": "逆袭", "v": "79@逆袭"},
-      {"n": "打脸虐渣", "v": "79@打脸虐渣"},
-      {"n": "穿越", "v": "81@穿越"}
+      {"n": "\u5168\u90e8", "v": ""},
+      {"n": "\u90fd\u5e02", "v": "68@\u90fd\u5e02"},
+      {"n": "\u9752\u6625", "v": "68@\u9752\u6625"},
+      {"n": "\u73b0\u4ee3\u8a00\u60c5", "v": "81@\u73b0\u4ee3\u8a00\u60c5"},
+      {"n": "\u8c6a\u95e8", "v": "81@\u8c6a\u95e8"},
+      {"n": "\u5927\u5973\u4e3b", "v": "80@\u5927\u5973\u4e3b"},
+      {"n": "\u9006\u88ad", "v": "79@\u9006\u88ad"},
+      {"n": "\u6253\u8138\u8650\u6e23", "v": "79@\u6253\u8138\u8650\u6e23"},
+      {"n": "\u7a7f\u8d8a", "v": "81@\u7a7f\u8d8a"}
     ]
   }],
-  "软鸭": [{
+  "\u8f6f\u9e2d": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "全部", "v": ""},
-      {"n": "战神", "v": "战神"},
-      {"n": "逆袭", "v": "逆袭"},
-      {"n": "霸总", "v": "霸总"},
-      {"n": "神豪", "v": "神豪"},
-      {"n": "都市", "v": "都市"},
-      {"n": "玄幻", "v": "玄幻"},
-      {"n": "言情", "v": "言情"}
+      {"n": "\u5168\u90e8", "v": ""},
+      {"n": "\u6218\u795e", "v": "\u6218\u795e"},
+      {"n": "\u9006\u88ad", "v": "\u9006\u88ad"},
+      {"n": "\u9738\u603b", "v": "\u9738\u603b"},
+      {"n": "\u795e\u8c6a", "v": "\u795e\u8c6a"},
+      {"n": "\u90fd\u5e02", "v": "\u90fd\u5e02"},
+      {"n": "\u7384\u5e7b", "v": "\u7384\u5e7b"},
+      {"n": "\u8a00\u60c5", "v": "\u8a00\u60c5"}
     ]
   }],
-  "七猫": [{
+  "\u4e03\u732b": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "全部", "v": ""},
-      {"n": "推荐", "v": "0"},
-      {"n": "新剧", "v": "-1"},
-      {"n": "都市情感", "v": "1273"},
-      {"n": "古装", "v": "1272"},
-      {"n": "都市", "v": "571"},
-      {"n": "玄幻仙侠", "v": "1286"},
-      {"n": "奇幻", "v": "570"},
-      {"n": "乡村", "v": "590"},
-      {"n": "民国", "v": "573"},
-      {"n": "年代", "v": "572"},
-      {"n": "青春校园", "v": "1288"},
-      {"n": "武侠", "v": "371"},
-      {"n": "科幻", "v": "594"},
-      {"n": "末世", "v": "556"},
-      {"n": "二次元", "v": "1289"},
-      {"n": "逆袭", "v": "400"},
-      {"n": "穿越", "v": "373"},
-      {"n": "复仇", "v": "795"},
-      {"n": "系统", "v": "787"},
-      {"n": "权谋", "v": "790"},
-      {"n": "重生", "v": "784"},
-      {"n": "女性成长", "v": "1294"},
-      {"n": "打脸虐渣", "v": "716"},
-      {"n": "闪婚", "v": "480"},
-      {"n": "强者回归", "v": "402"},
-      {"n": "追妻火葬场", "v": "715"},
-      {"n": "家庭", "v": "670"},
-      {"n": "马甲", "v": "558"},
-      {"n": "职场", "v": "724"},
-      {"n": "宫斗", "v": "343"},
-      {"n": "高手下山", "v": "1299"},
-      {"n": "娱乐明星", "v": "1295"},
-      {"n": "异能", "v": "727"},
-      {"n": "宅斗", "v": "342"},
-      {"n": "替身", "v": "712"},
-      {"n": "穿书", "v": "338"},
-      {"n": "商战", "v": "723"},
-      {"n": "种田经商", "v": "1291"},
-      {"n": "伦理", "v": "1293"},
-      {"n": "社会话题", "v": "1290"},
-      {"n": "致富", "v": "492"},
-      {"n": "偷听心声", "v": "1258"},
-      {"n": "脑洞", "v": "526"},
-      {"n": "豪门总裁", "v": "624"},
-      {"n": "萌宝", "v": "356"},
-      {"n": "战神", "v": "527"},
-      {"n": "真假千金", "v": "812"},
-      {"n": "赘婿", "v": "36"},
-      {"n": "神医", "v": "1269"},
-      {"n": "神豪", "v": "37"},
-      {"n": "小人物", "v": "1296"},
-      {"n": "团宠", "v": "545"},
-      {"n": "欢喜冤家", "v": "464"},
-      {"n": "女帝", "v": "617"},
-      {"n": "银发", "v": "1297"},
-      {"n": "兵王", "v": "28"},
-      {"n": "虐恋", "v": "16"},
-      {"n": "甜宠", "v": "21"},
-      {"n": "悬疑", "v": "27"},
-      {"n": "搞笑", "v": "793"},
-      {"n": "灵异", "v": "1287"}
+      {"n": "\u5168\u90e8", "v": ""},
+      {"n": "\u63a8\u8350", "v": "0"},
+      {"n": "\u65b0\u5267", "v": "-1"},
+      {"n": "\u90fd\u5e02\u60c5\u611f", "v": "1273"},
+      {"n": "\u53e4\u88c5", "v": "1272"},
+      {"n": "\u90fd\u5e02", "v": "571"},
+      {"n": "\u7384\u5e7b\u4ed9\u4fa0", "v": "1286"},
+      {"n": "\u5947\u5e7b", "v": "570"},
+      {"n": "\u4e61\u6751", "v": "590"},
+      {"n": "\u6c11\u56fd", "v": "573"},
+      {"n": "\u5e74\u4ee3", "v": "572"},
+      {"n": "\u9752\u6625\u6821\u56ed", "v": "1288"},
+      {"n": "\u6b66\u4fa0", "v": "371"},
+      {"n": "\u79d1\u5e7b", "v": "594"},
+      {"n": "\u672b\u4e16", "v": "556"},
+      {"n": "\u4e8c\u6b21\u5143", "v": "1289"},
+      {"n": "\u9006\u88ad", "v": "400"},
+      {"n": "\u7a7f\u8d8a", "v": "373"},
+      {"n": "\u590d\u4ec7", "v": "795"},
+      {"n": "\u7cfb\u7edf", "v": "787"},
+      {"n": "\u6743\u8c0b", "v": "790"},
+      {"n": "\u91cd\u751f", "v": "784"},
+      {"n": "\u5973\u6027\u6210\u957f", "v": "1294"},
+      {"n": "\u6253\u8138\u8650\u6e23", "v": "716"},
+      {"n": "\u95ea\u5a5a", "v": "480"},
+      {"n": "\u5f3a\u8005\u56de\u5f52", "v": "402"},
+      {"n": "\u8ffd\u59bb\u706b\u846c\u573a", "v": "715"},
+      {"n": "\u5bb6\u5ead", "v": "670"},
+      {"n": "\u9a6c\u7532", "v": "558"},
+      {"n": "\u804c\u573a", "v": "724"},
+      {"n": "\u5bab\u6597", "v": "343"},
+      {"n": "\u9ad8\u624b\u4e0b\u5c71", "v": "1299"},
+      {"n": "\u5a31\u4e50\u660e\u661f", "v": "1295"},
+      {"n": "\u5f02\u80fd", "v": "727"},
+      {"n": "\u5b85\u6597", "v": "342"},
+      {"n": "\u66ff\u8eab", "v": "712"},
+      {"n": "\u7a7f\u4e66", "v": "338"},
+      {"n": "\u5546\u6218", "v": "723"},
+      {"n": "\u79cd\u7530\u7ecf\u5546", "v": "1291"},
+      {"n": "\u4f26\u7406", "v": "1293"},
+      {"n": "\u793e\u4f1a\u8bdd\u9898", "v": "1290"},
+      {"n": "\u81f4\u5bcc", "v": "492"},
+      {"n": "\u5077\u542c\u5fc3\u58f0", "v": "1258"},
+      {"n": "\u8111\u6d1e", "v": "526"},
+      {"n": "\u8c6a\u95e8\u603b\u88c1", "v": "624"},
+      {"n": "\u840c\u5b9d", "v": "356"},
+      {"n": "\u6218\u795e", "v": "527"},
+      {"n": "\u771f\u5047\u5343\u91d1", "v": "812"},
+      {"n": "\u8d58\u5a7f", "v": "36"},
+      {"n": "\u795e\u533b", "v": "1269"},
+      {"n": "\u795e\u8c6a", "v": "37"},
+      {"n": "\u5c0f\u4eba\u7269", "v": "1296"},
+      {"n": "\u56e2\u5ba0", "v": "545"},
+      {"n": "\u6b22\u559c\u51a4\u5bb6", "v": "464"},
+      {"n": "\u5973\u5e1d", "v": "617"},
+      {"n": "\u94f6\u53d1", "v": "1297"},
+      {"n": "\u5175\u738b", "v": "28"},
+      {"n": "\u8650\u604b", "v": "16"},
+      {"n": "\u751c\u5ba0", "v": "21"},
+      {"n": "\u60ac\u7591", "v": "27"},
+      {"n": "\u641e\u7b11", "v": "793"},
+      {"n": "\u7075\u5f02", "v": "1287"}
     ]
   }],
-  "牛牛": [{
+  "\u725b\u725b": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "全部", "v": ""},
-      {"n": "现言", "v": "现言"},
-      {"n": "古言", "v": "古言"},
-      {"n": "历史", "v": "历史"},
-      {"n": "都市", "v": "都市"},
-      {"n": "活动", "v": "活动"},
-      {"n": "逆袭", "v": "逆袭"},
-      {"n": "豪门", "v": "豪门"},
-      {"n": "现代言情", "v": "现代言情"},
-      {"n": "战神", "v": "战神"},
-      {"n": "甜宠", "v": "甜宠"},
-      {"n": "穿越", "v": "穿越"},
-      {"n": "古装", "v": "古装"},
-      {"n": "虐心", "v": "虐心"},
-      {"n": "神医", "v": "神医"},
-      {"n": "赘婿", "v": "赘婿"},
-      {"n": "亲情", "v": "亲情"},
-      {"n": "复仇", "v": "复仇"},
-      {"n": "玄幻", "v": "玄幻"},
-      {"n": "古代言情", "v": "古代言情"},
-      {"n": "热血", "v": "热血"},
-      {"n": "动作", "v": "动作"},
-      {"n": "喜剧", "v": "喜剧"},
-      {"n": "悬疑", "v": "悬疑"},
-      {"n": "军事", "v": "军事"},
-      {"n": "二次元", "v": "二次元"},
-      {"n": "未来", "v": "未来"},
-      {"n": "快速穿越", "v": "快速穿越"},
-      {"n": "烧脑", "v": "烧脑"},
-      {"n": "治愈", "v": "治愈"},
-      {"n": "其他剧情", "v": "其他剧情"}
+      {"n": "\u5168\u90e8", "v": ""},
+      {"n": "\u73b0\u8a00", "v": "\u73b0\u8a00"},
+      {"n": "\u53e4\u8a00", "v": "\u53e4\u8a00"},
+      {"n": "\u5386\u53f2", "v": "\u5386\u53f2"},
+      {"n": "\u90fd\u5e02", "v": "\u90fd\u5e02"},
+      {"n": "\u6d3b\u52a8", "v": "\u6d3b\u52a8"},
+      {"n": "\u9006\u88ad", "v": "\u9006\u88ad"},
+      {"n": "\u8c6a\u95e8", "v": "\u8c6a\u95e8"},
+      {"n": "\u73b0\u4ee3\u8a00\u60c5", "v": "\u73b0\u4ee3\u8a00\u60c5"},
+      {"n": "\u6218\u795e", "v": "\u6218\u795e"},
+      {"n": "\u751c\u5ba0", "v": "\u751c\u5ba0"},
+      {"n": "\u7a7f\u8d8a", "v": "\u7a7f\u8d8a"},
+      {"n": "\u53e4\u88c5", "v": "\u53e4\u88c5"},
+      {"n": "\u8650\u5fc3", "v": "\u8650\u5fc3"},
+      {"n": "\u795e\u533b", "v": "\u795e\u533b"},
+      {"n": "\u8d58\u5a7f", "v": "\u8d58\u5a7f"},
+      {"n": "\u4eb2\u60c5", "v": "\u4eb2\u60c5"},
+      {"n": "\u590d\u4ec7", "v": "\u590d\u4ec7"},
+      {"n": "\u7384\u5e7b", "v": "\u7384\u5e7b"},
+      {"n": "\u53e4\u4ee3\u8a00\u60c5", "v": "\u53e4\u4ee3\u8a00\u60c5"},
+      {"n": "\u70ed\u8840", "v": "\u70ed\u8840"},
+      {"n": "\u52a8\u4f5c", "v": "\u52a8\u4f5c"},
+      {"n": "\u559c\u5267", "v": "\u559c\u5267"},
+      {"n": "\u60ac\u7591", "v": "\u60ac\u7591"},
+      {"n": "\u519b\u4e8b", "v": "\u519b\u4e8b"},
+      {"n": "\u4e8c\u6b21\u5143", "v": "\u4e8c\u6b21\u5143"},
+      {"n": "\u672a\u6765", "v": "\u672a\u6765"},
+      {"n": "\u5feb\u901f\u7a7f\u8d8a", "v": "\u5feb\u901f\u7a7f\u8d8a"},
+      {"n": "\u70e7\u8111", "v": "\u70e7\u8111"},
+      {"n": "\u6cbb\u6108", "v": "\u6cbb\u6108"},
+      {"n": "\u5176\u4ed6\u5267\u60c5", "v": "\u5176\u4ed6\u5267\u60c5"}
     ]
   }],
-  "百度": [{
+  "\u767e\u5ea6": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "新剧", "v": "新剧"},
-      {"n": "限时免费", "v": "限时免费"},
-      {"n": "精选", "v": "精选"},
-      {"n": "独播", "v": "独播"},
-      {"n": "全部", "v": "全部题材"},
-      {"n": "神医", "v": "神医"},
-      {"n": "连续剧", "v": "连续剧"},
-      {"n": "都市", "v": "都市"},
-      {"n": "现代言情", "v": "现代言情"},
-      {"n": "异能", "v": "异能"},
-      {"n": "逆袭", "v": "逆袭"},
-      {"n": "甜宠", "v": "甜宠"},
-      {"n": "总裁", "v": "总裁"},
-      {"n": "萌宝", "v": "萌宝"},
-      {"n": "战神", "v": "战神"},
-      {"n": "宫斗宅斗", "v": "宫斗宅斗"},
-      {"n": "神豪", "v": "神豪"},
-      {"n": "虐恋", "v": "虐恋"},
-      {"n": "闪婚", "v": "闪婚"},
-      {"n": "玄幻", "v": "玄幻"},
-      {"n": "穿越重生", "v": "穿越重生"},
-      {"n": "年代", "v": "年代"},
-      {"n": "家庭伦理", "v": "家庭伦理"},
-      {"n": "古代言情", "v": "古代言情"},
-      {"n": "武侠武打", "v": "武侠武打"},
-      {"n": "赘婿", "v": "赘婿"},
-      {"n": "单元剧", "v": "单元剧"},
-      {"n": "青春校园", "v": "青春校园"},
-      {"n": "历史架空", "v": "历史架空"},
-      {"n": "王妃", "v": "王妃"},
-      {"n": "鉴宝", "v": "鉴宝"},
-      {"n": "科幻", "v": "科幻"},
-      {"n": "军旅战争", "v": "军旅战争"},
-      {"n": "种田", "v": "种田"}
+      {"n": "\u65b0\u5267", "v": "\u65b0\u5267"},
+      {"n": "\u9650\u65f6\u514d\u8d39", "v": "\u9650\u65f6\u514d\u8d39"},
+      {"n": "\u7cbe\u9009", "v": "\u7cbe\u9009"},
+      {"n": "\u72ec\u64ad", "v": "\u72ec\u64ad"},
+      {"n": "\u5168\u90e8", "v": "\u5168\u90e8\u9898\u6750"},
+      {"n": "\u795e\u533b", "v": "\u795e\u533b"},
+      {"n": "\u8fde\u7eed\u5267", "v": "\u8fde\u7eed\u5267"},
+      {"n": "\u90fd\u5e02", "v": "\u90fd\u5e02"},
+      {"n": "\u73b0\u4ee3\u8a00\u60c5", "v": "\u73b0\u4ee3\u8a00\u60c5"},
+      {"n": "\u5f02\u80fd", "v": "\u5f02\u80fd"},
+      {"n": "\u9006\u88ad", "v": "\u9006\u88ad"},
+      {"n": "\u751c\u5ba0", "v": "\u751c\u5ba0"},
+      {"n": "\u603b\u88c1", "v": "\u603b\u88c1"},
+      {"n": "\u840c\u5b9d", "v": "\u840c\u5b9d"},
+      {"n": "\u6218\u795e", "v": "\u6218\u795e"},
+      {"n": "\u5bab\u6597\u5b85\u6597", "v": "\u5bab\u6597\u5b85\u6597"},
+      {"n": "\u795e\u8c6a", "v": "\u795e\u8c6a"},
+      {"n": "\u8650\u604b", "v": "\u8650\u604b"},
+      {"n": "\u95ea\u5a5a", "v": "\u95ea\u5a5a"},
+      {"n": "\u7384\u5e7b", "v": "\u7384\u5e7b"},
+      {"n": "\u7a7f\u8d8a\u91cd\u751f", "v": "\u7a7f\u8d8a\u91cd\u751f"},
+      {"n": "\u5e74\u4ee3", "v": "\u5e74\u4ee3"},
+      {"n": "\u5bb6\u5ead\u4f26\u7406", "v": "\u5bb6\u5ead\u4f26\u7406"},
+      {"n": "\u53e4\u4ee3\u8a00\u60c5", "v": "\u53e4\u4ee3\u8a00\u60c5"},
+      {"n": "\u6b66\u4fa0\u6b66\u6253", "v": "\u6b66\u4fa0\u6b66\u6253"},
+      {"n": "\u8d58\u5a7f", "v": "\u8d58\u5a7f"},
+      {"n": "\u5355\u5143\u5267", "v": "\u5355\u5143\u5267"},
+      {"n": "\u9752\u6625\u6821\u56ed", "v": "\u9752\u6625\u6821\u56ed"},
+      {"n": "\u5386\u53f2\u67b6\u7a7a", "v": "\u5386\u53f2\u67b6\u7a7a"},
+      {"n": "\u738b\u5983", "v": "\u738b\u5983"},
+      {"n": "\u9274\u5b9d", "v": "\u9274\u5b9d"},
+      {"n": "\u79d1\u5e7b", "v": "\u79d1\u5e7b"},
+      {"n": "\u519b\u65c5\u6218\u4e89", "v": "\u519b\u65c5\u6218\u4e89"},
+      {"n": "\u79cd\u7530", "v": "\u79cd\u7530"}
     ]
   }],
-  "围观": [{
+  "\u56f4\u89c2": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "全部", "v": ""}
+      {"n": "\u5168\u90e8", "v": ""}
     ]
   }],
-  "碎片": [{
+  "\u788e\u7247": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "全部", "v": ""}
+      {"n": "\u5168\u90e8", "v": ""}
     ]
   }],
-  "河马": [{
+  "\u6cb3\u9a6c": [{
     "key": "area",
-    "name": "分类",
+    "name": "\u5206\u7c7b",
     "value": [
-      {"n": "推荐", "v": "308"},
-      {"n": "新剧", "v": "309"},
-      {"n": "逆袭", "v": "310"},
-      {"n": "恋爱", "v": "311"},
-      {"n": "强者回归", "v": "312"},
-      {"n": "豪门恩怨", "v": "313"},
-      {"n": "古装", "v": "314"},
-      {"n": "重生", "v": "315"},
-      {"n": "萌宝", "v": "316"},
-      {"n": "复仇", "v": "317"},
-      {"n": "神医", "v": "318"},
-      {"n": "高手下山", "v": "319"},
-      {"n": "超能悬疑", "v": "320"},
-      {"n": "传承觉醒", "v": "321"},
-      {"n": "神豪", "v": "322"},
-      {"n": "民国", "v": "323"}
+      {"n": "\u63a8\u8350", "v": "308"},
+      {"n": "\u65b0\u5267", "v": "309"},
+      {"n": "\u9006\u88ad", "v": "310"},
+      {"n": "\u604b\u7231", "v": "311"},
+      {"n": "\u5f3a\u8005\u56de\u5f52", "v": "312"},
+      {"n": "\u8c6a\u95e8\u6069\u6028", "v": "313"},
+      {"n": "\u53e4\u88c5", "v": "314"},
+      {"n": "\u91cd\u751f", "v": "315"},
+      {"n": "\u840c\u5b9d", "v": "316"},
+      {"n": "\u590d\u4ec7", "v": "317"},
+      {"n": "\u795e\u533b", "v": "318"},
+      {"n": "\u9ad8\u624b\u4e0b\u5c71", "v": "319"},
+      {"n": "\u8d85\u80fd\u60ac\u7591", "v": "320"},
+      {"n": "\u4f20\u627f\u89c9\u9192", "v": "321"},
+      {"n": "\u795e\u8c6a", "v": "322"},
+      {"n": "\u6c11\u56fd", "v": "323"}
     ]
   }]
 };
 
-// 河马分类标签映射
+// \u6cb3\u9a6c\u5206\u7c7b\u6807\u7b7e\u6620\u5c04
 const hemaTagIds = {
   "308": "",
   "309": "",
@@ -504,11 +504,11 @@ const hemaTagIds = {
   "323": "590"
 };
 
-// ==================== 初始化 ====================
+// ==================== \u521d\u59cb\u5316 ====================
 async function init(cfg) {
-  console.log(`【${siteName}】初始化开始`);
+  console.log(`\u3010${siteName}\u3011\u521d\u59cb\u5316\u5f00\u59cb`);
   
-  // 星芽登录
+  // \u661f\u82bd\u767b\u5f55
   try {
     const loginData = { device: '24250683a3bdb3f118dff25ba4b1cba1a' };
     const response = await request(rule.星芽.login, {
@@ -522,18 +522,18 @@ async function init(cfg) {
     
     if (token) {
       xingya_headers = { ...aggConfig.headers.default, authorization: token };
-      console.log(`【${siteName}】星芽登录成功`);
+      console.log(`\u3010${siteName}\u3011\u661f\u82bd\u767b\u5f55\u6210\u529f`);
     } else {
       xingya_headers = aggConfig.headers.default;
     }
   } catch (e) {
-    console.log(`【${siteName}】星芽登录失败: ${e.message}`);
+    console.log(`\u3010${siteName}\u3011\u661f\u82bd\u767b\u5f55\u5931\u8d25: ${e.message}`);
     xingya_headers = aggConfig.headers.default;
   }
   
-  // 牛牛登录
+  // \u725b\u725b\u767b\u5f55
   try {
-    // 获取visitor token
+    // \u83b7\u53d6visitor token
     let tkhtml = await request(rule.牛牛.host + rule.牛牛.visitor, {
       headers: {
         "deviceid": "aa11fc54-ba9c-3980-add5-447d3fa5b939",
@@ -546,9 +546,9 @@ async function init(cfg) {
 
     let tkRes = JSON.parse(tkhtml);
     niuniu_token = tkRes.data.token;
-    console.log("牛牛token:", niuniu_token);
+    console.log("\u725b\u725btoken:", niuniu_token);
     
-    // 获取access_token
+    // \u83b7\u53d6access_token
     let t = String(Math.floor(new Date().getTime() / 1000));
     let body = `ac=wifi&os=Android&vod_version=1.10.21.6-tob&os_version=9&type=1&clientVersion=v5.2.5&uuid=Y4WNZ3SAWK7MAJMH7CXCDHJ4VMPVFRZQTBSIA4XTYO4AWEUHIK6Q01&resolution=1280*2618&openudid=889edced38f1069b&dt=Pixel%204&sha1=46121F77CE2FCAD3DBC3B9EC8A24908C1A8AD6D9&os_api=28&install_id=1549688030634536&device_brand=google&sdk_version=1.1.3.0&package_name=com.niuniu.ztdh.app&siteid=5627189&dev_log_aid=667431&oaid=&timestamp=${t}`;
     
@@ -571,7 +571,7 @@ async function init(cfg) {
     let logindata = aesDecryptECB(loginpost, 'dafdb3d2a5c343d6');
     let accesstoken = JSON.parse(logindata);
     niuniu_access_token = accesstoken.data.access_token;
-    console.log(`【${siteName}】牛牛登录成功`);
+    console.log(`\u3010${siteName}\u3011\u725b\u725b\u767b\u5f55\u6210\u529f`);
     
     niuniu_headers = {
       ...aggConfig.headers.niuniu,
@@ -580,23 +580,23 @@ async function init(cfg) {
     };
     
   } catch (e) {
-    console.log(`【${siteName}】牛牛登录失败: ${e.message}`);
+    console.log(`\u3010${siteName}\u3011\u725b\u725b\u767b\u5f55\u5931\u8d25: ${e.message}`);
     niuniu_headers = aggConfig.headers.niuniu;
   }
   
-  // 河马初始化
+  // \u6cb3\u9a6c\u521d\u59cb\u5316
   try {
     hema_headers = { ...aggConfig.headers.hema };
-    console.log(`【${siteName}】河马初始化成功`);
+    console.log(`\u3010${siteName}\u3011\u6cb3\u9a6c\u521d\u59cb\u5316\u6210\u529f`);
   } catch (e) {
-    console.log(`【${siteName}】河马初始化失败: ${e.message}`);
+    console.log(`\u3010${siteName}\u3011\u6cb3\u9a6c\u521d\u59cb\u5316\u5931\u8d25: ${e.message}`);
     hema_headers = aggConfig.headers.hema;
   }
   
   return true;
 }
 
-// ==================== 首页分类 ====================
+// ==================== \u9996\u9875\u5206\u7c7b ====================
 function home(filter) {
   const platForms = getPlatList();
   
@@ -614,7 +614,7 @@ function home(filter) {
   return JSON.stringify({ class: classes, filters: filters });
 }
 
-// ==================== 首页推荐 ====================
+// ==================== \u9996\u9875\u63a8\u8350 ====================
 async function homeVod() {
   const platForms = getPlatList();
   
@@ -629,7 +629,7 @@ async function homeVod() {
   });
 }
 
-// ==================== 分类列表 ====================
+// ==================== \u5206\u7c7b\u5217\u8868 ====================
 async function category(tid, pg, filter, extend) {
   const page = pg || 1;
   extend = extend || {};
@@ -649,9 +649,9 @@ async function category(tid, pg, filter, extend) {
   const videos = [];
   
   switch (tid) {
-    case '百度': {
-      let sub = ["新剧","限时免费","精选","独播"].includes(area) ? area : "新剧";
-      let tcsub = area === "全部" || area === "全部题材" ? "" : area;
+    case '\u767e\u5ea6': {
+      let sub = ["\u65b0\u5267","\u9650\u65f6\u514d\u8d39","\u7cbe\u9009","\u72ec\u64ad"].includes(area) ? area : "\u65b0\u5267";
+      let tcsub = area === "\u5168\u90e8" || area === "\u5168\u90e8\u9898\u6750" ? "" : area;
       let t = Math.floor(Date.now() / 1000);
       let version = await md5(t + "v2");
       
@@ -668,8 +668,8 @@ async function category(tid, pg, filter, extend) {
             "timestamp": t,
             "version": version,
             "themes": [
-              { "kind": "综合", "names": [sub] },
-              { "kind": "题材", "names": [tcsub] }
+              { "kind": "\u7efc\u5408", "names": [sub] },
+              { "kind": "\u9898\u6750", "names": [tcsub] }
             ]
           }
         }
@@ -684,33 +684,33 @@ async function category(tid, pg, filter, extend) {
       let items = res.data?.items || [];
       items.slice(0, 20).forEach(it => {
         videos.push({
-          vod_id: `百度@${it.collId}`,
-          vod_name: it.title || '未知短剧',
+          vod_id: `\u767e\u5ea6@${it.collId}`,
+          vod_name: it.title || '\u672a\u77e5\u77ed\u5267',
           vod_pic: it.img || '',
-          vod_remarks: '百度短剧 | ' + (it.updateStatus || "更新中"),
+          vod_remarks: '\u767e\u5ea6\u77ed\u5267 | ' + (it.updateStatus || "\u66f4\u65b0\u4e2d"),
           vod_content: it.description || ''
         });
       });
       break;
     }
     
-    case '甜圈': {
+    case '\u751c\u5708': {
       const url = `${platRule.host}${platRule.list}=${area}&offset=${page}`;
       const response = await request(url, { headers: aggConfig.headers.default });
       const res = JSON.parse(response);
       (res.data || []).forEach(it => {
         videos.push({
-          vod_id: `甜圈@${it.book_id}`,
-          vod_name: it.title || '未知标题',
+          vod_id: `\u751c\u5708@${it.book_id}`,
+          vod_name: it.title || '\u672a\u77e5\u6807\u9898',
           vod_pic: it.cover || '',
-          vod_remarks: '甜圈短剧 | ' + (it.copyright || ''),
+          vod_remarks: '\u751c\u5708\u77ed\u5267 | ' + (it.copyright || ''),
           vod_content: it.desc || ''
         });
       });
       break;
     }
     
-    case '锦鲤': {
+    case '\u9526\u9ca4': {
       const postData = { page, limit: 24, type_id: area, year: '', keyword: '' };
       const response = await request(`${platRule.host}${platRule.search}`, {
         method: 'POST',
@@ -719,55 +719,55 @@ async function category(tid, pg, filter, extend) {
       const res = JSON.parse(response);
       (res.data?.list || []).forEach(item => {
         videos.push({
-          vod_id: `锦鲤@${item.vod_id}`,
+          vod_id: `\u9526\u9ca4@${item.vod_id}`,
           vod_name: item.vod_name || '',
           vod_pic: item.vod_pic || '',
-          vod_remarks: '锦鲤短剧 | ' + (item.vod_total ? `${item.vod_total}集` : ''),
+          vod_remarks: '\u9526\u9ca4\u77ed\u5267 | ' + (item.vod_total ? `${item.vod_total}\u96c6` : ''),
           vod_content: item.vod_tag || ''
         });
       });
       break;
     }
     
-    case '番茄': {
+    case '\u756a\u8304': {
       const sessionId = new Date().toISOString().slice(0,16).replace(/-|T:/g,'');
       let url = `${platRule.host}${platRule.list}?change_type=0&selected_items=${area}&tab_type=8&cell_id=6952850996422770718&version_tag=video_feed_refactor&device_id=1423244030195267&aid=1967&app_name=novelapp&ssmix=a&session_id=${sessionId}`;
       if (page > 1) url += `&offset=${(page-1)*12}`;
       
       const response = await request(url, { headers: aggConfig.headers.default });
       const res = JSON.parse(response);
-      let items = res?.data?.cell_view?.cell_data || res?.search_tabs?.find(t => t.title === '短剧' && t.data)?.data || res?.data || [];
+      let items = res?.data?.cell_view?.cell_data || res?.search_tabs?.find(t => t.title === '\u77ed\u5267' && t.data)?.data || res?.data || [];
       
       items.forEach(item => {
         const videoData = item.video_data?.[0] || item;
         videos.push({
-          vod_id: `番茄@${videoData.series_id || videoData.book_id || videoData.id || ''}`,
-          vod_name: videoData.title || '未知短剧',
+          vod_id: `\u756a\u8304@${videoData.series_id || videoData.book_id || videoData.id || ''}`,
+          vod_name: videoData.title || '\u672a\u77e5\u77ed\u5267',
           vod_pic: videoData.cover || videoData.horiz_cover || '',
-          vod_remarks: '番茄短剧 | ' + (videoData.sub_title || videoData.rec_text || ''),
+          vod_remarks: '\u756a\u8304\u77ed\u5267 | ' + (videoData.sub_title || videoData.rec_text || ''),
           vod_content: videoData.abstract || ''
         });
       });
       break;
     }
     
-    case '星芽': {
+    case '\u661f\u82bd': {
       const url = `${platRule.host}${platRule.list}=${area}&type=1&class2_ids=0&page_num=${page}&page_size=24`;
       const response = await request(url, { headers: xingya_headers });
       const res = JSON.parse(response);
       (res.data?.list || []).forEach(it => {
         videos.push({
-          vod_id: `星芽@${it.theater.id}`,
+          vod_id: `\u661f\u82bd@${it.theater.id}`,
           vod_name: it.theater.title || '',
           vod_pic: it.theater.cover_url || '',
-          vod_remarks: '星芽短剧 | ' + (it.theater.total ? `${it.theater.total}集` : ''),
-          vod_content: `播放量:${it.theater.play_amount_str || 0}`
+          vod_remarks: '\u661f\u82bd\u77ed\u5267 | ' + (it.theater.total ? `${it.theater.total}\u96c6` : ''),
+          vod_content: `\u64ad\u653e\u91cf:${it.theater.play_amount_str || 0}`
         });
       });
       break;
     }
     
-    case '西饭': {
+    case '\u897f\u996d': {
       const [typeId, typeName] = area.split('@');
       const ts = Math.floor(Date.now() / 1000);
       const url = `${platRule.host}${platRule.list}?reqType=aggregationPage&offset=${(page-1)*30}&categoryId=${typeId}&quickEngineVersion=-1&scene=&categoryNames=${encodeURIComponent(typeName)}&categoryVersion=1&density=1.5&pageID=page_theater&version=2001001&androidVersionCode=28&requestId=${ts}aa498144140ef297&appId=drama&teenMode=false&userBaseMode=false&session=eyJpbmZvIjp7InVpZCI6IiIsInJ0IjoiMTc0MDY1ODI5NCIsInVuIjoiT1BHXzFlZGQ5OTZhNjQ3ZTQ1MjU4Nzc1MTE2YzFkNzViN2QwIiwiZnQiOiIxNzQwNjU4Mjk0In19&feedssession=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dHlwIjowLCJidWlkIjoxNjMzOTY4MTI2MTQ4NjQxNTM2LCJhdWQiOiJkcmFtYSIsInZlciI6MiwicmF0IjoxNzQwNjU4Mjk0LCJ1bm0iOiJPUEdfMWVkZDk5NmE2NDdlNDUyNTg3NzUxMTY2YzFkNzViN2QwIiwiZXhwIjoxNzQxMjYzMDk0LCJkYyI6Imd6cXkifQ.JS3QY6ER0P2cQSxAE_OGKSMIWNAMsYUZ3mJTnEpf-Rc`;
@@ -779,10 +779,10 @@ async function category(tid, pg, filter, extend) {
         (soup.contents || []).forEach(vod => {
           const dj = vod.duanjuVo || {};
           videos.push({
-            vod_id: `西饭@${dj.duanjuId}#${dj.source}`,
+            vod_id: `\u897f\u996d@${dj.duanjuId}#${dj.source}`,
             vod_name: dj.title || '',
             vod_pic: dj.coverImageUrl || '',
-            vod_remarks: '西饭短剧 | ' + (dj.total ? `${dj.total}集` : ''),
+            vod_remarks: '\u897f\u996d\u77ed\u5267 | ' + (dj.total ? `${dj.total}\u96c6` : ''),
             vod_content: dj.desc || ''
           });
         });
@@ -790,24 +790,24 @@ async function category(tid, pg, filter, extend) {
       break;
     }
     
-    case '软鸭': {
+    case '\u8f6f\u9e2d': {
       const url = `${platRule.host}${platRule.list}/?keyword=${encodeURIComponent(area)}&page=${page}`;
       const response = await request(url, { headers: aggConfig.headers.default });
       const res = JSON.parse(response);
       (res.data || []).forEach(item => {
         const purl = `${item.title}@${item.cover}@${item.author}@${item.type}@${item.desc}@${item.book_id}`;
         videos.push({
-          vod_id: `软鸭@${encodeURIComponent(purl)}`,
+          vod_id: `\u8f6f\u9e2d@${encodeURIComponent(purl)}`,
           vod_name: item.title || '',
           vod_pic: item.cover || '',
-          vod_remarks: '软鸭短剧 | ' + (item.type || ''),
+          vod_remarks: '\u8f6f\u9e2d\u77ed\u5267 | ' + (item.type || ''),
           vod_content: item.author || ''
         });
       });
       break;
     }
     
-    case '七猫': {
+    case '\u4e03\u732b': {
       let signStr = `operation=1playlet_privacy=1tag_id=${area}${aggConfig.keys}`;
       const sign = await md5(signStr);
       const url = `${platRule.host}${platRule.list}?tag_id=${area}&playlet_privacy=1&operation=1&sign=${sign}`;
@@ -817,17 +817,17 @@ async function category(tid, pg, filter, extend) {
       const res = JSON.parse(response);
       (res.data?.list || []).forEach(item => {
         videos.push({
-          vod_id: `七猫@${encodeURIComponent(item.playlet_id)}`,
+          vod_id: `\u4e03\u732b@${encodeURIComponent(item.playlet_id)}`,
           vod_name: item.title || '',
           vod_pic: item.image_link || '',
-          vod_remarks: '七猫短剧 | ' + (item.total_episode_num ? `${item.total_episode_num}集` : ''),
+          vod_remarks: '\u4e03\u732b\u77ed\u5267 | ' + (item.total_episode_num ? `${item.total_episode_num}\u96c6` : ''),
           vod_content: item.tags || ''
         });
       });
       break;
     }
     
-    case '牛牛': {
+    case '\u725b\u725b': {
       const postData = {
         condition: { classify: area, typeId: 'S1' },
         pageNum: page,
@@ -841,23 +841,23 @@ async function category(tid, pg, filter, extend) {
       const res = JSON.parse(response);
       (res.data?.records || []).forEach(item => {
         videos.push({
-          vod_id: `牛牛@${item.id}`,
+          vod_id: `\u725b\u725b@${item.id}`,
           vod_name: item.name || '',
           vod_pic: item.cover || '',
-          vod_remarks: '牛牛短剧 | ' + (item.totalEpisode ? `${item.totalEpisode}集` : ''),
+          vod_remarks: '\u725b\u725b\u77ed\u5267 | ' + (item.totalEpisode ? `${item.totalEpisode}\u96c6` : ''),
           vod_content: item.description || ''
         });
       });
       break;
     }
     
-    case '围观': {
+    case '\u56f4\u89c2': {
       const postData = {
-        audience: "全部受众",
+        audience: "\u5168\u90e8\u53d7\u4f17",
         page: page,
         pageSize: 30,
         searchWord: "",
-        subject: "全部主题"
+        subject: "\u5168\u90e8\u4e3b\u9898"
       };
       
       const response = await request(`${platRule.host}${platRule.search}`, {
@@ -869,10 +869,10 @@ async function category(tid, pg, filter, extend) {
       if (res.code === 200 && res.data) {
         (res.data || []).forEach(it => {
           videos.push({
-            vod_id: `围观@${it.oneId}`,
-            vod_name: it.title || '未知短剧',
+            vod_id: `\u56f4\u89c2@${it.oneId}`,
+            vod_name: it.title || '\u672a\u77e5\u77ed\u5267',
             vod_pic: it.vertPoster || it.horizonPoster || '',
-            vod_remarks: '围观短剧 | ' + `集数:${it.episodeCount || 0}`,
+            vod_remarks: '\u56f4\u89c2\u77ed\u5267 | ' + `\u96c6\u6570:${it.episodeCount || 0}`,
             vod_content: it.description || ''
           });
         });
@@ -880,7 +880,7 @@ async function category(tid, pg, filter, extend) {
       break;
     }
     
-    case '碎片': {
+    case '\u788e\u7247': {
         const token = await getSuiPianToken();
         const headers = { ...aggConfig.headers.default, 'Authorization': token };
         const url = `${platRule.host}${platRule.search}?type=5&tagId=&pageNum=${page}&pageSize=24`;
@@ -891,10 +891,10 @@ async function category(tid, pg, filter, extend) {
         if (res && res.list && res.list.length > 0) {
           (res.list || []).forEach(it => {
             videos.push({
-              vod_id: `碎片@${it.itemId}@${it.videoCode}`,
-              vod_name: it.title || '未知剧名',
+              vod_id: `\u788e\u7247@${it.itemId}@${it.videoCode}`,
+              vod_name: it.title || '\u672a\u77e5\u5267\u540d',
               vod_pic: it.imageKey ? `https://free-api.bighotwind.cc/papaya/papaya-file/files/download/${it.imageKey}/${it.imageName || 'cover.jpg'}` : 'https://t8.baidu.com/it/u=615012979,225344800&fm=193',
-              vod_remarks: '碎片剧场 | ' + (it.episodesMax ? `${it.episodesMax}集` : '') + (it.hitShowNum ? ` 播放:${it.hitShowNum}` : ''),
+              vod_remarks: '\u788e\u7247\u5267\u573a | ' + (it.episodesMax ? `${it.episodesMax}\u96c6` : '') + (it.hitShowNum ? ` \u64ad\u653e:${it.hitShowNum}` : ''),
               vod_content: it.content || it.description || ''
             });
           });
@@ -902,7 +902,7 @@ async function category(tid, pg, filter, extend) {
         break; 
     }
     
-    case '河马': {
+    case '\u6cb3\u9a6c': {
       try {
         const sub = area || '308';
         const tagIds = hemaTagIds[sub] || '';
@@ -934,10 +934,10 @@ async function category(tid, pg, filter, extend) {
             hmlist.forEach(videoDataArray => {
               (videoDataArray.videoData || []).forEach(video => {
                 videos.push({
-                  vod_id: `河马@${video.bookId}`,
+                  vod_id: `\u6cb3\u9a6c@${video.bookId}`,
                   vod_name: video.bookName || '',
                   vod_pic: video.coverWap || video.coverCutWap,
-                  vod_remarks: `河马短剧 | 更新${video.updateNum || 0}集`,
+                  vod_remarks: `\u6cb3\u9a6c\u77ed\u5267 | \u66f4\u65b0${video.updateNum || 0}\u96c6`,
                   vod_content: video.introduction || '',
                   vod_actor: video.author || '',
                   extra: {
@@ -952,7 +952,7 @@ async function category(tid, pg, filter, extend) {
           }
         }
       } catch (e) {
-        console.log(`河马分类失败: ${e.message}`);
+        console.log(`\u6cb3\u9a6c\u5206\u7c7b\u5931\u8d25: ${e.message}`);
       }
       break;
     }
@@ -967,7 +967,7 @@ async function category(tid, pg, filter, extend) {
   });
 }
 
-// ==================== 详情 ====================
+// ==================== \u8be6\u60c5 ====================
 async function detail(id) {
   
   const parts = id.split('@');
@@ -977,7 +977,7 @@ async function detail(id) {
   let vod = {};
   
   switch (platform) {
-    case '百度': {
+    case '\u767e\u5ea6': {
       const postData = { playlet_id: did, vid: "undefined" };
       let html = await request(`${platRule.detailHost}${platRule.detail}`, {
         method: 'POST',
@@ -987,63 +987,63 @@ async function detail(id) {
       let res = JSON.parse(html);
       let dthtml = res.data || {};
       let vids = dthtml.vid_list || [];
-      let playArr = vids.map((vid, index) => `第${index+1}集$${vid}`);
+      let playArr = vids.map((vid, index) => `\u7b2c${index+1}\u96c6$${vid}`);
       
       vod = {
         vod_id: id,
-        vod_name: dthtml.playlet_title || '未知短剧',
+        vod_name: dthtml.playlet_title || '\u672a\u77e5\u77ed\u5267',
         vod_pic: dthtml.playlet_poster || '',
-        vod_content: `热度值:${dthtml.hot_value||0}\n题材:${dthtml.tag_text||''}\n集数:${dthtml.episodes_num||0}\n简介:${dthtml.description||''}`,
-        vod_remarks: `共${vids.length||0}集`,
+        vod_content: `\u70ed\u5ea6\u503c:${dthtml.hot_value||0}\n\u9898\u6750:${dthtml.tag_text||''}\n\u96c6\u6570:${dthtml.episodes_num||0}\n\u7b80\u4ecb:${dthtml.description||''}`,
+        vod_remarks: `\u5171${vids.length||0}\u96c6`,
         vod_director: dthtml.tag_text || '',
         vod_year: dthtml.create_time || '',
-        vod_play_from: "百度短剧",
+        vod_play_from: "\u767e\u5ea6\u77ed\u5267",
         vod_play_url: playArr.join('#')
       };
       break;
     }
     
-    case '甜圈': {
+    case '\u751c\u5708': {
       const response = await request(`${platRule.host}${platRule.detail}=${did}`);
       const res = JSON.parse(response);
       vod = {
         vod_id: id,
-        vod_name: res.book_name || '未知标题',
+        vod_name: res.book_name || '\u672a\u77e5\u6807\u9898',
         vod_type: res.category || '',
         vod_pic: res.book_pic || '',
         vod_remarks: res.duration || '',
-        vod_year: `更新时间:${res.time || '未知'}`,
+        vod_year: `\u66f4\u65b0\u65f6\u95f4:${res.time || '\u672a\u77e5'}`,
         vod_actor: res.author || '',
         vod_content: res.desc || '',
-        vod_play_from: '甜圈短剧',
-        vod_play_url: (res.data || []).map(item => `${item.title || '第1集'}$${item.video_id || item.id || ''}`).join('#')
+        vod_play_from: '\u751c\u5708\u77ed\u5267',
+        vod_play_url: (res.data || []).map(item => `${item.title || '\u7b2c1\u96c6'}$${item.video_id || item.id || ''}`).join('#')
       };
       break;
     }
     
-    case '锦鲤': {
+    case '\u9526\u9ca4': {
       const response = await request(`${platRule.host}${platRule.detail}/${did}`);
       const res = JSON.parse(response);
       const list = res.data || {};
       const playUrls = list.player ? Object.keys(list.player).map(key => `${key}$${list.player[key]}`) : [];
       vod = {
         vod_id: list.vod_id || id,
-        vod_name: list.vod_name || '暂无名称',
-        vod_type: list.vod_class || '暂无类型',
-        vod_pic: list.vod_pic || '暂无图片',
-        vod_remarks: list.vod_remarks || '暂无备注',
-        vod_year: list.vod_year || '暂无年份',
-        vod_area: list.vod_area || '暂无地区',
-        vod_actor: list.vod_actor || '暂无演员',
-        vod_director: list.vod_director || '暂无导演',
-        vod_content: list.vod_blurb || '暂无剧情',
-        vod_play_from: '锦鲤短剧',
+        vod_name: list.vod_name || '\u6682\u65e0\u540d\u79f0',
+        vod_type: list.vod_class || '\u6682\u65e0\u7c7b\u578b',
+        vod_pic: list.vod_pic || '\u6682\u65e0\u56fe\u7247',
+        vod_remarks: list.vod_remarks || '\u6682\u65e0\u5907\u6ce8',
+        vod_year: list.vod_year || '\u6682\u65e0\u5e74\u4efd',
+        vod_area: list.vod_area || '\u6682\u65e0\u5730\u533a',
+        vod_actor: list.vod_actor || '\u6682\u65e0\u6f14\u5458',
+        vod_director: list.vod_director || '\u6682\u65e0\u5bfc\u6f14',
+        vod_content: list.vod_blurb || '\u6682\u65e0\u5267\u60c5',
+        vod_play_from: '\u9526\u9ca4\u77ed\u5267',
         vod_play_url: playUrls.join('#')
       };
       break;
     }
     
-    case '番茄': {
+    case '\u756a\u8304': {
       const response = await request(`${platRule.detail}?book_id=${did}`);
       const res = JSON.parse(response);
       const bookInfo = res.data?.book_info || {};
@@ -1055,14 +1055,14 @@ async function detail(id) {
         vod_year: bookInfo.create_time || '',
         vod_pic: bookInfo.thumb_url || bookInfo.audio_thumb_uri || '',
         vod_content: bookInfo.abstract || bookInfo.book_abstract_v2 || '',
-        vod_remarks: bookInfo.sub_info || `更新至${res.data?.item_data_list?.length || 0}集`,
-        vod_play_from: '番茄短剧',
+        vod_remarks: bookInfo.sub_info || `\u66f4\u65b0\u81f3${res.data?.item_data_list?.length || 0}\u96c6`,
+        vod_play_from: '\u756a\u8304\u77ed\u5267',
         vod_play_url: playList
       };
       break;
     }
     
-    case '星芽': {
+    case '\u661f\u82bd': {
       const detailUrl = `${platRule.host}${platRule.detail}?theater_parent_id=${did}`;
       const response = await request(detailUrl, { headers: xingya_headers });
       const res = JSON.parse(response);
@@ -1073,7 +1073,7 @@ async function detail(id) {
         if (data.theaters && Array.isArray(data.theaters)) {
           data.theaters.forEach((item) => {
             if (item.son_video_url) {
-              const epTitle = `第${item.num}集`;
+              const epTitle = `\u7b2c${item.num}\u96c6`;
               playUrls.push(`${epTitle}$${item.son_video_url}`);
             }
           });
@@ -1081,22 +1081,22 @@ async function detail(id) {
         
         vod = {
           vod_id: id,
-          vod_name: data.title || '未知剧名',
+          vod_name: data.title || '\u672a\u77e5\u5267\u540d',
           vod_type: data.class_two?.map(c => c.class_name).join(',') || '',
           vod_pic: data.cover_url || '',
-          vod_area: `收藏${data.collect_number || 0}`,
-          vod_actor: `点赞${data.like_num || 0}`,
-          vod_director: `评分${data.score || 0}`,
-          vod_remarks: data.is_over === 2 ? '连载中' : '已完结',
+          vod_area: `\u6536\u85cf${data.collect_number || 0}`,
+          vod_actor: `\u70b9\u8d5e${data.like_num || 0}`,
+          vod_director: `\u8bc4\u5206${data.score || 0}`,
+          vod_remarks: data.is_over === 2 ? '\u8fde\u8f7d\u4e2d' : '\u5df2\u5b8c\u7ed3',
           vod_content: data.introduction || data.desc || '',
-          vod_play_from: '星芽短剧',
-          vod_play_url: playUrls.length > 0 ? playUrls.join('#') : '暂无播放地址$0'
+          vod_play_from: '\u661f\u82bd\u77ed\u5267',
+          vod_play_url: playUrls.length > 0 ? playUrls.join('#') : '\u6682\u65e0\u64ad\u653e\u5730\u5740$0'
         };
       }
       break;
     }
     
-    case '西饭': {
+    case '\u897f\u996d': {
       const [duanjuId, source] = did.split('#');
       const url = `${platRule.host}${platRule.detail}?duanjuId=${duanjuId}&source=${source}`;
       const response = await request(url, { headers: aggConfig.headers.default });
@@ -1108,15 +1108,15 @@ async function detail(id) {
         vod_id: id,
         vod_name: data.title || '',
         vod_pic: data.coverImageUrl || '',
-        vod_content: data.desc || '未知',
-        vod_remarks: data.updateStatus === 'over' ? `${data.total || 0}集 已完结` : `更新${data.total || 0}集`,
-        vod_play_from: '西饭短剧',
+        vod_content: data.desc || '\u672a\u77e5',
+        vod_remarks: data.updateStatus === 'over' ? `${data.total || 0}\u96c6 \u5df2\u5b8c\u7ed3` : `\u66f4\u65b0${data.total || 0}\u96c6`,
+        vod_play_from: '\u897f\u996d\u77ed\u5267',
         vod_play_url: playUrls
       };
       break;
     }
     
-    case '软鸭': {
+    case '\u8f6f\u9e2d': {
       const didDecoded = decodeURIComponent(did);
       const parts = didDecoded.split('@');
       const title = parts[0] || '';
@@ -1138,13 +1138,13 @@ async function detail(id) {
         vod_actor: author || '',
         vod_remarks: type || '',
         vod_content: desc || '',
-        vod_play_from: '软鸭短剧',
+        vod_play_from: '\u8f6f\u9e2d\u77ed\u5267',
         vod_play_url: playUrls
       };
       break;
     }
     
-    case '七猫': {
+    case '\u4e03\u732b': {
       const didDecoded = decodeURIComponent(did);
       const sign = await md5(`playlet_id=${didDecoded}${aggConfig.keys}`);
       const url = `${platRule.detail}?playlet_id=${didDecoded}&sign=${sign}`;
@@ -1156,18 +1156,18 @@ async function detail(id) {
       
       vod = {
         vod_id: id,
-        vod_name: data.title || '未知标题',
-        vod_pic: data.image_link || '未知图片',
+        vod_name: data.title || '\u672a\u77e5\u6807\u9898',
+        vod_pic: data.image_link || '\u672a\u77e5\u56fe\u7247',
         vod_actor: '',
-        vod_remarks: `${data.tags || ''} ${data.total_episode_num || 0}集`,
-        vod_content: data.intro || '未知剧情',
-        vod_play_from: '七猫短剧',
+        vod_remarks: `${data.tags || ''} ${data.total_episode_num || 0}\u96c6`,
+        vod_content: data.intro || '\u672a\u77e5\u5267\u60c5',
+        vod_play_from: '\u4e03\u732b\u77ed\u5267',
         vod_play_url: (data.play_list || []).map(it => `${it.sort}$${it.video_url}`).join('#')
       };
       break;
     }
     
-    case '牛牛': {
+    case '\u725b\u725b': {
       const descData = await request(`${platRule.host}${platRule.desc}`, {
         method: 'POST',
         headers: niuniu_headers,
@@ -1197,27 +1197,27 @@ async function detail(id) {
           if (html1 && html1.data && html1.data.episode_right_list) {
             playUrls = html1.data.episode_right_list.map(it => {
               let lockType = it.lock_type || 'free';
-              return `第${it.index}集$${it.index}+${lockType}+${thirdPlayId}`;
+              return `\u7b2c${it.index}\u96c6$${it.index}+${lockType}+${thirdPlayId}`;
             }).join('#');
           }
         } catch (e) {
-          console.log("获取加密剧集失败:", e.message);
+          console.log("\u83b7\u53d6\u52a0\u5bc6\u5267\u96c6\u5931\u8d25:", e.message);
         }
       }
       
       vod = {
         vod_id: id,
-        vod_name: descInfo.name || listInfo.name || '未知名称',
+        vod_name: descInfo.name || listInfo.name || '\u672a\u77e5\u540d\u79f0',
         vod_pic: descInfo.cover || listInfo.cover || '',
-        vod_content: `类型：${descInfo.classify || ''}\n评分：${descInfo.score || ''}\n简介：${descInfo.introduce || ''}`,
-        vod_remarks: `共${descInfo.totalEpisode || listInfo.totalEpisode || 0}集`,
-        vod_play_from: '牛牛短剧',
-        vod_play_url: playUrls || '暂无播放地址$0'
+        vod_content: `\u7c7b\u578b\uff1a${descInfo.classify || ''}\n\u8bc4\u5206\uff1a${descInfo.score || ''}\n\u7b80\u4ecb\uff1a${descInfo.introduce || ''}`,
+        vod_remarks: `\u5171${descInfo.totalEpisode || listInfo.totalEpisode || 0}\u96c6`,
+        vod_play_from: '\u725b\u725b\u77ed\u5267',
+        vod_play_url: playUrls || '\u6682\u65e0\u64ad\u653e\u5730\u5740$0'
       };
       break;
     }
     
-    case '围观': {
+    case '\u56f4\u89c2': {
       const response = await request(`${platRule.host}${platRule.detail}&oneId=${did}&page=1&pageSize=1000`, {
         headers: aggConfig.headers.default
       });
@@ -1230,9 +1230,9 @@ async function detail(id) {
           vod_id: id,
           vod_name: firstEpisode.title || '',
           vod_pic: firstEpisode.vertPoster || firstEpisode.horizonPoster || '',
-          vod_remarks: `共${data.length || 0}集`,
-          vod_content: `播放量:${firstEpisode.viewCount || 0} 收藏:${firstEpisode.collectionCount || 0} 评论:${firstEpisode.commentCount || 0}`,
-          vod_play_from: '围观短剧',
+          vod_remarks: `\u5171${data.length || 0}\u96c6`,
+          vod_content: `\u64ad\u653e\u91cf:${firstEpisode.viewCount || 0} \u6536\u85cf:${firstEpisode.collectionCount || 0} \u8bc4\u8bba:${firstEpisode.commentCount || 0}`,
+          vod_play_from: '\u56f4\u89c2\u77ed\u5267',
           vod_play_url: data.map(ep => {
           let playSetting = ep.playSetting || ep.videoClarityList || [];
           try {
@@ -1241,10 +1241,10 @@ async function detail(id) {
             }
           } catch (e) {}
         
-          // 确保是数组
+          // \u786e\u4fdd\u662f\u6570\u7ec4
           if (!Array.isArray(playSetting)) playSetting = [];
         
-          // 清晰度优先级：1080P > 720P > 480P
+          // \u6e05\u6670\u5ea6\u4f18\u5148\u7ea7\uff1a1080P > 720P > 480P
           const url = (
             playSetting.find(item => item.name === '1080P')?.url ||
             playSetting.find(item => item.name === '720P')?.url ||
@@ -1252,7 +1252,7 @@ async function detail(id) {
             ''
           );
         
-          const title = `第${ep.playOrder || 1}集`;
+          const title = `\u7b2c${ep.playOrder || 1}\u96c6`;
           return `${title}$${url}`;
         }).filter(ep => ep.split('$')[1]).join('#')
         };
@@ -1260,7 +1260,7 @@ async function detail(id) {
       break;
     }
     
-    case '碎片': {
+    case '\u788e\u7247': {
       const [itemId, videoCode] = did.split('@');
       const token = await getSuiPianToken();
       const headers = { ...aggConfig.headers.default, 'Authorization': token };
@@ -1270,7 +1270,7 @@ async function detail(id) {
       const res = JSON.parse(response);
       const data = res.data || res;
       const playUrls = (data.episodesList || []).map(episode => {
-        let title = `第${episode.episodes || 1}集`;
+        let title = `\u7b2c${episode.episodes || 1}\u96c6`;
         if (episode.resolutionList?.length) {
           episode.resolutionList.sort((a, b) => b.resolution - a.resolution);
           let best = episode.resolutionList[0];
@@ -1283,18 +1283,18 @@ async function detail(id) {
         vod_id: id,
         vod_name: data.title || '',
         vod_pic: `https://free-api.bighotwind.cc/papaya/papaya-file/files/download/${data.imageKey || ''}/${data.imageName || ''}`,
-        vod_remarks: `共${data.episodesMax || 0}集`,
-        vod_content: data.content || data.description || `播放量:${data.hitShowNum || 0} 点赞:${data.likeNum || 0}`,
-        vod_play_from: '碎片剧场',
+        vod_remarks: `\u5171${data.episodesMax || 0}\u96c6`,
+        vod_content: data.content || data.description || `\u64ad\u653e\u91cf:${data.hitShowNum || 0} \u70b9\u8d5e:${data.likeNum || 0}`,
+        vod_play_from: '\u788e\u7247\u5267\u573a',
         vod_play_url: playUrls
       };
       break;
     }
     
-    case '河马': {
+    case '\u6cb3\u9a6c': {
       const bookId = did;
       
-      // 获取详情
+      // \u83b7\u53d6\u8be6\u60c5
       const body = hemaEncrypt(JSON.stringify({ "bookId": bookId }));
       const detailResponse = await request(`${platRule.host}${platRule.detail}`, {
         method: 'POST',
@@ -1307,7 +1307,7 @@ async function detail(id) {
       const postdata = hemaDecrypt(detailHtml);
       const videoInfo = JSON.parse(postdata).videoInfo || {};
       
-      // 获取剧集
+      // \u83b7\u53d6\u5267\u96c6
       const episodeBody = hemaEncrypt(JSON.stringify({
         "bookId": bookId,
         "chapterMin": videoInfo.updateNum || 0,
@@ -1324,27 +1324,27 @@ async function detail(id) {
       const episodeHtml = episodeRes.data;
       const playdata = hemaDecrypt(episodeHtml);
       const chapterList = JSON.parse(playdata).chapterList || [];
-      // 构建播放列表
+      // \u6784\u5efa\u64ad\u653e\u5217\u8868
       const playUrls = chapterList.map(item => 
         `${item.chapterName}$${item.chapterId}++${item.chapterIndex}++${bookId}`
       ).join('#');
       
-      // 处理数组字段
+      // \u5904\u7406\u6570\u7ec4\u5b57\u6bb5
       const vodType = Array.isArray(videoInfo.bookTags) ? videoInfo.bookTags.join(',') : (videoInfo.bookTags || '');
       const vodActor = Array.isArray(videoInfo.protagonist) ? videoInfo.protagonist.join(',') : (videoInfo.protagonist || '');
       
       vod = {
         vod_id: id,
-        vod_name: videoInfo.bookName || '未知剧名',
+        vod_name: videoInfo.bookName || '\u672a\u77e5\u5267\u540d',
         vod_type: vodType,
         vod_pic: videoInfo.coverWap,
-        vod_remarks: videoInfo.finishStatusCn || `更新至${videoInfo.updateNum || 0}集`,
-        vod_content: videoInfo.introduction || '暂无简介',
+        vod_remarks: videoInfo.finishStatusCn || `\u66f4\u65b0\u81f3${videoInfo.updateNum || 0}\u96c6`,
+        vod_content: videoInfo.introduction || '\u6682\u65e0\u7b80\u4ecb',
         vod_actor: vodActor,
         vod_director: videoInfo.author || '',
         vod_year: videoInfo.updateTime || '',
-        vod_play_from: '河马短剧',
-        vod_play_url: playUrls || '暂无播放地址$0'
+        vod_play_from: '\u6cb3\u9a6c\u77ed\u5267',
+        vod_play_url: playUrls || '\u6682\u65e0\u64ad\u653e\u5730\u5740$0'
       };
       break;
     }
@@ -1353,11 +1353,11 @@ async function detail(id) {
   return JSON.stringify({ list: [vod] });
 }
 
-// ==================== 播放 ====================
+// ==================== \u64ad\u653e ====================
 async function play(flag, id, flags) {
   if (/百度/.test(flag)) {
     const postData = { method: "post", vid: id };
-    let html = await request(`${rule.百度.detailHost}${rule.百度.play}`, {
+    let html = await request(`${rule.\u767e\u5ea6.detailHost}${rule.\u767e\u5ea6.play}`, {
       method: 'POST',
       headers: aggConfig.headers.baidu,
       data: postData
@@ -1375,7 +1375,7 @@ async function play(flag, id, flags) {
       .map(item => ({
         title: item.title,
         url: item.url,
-        order: { '蓝光': 1, '超清': 2, '标清': 3 }[item.title] || 999
+        order: { '\u84dd\u5149': 1, '\u8d85\u6e05': 2, '\u6807\u6e05': 3 }[item.title] || 999
       }))
       .sort((a, b) => a.order - b.order)
       .flatMap(item => [item.title, item.url]);
@@ -1418,7 +1418,7 @@ async function play(flag, id, flags) {
   }
   
   if (/软鸭/.test(flag)) {
-    const response = await request(`${rule.软鸭.host}/API/playlet/?video_id=${id}&quality=original`, {
+    const response = await request(`${rule.\u8f6f\u9e2d.host}/API/playlet/?video_id=${id}&quality=original`, {
       headers: aggConfig.headers.default
     });
     const res = JSON.parse(response);
@@ -1441,7 +1441,7 @@ async function play(flag, id, flags) {
         episodeId: ep
       };
       
-      var response = await request(`${rule.牛牛.host}/api/v1/app/play/movieDetails`, {
+      var response = await request(`${rule.\u725b\u725b.host}/api/v1/app/play/movieDetails`, {
         method: 'POST',
         headers: niuniu_headers,
         data: postData
@@ -1487,9 +1487,9 @@ async function play(flag, id, flags) {
     try {
       let playSetting = typeof id === 'string' ? JSON.parse(id) : id;
       let urls = [];
-      if (playSetting.super) urls.push("超清", playSetting.super);
-      if (playSetting.high) urls.push("高清", playSetting.high);
-      if (playSetting.normal) urls.push("流畅", playSetting.normal);
+      if (playSetting.super) urls.push("\u8d85\u6e05", playSetting.super);
+      if (playSetting.high) urls.push("\u9ad8\u6e05", playSetting.high);
+      if (playSetting.normal) urls.push("\u6d41\u7545", playSetting.normal);
       return JSON.stringify({ parse: 0, url: urls.length ? urls : id });
     } catch (e) {
       return JSON.stringify({ parse: 0, url: id });
@@ -1514,9 +1514,9 @@ async function play(flag, id, flags) {
         "confirmPay": 2,
         "autoPayFlag": true,
         "omap": {
-          "channelName": "精选",
+          "channelName": "\u7cbe\u9009",
           "logId": "17a6500357709bb2547e1e122b438cfc",
-          "originName": "书城",
+          "originName": "\u4e66\u57ce",
           "recId": "bigdata_rec",
           "scene": "nsc_727",
           "sceneId": "dzmf_video_sc_reco",
@@ -1540,7 +1540,7 @@ async function play(flag, id, flags) {
           let parsed = JSON.parse(fsdata);
           let type = parsed.chaptersPayType;
           
-          if (type == '免费') {
+          if (type == '\u514d\u8d39') {
             let data = parsed.chapterInfo || [];
             let url = data[0].content.m3u8720p || [];
             if (data.length > 0 && data[0].content.m3u8720p) {
@@ -1554,7 +1554,7 @@ async function play(flag, id, flags) {
       return JSON.stringify({ parse: 0, url: playurl + '#isVideo=true#' });
       
     } catch (e) {
-      console.log(`河马播放失败: ${e.message}`);
+      console.log(`\u6cb3\u9a6c\u64ad\u653e\u5931\u8d25: ${e.message}`);
       return JSON.stringify({ parse: 0, url: id });
     }
   }
@@ -1562,7 +1562,7 @@ async function play(flag, id, flags) {
   return JSON.stringify({ parse: 0, url: id });
 }
 
-// ==================== 搜索 ====================
+// ==================== \u641c\u7d22 ====================
 async function cfs(siteId, wd, pg) {
   const page = pg || 1;
   const searchLimit = 20;
@@ -1577,7 +1577,7 @@ async function cfs(siteId, wd, pg) {
   const platRule = rule[siteId];
   
   switch (siteId) {
-    case '百度': {
+    case '\u767e\u5ea6': {
       let innerData = {
         query: wd,
         page: page,
@@ -1588,7 +1588,7 @@ async function cfs(siteId, wd, pg) {
           flow_tabid: "13",
           shortplay_source: "feed",
           from: "feed",
-          tab_type: "搜索",
+          tab_type: "\u641c\u7d22",
           sub_template: "playlet_search_result"
         }
       };
@@ -1604,30 +1604,30 @@ async function cfs(siteId, wd, pg) {
       let res = JSON.parse(html);
       let data = res.data?.itemList || [];
       results = data.map(it => ({
-        vod_id: `百度@${it.nid?.split("_")[1] || ''}`,
-        vod_name: it.title || '未知短剧',
+        vod_id: `\u767e\u5ea6@${it.nid?.split("_")[1] || ''}`,
+        vod_name: it.title || '\u672a\u77e5\u77ed\u5267',
         vod_pic: it.img || '',
-        vod_remarks: '百度短剧 | ' + (it.collNum || "搜索短剧"),
+        vod_remarks: '\u767e\u5ea6\u77ed\u5267 | ' + (it.collNum || "\u641c\u7d22\u77ed\u5267"),
         vod_content: it.description || ''
       }));
       break;
     }
     
-    case '甜圈': {
+    case '\u751c\u5708': {
       const url = `${platRule.host}${platRule.search}=${encodeURIComponent(wd)}&offset=${page}`;
       const response = await request(url, { headers: aggConfig.headers.default, timeout: searchTimeout });
       const res = JSON.parse(response);
       results = (res.data || []).map(item => ({
-        vod_id: `甜圈@${item.book_id}`,
-        vod_name: item.title || '未知标题',
+        vod_id: `\u751c\u5708@${item.book_id}`,
+        vod_name: item.title || '\u672a\u77e5\u6807\u9898',
         vod_pic: item.cover || '',
-        vod_remarks: '甜圈短剧 | ' + (item.copyright || ''),
+        vod_remarks: '\u751c\u5708\u77ed\u5267 | ' + (item.copyright || ''),
         vod_content: item.desc || ''
       }));
       break;
     }
     
-    case '锦鲤': {
+    case '\u9526\u9ca4': {
       const postData = { page, limit: searchLimit, type_id: '', year: '', keyword: wd };
       const response = await request(`${platRule.host}${platRule.search}`, {
         method: 'POST',
@@ -1636,30 +1636,30 @@ async function cfs(siteId, wd, pg) {
       });
       const res = JSON.parse(response);
       results = (res.data?.list || []).map(item => ({
-        vod_id: `锦鲤@${item.vod_id}`,
-        vod_name: item.vod_name || '未知短剧',
+        vod_id: `\u9526\u9ca4@${item.vod_id}`,
+        vod_name: item.vod_name || '\u672a\u77e5\u77ed\u5267',
         vod_pic: item.vod_pic || '',
-        vod_remarks: '锦鲤短剧 | ' + (item.vod_total ? `${item.vod_total}集` : ''),
+        vod_remarks: '\u9526\u9ca4\u77ed\u5267 | ' + (item.vod_total ? `${item.vod_total}\u96c6` : ''),
         vod_content: ''
       }));
       break;
     }
     
-    case '番茄': {
+    case '\u756a\u8304': {
       const url = `${platRule.search}?keyword=${encodeURIComponent(wd)}&page=${page}`;
       const response = await request(url, { headers: aggConfig.headers.default, timeout: searchTimeout });
       const res = JSON.parse(response);
       results = (res.data || []).map(item => ({
-        vod_id: `番茄@${item.series_id || ''}`,
-        vod_name: item.title || '未知标题',
+        vod_id: `\u756a\u8304@${item.series_id || ''}`,
+        vod_name: item.title || '\u672a\u77e5\u6807\u9898',
         vod_pic: item.cover || '',
-        vod_remarks: '番茄短剧 | ' + (item.sub_title || ''),
+        vod_remarks: '\u756a\u8304\u77ed\u5267 | ' + (item.sub_title || ''),
         vod_content: ''
       }));
       break;
     }
     
-    case '星芽': {
+    case '\u661f\u82bd': {
       const postData = { text: wd };
       const response = await request(`${platRule.host}${platRule.search}`, {
         method: 'POST',
@@ -1669,16 +1669,16 @@ async function cfs(siteId, wd, pg) {
       });
       const res = JSON.parse(response);
       results = (res.data?.theater?.search_data || []).map(item => ({
-        vod_id: `星芽@${item.id}`,
+        vod_id: `\u661f\u82bd@${item.id}`,
         vod_name: item.title || '',
         vod_pic: item.cover_url || '',
-        vod_remarks: '星芽短剧 | ' + (item.total ? `${item.total}集` : ''),
+        vod_remarks: '\u661f\u82bd\u77ed\u5267 | ' + (item.total ? `${item.total}\u96c6` : ''),
         vod_content: item.introduction || ''
       }));
       break;
     }
     
-    case '西饭': {
+    case '\u897f\u996d': {
       const ts = Math.floor(Date.now() / 1000);
       const url = `${platRule.host}${platRule.search}?reqType=search&offset=${(page-1)*searchLimit}&keyword=${encodeURIComponent(wd)}&quickEngineVersion=-1&scene=&categoryVersion=1&density=1.5&pageID=page_theater&version=2001001&androidVersionCode=28&requestId=${ts}aa498144140ef297&appId=drama&teenMode=false&userBaseMode=false&session=eyJpbmZvIjp7InVpZCI6IiIsInJ0IjoiMTc0MDY1ODI5NCIsInVuIjoiT1BHXzFlZGQ5OTZhNjQ3ZTQ1MjU4Nzc1MTE2YzFkNzViN2QwIiwiZnQiOiIxNzQwNjU4Mjk0In19&feedssession=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1dHlwIjowLCJidWlkIjoxNjMzOTY4MTI2MTQ4NjQxNTM2LCJhdWQiOiJkcmFtYSIsInZlciI6MiwicmF0IjoxNzQwNjU4Mjk0LCJ1bm0iOiJPUEdfMWVkZDk5NmE2NDdlNDUyNTg3NzUxMTZjMWQ3NWI3ZDAiLCJpZCI6IjNiMzViZmYzYWE0OTgxNDQxNDBlZjI5N2JkMDY5NGNhIiwiZXhwIjoxNzQxMjYzMDk0LCJkYyI6Imd6cXkifQ.JS3QY6ER0P2cQSxAE_OGKSMIWNAMsYUZ3mJTnEpf-Rc`;
       
@@ -1687,34 +1687,34 @@ async function cfs(siteId, wd, pg) {
       results = (res.result?.elements || []).map(vod => {
         const dj = vod.duanjuVo || {};
         return {
-          vod_id: `西饭@${dj.duanjuId || ''}#${dj.source || ''}`,
-          vod_name: dj.title || '未知标题',
+          vod_id: `\u897f\u996d@${dj.duanjuId || ''}#${dj.source || ''}`,
+          vod_name: dj.title || '\u672a\u77e5\u6807\u9898',
           vod_pic: dj.coverImageUrl || '',
-          vod_remarks: '西饭短剧 | ' + (dj.total ? `${dj.total}集` : ''),
+          vod_remarks: '\u897f\u996d\u77ed\u5267 | ' + (dj.total ? `${dj.total}\u96c6` : ''),
           vod_content: ''
         };
       });
       break;
     }
     
-    case '软鸭': {
+    case '\u8f6f\u9e2d': {
       const url = `${platRule.host}${platRule.search}/?keyword=${encodeURIComponent(wd)}&page=${page}`;
       const response = await request(url, { headers: aggConfig.headers.default, timeout: searchTimeout });
       const res = JSON.parse(response);
       results = (res.data || []).map(item => {
         const purl = `${item.title}@${item.cover}@${item.author}@${item.type}@${item.desc}@${item.book_id}`;
         return {
-          vod_id: `软鸭@${encodeURIComponent(purl)}`,
+          vod_id: `\u8f6f\u9e2d@${encodeURIComponent(purl)}`,
           vod_name: item.title || '',
           vod_pic: item.cover || '',
-          vod_remarks: '软鸭短剧 | ' + (item.type || ''),
+          vod_remarks: '\u8f6f\u9e2d\u77ed\u5267 | ' + (item.type || ''),
           vod_content: ''
         };
       });
       break;
     }
     
-    case '七猫': {
+    case '\u4e03\u732b': {
       let signStr = `operation=2playlet_privacy=1search_word=${wd}${aggConfig.keys}`;
       const sign = await md5(signStr);
       const url = `${platRule.host}${platRule.search}?search_word=${encodeURIComponent(wd)}&playlet_privacy=1&operation=2&sign=${sign}`;
@@ -1723,16 +1723,16 @@ async function cfs(siteId, wd, pg) {
       const response = await request(url, { method: 'GET', headers, timeout: searchTimeout });
       const res = JSON.parse(response);
       results = (res.data?.list || []).map(item => ({
-        vod_id: `七猫@${encodeURIComponent(item.playlet_id)}`,
-        vod_name: item.title || '未知标题',
+        vod_id: `\u4e03\u732b@${encodeURIComponent(item.playlet_id)}`,
+        vod_name: item.title || '\u672a\u77e5\u6807\u9898',
         vod_pic: item.image_link || '',
-        vod_remarks: '七猫短剧 | ' + (item.tags || '') + ' ' + (item.total_episode_num ? `${item.total_episode_num}集` : ''),
+        vod_remarks: '\u4e03\u732b\u77ed\u5267 | ' + (item.tags || '') + ' ' + (item.total_episode_num ? `${item.total_episode_num}\u96c6` : ''),
         vod_content: ''
       }));
       break;
     }
     
-    case '牛牛': {
+    case '\u725b\u725b': {
       const postData = {
         condition: { typeId: "S1", value: wd },
         pageNum: page,
@@ -1746,16 +1746,16 @@ async function cfs(siteId, wd, pg) {
       });
       const res = JSON.parse(response);
       results = (res.data?.records || []).map(item => ({
-        vod_id: `牛牛@${item.id}`,
+        vod_id: `\u725b\u725b@${item.id}`,
         vod_name: item.name || '',
         vod_pic: item.cover || '',
-        vod_remarks: '牛牛短剧 | ' + (item.totalEpisode ? `${item.totalEpisode}集` : ''),
+        vod_remarks: '\u725b\u725b\u77ed\u5267 | ' + (item.totalEpisode ? `${item.totalEpisode}\u96c6` : ''),
         vod_content: ''
       }));
       break;
     }
     
-    case '围观': {
+    case '\u56f4\u89c2': {
       const postData = {
         audience: "",
         page: page,
@@ -1772,17 +1772,17 @@ async function cfs(siteId, wd, pg) {
       
       if (res.code === 200 && res.data) {
         results = (res.data || []).map(it => ({
-          vod_id: `围观@${it.oneId || ''}`,
-          vod_name: it.title || '未知标题',
+          vod_id: `\u56f4\u89c2@${it.oneId || ''}`,
+          vod_name: it.title || '\u672a\u77e5\u6807\u9898',
           vod_pic: it.vertPoster || it.horizonPoster || '',
-          vod_remarks: '围观短剧 | ' + `集数:${it.episodeCount || 0}`,
+          vod_remarks: '\u56f4\u89c2\u77ed\u5267 | ' + `\u96c6\u6570:${it.episodeCount || 0}`,
           vod_content: it.description || ''
         }));
       }
       break;
     }
     
-    case '碎片': {
+    case '\u788e\u7247': {
       try {
         const token = await getSuiPianToken();
         const headers = { ...aggConfig.headers.default, 'Authorization': token };
@@ -1792,19 +1792,19 @@ async function cfs(siteId, wd, pg) {
         const res = JSON.parse(response);
         
         results = (res.list || []).map(it => ({
-          vod_id: `碎片@${it.itemId || ''}@${it.videoCode || ''}`,
+          vod_id: `\u788e\u7247@${it.itemId || ''}@${it.videoCode || ''}`,
           vod_name: it.title || '',
           vod_pic: `https://free-api.bighotwind.cc/papaya/papaya-file/files/download/${it.imageKey || ''}/${it.imageName || ''}`,
-          vod_remarks: '碎片剧场 | ' + (it.episodesMax ? `${it.episodesMax}集` : '') + (it.hitShowNum ? ` 播放:${it.hitShowNum}` : ''),
+          vod_remarks: '\u788e\u7247\u5267\u573a | ' + (it.episodesMax ? `${it.episodesMax}\u96c6` : '') + (it.hitShowNum ? ` \u64ad\u653e:${it.hitShowNum}` : ''),
           vod_content: it.content || it.description || ''
         }));
       } catch (e) {
-        console.log(`【碎片搜索】失败: ${e.message}`);
+        console.log(`\u3010\u788e\u7247\u641c\u7d22\u3011\u5931\u8d25: ${e.message}`);
       }
       break;
     }
     
-    case '河马': {
+    case '\u6cb3\u9a6c': {
       try {
         const hmbody = JSON.stringify({
           "keyword": wd,
@@ -1828,10 +1828,10 @@ async function cfs(siteId, wd, pg) {
             const xmlist = JSON.parse(dexmres).searchVos || [];
             
             results = xmlist.map(video => ({
-              vod_id: `河马@${video.bookId}`,
+              vod_id: `\u6cb3\u9a6c@${video.bookId}`,
               vod_name: video.bookName || '',
               vod_pic: (video.coverWap || '') + '@Referer=',
-              vod_remarks: `河马短剧 | 共${video.updateNum || 0}集`,
+              vod_remarks: `\u6cb3\u9a6c\u77ed\u5267 | \u5171${video.updateNum || 0}\u96c6`,
               vod_content: video.introduction || '',
               extra: {
                 bookId: video.bookId,
@@ -1843,7 +1843,7 @@ async function cfs(siteId, wd, pg) {
           }
         }
       } catch (e) {
-        console.log(`河马搜索失败: ${e.message}`);
+        console.log(`\u6cb3\u9a6c\u641c\u7d22\u5931\u8d25: ${e.message}`);
       }
       break;
     }
@@ -1896,7 +1896,7 @@ async function action(action, value) {
     });
   }
 }
-// ==================== 河马辅助函数 ====================
+// ==================== \u6cb3\u9a6c\u8f85\u52a9\u51fd\u6570 ====================
 function hemaEncrypt(plaintext) {
   var keyBytes = CryptoJS.enc.Hex.parse("647a6b6a67667978677368796c677a6d");
   var ivBytes = CryptoJS.enc.Hex.parse("6170697570646f776e65646372797074");
@@ -1923,12 +1923,12 @@ function hemaDecrypt(word) {
     let decryptedStr = decrypt.toString(CryptoJS.enc.Utf8);
     return decryptedStr;
   } catch (e) {
-    console.log(`河马解密失败: ${e.message}`);
+    console.log(`\u6cb3\u9a6c\u89e3\u5bc6\u5931\u8d25: ${e.message}`);
     return '{}';
   }
 }
 
-// ==================== 工具函数 ====================
+// ==================== \u5de5\u5177\u51fd\u6570 ====================
 function isSkipPlat(platformItem) {
   return cate_remove.some(word => 
     new RegExp(word, 'i').test(platformItem.name) || new RegExp(word, 'i').test(platformItem.id)
@@ -2058,7 +2058,7 @@ async function getQiMaoHeaders() {
   };
 }
 
-// ==================== 加密工具函数 ====================
+// ==================== \u52a0\u5bc6\u5de5\u5177\u51fd\u6570 ====================
 function aesEncryptECB(decrypteddata, key) {
   let keyCrypto = CryptoJS.enc.Utf8.parse(key);
   let dataCrypto = CryptoJS.enc.Utf8.parse(decrypteddata);
@@ -2082,7 +2082,7 @@ function aesDecryptECB(encryptedData, key) {
     });
     return decrypted.toString(CryptoJS.enc.Utf8);
   } catch (e) {
-    console.log(`ECB解密失败: ${e.message}`);
+    console.log(`ECB\u89e3\u5bc6\u5931\u8d25: ${e.message}`);
     return '';
   }
 }
@@ -2123,11 +2123,11 @@ async function niuniuPost(url1, data1, index) {
   return JSON.parse(html1);
 }
 
-// ==================== 统一请求函数 ====================
+// ==================== \u7edf\u4e00\u8bf7\u6c42\u51fd\u6570 ====================
 
 async function request(url, options = {}) {
   try {
-    console.log(`【${siteName}】${options.method || 'GET'} ${url.split('?')[0]}`);
+    console.log(`\u3010${siteName}\u3011${options.method || 'GET'} ${url.split('?')[0]}`);
     
     let requestConfig = {
       method: options.method || 'GET',
@@ -2160,7 +2160,7 @@ async function request(url, options = {}) {
     const res = await req(url, requestConfig);
     return res.content || '';
   } catch (e) {
-    console.log(`【${siteName}】请求失败: ${e.message}`);
+    console.log(`\u3010${siteName}\u3011\u8bf7\u6c42\u5931\u8d25: ${e.message}`);
     return '';
   }
 }

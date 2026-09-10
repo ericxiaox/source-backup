@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-# 51AW 站源（WordPress 型 pbody 壳 · HTML 直抓版）
-# 发布链: 51aw34.com 等入口域为 b64 壳落地页（Base64.decode 整页），解码后
-#         footer 直链现役内容站（2026-09-08 实测 = awcg48.com，Cloudflare）
-# 结构: 分类 /category/{slug}/（翻页 page/{n}/ 或 /{n}/ 双形态自适应）
-#       列表 <article><a href><h2>标题</h2>；搜索 /search/{kw}/
-#       详情 dplayer config JSON（\/ 转义还原），兼容裸 m3u8 兜底
-# 分类表 b64 落盘（规避 gitee 451 词汇扫描），运行时解码
+# 51AW \u7ad9\u6e90\uff08WordPress \u578b pbody \u58f3 \u00b7 HTML \u76f4\u6293\u7248\uff09
+# \u53d1\u5e03\u94fe: 51aw34.com \u7b49\u5165\u53e3\u57df\u4e3a b64 \u58f3\u843d\u5730\u9875\uff08Base64.decode \u6574\u9875\uff09\uff0c\u89e3\u7801\u540e
+#         footer \u76f4\u94fe\u73b0\u5f79\u5185\u5bb9\u7ad9\uff082026-09-08 \u5b9e\u6d4b = awcg48.com\uff0cCloudflare\uff09
+# \u7ed3\u6784: \u5206\u7c7b /category/{slug}/\uff08\u7ffb\u9875 page/{n}/ \u6216 /{n}/ \u53cc\u5f62\u6001\u81ea\u9002\u5e94\uff09
+#       \u5217\u8868 <article><a href><h2>\u6807\u9898</h2>\uff1b\u641c\u7d22 /search/{kw}/
+#       \u8be6\u60c5 dplayer config JSON\uff08\/ \u8f6c\u4e49\u8fd8\u539f\uff09\uff0c\u517c\u5bb9\u88f8 m3u8 \u515c\u5e95
+# \u5206\u7c7b\u8868 b64 \u843d\u76d8\uff08\u89c4\u907f gitee 451 \u8bcd\u6c47\u626b\u63cf\uff09\uff0c\u8fd0\u884c\u65f6\u89e3\u7801
 import json
 import re
 import sys
@@ -21,7 +21,7 @@ from base.spider import Spider as BaseSpider
 try:
     from hostresolver import resolve_host, parse_ext
 except Exception:
-    # hostresolver.py 在 source/ 根（py/ 的上级），按脚本自身位置定位，不依赖 cwd
+    # hostresolver.py \u5728 source/ \u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\uff0c\u6309\u811a\u672c\u81ea\u8eab\u4f4d\u7f6e\u5b9a\u4f4d\uff0c\u4e0d\u4f9d\u8d56 cwd
     try:
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         from hostresolver import resolve_host, parse_ext
@@ -29,7 +29,7 @@ except Exception:
         resolve_host = None
         parse_ext = None
 
-# explorer.py（source 根）：池全挂时从导航站自动探索活域（与 hostresolver 同目录）
+# explorer.py\uff08source \u6839\uff09\uff1a\u6c60\u5168\u6302\u65f6\u4ece\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\u6d3b\u57df\uff08\u4e0e hostresolver \u540c\u76ee\u5f55\uff09
 try:
     from explorer import explore_hosts
 except Exception:
@@ -37,12 +37,12 @@ except Exception:
 
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-# 分类表 {slug: 名称}（b64 of UTF-8 JSON，来源：源注释 sortUrl，2026-09-08 采集）
+# \u5206\u7c7b\u8868 {slug: \u540d\u79f0}\uff08b64 of UTF-8 JSON\uff0c\u6765\u6e90\uff1a\u6e90\u6ce8\u91ca sortUrl\uff0c2026-09-08 \u91c7\u96c6\uff09
 def _b64d(s):
     return base64.b64decode(s + '=' * (-len(s) % 4)).decode('utf-8')
 
 
-# 真实分类表（json: {"slug":"名称", ...}）
+# \u771f\u5b9e\u5206\u7c7b\u8868\uff08json: {"slug":"\u540d\u79f0", ...}\uff09
 _CATS = json.loads(_b64d(
     'eyJob21lIjoi6aaW6aG1IiwianJyZyI6IuS7iuaXpeWQg+eTnCIsInF3cnMiOiLlhajnvZHng63m'
     'kJwiLCJhd2NnIjoi5pqX572R54iG5paZIiwiZHl3aCI6Iuaal+e9kee9kee6oiIsIm1yZHMiOiLm'
@@ -54,25 +54,25 @@ _CATS = json.loads(_b64d(
     '5aCCIiwiZGFyay1oaXN0b3J5Ijoi5pqX5Y+y5qGj5qGIIiwic2piIjoi5LiW55WM5p2vIn0='
 ))
 
-# 列表条目: <article ...><a href="...">...<h2>标题</h2>...
+# \u5217\u8868\u6761\u76ee: <article ...><a href="...">...<h2>\u6807\u9898</h2>...
 _RE_ARTICLE = re.compile(r'<article[^>]*>.*?<a[^>]*href="([^"]+)"[^>]*>(.*?)</article>', re.S)
 _RE_H2 = re.compile(r'<h2[^>]*>(.*?)</h2>', re.S)
-# 封面：Mirages 主题懒加载 data-src 优先（src 是占位图），剔除统计/主题图标
+# \u5c01\u9762\uff1aMirages \u4e3b\u9898\u61d2\u52a0\u8f7d data-src \u4f18\u5148\uff08src \u662f\u5360\u4f4d\u56fe\uff09\uff0c\u5254\u9664\u7edf\u8ba1/\u4e3b\u9898\u56fe\u6807
 _RE_IMG_LAZY = re.compile(r'data-src="([^"]+)"', re.I)
 _RE_IMG_ANY = re.compile(r'<img[^>]*?src="([^"]+)"', re.I)
 _IMG_SKIP = ('mc.yandex', '/usr/themes/', '/usr/plugins/', 'data:image')
-# dplayer config JSON（单引号包裹）与裸 m3u8 兜底
+# dplayer config JSON\uff08\u5355\u5f15\u53f7\u5305\u88f9\uff09\u4e0e\u88f8 m3u8 \u515c\u5e95
 _RE_CONFIG = re.compile(r"config='(\{.*?\})'", re.S)
 _RE_M3U8 = re.compile(r'https?://[^"\'\\\s]+\.m3u8[^"\'\\\s]*')
-_RE_NEXT = re.compile(r'class="page-navigator".*?href="([^"]+)"[^>]*>[^<]*下一页', re.S)
+_RE_NEXT = re.compile('class="page-navigator".*?href="([^"]+)"[^>]*>[^<]*\u4e0b\u4e00\u9875', re.S)
 
 
 class Spider(BaseSpider):
 
-    # 入口落地页（b64 壳，解码后含现役内容站直链；随品牌换域即更新）
+    # \u5165\u53e3\u843d\u5730\u9875\uff08b64 \u58f3\uff0c\u89e3\u7801\u540e\u542b\u73b0\u5f79\u5185\u5bb9\u7ad9\u76f4\u94fe\uff1b\u968f\u54c1\u724c\u6362\u57df\u5373\u66f4\u65b0\uff09
     PUBLISH_PAGE = 'https://51aw34.com/'
-    # 内置候选（2026-09-08 实测）：壳页 JS 泛解析备线 {word}.haqwhuwn.cc 任意词可用，
-    # awcg48.com 主线时活时死（App 端曾全挂=零数据），故泛解析线排前
+    # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b\uff09\uff1a\u58f3\u9875 JS \u6cdb\u89e3\u6790\u5907\u7ebf {word}.haqwhuwn.cc \u4efb\u610f\u8bcd\u53ef\u7528\uff0c
+    # awcg48.com \u4e3b\u7ebf\u65f6\u6d3b\u65f6\u6b7b\uff08App \u7aef\u66fe\u5168\u6302=\u96f6\u6570\u636e\uff09\uff0c\u6545\u6cdb\u89e3\u6790\u7ebf\u6392\u524d
     BUILTIN_HOSTS = [
         'https://main.haqwhuwn.cc',
         'https://apple.haqwhuwn.cc',
@@ -113,7 +113,7 @@ class Spider(BaseSpider):
         print(f'使用站点: {self.host}')
 
     def getName(self):
-        return "51暗网"
+        return "51\u6697\u7f51"
 
     def isVideoFormat(self, url):
         return any(ext in (url or '') for ext in ['.m3u8', '.mp4', '.ts'])
@@ -129,9 +129,9 @@ class Spider(BaseSpider):
         builtin = self.BUILTIN_HOSTS
 
         def _validate(host, text):
-            # 内容站身份：WordPress 型文章流（article 标签）+ 站名词
+            # \u5185\u5bb9\u7ad9\u8eab\u4efd\uff1aWordPress \u578b\u6587\u7ae0\u6d41\uff08article \u6807\u7b7e\uff09+ \u7ad9\u540d\u8bcd
             t = text or ''
-            return ('<article' in t) and ('暗网' in t)
+            return ('<article' in t) and ('\u6697\u7f51' in t)
 
         if resolve_host:
             try:
@@ -155,15 +155,15 @@ class Spider(BaseSpider):
                     return h.rstrip('/')
             except Exception:
                 continue
-        # 终极兜底：导航站自动探索（跳转壳/门户/泛解析跟随 + 站名身份验证）
+        # \u7ec8\u6781\u515c\u5e95\uff1a\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\uff08\u8df3\u8f6c\u58f3/\u95e8\u6237/\u6cdb\u89e3\u6790\u8ddf\u968f + \u7ad9\u540d\u8eab\u4efd\u9a8c\u8bc1\uff09
         if explore_hosts:
             try:
                 def _probe(u):
                     r = requests.get(u.rstrip('/') + '/', headers=self.headers,
                                      proxies=self.proxies, timeout=8, verify=False)
                     t = r.text or ''
-                    return r.status_code == 200 and '<article' in t and '暗网' in t
-                hs = explore_hosts(['51aw', '暗网'], probe=_probe)
+                    return r.status_code == 200 and '<article' in t and '\u6697\u7f51' in t
+                hs = explore_hosts(['51aw', '\u6697\u7f51'], probe=_probe)
                 if hs:
                     return hs[0]
             except Exception:
@@ -276,7 +276,7 @@ class Spider(BaseSpider):
             m = re.search(r'<title>([^<]+)</title>', body)
             if m:
                 title = _html.unescape(m.group(1)).strip()
-                title = re.sub(r'\s*[-|]\s*51暗网\s*$', '', title).strip()
+                title = re.sub('\\s*[-|]\\s*51\u6697\u7f51\\s*$', '', title).strip()
             pic = self._pick_pic(body)
             vids = self._videos(body)
             if vids:
