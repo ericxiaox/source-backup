@@ -134,7 +134,12 @@ class Spider(BaseSpider):
             try:
                 r = requests.get(u + '/', headers=self.headers, proxies=self.proxies,
                                  timeout=5, verify=False, allow_redirects=True)
-                if r.status_code == 200 and validate(r.url, r.text) and _looks_like_content(r.text):
+                # 2026-09-11\uff1a\u7ad9\u65b9\u628a\u9996\u9875\u6362\u6210\u4e86\u300c\u96c6\u82b3\u9601\u4e91\u641c\u300d\u95e8\u6237\u58f3\uff08\u65e0 article/<li> \u7b49\u5185\u5bb9
+                # \u7ed3\u6784\u6807\u8bb0\uff09\uff0c\u6807\u51c6\u5185\u5bb9\u5f62\u6001\u5224\u4f1a\u628a\u5b83\u8bef\u6740 \u2192 host \u89e3\u6790\u4e3a\u7a7a \u2192 \u6709\u5206\u7c7b\u65e0\u89c6\u9891\u3002
+                # \u672c\u6e90\u5217\u8868\u8d70 /newlist.php \u7b49\u56fa\u5b9a\u8def\u7531\uff08\u5b9e\u6d4b 94KB/24 \u6761\uff09\uff0c\u4e0e\u9996\u9875\u5f62\u6001\u65e0\u5173\uff0c
+                # \u4e14 validate \u5df2\u542b\u7ad9\u540d\uff08'\u96c6\u82b3\u9601'/'h_d_key'\uff09\uff0c\u6545**\u4ee5 validate \u4e3a\u51c6**\uff0c
+                # \u4e0d\u518d\u505a\u5185\u5bb9\u5f62\u6001\u5224\uff08\u5404\u6e90 _resolve_inline \u4e3a\u72ec\u7acb\u526f\u672c\uff0c\u53ef\u6309\u7ad9\u5b9a\u5236\uff09\u3002
+                if r.status_code == 200 and validate(r.url, r.text):
                     if not result[0]:
                         result[0] = r.url.rstrip('/')
             except Exception:
