@@ -170,8 +170,11 @@ class Spider(BaseSpider):
 
     # \u7ad9\u65b9\u4e2d\u8f6c\u53d1\u5e03\u9875\uff08b64 \u58f3\uff0c\u89e3\u7801\u540e JS zz_line \u5217\u7ebf\u8def\u57fa\u57df\uff09
     PUBLISH_PAGE = 'https://t91bl.com/'
-    # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b 200/204KB\uff0c\u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5b50\u57df\u53ef\u7528\uff09
+    # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b 200/204KB\uff0c\u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5b50\u57df\u53ef\u7528\uff1b
+    # 2026-09-11 \u8ffd\u52a0 dgebtuip.cc \u5f53\u524d\u56fa\u5b9a\u7ebf\u8def\uff0c\u9632 hostresolver \u672a\u52a0\u8f7d\u65f6\u88f8\u5954\uff09
     BUILTIN_HOSTS = [
+        'https://borrow.dgebtuip.cc',
+        'https://bank.dgebtuip.cc',
         'https://main.quibepqh.cc',
         'https://apple.quibepqh.cc',
         'https://main.matutgbj.cc',
@@ -258,6 +261,58 @@ class Spider(BaseSpider):
             return ''
         return f'{self.getProxyUrl()}&url={self.e64(u)}&type=blimg'
 
+    def _resolve_inline(self, publish, builtin, validate):
+        """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff1a\u907f\u514d\u4e32\u884c 8s\u00d7N \u5bfc\u81f4 App \u7aef\u7a7a\u8f6c\u51e0\u5341\u79d2\u3002
+        \u5e26\u6781\u7b80\u5185\u5bb9\u5f62\u6001\u5224\uff0c\u9632\u6b62\u547d\u4e2d\u53d1\u5e03\u9875/\u95e8\u6237\u516c\u544a\u9875\uff08\u6709\u7ad9\u540d\u4f46\u65e0\u5185\u5bb9\uff09\u3002"""
+        import threading
+        import re
+        candidates = []
+        if publish:
+            candidates.append(publish)
+        candidates += list(self._ext.get('hosts') or [])
+        candidates += list(builtin or [])
+        seen = set()
+        deduped = []
+        for u in candidates:
+            u = (u or '').strip().rstrip('/')
+            if not u:
+                continue
+            if not u.startswith('http'):
+                u = 'https://' + u
+            if u not in seen:
+                seen.add(u)
+                deduped.append(u)
+        if not deduped:
+            return ''
+        result = [None]
+        content_marks = ('<article', 'post-card', 'entry-title', 'post-title',
+                         'video-item', 'oneVideo', 'playlist', 'class="video')
+        content_link_pat = re.compile(
+            r'href=["\'][^"\']*/(?:archives?|video|videos|category|categories|post|vod|'
+            r'watch|tag|detail|thread|topic)[/"\']', re.I)
+
+        def _looks_like_content(t):
+            return bool(t and (len(t) > 80000 or any(k in t for k in content_marks)
+                               or len(content_link_pat.findall(t)) >= 5))
+
+        def _probe_one(u):
+            if result[0]:
+                return
+            try:
+                r = requests.get(u + '/', headers=self.headers, proxies=self.proxies,
+                                 timeout=5, verify=False, allow_redirects=True)
+                if r.status_code == 200 and validate(r.url, r.text) and _looks_like_content(r.text):
+                    if not result[0]:
+                        result[0] = r.url.rstrip('/')
+            except Exception:
+                pass
+        threads = [threading.Thread(target=_probe_one, args=(u,)) for u in deduped]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=5)
+        return result[0] or ''
+
     def get_working_host(self):
         """\u52a8\u6001\u57df\u540d\u89e3\u6790 v2.3\uff08hostresolver\uff09\uff1aext \u9501\u5b9a \u2192 \u53d1\u5e03\u9875\u62bd\u94fe(\u542b\u53cd\u5f15\u53f7\u7ebf\u8def\u8868)\u5e76\u884c
         \u5b9e\u6d4b \u2192 ext/\u5185\u7f6e\u5019\u9009\u5e76\u884c\u515c\u5e95 \u2192 \u5bfc\u822a\u7ad9\u63a2\u7d22\u3002\u5168\u5931\u8d25\u8fd4\u56de ''\uff08\u63a5\u53e3\u5c42\u515c\u7a7a\uff1aApp \u7aef
@@ -283,31 +338,25 @@ class Spider(BaseSpider):
                     return h
             except Exception:
                 pass
-        # \u515c\u5e95\uff1aext/\u5185\u7f6e\u5019\u9009**\u5e76\u884c**\u5b9e\u6d4b\uff08\u539f\u4e3a 5\u00d78s \u4e32\u884c\uff0c\u662f\u300c\u8f6c\u5708\u5f88\u4e45\u300d\u7684\u76f4\u63a5\u6765\u6e90\uff09
+        # \u515c\u5e95\uff1ahostresolver \u5df2\u52a0\u8f7d\u5219\u7528 probe_first\uff1b\u672a\u52a0\u8f7d/\u5931\u8d25\u5219\u5185\u8054\u5e76\u884c\u63a2\u6d4b
         cands = list(self._ext.get('hosts') or []) + builtin
         if probe_first:
             try:
                 h = probe_first(cands, headers=self.headers, proxies=self.proxies,
-                                timeout=8, validate=_validate, tag='\u515c\u5e95')
+                                timeout=5, validate=_validate, tag='\u515c\u5e95')
                 if h:
                     return h
             except Exception:
                 pass
-        else:
-            for h in cands:
-                try:
-                    r = requests.get(h.rstrip('/') + '/', headers=self.headers,
-                                     proxies=self.proxies, timeout=8, verify=False)
-                    if r.status_code == 200 and _validate(h, r.text):
-                        return h.rstrip('/')
-                except Exception:
-                    continue
+        h = self._resolve_inline(publish, builtin, _validate)
+        if h:
+            return h
         # \u7ec8\u6781\u515c\u5e95\uff1a\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\uff08\u8df3\u8f6c\u58f3/\u95e8\u6237/\u6cdb\u89e3\u6790\u8ddf\u968f + \u7ad9\u540d\u8eab\u4efd\u9a8c\u8bc1\uff09
         if explore_hosts:
             try:
                 def _probe(u):
                     r = requests.get(u.rstrip('/') + '/', headers=self.headers,
-                                     proxies=self.proxies, timeout=8, verify=False)
+                                     proxies=self.proxies, timeout=5, verify=False)
                     return r.status_code == 200 and '91\u7206\u6599' in (r.text or '')
                 hs = explore_hosts(['91bl', '\u7206\u6599'], probe=_probe)
                 if hs:
