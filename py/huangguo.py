@@ -49,6 +49,8 @@ except Exception:
 # hostresolver.py\uff08source \u6839\uff09\uff1a\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe + \u5019\u9009\u5e76\u884c\u5b9e\u6d4b\uff08\u4e0e explorer \u540c\u76ee\u5f55\uff09
 try:
     from hostresolver import resolve_host, probe_first, ext_of
+except ImportError:
+    resolve_host = probe_first = ext_of = None
 except Exception:
     try:
         sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -357,8 +359,8 @@ class Spider(Spider):
                     return hs[0]
             except Exception:
                 pass
-        # \u5168\u8d25\uff1a\u663e\u5f0f\u8fd4\u56de\u7a7a\uff08_safe_host() \u81ea\u4f1a\u515c\u4e00\u4e2a\u9ed8\u8ba4\u5177\u540d\u57df\u4f9b\u53d6\u56fe\u7528\uff09
-        return ''
+        # \u5168\u8d25\uff1a\u663e\u5f0f\u8fd4\u56de\u7a7a
+        return self._resolve_inline(ext.get('publish') or '', HOSTS, _validate)
 
     def _safe_host(self):
         """\u4efb\u4f55\u65f6\u5019\u90fd\u80fd\u62ff\u5230\u4e00\u4e2a\u53ef\u7528 host"""

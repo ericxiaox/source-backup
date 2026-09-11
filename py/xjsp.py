@@ -107,10 +107,19 @@ class Spider(Spider):
             if h in cands:
                 cands.remove(h)
             cands.insert(0, h)
-        for c in cands:
+        import threading
+        result = [None]
+        def _p(c):
+            if result[0]:
+                return
             if self._alive(c):
-                return c
-        return cands[0] if cands else ''
+                result[0] = c
+        threads = [threading.Thread(target=_p, args=(c,)) for c in cands]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=5)
+        return result[0] or (cands[0] if cands else '')
 
     def _host_from_publish(self, pages):
         """\u4ece\u53d1\u5e03\u9875\u62a0\u5f53\u524d h5_url\uff08config.js \u662f\u7eaf JS \u914d\u7f6e\uff0c\u6b63\u5219\u6700\u7a33\uff09\u3002"""

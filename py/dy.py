@@ -275,6 +275,53 @@ class Spider(BaseSpider):
     def destroy(self):
         pass
 
+    def _resolve_inline(self, publish, builtin, validate):
+        """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff1a\u907f\u514d\u4e32\u884c\u8d85\u65f6\u5bfc\u81f4 App \u7aef\u7a7a\u8f6c\u51e0\u5341\u79d2\u3002
+        \u5e26\u5185\u5bb9\u5f62\u6001\u5224\uff0c\u9632\u6b62\u547d\u4e2d\u53d1\u5e03\u9875/\u95e8\u6237\u516c\u544a\u9875\uff08\u6709\u7ad9\u540d\u4f46\u65e0\u5185\u5bb9\uff09\u3002"""
+        import threading
+        candidates = []
+        if publish:
+            candidates.append(publish)
+        candidates += list(self._ext.get('hosts') or [])
+        candidates += list(builtin or [])
+        seen = set(); deduped = []
+        for u in candidates:
+            u = (u or '').strip().rstrip('/')
+            if not u:
+                continue
+            if not u.startswith('http'):
+                u = 'https://' + u
+            if u not in seen:
+                seen.add(u); deduped.append(u)
+        if not deduped:
+            return ''
+        result = [None]
+        content_marks = ('<article', 'post-card', 'entry-title', 'post-title',
+                         'video-item', 'oneVideo', 'playlist', 'class="video')
+        content_link_pat = re.compile(
+            r'href=["\'] [^"\']*/(?:archives?|video|videos|category|categories|post|vod|'
+            r'watch|tag|detail|thread|topic)[/"\']', re.I)
+        def _looks_like_content(t):
+            return bool(t and (len(t) > 80000 or any(k in t for k in content_marks)
+                               or len(content_link_pat.findall(t)) >= 5))
+        def _probe_one(u):
+            if result[0]:
+                return
+            try:
+                r = requests.get(u + '/', headers=self.headers, proxies=self.proxies,
+                                 timeout=5, verify=False, allow_redirects=True)
+                if r.status_code == 200 and validate(r.url, r.text) and _looks_like_content(r.text):
+                    if not result[0]:
+                        result[0] = r.url.rstrip('/')
+            except Exception:
+                pass
+        threads = [threading.Thread(target=_probe_one, args=(u,)) for u in deduped]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=5)
+        return result[0] or ''
+
     def get_working_host(self):
         publish = self._ext.get('publish') or self.PUBLISH_PAGE
         builtin = self.BUILTIN_HOSTS
@@ -307,14 +354,7 @@ class Spider(BaseSpider):
             except Exception:
                 pass
         else:
-            for h in cands:
-                try:
-                    r = requests.get(h.rstrip('/') + '/', headers=self.headers,
-                                     proxies=self.proxies, timeout=8, verify=False)
-                    if r.status_code == 200 and _validate(h, r.text):
-                        return h.rstrip('/')
-                except Exception:
-                    continue
+            return self._resolve_inline(publish, builtin, _validate)
         # \u7ec8\u6781\u515c\u5e95\uff1a\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\uff08\u8df3\u8f6c\u58f3/\u95e8\u6237/\u6cdb\u89e3\u6790\u8ddf\u968f + \u7ad9\u540d\u8eab\u4efd\u9a8c\u8bc1\uff09
         if explore_hosts:
             try:

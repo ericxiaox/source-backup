@@ -27,7 +27,8 @@
         "type": "rect",
         "ratio": 1
       },
-      "changeable": 1
+      "changeable": 1,
+      "ext": "publish@https://www.wkcdhiqk.cc"
     },
     {
       "key": "py_huangguo",
@@ -54,7 +55,7 @@
     },
     {
       "key": "py_daluandou",
-      "name": "\ud83d\udcf1\u6bcf\u65e5\u5927\u4e71\u6597",
+      "name": "\ud83d\udcf1\u6bcf\u65e5\u5927\u4e71\u6597\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/daluandou.py",
       "ext": "publish@https://idld65.com;hosts@https://border.loewkgyyv.cc,https://capture.loewkgyyv.cc,https://fe7.loewkgyyv.cc",
@@ -136,7 +137,7 @@
     },
     {
       "key": "py_hlw",
-      "name": "\ud83d\udcf1\u9ed1\u6599\u7f51",
+      "name": "\ud83d\udcf1\u9ed1\u6599\u7f51\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/hlw.py",
       "ext": "publish@https://hlwf6.com/",
@@ -195,7 +196,7 @@
     },
     {
       "key": "py_91bl",
-      "name": "\ud83d\udcf191\u7206\u6599",
+      "name": "\ud83d\udcf191\u7206\u6599\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/91bl.py",
       "ext": "publish@https://t91bl.com/",

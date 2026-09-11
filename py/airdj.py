@@ -13,11 +13,16 @@ from base.spider import Spider
 from urllib.parse import urljoin
 try:
     from hostresolver import ext_of
+except ImportError:
+    ext_of = None
 except Exception:
     try:
         import os as _os
         sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
-        from hostresolver import ext_of
+        try:
+            from hostresolver import ext_of
+        except ImportError:
+            ext_of = None
     except Exception:
         ext_of = None
 
@@ -48,39 +53,93 @@ class Spider(Spider):
     def getName(self):
         return base64.b64decode('6bq76LGG5Lyg5aqSQUk=').decode('utf-8')
 
+    def _resolve_inline(self, publish, builtin, validate):
+        """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff1a\u907f\u514d\u4e32\u884c\u8d85\u65f6\u5bfc\u81f4 App \u7aef\u7a7a\u8f6c\u51e0\u5341\u79d2\u3002
+        \u5e26\u5185\u5bb9\u5f62\u6001\u5224\uff0c\u9632\u6b62\u547d\u4e2d\u53d1\u5e03\u9875/\u95e8\u6237\u516c\u544a\u9875\uff08\u6709\u7ad9\u540d\u4f46\u65e0\u5185\u5bb9\uff09\u3002"""
+        import threading
+        candidates = []
+        if publish:
+            candidates.append(publish)
+        candidates += list(self._ext.get('hosts') or [])
+        candidates += list(builtin or [])
+        seen = set(); deduped = []
+        for u in candidates:
+            u = (u or '').strip().rstrip('/')
+            if not u:
+                continue
+            if not u.startswith('http'):
+                u = 'https://' + u
+            if u not in seen:
+                seen.add(u); deduped.append(u)
+        if not deduped:
+            return ''
+        result = [None]
+        content_marks = ('<article', 'post-card', 'entry-title', 'post-title',
+                         'video-item', 'oneVideo', 'playlist', 'class="video')
+        content_link_pat = re.compile(
+            r'href=["\'] [^"\']*/(?:archives?|video|videos|category|categories|post|vod|'
+            r'watch|tag|detail|thread|topic)[/"\']', re.I)
+        def _looks_like_content(t):
+            return bool(t and (len(t) > 80000 or any(k in t for k in content_marks)
+                               or len(content_link_pat.findall(t)) >= 5))
+        def _probe_one(u):
+            if result[0]:
+                return
+            try:
+                r = requests.get(u + '/', headers=self.headers, proxies=self.proxies,
+                                 timeout=5, verify=False, allow_redirects=True)
+                if r.status_code == 200 and validate(r.url, r.text) and _looks_like_content(r.text):
+                    if not result[0]:
+                        result[0] = r.url.rstrip('/')
+            except Exception:
+                pass
+        threads = [threading.Thread(target=_probe_one, args=(u,)) for u in deduped]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=5)
+        return result[0] or ''
+
     def init(self, extend=""):
         # ext \u652f\u6301\uff1ahost@ \u9501\u5b9a / hosts@ \u8ffd\u52a0\u5019\u9009 / publish@ \u9884\u7559\uff08\u7ad9\u65b9\u6682\u65e0\u7a33\u5b9a\u53d1\u5e03\u9875\uff09
         self._ext = ext_of(extend) if ext_of else {}
         self._detect_domain()
 
     def _detect_domain(self):
+        """\u5019\u9009\u57df\u5e76\u884c\u5b9e\u6d4b\uff08hostresolver \u7f3a\u5931\u65f6\u4ecd\u53ef\u7528\uff09\uff1aext host \u9501\u5b9a > ext hosts > \u5185\u7f6e\u5019\u9009\u3002
+        \u539f\u4e32\u884c 3s\u00d7N \u6539\u4e3a\u5e76\u884c\uff0c\u907f\u514d App \u7aef\u7a7a\u8f6c\u3002\u7b2c\u4e00\u4e2a\u6210\u529f\u5373\u91c7\u7528\u3002"""
+        import threading
         ext = getattr(self, '_ext', {}) or {}
-        # \u5019\u9009\u987a\u5e8f\uff1aext host \u9501\u5b9a > ext hosts > \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b 4/5/3/2 \u5168\u6d3b\uff09
         hosts = []
         if ext.get('host'):
             hosts.append(ext['host'].rstrip('/'))
         hosts += [h.rstrip('/') for h in (ext.get('hosts') or [])]
         hosts += [d.rstrip('/') for d in self.CANDIDATE_DOMAINS]
-        for domain in hosts:
+        result = [None]
+        UAMOB = 'Mozilla/5.0 (Linux; Android 13; M2102J2SC Build/TKQ1.221114.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.31 Mobile Safari/537.36'
+
+        def _try(d):
+            if result[0]:
+                return
             try:
-                h = {
-                    'User-Agent': 'Mozilla/5.0 (Linux; Android 13; M2102J2SC Build/TKQ1.221114.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.31 Mobile Safari/537.36',
-                    'Referer': domain,
-                }
-                r = requests.get(f"{domain}/api/v1/categories", headers=h, timeout=3)
+                h = {'User-Agent': UAMOB, 'Referer': d}
+                r = requests.get(f"{d}/api/v1/categories", headers=h, timeout=3)
                 if r.status_code == 200:
                     data = r.json()
-                    if data.get('code') == 200:
-                        self._xurl = domain
-                        self._headers = h
-                        return
+                    if data.get('code') == 200 and not result[0]:
+                        result[0] = (d, h)
             except Exception:
-                continue
-        self._xurl = self.CANDIDATE_DOMAINS[0]
-        self._headers = {
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 13; M2102J2SC Build/TKQ1.221114.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.31 Mobile Safari/537.36',
-            'Referer': self._xurl,
-        }
+                pass
+        threads = [threading.Thread(target=_try, args=(d,)) for d in hosts]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=4)
+        if result[0]:
+            self._xurl, self._headers = result[0]
+        else:
+            self._xurl = self.CANDIDATE_DOMAINS[0]
+            self._headers = {'User-Agent': UAMOB, 'Referer': self._xurl}
 
     def _domain(self):
         if self._xurl is None:

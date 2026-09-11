@@ -64,26 +64,79 @@ class Spider(Spider):
         # \u52a8\u6001\u57df\u540d\u89e3\u6790 v2\uff1a2026-09-08 \u5b9e\u6d4b jptt.tv \u6b63\u5728\u9000\u5f79\uff08302 -> 2026ajptttv.work\uff09\uff0c
         # \u4ee5 jptt.tv \u4e3a\u53d1\u5e03\u94fe\uff08\u8df3\u8f6c\u5373\u73b0\u5f79\uff09\uff0c.work \u53cc\u955c\u50cf\u4e3a\u5185\u7f6e\u5019\u9009\uff1b\u5168\u5931\u8d25\u8fd4\u56de '' \u515c\u7a7a\u3002
         ext = self._ext
+        publish = ext.get('publish') or 'https://jptt.tv/'
+        builtin_hosts = [
+            'https://2026ajptttv.work/',      # 2026-09-08 \u5b9e\u6d4b\u73b0\u5f79\u955c\u50cf(222KB\u5b8c\u6574\u7ad9)
+            'https://jptttv2026a.work/',
+            'https://jptt.tv/',               # \u65e7\u4e3b\u57df\uff0c302 -> 2026ajptttv.work
+        ]
         if ext.get('host'):
             self.host = ext['host'].rstrip('/')
+        elif resolve_host:
+            self.host = resolve_host(
+                publish_page=publish,
+                candidate_hosts=list(ext.get('hosts') or []) + builtin_hosts,
+                headers=self.headers,
+                proxies=self.proxies,
+                timeout=8,
+            ) or ''
         else:
-            publish = ext.get('publish') or 'https://jptt.tv/'
-            builtin_hosts = [
-                'https://2026ajptttv.work/',      # 2026-09-08 \u5b9e\u6d4b\u73b0\u5f79\u955c\u50cf(222KB\u5b8c\u6574\u7ad9)
-                'https://jptttv2026a.work/',
-                'https://jptt.tv/',               # \u65e7\u4e3b\u57df\uff0c302 -> 2026ajptttv.work
-            ]
-            if resolve_host:
-                self.host = resolve_host(
-                    publish_page=publish,
-                    candidate_hosts=list(ext.get('hosts') or []) + builtin_hosts,
-                    headers=self.headers,
-                    proxies=self.proxies,
-                    timeout=8,
-                ) or ''
-            else:
-                self.host = (ext.get('hosts') or builtin_hosts)[0].rstrip('/')
+            if not getattr(self, 'host', ''):
+                h = self._resolve_inline(publish, builtin_hosts, lambda hh,tt: 'jptt' in (hh or '') or '\u7981\u7247' in (tt or ''))
+                if h:
+                    self.host = h
+        # \u5168\u5931\u8d25\u515c\u5e95\uff1a\u9000\u56de\u9996\u4e2a\u5185\u7f6e\u5019\u9009\uff0c\u907f\u514d init \u56e0 self.host \u672a\u8bbe\u800c\u5d29\u6e83
+        # \uff08\u7ad9\u70b9\u771f\u5168\u6b7b\u65f6 homeContent \u8d70\u515c\u5e95\u5206\u7c7b/\u8bca\u65ad\uff0c\u800c\u4e0d\u662f init \u629b AttributeError\uff09
+        if not getattr(self, 'host', ''):
+            self.host = builtin_hosts[0].rstrip('/')
         self.headers.update({'Referer': self.host + '/', 'Origin': self.host})
+
+    def _resolve_inline(self, publish, builtin, validate):
+        """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff1a\u907f\u514d\u4e32\u884c\u8d85\u65f6\u5bfc\u81f4 App \u7aef\u7a7a\u8f6c\u51e0\u5341\u79d2\u3002
+        \u5e26\u5185\u5bb9\u5f62\u6001\u5224\uff0c\u9632\u6b62\u547d\u4e2d\u53d1\u5e03\u9875/\u95e8\u6237\u516c\u544a\u9875\uff08\u6709\u7ad9\u540d\u4f46\u65e0\u5185\u5bb9\uff09\u3002"""
+        import threading
+        candidates = []
+        if publish:
+            candidates.append(publish)
+        candidates += list(self._ext.get('hosts') or [])
+        candidates += list(builtin or [])
+        seen = set(); deduped = []
+        for u in candidates:
+            u = (u or '').strip().rstrip('/')
+            if not u:
+                continue
+            if not u.startswith('http'):
+                u = 'https://' + u
+            if u not in seen:
+                seen.add(u); deduped.append(u)
+        if not deduped:
+            return ''
+        result = [None]
+        content_marks = ('<article', 'post-card', 'entry-title', 'post-title',
+                         'video-item', 'oneVideo', 'playlist', 'class="video')
+        content_link_pat = re.compile(
+            r'href=["\'] [^"\']*/(?:archives?|video|videos|category|categories|post|vod|'
+            r'watch|tag|detail|thread|topic)[/"\']', re.I)
+        def _looks_like_content(t):
+            return bool(t and (len(t) > 80000 or any(k in t for k in content_marks)
+                               or len(content_link_pat.findall(t)) >= 5))
+        def _probe_one(u):
+            if result[0]:
+                return
+            try:
+                r = requests.get(u + '/', headers=self.headers, proxies=self.proxies,
+                                 timeout=5, verify=False, allow_redirects=True)
+                if r.status_code == 200 and validate(r.url, r.text) and _looks_like_content(r.text):
+                    if not result[0]:
+                        result[0] = r.url.rstrip('/')
+            except Exception:
+                pass
+        threads = [threading.Thread(target=_probe_one, args=(u,)) for u in deduped]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=5)
+        return result[0] or ''
 
     def _get(self, path):
         url = path if path.startswith('http') else self.host + path

@@ -152,6 +152,53 @@ class Spider(Spider):
         except Exception:
             self._diag = []
         print(f"使用站点: {self.HOST}")
+    def _resolve_inline(self, publish, builtin, validate):
+        """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff1a\u907f\u514d\u4e32\u884c\u8d85\u65f6\u5bfc\u81f4 App \u7aef\u7a7a\u8f6c\u51e0\u5341\u79d2\u3002
+        \u5e26\u5185\u5bb9\u5f62\u6001\u5224\uff0c\u9632\u6b62\u547d\u4e2d\u53d1\u5e03\u9875/\u95e8\u6237\u516c\u544a\u9875\uff08\u6709\u7ad9\u540d\u4f46\u65e0\u5185\u5bb9\uff09\u3002"""
+        import threading
+        candidates = []
+        if publish:
+            candidates.append(publish)
+        candidates += list(self._ext.get('hosts') or [])
+        candidates += list(builtin or [])
+        seen = set(); deduped = []
+        for u in candidates:
+            u = (u or '').strip().rstrip('/')
+            if not u:
+                continue
+            if not u.startswith('http'):
+                u = 'https://' + u
+            if u not in seen:
+                seen.add(u); deduped.append(u)
+        if not deduped:
+            return ''
+        result = [None]
+        content_marks = ('<article', 'post-card', 'entry-title', 'post-title',
+                         'video-item', 'oneVideo', 'playlist', 'class="video')
+        content_link_pat = re.compile(
+            r'href=["\'] [^"\']*/(?:archives?|video|videos|category|categories|post|vod|'
+            r'watch|tag|detail|thread|topic)[/"\']', re.I)
+        def _looks_like_content(t):
+            return bool(t and (len(t) > 80000 or any(k in t for k in content_marks)
+                               or len(content_link_pat.findall(t)) >= 5))
+        def _probe_one(u):
+            if result[0]:
+                return
+            try:
+                r = requests.get(u + '/', headers=self.headers, proxies=self.proxies,
+                                 timeout=5, verify=False, allow_redirects=True)
+                if r.status_code == 200 and validate(r.url, r.text) and _looks_like_content(r.text):
+                    if not result[0]:
+                        result[0] = r.url.rstrip('/')
+            except Exception:
+                pass
+        threads = [threading.Thread(target=_probe_one, args=(u,)) for u in deduped]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=5)
+        return result[0] or ''
+
     def get_working_host(self):
         """\u52a8\u6001\u57df\u540d\u89e3\u6790 v2\uff08hostresolver\uff09\uff1aext \u9501\u5b9a \u2192 \u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe(b64\u58f3\u89e3\u7801+\u6cdb\u89e3\u6790\u57fa\u57df
         \u81ea\u52a8\u751f\u6210\u5019\u9009) \u2192 \u5185\u7f6e\u5019\u9009\u5e76\u884c\u5b9e\u6d4b \u2192 \u6210\u529f\u7f13\u5b5830\u5206\u949f\u3002\u5168\u90e8\u5931\u8d25\u8fd4\u56de ''\uff08\u63a5\u53e3\u5c42\u515c\u7a7a\uff0c
@@ -201,7 +248,7 @@ class Spider(Spider):
                     return hs[0]
             except Exception:
                 pass
-        return ''
+        return self._resolve_inline(ext.get('publish') or PUBLISH_PAGE, BUILTIN_HOSTS, _validate)
     # \u515c\u5e95\u5206\u7c7b\uff082026-09-07 \u6539\u7248\u540e\u5bfc\u822a\u5b9e\u6d4b\uff0cb64 \u5b58\u50a8\u9632\u6258\u7ba1\u5e73\u53f0\u5185\u5bb9\u626b\u63cf\u8bef\u5224\uff09\u2014\u2014
     # \u4ec5\u5f53\u9996\u9875\u5b9e\u65f6\u6293\u53d6\u5931\u8d25\u65f6\u4f7f\u7528\uff0c\u6b63\u5e38\u60c5\u51b5\u5206\u7c7b\u4e00\u5f8b\u4ece\u7f51\u7ad9\u5b9e\u65f6\u83b7\u53d6
     CATE_MANUAL_B64='IHsi5LuK5pel55yL5paZIjoiMjRoY2ciLCLmr4/ml6XlpKfotZsiOiJtcmRzIiwiQUnnn63liaciOiJzd2RqIiwi54Ot6Zeo5ZCD55OcIjoicmd0aiIsIuavj+aXpeeDreeTnCI6Im1ycmciLCLpu5HmlpnlpKfkuosiOiJobGRhIiwi5Y+N5beu5aWz56WeIjoiZmNucyIsIuWtpumZoueDreeTnCI6Inh5cmciLCLnvZHnuqLlkIPnk5wiOiJ3aGhsIiwi6buR5paZ5p2C6LCIIjoiaGx6dCIsIuaYjuaYn+WQg+eTnCI6Im14YmciLCLlrpjlnLrnp5jpl7siOiJnY213Iiwi56aB5pKt5Yqo5ryrIjoibXJzdCIsIuaSuOWPi+eci+eJhyI6Imx5ZHQiLCLmtbfop5LkubHkvKYiOiJsbHNxIiwiYXbop6Por7QiOiJhdmpzIiwi5o6i6Iqx5aSn5YWoIjoidGhkcSIsIue9kem7hOS4k+i+kSI6IndoemoiLCLljp/liJvmipXnqL8iOiJxZ3pxIiwi5oCn54ix5oqA5benIjoid3l4cyIsIlBNVua3t+WJqiI6InBtdiIsIuWBt+aLjeebl+aRhCI6ImNoamxiIiwi5LiW55WM5p2v55CD5ZGY6buR5paZIjoic2piLWhsIiwi5LiW55WM5p2v5aSq5aSq5ZuiIjoic2piLXR0dCIsIuS4lueVjOadr+eDreaQnCI6InNqYi1ycyIsIuS4lueVjOadr+WNmuW9qeS4k+WMuiI6InNqYi1iYyIsIueQg+i/t+eOsOWcuiI6InNqYi1xbSJ9'
