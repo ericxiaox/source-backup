@@ -76,45 +76,6 @@ BUILTIN_HOSTS=[
 # \u5206\u7c7b\u540d\u5e7f\u544a/\u7ad9\u52a1\u9ed1\u540d\u5355\uff08\u53d1\u5e03\u9875\u5bfc\u822a\u63a8\u5e7f\u8bcd\uff0c\u5747\u4e3a\u4e2d\u6027\u8bcd\uff0c\u65e0\u9700 b64\uff09
 AD_CAT_RE=re.compile('(?i)app|\u4e0b\u8f7d|qq|\u5fae\u4fe1|\u63a8\u7279|tg\u7fa4|\u5bfc\u822a|\u8054\u7cfb|\u5408\u4f5c|\u90ae\u7bb1|\u5173\u4e8e|\u5b58\u6863|\u6536\u85cf|forgot|\u767b\u9646|\u767b\u5f55')
 
-# \u2500\u2500 \u81ea\u8bca\u65ad\uff08\u4e34\u65f6\u6392\u969c\u7528\uff0c2026-09-11 \u4e0b\u5348\u56de\u88c5\uff1a\u771f\u673a\u4ecd\u62a5\u6709\u5206\u7c7b\u65e0\u89c6\u9891\uff09\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-# \u8bbe\u8ba1\uff1a\u5b8c\u5168\u81ea\u5305\u542b\uff0c\u4e0d\u4f9d\u8d56 hostresolver/explorer\uff0cimport \u5931\u8d25\u4e5f\u7167\u6837\u8f93\u51fa\u3002
-DIAG_TID = '__diag__'
-
-
-def _diag_lines(sp, key='\u9ed1\u6599\u4e0d\u6253\u70ca'):
-    """\u628a\u53d6\u57df\u94fe\u8def\u644a\u6210\u53ef\u8bfb\u6587\u672c\u884c\uff08\u5728\u300c\u26a0\u8bca\u65ad\u300d\u5206\u7c7b\u91cc\u9010\u6761\u663e\u793a\uff09"""
-    out = []
-    g = globals()
-
-    def add(k, v):
-        out.append('%s: %s' % (k, v))
-
-    add('\u6700\u7ec8\u9009\u5b9a host', getattr(sp, 'host', '') or getattr(sp, 'HOST', '') or '(\u7a7a\u2605\u5730\u5740\u6ca1\u89e3\u6790\u51fa\u6765)')
-    add('hostresolver \u6a21\u5757', '\u5df2\u52a0\u8f7d' if g.get('resolve_host') else '\u2605\u672a\u52a0\u8f7d(gitee \u5f62\u6001\u5c5e\u6b63\u5e38)')
-    ext = getattr(sp, '_ext', {}) or {}
-    add('ext.publish', ext.get('publish') or '(\u7a7a\uff0c\u7528\u5185\u7f6e)')
-    add('ext.hosts', ','.join(ext.get('hosts') or []) or '(\u7a7a)')
-    add('\u5185\u7f6e\u5019\u9009', ' '.join(BUILTIN_HOSTS))
-    _rq = g.get('requests')
-    u = getattr(sp, 'HOST', '') or ''
-    if u and _rq is not None:
-        hh = dict(getattr(sp, 'headers', None) or {})
-        if not hh.get('User-Agent'):
-            hh['User-Agent'] = g.get('_UA') or 'Mozilla/5.0'
-        try:
-            r = _rq.get(u.rstrip('/') + '/', headers=hh,
-                        proxies=getattr(sp, 'proxies', {}) or {}, timeout=8, verify=False)
-            t = r.text or ''
-            add('\u5b9e\u6d4b\u8be5 host', 'HTTP %s / %dB / \u542b\u7ad9\u540d:%s'
-                % (r.status_code, len(t), ('\u662f' if key in t else '\u5426\u2605') if key else '\u672a\u5224\u5b9a'))
-        except Exception as e:
-            add('\u5b9e\u6d4b\u8be5 host', '\u2605\u8fde\u4e0d\u4e0a: %s' % str(e)[:60])
-    else:
-        add('\u5b9e\u6d4b\u8be5 host', '(\u8df3\u8fc7\uff1ahost \u4e3a\u7a7a\u6216 requests \u4e0d\u53ef\u7528)')
-    return out
-
-
-
 
 class Spider(Spider):
     SELECTORS=['.post-card','.video-item','.video-list .item','.list-item','.post-item']
@@ -134,10 +95,6 @@ class Spider(Spider):
             except Exception:pass
         self.HOST=self.get_working_host()
         self.host=self.HOST
-        try:
-            self._diag = _diag_lines(self, '\u9ed1\u6599\u4e0d\u6253\u70ca')
-        except Exception:
-            self._diag = []
         print(f"使用站点: {self.HOST}")
     def _resolve_inline(self, publish, builtin, validate):
         """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff1a\u907f\u514d\u4e32\u884c\u8d85\u65f6\u5bfc\u81f4 App \u7aef\u7a7a\u8f6c\u51e0\u5341\u79d2\u3002
@@ -305,32 +262,13 @@ class Spider(Spider):
         if not self.HOST:
             self.HOST = BUILTIN_HOSTS[0].rstrip('/')
             self.host = self.HOST
-            try:
-                self._diag = (getattr(self, '_diag', []) or []) + \
-                    ['\u2605\u61d2\u91cd\u89e3\u6790\u4ecd\u5931\u8d25\uff0c\u56de\u9000\u5185\u7f6e\u9996\u57df: ' + self.HOST]
-            except Exception:
-                pass
         print(f"[ensure_host] 使用站点: {self.HOST}")
         return self.HOST
     # \u515c\u5e95\u5206\u7c7b\uff082026-09-07 \u6539\u7248\u540e\u5bfc\u822a\u5b9e\u6d4b\uff0cb64 \u5b58\u50a8\u9632\u6258\u7ba1\u5e73\u53f0\u5185\u5bb9\u626b\u63cf\u8bef\u5224\uff09\u2014\u2014
     # \u4ec5\u5f53\u9996\u9875\u5b9e\u65f6\u6293\u53d6\u5931\u8d25\u65f6\u4f7f\u7528\uff0c\u6b63\u5e38\u60c5\u51b5\u5206\u7c7b\u4e00\u5f8b\u4ece\u7f51\u7ad9\u5b9e\u65f6\u83b7\u53d6
     CATE_MANUAL_B64='IHsi5LuK5pel55yL5paZIjoiMjRoY2ciLCLmr4/ml6XlpKfotZsiOiJtcmRzIiwiQUnnn63liaciOiJzd2RqIiwi54Ot6Zeo5ZCD55OcIjoicmd0aiIsIuavj+aXpeeDreeTnCI6Im1ycmciLCLpu5HmlpnlpKfkuosiOiJobGRhIiwi5Y+N5beu5aWz56WeIjoiZmNucyIsIuWtpumZoueDreeTnCI6Inh5cmciLCLnvZHnuqLlkIPnk5wiOiJ3aGhsIiwi6buR5paZ5p2C6LCIIjoiaGx6dCIsIuaYjuaYn+WQg+eTnCI6Im14YmciLCLlrpjlnLrnp5jpl7siOiJnY213Iiwi56aB5pKt5Yqo5ryrIjoibXJzdCIsIuaSuOWPi+eci+eJhyI6Imx5ZHQiLCLmtbfop5LkubHkvKYiOiJsbHNxIiwiYXbop6Por7QiOiJhdmpzIiwi5o6i6Iqx5aSn5YWoIjoidGhkcSIsIue9kem7hOS4k+i+kSI6IndoemoiLCLljp/liJvmipXnqL8iOiJxZ3pxIiwi5oCn54ix5oqA5benIjoid3l4cyIsIlBNVua3t+WJqiI6InBtdiIsIuWBt+aLjeebl+aRhCI6ImNoamxiIiwi5LiW55WM5p2v55CD5ZGY6buR5paZIjoic2piLWhsIiwi5LiW55WM5p2v5aSq5aSq5ZuiIjoic2piLXR0dCIsIuS4lueVjOadr+eDreaQnCI6InNqYi1ycyIsIuS4lueVjOadr+WNmuW9qeS4k+WMuiI6InNqYi1iYyIsIueQg+i/t+eOsOWcuiI6InNqYi1xbSJ9'
 
-    def homeContent(self, *a, **kw):
-        """\u5916\u5c42\u5305\u88c5\uff1a\u539f\u5b9e\u73b0\u7ed3\u679c + \u8ffd\u52a0\u300c\u26a0\u8bca\u65ad\u300d\u5206\u7c7b\uff08\u4e34\u65f6\u6392\u969c\uff0c\u5b9a\u4f4d App \u7aef\u65e0\u5185\u5bb9\u6839\u56e0\uff09"""
-        try:
-            r = self._homeContent(*a, **kw)
-        except Exception:
-            r = {}
-        try:
-            if isinstance(r, dict):
-                r['class'] = list(r.get('class') or []) + \
-                    [{'type_id': DIAG_TID, 'type_name': '\u26a0\u8bca\u65ad'}]
-        except Exception:
-            pass
-        return r
-
-    def _homeContent(self, filter):
+    def homeContent(self, filter):
 
         # \u5206\u7c7b\u5b9e\u65f6\u83b7\u53d6\uff08\u4e0e\u6bcf\u65e5\u5927\u8d5b\u540c\u6b3e\uff09\uff1a\u5168\u9875\u626b /category/{slug}/ \u94fe\u63a5\uff0c\u7ad9\u65b9\u52a0\u5206\u7c7b/\u6539\u540d\u81ea\u52a8\u8ddf\u968f
         try:
@@ -356,22 +294,7 @@ class Spider(Spider):
         cateManual=json.loads(base64.b64decode(self.CATE_MANUAL_B64).decode('utf-8'))
         return{'class':[{'type_name':k,'type_id':v}for k,v in cateManual.items()]}
     def homeVideoContent(self):return{}
-    def _diag_items(self):
-        """\u8bca\u65ad\u884c \u2192 App \u5217\u8868\u6761\u76ee\uff08\u70b9\u300c\u26a0\u8bca\u65ad\u300d\u5206\u7c7b\u5373\u53ef\u770b\u5230\u5168\u90e8\u53d6\u57df\u8fc7\u7a0b\uff09"""
-        return [{'vod_id': 'diag%d' % i, 'vod_name': '\u26a0 ' + str(x),
-                 'vod_pic': '', 'vod_remarks': ''}
-                for i, x in enumerate(getattr(self, '_diag', []) or [])]
     def categoryContent(self,tid,pg,filter,extend):
-        if tid == DIAG_TID:
-            # \u8bca\u65ad\u9875\u987a\u624b\u505a\u4e00\u6b21\u61d2\u91cd\u89e3\u6790\u5e76\u5237\u65b0\u8bca\u65ad\u884c\uff08\u7528\u6237\u70b9\u8fdb\u6765 = \u6392\u969c\u65f6\u523b\uff09
-            try:
-                self._ensure_host()
-                self._diag = _diag_lines(self, '\u9ed1\u6599\u4e0d\u6253\u70ca')
-            except Exception:
-                pass
-            items = self._diag_items()
-            return {'page': 1, 'pagecount': 1, 'limit': len(items),
-                    'total': len(items), 'list': items}
         self._ensure_host()
         # 2026-09-07 \u6539\u7248\u540e\u5206\u7c7b\u8def\u7531\u4e3a /category/{slug}/\uff0c\u5206\u9875\u4e3a /category/{slug}/{pg}/
         # tid \u517c\u5bb9\u4e24\u79cd\u5f62\u6001\uff1a\u5b9e\u65f6\u626b\u63cf('/category/slug/'\u5168\u8def\u5f84) \u4e0e b64\u515c\u5e95\u8868(\u88f8slug)
@@ -506,8 +429,15 @@ class Spider(Spider):
         else:
             return{"parse":0,"playUrl":"","url":id,"header":{"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.7049.96 Safari/537.36","Referer":self.HOST+'/'}}
     def get_list(self,url):
-        rsp=self.fetch(url)
-        return[]if not rsp else self._parse_items(pq(rsp.text))
+        # \u7a7a\u7ed3\u679c\u91cd\u8bd5\u4e00\u6b21\uff1aApp \u8fdb\u6e90\u4f1a\u81ea\u52a8\u9884\u8f7d\u7b2c\u4e00\u4e2a\u5206\u7c7b\uff0c\u5076\u53d1\u8bf7\u6c42\u5931\u8d25\u5373\u8868\u73b0\u4e3a\u300c\u8be5\u5206\u7c7b\u7a7a\u300d
+        for i in range(2):
+            rsp=self.fetch(url)
+            vids=[]if not rsp else self._parse_items(pq(rsp.text))
+            if vids:return vids
+            if i==0:
+                try:self._ensure_host()
+                except Exception:pass
+        return[]
     def fetch(self,url,params=None,cookies=None,headers=None,timeout=12,verify=True,stream=False,allow_redirects=True):
         """requests \u76f4\u8fde\uff082026-09-11 \u6539\uff09\u3002\u9ed8\u8ba4\u8d85\u65f6 5\u219212\uff1a\u624b\u673a\u7f51\u7edc\u62c9 240KB \u5217\u8868\u9875 5s \u8fb9\u7f18\u8d85\u65f6\u3002
 
@@ -519,13 +449,7 @@ class Spider(Spider):
         try:
             return requests.get(url,params=params,headers=h,cookies=cookies,timeout=timeout,
                                 verify=False,stream=stream,allow_redirects=allow_redirects)
-        except Exception as e:
-            try:
-                d=getattr(self,'_diag',None)
-                if isinstance(d,list) and len(d)<80:
-                    d.append('\u2605 fetch \u5f02\u5e38 %s \u2192 %s'%(str(url)[:70],str(e)[:60]))
-            except Exception:
-                pass
+        except Exception:
             return None
     def localProxy(self,param):
         try:
