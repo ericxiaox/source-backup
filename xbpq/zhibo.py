@@ -2,14 +2,36 @@
 import json
 import sys
 import traceback
+import requests
 sys.path.append('..')
 from base.spider import Spider
+
 
 class Spider(Spider):
     primary_host = 'http://api.hclyz.com:81/mf/'
     backup_host = 'http://api.maiyoux.com:81/mf/'
     host = primary_host
     platforms = []
+
+    def fetch(self, url, params=None, cookies=None, headers=None, timeout=10, verify=True,
+              stream=False, allow_redirects=True):
+        """requests \u76f4\u8fde\uff082026-09-11 \u6539\uff09\u3002
+
+        \u539f\u5b9e\u73b0\u7ee7\u627f App base \u7c7b\u7684 fetch\uff1b\u4e00\u65e6\u5176\u8fd4\u56de\u7c7b\u578b\u4e0e rsp.text \u9884\u671f\u4e0d\u7b26\uff0c
+        init \u91cc platforms \u5c31\u4f1a\u662f\u7a7a\u5217\u8868 \u2192 \u9996\u9875 0 \u5206\u7c7b\uff082026-09-11 \u955c\u50cf\u5b9e\u6d4b \u5206\u7c7b0\uff09\u3002
+        \u4e0e\u7981\u7247\u5929\u5802/UAA\u97f3\u753b\u540c\u6b3e\u6839\u56e0\uff0c\u6539\u76f4\u8fde\u4e0e\u5168\u5e93\u7eaa\u5f8b\u5bf9\u9f50\u3002\u5f02\u5e38\u8fd4\u56de None\u3002"""
+        h = headers or {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'}
+        try:
+            return requests.get(url, params=params, headers=h, cookies=cookies,
+                                timeout=timeout, verify=False, stream=stream,
+                                allow_redirects=allow_redirects)
+        except Exception as e:
+            try:
+                print('[\u76f4\u64ad] fetch \u5f02\u5e38 %s \u2192 %s' % (str(url)[:70], str(e)[:60]))
+            except Exception:
+                pass
+            return None
 
     def init(self, extend=""):
         if extend:

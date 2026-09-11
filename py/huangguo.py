@@ -46,6 +46,17 @@ except Exception:
         from explorer import explore_hosts
     except Exception:
         explore_hosts = None
+# hostresolver.py\uff08source \u6839\uff09\uff1a\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe + \u5019\u9009\u5e76\u884c\u5b9e\u6d4b\uff08\u4e0e explorer \u540c\u76ee\u5f55\uff09
+try:
+    from hostresolver import resolve_host, probe_first, ext_of
+except Exception:
+    try:
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from hostresolver import resolve_host, probe_first, ext_of
+    except Exception:
+        resolve_host = None
+        probe_first = None
+        ext_of = None
 
 try:
     import requests as rq
@@ -208,6 +219,60 @@ except Exception:
         return 'image/jpeg'
 
 
+# \u2500\u2500 \u81ea\u8bca\u65ad\uff08\u4e34\u65f6\u6392\u969c\u7528\uff0c2026-09-11\uff09\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+# \u76ee\u7684\uff1aApp \u7aef\u53d6\u4e0d\u5230\u65e5\u5fd7\uff0c\u628a\u300c\u53d6\u57df\u5168\u8fc7\u7a0b\u300d\u76f4\u63a5\u644a\u6210 App \u91cc\u80fd\u770b\u89c1\u7684\u6587\u5b57\u3002
+# \u8bbe\u8ba1\uff1a\u5b8c\u5168\u81ea\u5305\u542b\u2014\u2014\u6700\u9700\u8981\u6392\u67e5\u7684\u573a\u666f\u6070\u6070\u662f\u300c\u540c\u7ea7\u6a21\u5757 hostresolver/explorer \u6ca1\u52a0\u8f7d\u5230\u300d\uff0c
+#      \u6240\u4ee5\u672c\u51fd\u6570\u4e0d\u4f9d\u8d56\u5b83\u4eec\uff0cimport \u5931\u8d25\u4e5f\u7167\u6837\u8f93\u51fa\u3002
+DIAG_TID = '__diag__'
+
+
+def _diag_lines(sp, key=''):
+    """\u628a\u53d6\u57df\u94fe\u8def\u644a\u6210\u53ef\u8bfb\u6587\u672c\u884c\uff08\u5728\u300c\u26a0\u8bca\u65ad\u300d\u5206\u7c7b\u91cc\u9010\u6761\u663e\u793a\uff09"""
+    out = []
+    g = globals()
+
+    def add(k, v):
+        out.append('%s: %s' % (k, v))
+
+    add('\u6700\u7ec8\u9009\u5b9a host', getattr(sp, 'host', '') or '(\u7a7a\u2605\u5730\u5740\u6ca1\u89e3\u6790\u51fa\u6765)')
+    add('hostresolver \u6a21\u5757', '\u5df2\u52a0\u8f7d' if g.get('resolve_host') else '\u2605\u672a\u52a0\u8f7d(\u540c\u7ea7\u6a21\u5757\u6ca1\u8fdb\u8bbe\u5907)')
+    add('explorer \u6a21\u5757', '\u5df2\u52a0\u8f7d' if g.get('explore_hosts') else '\u672a\u52a0\u8f7d')
+    ext = getattr(sp, '_ext', {}) or {}
+    add('ext.publish', ext.get('publish') or '(\u7a7a\uff0c\u7528\u5185\u7f6e)')
+    add('ext.hosts', ','.join(ext.get('hosts') or []) or '(\u7a7a)')
+    if not key:
+        try:
+            key = sp.getName()
+        except Exception:
+            key = ''
+    add('\u672c\u6587\u4ef6\u58f0\u660e\u7684\u7ad9\u540d', key or '(\u672a\u77e5)')
+    _rq = g.get('requests') or g.get('rq')
+    u = getattr(sp, 'host', '') or ''
+    if u and _rq is not None:
+        hh = dict(getattr(sp, 'headers', None) or {})
+        if not hh.get('User-Agent'):
+            hh['User-Agent'] = g.get('_UA') or g.get('UA') or 'Mozilla/5.0'
+        try:
+            r = _rq.get(u.rstrip('/') + '/', headers=hh,
+                        proxies=getattr(sp, 'proxies', {}) or {}, timeout=6, verify=False)
+            t = r.text or ''
+            add('\u5b9e\u6d4b\u8be5 host', 'HTTP %s / %dB / \u542b\u7ad9\u540d:%s'
+                % (r.status_code, len(t), ('\u662f' if key in t else '\u5426\u2605') if key else '\u672a\u5224\u5b9a'))
+        except Exception as e:
+            add('\u5b9e\u6d4b\u8be5 host', '\u2605\u8fde\u4e0d\u4e0a: %s' % str(e)[:60])
+    else:
+        add('\u5b9e\u6d4b\u8be5 host', '(\u8df3\u8fc7\uff1ahost \u4e3a\u7a7a\u6216 requests \u4e0d\u53ef\u7528)')
+    try:
+        import hostresolver as _hr
+        tr = _hr.last_trace()
+        if tr:
+            out.append('\u2500\u2500 \u9009\u7ad9\u8fc7\u7a0b \u2500\u2500')
+            out += tr[:30]
+    except Exception as e:
+        out.append('\u2605 \u8bfb\u9009\u7ad9\u8fc7\u7a0b\u5931\u8d25: %s' % str(e)[:60])
+    return out
+
+
 class Spider(Spider):
 
     def getName(self):
@@ -216,10 +281,23 @@ class Spider(Spider):
     def init(self, extend=""):
         # \u5148\u7ed9\u9ed8\u8ba4\u503c\uff0c\u9632\u6b62\u90e8\u5206\u58f3\u4e0d\u8c03\u7528 init \u6216\u8c03\u7528\u5931\u8d25\u5bfc\u81f4 AttributeError
         self.host = HOSTS[0].rstrip('/')
+        # ext \u652f\u6301\uff082026-09-11 \u8865\uff09\uff1apublish@\u53d1\u5e03\u9875 / hosts@\u5019\u9009 / host@\u9501\u5b9a\uff0c
+        # \u7ba1\u7406\u53f0\u300c\u914d\u7f6e \u2192 \u57df\u540d\u300d\u53ef\u76f4\u63a5\u6539\uff0c\u4e0d\u5fc5\u518d\u52a8\u6e90\u6587\u4ef6
+        self._ext = {}
+        self.proxies = {}
+        try:
+            if ext_of:
+                self._ext = ext_of(extend) or {}
+        except Exception:
+            self._ext = {}
         try:
             self.host = self._pick_host()
         except Exception:
             pass
+        try:
+            self._diag = _diag_lines(self, '\u9ec4\u679c\u77ed\u5267')
+        except Exception:
+            self._diag = []
         try:
             self.s = rq.Session()
             self.s.verify = False
@@ -237,14 +315,37 @@ class Spider(Spider):
             pass
 
     def _pick_host(self):
-        """\u4f18\u5148\u4e3b\u7ad9\uff0c\u5176\u6b21\u5907\u7528\u955c\u50cf\u3002\u8d85\u65f6\u77ed\uff0c\u5931\u8d25\u76f4\u63a5\u56de\u9000\u3002"""
-        for h in HOSTS:
+        """\u53d6\u57df v2.3\uff082026-09-11\uff09\uff1aext \u9501\u5b9a \u2192 \u5019\u9009**\u5e76\u884c**\u5b9e\u6d4b\uff08\u5e26\u8eab\u4efd\u6821\u9a8c\uff09
+        \u2192 \u53d1\u5e03\u9875\u62bd\u94fe \u2192 \u5bfc\u822a\u7ad9\u63a2\u7d22\u3002\u539f\u4e3a 6\u00d75s \u4e32\u884c\uff0c\u7ad9\u70b9\u6302\u65f6\u8981\u8f6c\u5708 30 \u79d2\u3002"""
+        ext = getattr(self, '_ext', {}) or {}
+        if ext.get('host'):
+            return str(ext['host']).rstrip('/')
+
+        def _validate(host, text):
+            t = text or ''
+            return ('\u9ec4\u679c' in t) or ('huangguo' in t.lower())
+
+        cands = list(ext.get('hosts') or []) + HOSTS
+        if resolve_host:
             try:
-                r = rq.get(h, headers={"User-Agent": UA}, timeout=5, verify=False)
-                if r.status_code == 200 and ('\u9ec4\u679c' in r.text or 'huangguo' in r.text.lower() or len(r.text) > 1500):
-                    return h.rstrip('/')
+                h = resolve_host(publish_page=ext.get('publish') or '',
+                                 candidate_hosts=cands,
+                                 headers={'User-Agent': UA},
+                                 proxies=getattr(self, 'proxies', {}) or {},
+                                 timeout=8, validate=_validate, site_key='\u9ec4\u679c')
+                if h:
+                    return h
             except Exception:
-                continue
+                pass
+        if probe_first:
+            try:
+                h = probe_first(cands, headers={'User-Agent': UA},
+                                proxies=getattr(self, 'proxies', {}) or {},
+                                timeout=6, validate=_validate, tag='\u515c\u5e95')
+                if h:
+                    return h
+            except Exception:
+                pass
         # \u7ec8\u6781\u515c\u5e95\uff1a\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\uff08\u8df3\u8f6c\u58f3/\u95e8\u6237/\u6cdb\u89e3\u6790\u8ddf\u968f + \u7ad9\u540d\u8eab\u4efd\u9a8c\u8bc1\uff09
         if explore_hosts:
             try:
@@ -256,7 +357,8 @@ class Spider(Spider):
                     return hs[0]
             except Exception:
                 pass
-        return HOSTS[0].rstrip('/')
+        # \u5168\u8d25\uff1a\u663e\u5f0f\u8fd4\u56de\u7a7a\uff08_safe_host() \u81ea\u4f1a\u515c\u4e00\u4e2a\u9ed8\u8ba4\u5177\u540d\u57df\u4f9b\u53d6\u56fe\u7528\uff09
+        return ''
 
     def _safe_host(self):
         """\u4efb\u4f55\u65f6\u5019\u90fd\u80fd\u62ff\u5230\u4e00\u4e2a\u53ef\u7528 host"""
@@ -304,7 +406,27 @@ class Spider(Spider):
         return False
 
     # ---------- \u9996\u9875 ----------
-    def homeContent(self, filter=False):
+    def _diag_items(self):
+        """\u8bca\u65ad\u884c \u2192 App \u5217\u8868\u6761\u76ee\uff08\u70b9\u300c\u26a0\u8bca\u65ad\u300d\u5206\u7c7b\u5373\u53ef\u770b\u5230\u5168\u90e8\u53d6\u57df\u8fc7\u7a0b\uff09"""
+        return [{'vod_id': 'diag%d' % i, 'vod_name': '\u26a0 ' + str(x),
+                 'vod_pic': '', 'vod_remarks': ''}
+                for i, x in enumerate(getattr(self, '_diag', []) or [])]
+    def homeContent(self, *a, **kw):
+        """\u5916\u5c42\u5305\u88c5\uff1a\u539f\u5b9e\u73b0\u7ed3\u679c + \u8ffd\u52a0\u300c\u26a0\u8bca\u65ad\u300d\u5206\u7c7b\uff08\u4e34\u65f6\u6392\u969c\uff0c\u5b9a\u4f4d App \u7aef\u65e0\u5185\u5bb9\u6839\u56e0\uff09"""
+        try:
+            r = self._homeContent(*a, **kw)
+        except Exception:
+            r = {}
+        try:
+            if isinstance(r, dict):
+                r['class'] = list(r.get('class') or []) + \
+                    [{'type_id': DIAG_TID, 'type_name': '\u26a0\u8bca\u65ad'}]
+        except Exception:
+            pass
+        return r
+
+    def _homeContent(self, filter=False):
+
         result = {
             "class": [
                 {"type_id": "recommend", "type_name": "\u7cbe\u9009\u63a8\u8350"},
@@ -313,7 +435,7 @@ class Spider(Spider):
                 {"type_id": "ai-manju", "type_name": base64.b64decode('QUnmiJDkurrmvKvliac=').decode('utf-8')},
                 {"type_id": "ai-huanlian", "type_name": "AI\u6362\u8138"},
                 {"type_id": "ai-mogai", "type_name": "AI\u9b54\u6539"},
-                {"type_id": "topic", "type_name": "\ud83d\udccc\u4e13\u9898"},
+                {"type_id": "topic", "type_name": "\U0001f4cc\u4e13\u9898"},
                 {"type_id": "ranks", "type_name": "\u6392\u884c\u699c"},
                 {"type_id": "chigua", "type_name": "\u9ec4\u679c\u5403\u74dc"},
                 {"type_id": "author", "type_name": "\u9ec4\u679c\u5b98\u65b9"},
@@ -357,6 +479,10 @@ class Spider(Spider):
 
     # ---------- \u5206\u7c7b ----------
     def categoryContent(self, tid, pg=1, filter=False, extend=""):
+        if tid == DIAG_TID:
+            items = self._diag_items()
+            return {'page': 1, 'pagecount': 1, 'limit': len(items),
+                    'total': len(items), 'list': items}
         try:
             pg = int(str(pg or 1))
         except Exception:
@@ -978,7 +1104,7 @@ class Spider(Spider):
                     t = item.select_one(".hg-rank-item__title, h2")
                     title = t.get_text(strip=True) if t else ""
                 heat = item.select_one(".hg-rank-item__heat-value")
-                remark = ("\ud83d\udd25" + heat.get_text(strip=True)) if heat else ""
+                remark = ("\U0001f525" + heat.get_text(strip=True)) if heat else ""
                 if title:
                     videos.append({
                         "vod_id": vid,

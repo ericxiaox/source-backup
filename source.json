@@ -1,5 +1,5 @@
 {
-  "sites_count": 20,
+  "sites_count": 47,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -42,7 +42,7 @@
     },
     {
       "key": "py_51xigua",
-      "name": "\ud83d\udcf151\u5403\u74dc",
+      "name": "\ud83d\udcf151\u5403\u74dc\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/51xigua.py",
       "ext": "publish@https://advise.nlwkmsv.cc;hosts@https://advise.ucorfqmp.cc",
@@ -237,6 +237,301 @@
       "quickSearch": 1,
       "filterable": 1,
       "playerType": 2
+    },
+    {
+      "key": "py_\u571f\u8c46",
+      "name": "\ud83d\udcf1\u571f\u8c46\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/tudou.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2
+    },
+    {
+      "key": "py_\u4e00\u8d77\u968f\u7f18",
+      "name": "\ud83d\udcf1\u968f\u7f18\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/yiqisuiyuan.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2
+    },
+    {
+      "key": "py_\u65b0\u571f\u8c46",
+      "name": "\ud83d\udcf1\u65b0\u8c46\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/xintudou.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2
+    },
+    {
+      "key": "py_stripchat",
+      "name": "\ud83d\udcf1Strip\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/stripchat.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2
+    },
+    {
+      "key": "py_\u64b8\u4e00\u64b8",
+      "name": "\ud83d\udcf1\u64b8\u4e00\u64b8\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/luyilu.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2
+    },
+    {
+      "key": "404",
+      "name": "\ud83d\udcf1\u56db\u96f6\u56db\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/404.json"
+    },
+    {
+      "key": "91\u5403\u74dc",
+      "name": "\ud83d\udcf191\u5403\u74dc\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/91chigua.json"
+    },
+    {
+      "key": "91\u60c5\u62a5\u5c40",
+      "name": "\ud83d\udcf1\u60c5\u62a5\u5c40\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/91qingbaoju.json"
+    },
+    {
+      "key": "91\u63a2\u82b1",
+      "name": "\ud83d\udcf191\u63a2\u82b1\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/91tanhua.json"
+    },
+    {
+      "key": "Aries",
+      "name": "\ud83d\udcf1Aries\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/Aries.json"
+    },
+    {
+      "key": "JAVDAY",
+      "name": "\ud83d\udcf1Javday\ud83e\ude9c\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/JAVDAY.json"
+    },
+    {
+      "key": "\u8272\u5f69\u4ed3\u5e93",
+      "name": "\ud83d\udcf1\u4ed3\u5e93\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/\u0068\u0073\u0063\u006b.json"
+    },
+    {
+      "key": "\u4e00\u8d77\u7f51",
+      "name": "\ud83d\udcf1\u4e00\u8d77\u73a9\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/yiqiwan.json"
+    },
+    {
+      "key": "\u641c\u7d22\u4ed3\u5e93",
+      "name": "\ud83d\udcf1\u641c\u7d22\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/sousuo.json"
+    },
+    {
+      "key": "\u5c0f\u4e11",
+      "name": "\ud83d\udcf1\u5c0f\u4e11\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/xiaochou.json"
+    },
+    {
+      "key": "\u64e6\u8fb9",
+      "name": "\ud83d\udcf1\u64e6\u8fb9\u7f51\u02b2\u02e2\u1d52\u207f\uff5c\u77ed\u5267",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/cabian.json"
+    },
+    {
+      "key": "\u6781\u4e50\u7981\u533a",
+      "name": "\ud83d\udcf1\u6781\u4e50\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/jile.json"
+    },
+    {
+      "key": "\u732b\u5a18\u52a8\u6f2b",
+      "name": "\ud83d\udcf1\u732b\u6f2b\u5267\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "csp_XBPQ",
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/maoniang.json"
+    },
+    {
+      "key": "local_404b",
+      "name": "\ud83d\udcf1\u56db\u96f6\u56db\u5907\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "api": "csp_XBPQ",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/404b.json"
+    },
+    {
+      "key": "local_\u0039\u0031\u0063\u0067_b",
+      "name": "\ud83d\udcf191\u5403\u74dc\u5907\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "api": "csp_XBPQ",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/\u0039\u0031\u0063\u0067_b.json"
+    },
+    {
+      "key": "local_\u0039\u0031\u0071\u006a\u006a_b",
+      "name": "\ud83d\udcf1\u60c5\u62a5\u5c40\u5907\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "api": "csp_XBPQ",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/\u0039\u0031\u0071\u006a\u006a_b.json"
+    },
+    {
+      "key": "local_cb2",
+      "name": "\ud83d\udcf1\u64e6\u8fb92\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "api": "csp_XBPQ",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/cb2.json"
+    },
+    {
+      "key": "local_lscd",
+      "name": "\ud83d\udcf1\u7eff\u4ed3\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "type": 3,
+      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
+      "api": "csp_XBPQ",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "ext": "./xbpq/lscd.json"
+    },
+    {
+      "key": "cat_\u9ebb\u8c46\u7f51",
+      "name": "\ud83d\udcf1\u9ebb\u8c46\u7f51\u1d9c\u1d43\u1d57\uff5cAPP",
+      "type": 3,
+      "api": "./js/catmaodou.js",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "cat_\u9a9a\u706b",
+      "name": "\ud83d\udcf1\u9a9a\u706b\u7f51\u1d9c\u1d43\u1d57\uff5cAPP",
+      "type": 3,
+      "api": "./js/catsaohuo.js",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "cat_\u4f18\u590f\u7f51",
+      "name": "\ud83d\udcf1\u4f18\u590f\u7f51\u1d9c\u1d43\u1d57\uff5cAPP",
+      "type": 3,
+      "api": "./js/catyouxia.js",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "Cat_91\u7535\u89c6",
+      "name": "\ud83d\udcf191\u7535\u89c6\u1d9c\u1d43\u1d57\uff5c\u76f4\u64ad",
+      "type": 3,
+      "api": "./open/91live_zb.js",
+      "searchable": 1,
+      "quickSearch": 0,
+      "filterable": 1
     }
   ],
   "parses": [],

@@ -57,7 +57,7 @@ class Spider(Spider):
         url = f"{self.host}/api/front/models?improveTs=false&removeShows=false&limit={limit}&offset={offset}&primaryTag={tid}&sortBy=stripRanking&rcmGrp=A&rbCnGr=true&prxCnGr=false&nic=false"
         if 'tag' in extend: url += f'&filterGroupTags=[["{extend["tag"]}"]]'
         rsp = self.session_get(url).json()
-        videos = [{"vod_id": str(v['username']), "vod_name": f"{self.country_code_to_flag(str(v['country']))}{v['username']}", "vod_pic": f"https://img.{self.Doppiocdn}/snapshot/{v['id']}/{v['snapshotTimestamp']}", "vod_remarks": "" if v.get('status') == "public" else "\ud83c\udfab"} for v in rsp.get('models', [])]
+        videos = [{"vod_id": str(v['username']), "vod_name": f"{self.country_code_to_flag(str(v['country']))}{v['username']}", "vod_pic": f"https://img.{self.Doppiocdn}/snapshot/{v['id']}/{v['snapshotTimestamp']}", "vod_remarks": "" if v.get('status') == "public" else "\U0001f3ab"} for v in rsp.get('models', [])]
         total = int(rsp.get('filteredCount', 0))
         return {"list": videos, "page": pg, "pagecount": (total + limit - 1) // limit, "limit": limit, "total": total}
 
@@ -73,7 +73,7 @@ class Spider(Spider):
                 timestp = int(time.time())
                 self.stripchat_play = f"0 {timestp} {username}"
             flag = self.country_code_to_flag(str(user['country']).strip())
-            remark = "\ud83d\udd34 \u76f4\u64ad\u4e2d" if isLive else "\u26ab \u5df2\u4e0b\u64ad"
+            remark = "\U0001f534 \u76f4\u64ad\u4e2d" if isLive else "\u26ab \u5df2\u4e0b\u64ad"
             show = info.get('show') or info.get('groupShowAnnouncement')
             if show:
                 startAt = show.get('createdAt') or show.get('startAt')
@@ -88,7 +88,7 @@ class Spider(Spider):
         parts = key.split(maxsplit=1)
         tag, key = (tags.get(parts[0].upper()), parts[1].strip()) if len(parts) > 1 and parts[0].upper() in tags else ('girls', key.strip())
         rsp = self.session_get(f"{self.host}/api/front/v4/models/search/group/username?query={key}&limit=900&primaryTag={tag}").json()
-        return {'list': [{"vod_id": str(u['username']), "vod_name": f"{self.country_code_to_flag(str(u['country']))}{u['username']}", "vod_pic": f"https://img.{self.Doppiocdn}/snapshot/{u['id']}/{u['snapshotTimestamp']}", "vod_remarks": "" if u['status'] == "public" else "\ud83c\udfab"} for u in rsp.get('models', []) if u['isLive']]}
+        return {'list': [{"vod_id": str(u['username']), "vod_name": f"{self.country_code_to_flag(str(u['country']))}{u['username']}", "vod_pic": f"https://img.{self.Doppiocdn}/snapshot/{u['id']}/{u['snapshotTimestamp']}", "vod_remarks": "" if u['status'] == "public" else "\U0001f3ab"} for u in rsp.get('models', []) if u['isLive']]}
 
     def playerContent(self, flag, id, vipFlags):
         if id.startswith('lemon'):

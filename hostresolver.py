@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-hostresolver.py \u2014\u2014 \u901a\u7528\u52a8\u6001\u57df\u540d\u89e3\u6790 v2\uff08\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe + \u5019\u9009\u955c\u50cf\u5e76\u884c\u5b9e\u6d4b + \u6210\u529f\u7f13\u5b58\uff09
+hostresolver.py \u2014\u2014 \u901a\u7528\u52a8\u6001\u57df\u540d\u89e3\u6790 v2.3\uff08\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe + \u5019\u9009\u955c\u50cf\u5e76\u884c\u5b9e\u6d4b + \u6210\u529f\u7f13\u5b58\uff09
 
 \u89e3\u51b3\uff1a\u5f71\u89c6\u7c7b\u7ad9\u70b9\u57df\u540d\u9891\u7e41\u8f6e\u6362\uff08\u6cdb\u5b50\u57df + \u53d1\u5e03\u9875\u52a8\u6001\u751f\u6210\uff09\uff0cpy \u6e90\u5185\u7f6e\u5019\u9009\u6c60\u6ede\u540e\u5931\u6548\u3002
 
@@ -14,10 +14,29 @@ v2 \u76f8\u5bf9 v1 \u7684\u6839\u56e0\u7ea7\u5347\u7ea7\uff1a
   4.\u3010\u5931\u8d25\u663e\u5f0f\u5316\u3011\u5168\u90e8\u5019\u9009\u5931\u8d25\u65f6\u8fd4\u56de ''\uff08\u4e0d\u56de\u9000\u6b7b\u57df\u9996\u9879\u9759\u9ed8\u7a7a\u8f6c\uff09\u3002\u8c03\u7528\u65b9\u5e94\u8ba9\u5404\u63a5\u53e3
      \u8d70\u81ea\u8eab try/except \u8fd4\u56de\u7a7a\u7ed3\u679c\uff0cApp \u7aef\u8868\u73b0\u4e3a\u660e\u786e\u7684\u5931\u8d25\u800c\u975e\u5047\u52a0\u8f7d\u3002
 
+v2.3 \u76f8\u5bf9 v2 \u7684\u6839\u56e0\u7ea7\u5347\u7ea7\uff082026-09-11\uff0c\u56e0 91\u7206\u6599\u300c\u8f6c\u5708 50 \u79d2\u65e0\u5185\u5bb9\u300d\u590d\u76d8\uff09\uff1a
+  5.\u3010\u7ebf\u8def\u8868\u62bd\u94fe\u3011\u7ad9\u65b9\u628a\u57fa\u57df\u6309\u884c\u585e\u8fdb**\u53cd\u5f15\u53f7\u6a21\u677f\u5b57\u7b26\u4e32**\uff0891\u7206\u6599 zz_line \u540c\u6b3e\uff1a
+     var zz_line = `xndzecer.cc\ndgebtuip.cc\n...`\uff09\uff0c\u57fa\u57df\u672c\u8eab\u4e0d\u518d\u4ee5\u5b57\u9762\u91cf\u51fa\u73b0\u5728
+     random() \u62fc\u63a5\u91cc\u2014\u2014_WILD_PAT \u5bf9\u6b64**\u62bd 0 \u6761**\u3002\u65b0\u589e\u6309\u884c/\u6309\u6570\u7ec4\u62bd\u53d6\u7ebf\u8def\u8868\u57fa\u57df\u3002
+  6.\u3010\u53cc\u5f62\u6001\u5019\u9009\u3011\u6bcf\u4e2a\u57fa\u57df\u540c\u65f6\u751f\u6210 `{\u8bcd}.{\u57fa\u57df}`\uff08\u6cdb\u89e3\u6790\uff09\u4e0e\u88f8 `{\u57fa\u57df}`\uff08\u7ad9\u65b9\u56fa\u5b9a\u7ebf
+     \u8def\u4e0d\u52a0\u524d\u7f00\uff09\uff0c\u4e0d\u518d\u53ea\u8d4c\u6cdb\u89e3\u6790\u4e00\u79cd\u5f62\u6001\u3002
+  7.\u3010\u5185\u5bb9\u5f62\u6001\u5224\u3011\u65b0\u589e**\u6b63\u5411**\u5224\u636e\u300c\u50cf\u5185\u5bb9\u7ad9\u5417\u300d\uff08\u6709\u5185\u5bb9\u7ed3\u6784\u6807\u8bb0 / \u22655 \u6761\u5185\u5bb9\u578b\u5185\u94fe /
+     \u9875\u9762 >80KB\uff09\u2014\u2014\u5b83\u624d\u662f\u5047\u95e8\u7ad9\u7684\u6b63\u89e3\u3002\u7ad9\u65b9\u5e38\u628a\u300c\u53d1\u5e03\u9875\u300d\u505a\u6210\u4e3b\u57df\u7684\u6d3b\u955c\u50cf
+     \uff0851\u5403\u74dc advise.nlwkmsv.cc = 260KB \u5b8c\u6574\u7ad9\uff09\uff0c\u6240\u4ee5\u53d1\u5e03\u9875\u5730\u5740\u5217\u4e3a**\u9996\u9009\u5019\u9009**\u800c\u4e0d\u662f
+     \u9884\u5148\u6392\u9664\uff1b\u53cd\u4f8b\u662f 51\u5403\u74dc 20KB \u7684\u300c\u65b0\u5730\u5740\u516c\u544a\u9875\u300d\uff08\u542b\u7ad9\u540d\u3001\u65e0\u5185\u5bb9\u7ed3\u6784\uff09\u4e0e
+     \u6bcf\u65e5\u5927\u4e71\u6597 18KB \u7684\u95e8\u6237\u9875\uff0c\u90fd\u88ab\u5f62\u6001\u5224\u6321\u4e0b\u3002
+  8.\u3010\u6821\u9a8c\u9ed8\u8ba4\u5316\u3011\u65b0\u589e site_key \u53c2\u6570\uff1bvalidate \u7f3a\u7701\u65f6\u81ea\u52a8\u6309\u7ad9\u540d\u751f\u6210\u6821\u9a8c\u51fd\u6570\u3002**\u4e0d\u4f20\u6821\u9a8c
+     \u4e0d\u518d\u7b49\u4e8e\u4e0d\u6821\u9a8c**\uff08\u5f62\u6001\u5224\u59cb\u7ec8\u751f\u6548\uff09\u3002
+  9.\u3010\u5e76\u884c\u515c\u5e95\u5bfc\u51fa\u3011probe_first() = \u5e76\u884c\u63a2\u6d4b\u9996\u6210\u529f\u5373\u8fd4\uff1b\u5404\u6e90\u539f\u6765\u7684 5\u00d78s \u4e32\u884c\u515c\u5e95\u5faa\u73af
+     \u5e94\u6539\u7528\u5b83\uff0840s \u2192 8s\uff09\u3002
+ 10.\u3010\u53ef\u89c2\u6d4b\u3011last_trace() \u8fd4\u56de\u4e0a\u4e00\u6b21\u9009\u7ad9\u5168\u8fc7\u7a0b\u7684\u9010\u884c\u8bb0\u5f55\uff08\u53d1\u5e03\u9875\u6293\u53d6\u3001\u62bd\u5230\u7684\u57fa\u57df\u3001
+     \u5019\u9009\u6e05\u5355\u3001\u6bcf\u4e2a\u5019\u9009\u7684\u5b9e\u6d4b\u7ed3\u679c\uff09\uff0c\u4f9b\u6e90\u5185\u300c\u8bca\u65ad\u300d\u680f\u76ee\u76f4\u63a5\u5c55\u793a\u3002
+
 \u8c03\u7528\u65b9\uff08\u5404 py \u6e90\uff09\u53ea\u9700\u58f0\u660e\uff1a
   PUBLISH_PAGE = 'https://xxx.xxx/'          # \u7a33\u5b9a\u53d1\u5e03\u9875\uff08\u53ef\u7a7a\uff09
   CANDIDATE_HOSTS = ['https://a/', ...]      # \u5df2\u77e5\u955c\u50cf\uff0c\u6309\u5b58\u6d3b\u6392\u5e8f
-  self.host = resolve_host(PUBLISH_PAGE, CANDIDATE_HOSTS, headers=..., proxies=...)
+  self.host = resolve_host(PUBLISH_PAGE, CANDIDATE_HOSTS, headers=..., proxies=...,
+                           site_key='\u7ad9\u540d')   # site_key \u5f3a\u70c8\u5efa\u8bae\u4f20\uff0c\u7f3a\u7701\u9000\u56de\u5f62\u6001\u5224
   # \u8fd4\u56de\u53ef\u80fd\u662f ''\uff0c\u8c03\u7528\u65b9\u63a5\u53e3\u5c42 try/except \u515c\u4f4f\u5373\u53ef
 
 ext \u673a\u5236\uff08\u5f71\u89c6.json \u7ad9\u70b9\u6761\u76ee ext \u5b57\u6bb5\uff0cgitee \u7f51\u9875\u53ef\u76f4\u63a5\u6539\uff09\uff1a
@@ -47,10 +66,28 @@ except Exception:
 _CACHE = {}
 _CACHE_TTL = 1800  # \u6210\u529f\u9009\u7ad9\u7f13\u5b58 30 \u5206\u949f
 
+# \u9009\u7ad9\u8fc7\u7a0b\u8bb0\u5f55\uff08\u4f9b\u6e90\u5185\u300c\u8bca\u65ad\u300d\u680f\u76ee\u5c55\u793a\uff0cApp \u7aef\u65e0\u9700\u65e5\u5fd7\u5de5\u5177\u5373\u53ef\u770b\u5230\u5168\u94fe\u8def\uff09
+_TRACE = []
+
+
+def _tr(msg):
+    """\u8ffd\u52a0\u4e00\u884c\u9009\u7ad9\u8fc7\u7a0b\u8bb0\u5f55\uff08\u4e0a\u9650 60 \u884c\uff0c\u9632\u9875\u9762\u4e0a\u5237\u5c4f\uff09"""
+    try:
+        if len(_TRACE) < 60:
+            _TRACE.append(str(msg))
+    except Exception:
+        pass
+
+
+def last_trace():
+    """\u8fd4\u56de\u4e0a\u4e00\u6b21\u9009\u7ad9\u7684\u9010\u884c\u8bb0\u5f55\uff08\u526f\u672c\uff09"""
+    return list(_TRACE)
+
 
 def clear_cache():
     """\u6e05\u7a7a\u9009\u7ad9\u7f13\u5b58\uff08\u8c03\u8bd5\u7528\uff1b\u8c03\u7528\u65b9\u4e00\u822c\u4e0d\u9700\u8981\uff09"""
     _CACHE.clear()
+    del _TRACE[:]
 
 
 # ---------------------------------------------------------------- ext \u89e3\u6790
@@ -134,6 +171,10 @@ _WILD_PAT = re.compile(
     r"[\w.]*random\s*\(\s*\)\s*\+\s*['\"]\.([a-z0-9-]+(?:\.[a-z0-9-]+)+)['\"]", re.I)
 # \u53d1\u5e03\u9875 b64 \u58f3\uff08document.write(Base64.decode('...')) \u6574\u9875 HTML \u85cf base64\uff09
 _B64_SHELL_PAT = re.compile(r"Base64\.decode\(\s*['\"]([A-Za-z0-9+/=]{100,})['\"]")
+# v2.3 \u7ebf\u8def\u8868\uff08\u57fa\u57df\u88ab\u85cf\u8fdb\u6a21\u677f\u5b57\u7b26\u4e32 / \u6570\u7ec4\uff0c\u4e0d\u518d\u4ee5 random()+'.\u57fa\u57df' \u5f62\u6001\u51fa\u73b0\uff09
+_TICK_PAT = re.compile(r'`([^`]{4,800})`', re.S)
+_DOMLINE_PAT = re.compile(r'^[a-z0-9][a-z0-9.-]*\.[a-z]{2,15}$', re.I)
+_ARR_PAT = re.compile(r'\[((?:\s*[\'"][a-z0-9.-]*\.[a-z]{2,15}[\'"]\s*,?)+)\]', re.I)
 # \u53d1\u5e03\u9875\u91cc\u5fc5\u7136\u6df7\u5165\u7684\u7b2c\u4e09\u65b9\u5927\u5e73\u53f0/\u7edf\u8ba1/\u5e7f\u544a\u57df\u2014\u2014\u63a2\u6d4b\u5b83\u4eec\u4f1a\u628a\u5927\u9875\u9762\u8bef\u5224\u6210"\u7ad9\u70b9\u53ef\u7528"
 _JUNK_HOST_PAT = re.compile(
     r'(googletagmanager|google-analytics|googleads|gstatic|google\.|gitlab\.|github\.|'
@@ -141,6 +182,41 @@ _JUNK_HOST_PAT = re.compile(
     r'browsehappy|schema\.org|w3\.org|qq\.com|apple\.com|bing\.com|baidu\.com|'
     r'magsrv\.|adsrv|ad-provider|chnsrv|stripchat|jsdelivr|unpkg|npmjs|shields\.io|'
     r'699pic|meituan|fontawesome|jquery|bootstrap)', re.I)
+
+
+def _host_of(url):
+    """\u53d6 URL \u7684 host\uff08\u5c0f\u5199\u3001\u65e0\u7aef\u53e3\u534f\u8bae\uff09\uff0c\u5931\u8d25\u8fd4\u56de ''"""
+    m = re.match(r'https?://([^/:?#\s]+)', str(url or ''), re.I)
+    return m.group(1).lower() if m else ''
+
+
+def _is_junk(cand):
+    return bool(_JUNK_HOST_PAT.search(_host_of(cand) or cand or ''))
+
+
+# v2.31\uff1a\u5185\u5bb9\u5f62\u6001**\u6b63\u5411**\u5224\u636e\uff082026-09-11 51\u5403\u74dc\u590d\u76d8\u65b0\u589e\uff09
+# \u80cc\u666f\uff1a51\u5403\u74dc \u6709\u4e00\u4e2a 20KB \u7684\u300c\u65b0\u5730\u5740\u516c\u544a\u9875\u300d\uff08401.dzyeamwh.cc\uff09\uff0c\u6b63\u6587\u542b\u7ad9\u540d\u3001\u80fd\u88ab
+# \u7ad9\u540d\u6821\u9a8c\u653e\u8fc7\uff0c\u4f46\u6ca1\u6709\u4efb\u4f55\u5185\u5bb9\u7ed3\u6784\u2014\u2014\u9009\u4e2d\u5b83 \u2192 \u5206\u7c7b\u53ea\u6709 3 \u4e2a\u3001\u5217\u8868\u5168\u7a7a\uff0c
+# \u6b63\u662f\u300c\u8fde\u5206\u7c7b\u90fd\u5237\u4e0d\u51fa\u6765\u300d\u3002\u6545\u5728\u7ad9\u540d\u6821\u9a8c\u4e4b\u4e0a\u518d\u8981\u6c42\u300c\u50cf\u5185\u5bb9\u7ad9\u300d\u3002
+# \u6ce8\uff1av2.3 \u521d\u7248\u8fd8\u5199\u8fc7\u4e00\u4e2a**\u5426\u5b9a\u5f0f**\u5224\u636e _looks_like_nav\uff08\u5916\u94fe\u591a=\u5bfc\u822a\u9875\uff09\uff0c
+#     \u540c\u65e5\u5373\u5220\u2014\u2014\u5b83\u5bf9\u7981\u7247\u5929\u5802\uff08oneVideo \u5361\u7247\u3001\u65e0 <article> \u5b57\u9762\u6807\u8bb0\uff09\u8bef\u6740\u3002
+#     \u540c\u4e00\u4ef6\u4e8b\u53ea\u7559\u4e00\u4e2a\u6b63\u5411\u5224\u636e\u3002
+_CONTENT_MARKS = ('<article', 'post-card', 'video-item', 'oneVideo', 'entry-title',
+                  'post-title', 'vod-img', 'vod-txt', 'playlist', 'class="video')
+_CONTENT_LINK_PAT = re.compile(
+    r'href=["\'][^"\']*/(?:archives?|video|videos|category|categories|post|vod|'
+    r'watch|tag|detail|thread|topic|tag_list)[/"\']', re.I)
+
+
+def _looks_like_content(text):
+    """\u50cf\u5185\u5bb9\u7ad9\u5417\uff1a\u6709\u5185\u5bb9\u7ed3\u6784\u6807\u8bb0 / \u6709 \u22655 \u6761\u5185\u5bb9\u578b\u5185\u94fe / \u9875\u9762\u591f\u5927\uff08>80KB\uff09\u3002
+    \u5047\u95e8\u7ad9\uff08\u516c\u544a\u9875/\u5bfc\u822a\u9875\uff09\u4e09\u6761\u5168\u4e0d\u6ee1\u8db3\u3002"""
+    t = text or ''
+    if any(k in t for k in _CONTENT_MARKS):
+        return True
+    if len(_CONTENT_LINK_PAT.findall(t)) >= 5:
+        return True
+    return len(t) > 80000
 
 
 def _expand_b64_shells(text):
@@ -154,19 +230,54 @@ def _expand_b64_shells(text):
     return texts
 
 
+def extract_line_bases(text):
+    """\u7ad9\u65b9\u300c\u7ebf\u8def\u8868\u300d\u57fa\u57df\u62bd\u53d6\uff08v2.3 \u65b0\u589e\uff09\u3002
+
+    \u4e24\u7c7b\u5f62\u6001\uff08\u4e0e _WILD_PAT \u4e92\u8865\u2014\u2014_WILD_PAT \u6293\u300c\u5b57\u9762\u91cf .\u57fa\u57df\u300d\uff0c
+    \u672c\u51fd\u6570\u6293\u300c\u57fa\u57df\u672c\u4f53\u88ab\u585e\u8fdb\u6a21\u677f\u4e32/\u6570\u7ec4\u3001\u524d\u7f00\u5728\u8fd0\u884c\u65f6\u624d\u62fc\u300d\uff09\uff1a
+      \u2460 \u53cd\u5f15\u53f7\u6a21\u677f\u5185**\u6309\u884c**\u6392\u5217\u7684\u88f8\u57df\u540d\uff1a
+         var zz_line = `xndzecer.cc\\ndgebtuip.cc\\nd3f9.cloudfront.net`;
+      \u2461 JS \u6570\u7ec4\u5b57\u9762\u91cf\u91cc\u7684\u88f8\u57df\u540d\u4e32\uff1a['a.cc','b.cc']
+    \u8fd4\u56de\u57fa\u57df\u5217\u8868\uff08\u65e0\u534f\u8bae\u3001\u4fdd\u5e8f\u53bb\u91cd\u3001\u5df2\u5254\u7b2c\u4e09\u65b9\u57df\uff09\u3002"""
+    out, text = [], text or ''
+    for m in _TICK_PAT.finditer(text):
+        body = m.group(1)
+        if '\n' not in body:
+            continue
+        lines = []
+        for l in body.split('\n'):
+            l = l.strip().strip(',').strip('"\'').strip()
+            lines.append(l)
+        lines = [l for l in lines if l]
+        if len(lines) >= 2 and all(_DOMLINE_PAT.match(l) for l in lines):
+            out += lines
+    for m in _ARR_PAT.finditer(text):
+        items = re.findall(r'[\'"]([a-z0-9.-]*\.[a-z]{2,15})[\'"]', m.group(1), re.I)
+        if len(items) >= 2:
+            out += items
+    return [b for b in dict.fromkeys(out) if not _JUNK_HOST_PAT.search(b)]
+
+
 def extract_publish_domains(publish_page, headers, proxies, timeout):
-    """\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe\u3002\u8fd4\u56de (\u9759\u6001\u955c\u50cf\u94fe\u63a5\u5217\u8868, \u6cdb\u89e3\u6790\u57fa\u57df\u5217\u8868)\u3002
-    JS \u6e32\u67d3\u4f46\u65e0 b64 \u58f3\u7684\u9875\u9762\u9759\u6001\u94fe\u63a5\u4ecd\u53ef\u80fd\u4e3a\u7a7a\u2014\u2014\u6cdb\u89e3\u6790\u57fa\u57df\u8bc6\u522b\u662f\u4e3b\u901a\u9053\u3002"""
+    """\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe\u3002\u8fd4\u56de (\u9759\u6001\u955c\u50cf\u94fe\u63a5\u5217\u8868, \u6cdb\u89e3\u6790/\u7ebf\u8def\u8868\u57fa\u57df\u5217\u8868)\u3002
+    JS \u6e32\u67d3\u4f46\u65e0 b64 \u58f3\u7684\u9875\u9762\u9759\u6001\u94fe\u63a5\u4ecd\u53ef\u80fd\u4e3a\u7a7a\u2014\u2014\u57fa\u57df\u8bc6\u522b\u662f\u4e3b\u901a\u9053\u3002"""
     if requests is None or not publish_page:
         return [], []
     try:
         r = requests.get(publish_page, headers=headers, proxies=proxies,
                          timeout=timeout, verify=False, allow_redirects=True)
+        _tr('[\u53d1\u5e03\u9875] %s \u2192 HTTP %s / %dB' % (_host_of(publish_page) or publish_page,
+                                             r.status_code, len(r.text or '')))
         if r.status_code != 200:
+            _tr('  \u2717 \u53d1\u5e03\u9875\u975e 200\uff0c\u62bd\u94fe\u4e2d\u6b62')
             return [], []
-    except Exception:
+    except Exception as e:
+        _tr('[\u53d1\u5e03\u9875] %s \u6293\u53d6\u5f02\u5e38: %s' % (_host_of(publish_page) or publish_page,
+                                       str(e)[:60]))
         return [], []
     texts = _expand_b64_shells(r.text or '')
+    if len(texts) > 1:
+        _tr('  \u5c55\u5f00 b64 \u58f3 %d \u4e2a' % (len(texts) - 1))
     static, wilds = [], set()
     for t in texts:
         for l in re.findall(r'href=["\'](https?://[^"\']+)["\']', t, re.I):
@@ -175,6 +286,11 @@ def extract_publish_domains(publish_page, headers, proxies, timeout):
                 static.append('https://' + m.group(1))
         for m in _WILD_PAT.finditer(t):
             wilds.add(m.group(1))
+        for b in extract_line_bases(t):
+            wilds.add(b)
+    _tr('  \u62bd\u94fe: \u9759\u6001\u94fe\u63a5 %d \u4e2a / \u57fa\u57df %d \u4e2a %s'
+        % (len(dict.fromkeys(static)), len(wilds),
+           ('\u2192 ' + ', '.join(sorted(wilds)[:6])) if wilds else ''))
     return list(dict.fromkeys(static)), list(wilds)
 
 
@@ -196,7 +312,8 @@ def _dedupe(urls):
 # ---------------------------------------------------------------- \u63a2\u6d4b
 def _probe(url, headers, proxies, timeout, depth=0, validate=None):
     """\u6d4b\u8bd5\u5355\u57df\u540d\uff1a\u8df3\u8f6c\u58f3\u5219\u8ddf\u968f <a href>\uff08\u6700\u591a2\u5c42\uff09\uff1b\u771f\u5185\u5bb9\u8fd4\u56de\u6700\u7ec8 host\uff1b\u5931\u8d25 None\u3002
-    validate(final_host, text) -> bool\uff1a\u5185\u5bb9\u8eab\u4efd\u6821\u9a8c\uff08\u9632\u5e7f\u544a\u95e8\u7ad9/\u7b2c\u4e09\u65b9\u9875\u5192\u5145\uff09\u3002"""
+    validate(final_host, text) -> bool\uff1a\u5185\u5bb9\u8eab\u4efd\u6821\u9a8c\uff08\u9632\u5e7f\u544a\u95e8\u7ad9/\u7b2c\u4e09\u65b9\u9875\u5192\u5145\uff09\u3002
+    \u672a\u4f20 validate \u65f6\u9000\u5230\u300c\u5185\u5bb9\u5f62\u6001\u5224\u300d\uff1a\u5916\u94fe\u5f88\u591a\u53c8\u65e0\u5185\u5bb9\u7ed3\u6784 = \u5bfc\u822a\u9875 \u2192 \u62d2\u7edd\u3002"""
     if requests is None:
         return None
     try:
@@ -213,6 +330,8 @@ def _probe(url, headers, proxies, timeout, depth=0, validate=None):
                 if target and target != final:
                     return _probe(target, headers, proxies, timeout, depth + 1, validate)
         if len(t) > 5000 or ('article' in t and 'category' in t):
+            if not _looks_like_content(t):
+                return None                     # \u5047\u95e8\u7ad9\uff1a\u516c\u544a\u9875/\u5bfc\u822a\u9875\uff0c\u4e0d\u542b\u5185\u5bb9\u7ed3\u6784
             if validate is not None:
                 try:
                     if not validate(final, t):
@@ -225,7 +344,7 @@ def _probe(url, headers, proxies, timeout, depth=0, validate=None):
         return None
 
 
-def _probe_all(urls, headers, proxies, timeout, validate=None):
+def _probe_all(urls, headers, proxies, timeout, validate=None, tag=''):
     """\u5e76\u884c\u63a2\u6d4b\uff0c\u4efb\u4e00\u5019\u9009\u6210\u529f\u5373\u523b\u8fd4\u56de\uff08\u53d6\u6d88\u5176\u4f59\u4efb\u52a1\uff09\uff1b\u5168\u8d25\u8fd4\u56de ''\u3002
     \u603b\u8017\u65f6 \u2248 \u5355\u6b21\u8d85\u65f6\uff0c\u4e0d\u518d\u968f\u5019\u9009\u6570\u91cf\u53e0\u52a0\u3002"""
     if not urls:
@@ -233,64 +352,106 @@ def _probe_all(urls, headers, proxies, timeout, validate=None):
     if not (ThreadPoolExecutor and as_completed) or len(urls) == 1:
         for u in urls:
             h = _probe(u, headers, proxies, timeout, 0, validate)
+            _tr('  [%s] %s' % (tag or '\u4e32\u884c', ('\u2713 ' + h) if h else ('\u2717 ' + _host_of(u))))
             if h:
                 return h
         return ''
     ex = ThreadPoolExecutor(max_workers=min(12, len(urls)))
     try:
-        futs = [ex.submit(_probe, u, headers, proxies, timeout, 0, validate) for u in urls]
+        futs = dict((ex.submit(_probe, u, headers, proxies, timeout, 0, validate), u)
+                    for u in urls)
         for f in as_completed(futs):
             try:
                 r = f.result()
             except Exception:
-                continue
+                r = None
             if r:
                 for x in futs:
                     x.cancel()
+                ok_u = futs.get(f, '')
+                _tr('  [%s] \u2713 %s\uff08\u5019\u9009 %s \u547d\u4e2d\uff09' % (tag or '\u5e76\u884c', r, _host_of(ok_u)))
                 return r
+        _tr('  [%s] \u2717 %d \u4e2a\u5019\u9009\u5168\u90e8\u5931\u8d25' % (tag or '\u5e76\u884c', len(urls)))
         return ''
     finally:
         ex.shutdown(wait=False)
 
 
+def probe_first(urls, headers=None, proxies=None, timeout=8, validate=None, tag='\u515c\u5e95'):
+    """\u516c\u5f00\u7248\u5e76\u884c\u63a2\u6d4b\uff08\u4f9b\u5404\u6e90\u7684\u300c\u5185\u7f6e\u5019\u9009\u515c\u5e95\u300d\u7528\uff0c\u66ff\u4ee3 5\u00d78s \u4e32\u884c\u5faa\u73af\uff09\u3002
+    \u4efb\u4e00\u6210\u529f\u5373\u8fd4\u56de\u5176 host\uff08\u53bb\u5c3e\u659c\u6760\uff09\uff0c\u5168\u8d25\u8fd4\u56de ''\u3002"""
+    return _probe_all(_dedupe(urls or []), headers, proxies, timeout, validate, tag)
+
+
+def _auto_validate(site_key):
+    """\u6309\u7ad9\u540d\u751f\u6210\u8eab\u4efd\u6821\u9a8c\u51fd\u6570\uff08validate \u7f3a\u7701\u65f6\u7684\u9ed8\u8ba4\u5b9e\u73b0\uff09"""
+    def _v(host, text):
+        return site_key in (text or '')
+    return _v
+
+
 # ---------------------------------------------------------------- \u4e3b\u5165\u53e3
 def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
-                 proxies=None, timeout=8, use_cache=True, validate=None):
+                 proxies=None, timeout=8, use_cache=True, validate=None,
+                 site_key=None):
     """\u8fd4\u56de\u5f53\u524d\u53ef\u7528 host\uff08\u53bb\u5c3e\u659c\u6760\uff09\u3002\u5168\u90e8\u5931\u8d25\u8fd4\u56de ''\uff08\u8c03\u7528\u65b9\u63a5\u53e3\u5c42\u81ea\u884c\u515c\u7a7a\uff09\u3002
-    validate(final_host, text)->bool\uff1a\u7ad9\u70b9\u8eab\u4efd\u6821\u9a8c\u56de\u8c03\uff0c\u9632\u53d1\u5e03\u9875\u6df7\u5165\u7684\u5e7f\u544a\u95e8\u7ad9
-    \uff08\u5982 18se \u5bfc\u822a\uff09\u88ab\u5f53\u6210\u771f\u7ad9\u7f13\u5b58\u3002\u987a\u5e8f\uff1a\u53d1\u5e03\u9875\u6cdb\u89e3\u6790\u5019\u9009(\u6700\u65b0\u9c9c) > ext/\u5185\u7f6e\u5019\u9009
-    > \u53d1\u5e03\u9875\u9759\u6001\u94fe\u63a5\u3002"""
+
+    validate(final_host, text)->bool\uff1a\u7ad9\u70b9\u8eab\u4efd\u6821\u9a8c\u56de\u8c03\u3002
+    site_key\uff1a\u7ad9\u540d\u5173\u952e\u8bcd\uff1bvalidate \u7f3a\u7701\u65f6\u81ea\u52a8\u7528\u5b83\u751f\u6210\u6821\u9a8c\uff08\u518d\u4e0d\u4f20\u5219\u9000\u5230\u5185\u5bb9\u5f62\u6001\u5224\uff09\u3002
+    \u987a\u5e8f\uff1a\u53d1\u5e03\u9875\u57fa\u57df\u5019\u9009\uff08\u6700\u65b0\u9c9c\uff09> ext/\u5185\u7f6e\u5019\u9009 > \u53d1\u5e03\u9875\u9759\u6001\u94fe\u63a5\u3002
+    \u5168\u8fc7\u7a0b\u5199\u5165 last_trace()\uff0c\u4f9b\u6e90\u5185\u300c\u8bca\u65ad\u300d\u680f\u76ee\u5c55\u793a\u3002"""
+    del _TRACE[:]
     candidate_hosts = candidate_hosts or []
-    key = (publish_page or '', tuple(candidate_hosts))
+    _tr('== \u9009\u7ad9\u5f00\u59cb (publish=%s | site_key=%s) =='
+        % (_host_of(publish_page) or '(\u65e0)', site_key or '(\u672a\u4f20)'))
+    if validate is None and site_key:
+        validate = _auto_validate(site_key)
+    key = (publish_page or '', tuple(candidate_hosts), site_key or '')
     if use_cache:
         hit = _CACHE.get(key)
         if hit and time.time() < hit[1]:
+            _tr('  \u547d\u4e2d\u9009\u7ad9\u7f13\u5b58 \u2192 %s\uff08%d \u79d2\u540e\u8fc7\u671f\uff09'
+                % (hit[0], int(hit[1] - time.time())))
             return hit[0]
 
-    # 1) \u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe\uff08\u6cdb\u89e3\u6790\u57fa\u57df\u81ea\u52a8\u751f\u6210\u5019\u9009 + \u9759\u6001\u955c\u50cf\u94fe\u63a5\uff09
-    pub_domains, wild_bases = [], []
+    # 1) \u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe\uff08\u57fa\u57df\u81ea\u52a8\u751f\u6210\u5019\u9009 + \u9759\u6001\u955c\u50cf\u94fe\u63a5\uff09
+    pub_domains, bases = [], []
     if publish_page:
         try:
-            pub_domains, wild_bases = extract_publish_domains(
+            pub_domains, bases = extract_publish_domains(
                 publish_page, headers, proxies, timeout)
         except Exception:
-            pub_domains, wild_bases = [], []
+            pub_domains, bases = [], []
     words = random.sample(_WILD_WORDS, min(4, len(_WILD_WORDS)))
-    wild_candidates = ['https://%s.%s' % (w, b) for b in wild_bases for w in words]
+    wild_candidates = []
+    for b in bases:
+        wild_candidates += ['https://%s.%s' % (w, b) for w in words]
+        wild_candidates.append('https://%s' % b)      # \u7ad9\u65b9\u56fa\u5b9a\u7ebf\u8def\uff1a\u4e0d\u52a0\u524d\u7f00
 
     # 2) \u5206\u5c42\u5019\u9009\uff08\u5404\u5c42\u4fdd\u5e8f\u53bb\u91cd\uff09\uff1a
-    #    \u7b2c\u4e00\u5c42 = \u6cdb\u89e3\u6790\u5019\u9009 + ext/\u5185\u7f6e\u5019\u9009\uff08\u65b0\u9c9c\u4e14\u53ef\u4fe1\uff0c\u7edd\u5927\u591a\u6570\u573a\u666f\u6b64\u5c42\u5373\u547d\u4e2d\uff09
-    #    \u7b2c\u4e8c\u5c42 = \u53d1\u5e03\u9875\u9759\u6001\u94fe\u63a5\uff08\u4ec5\u7b2c\u4e00\u5c42\u5168\u8d25\u65f6\u624d\u6d4b\uff0c\u9632\u7b2c\u4e09\u65b9\u5927\u9875\u9762\u8bef\u5224\u6210\u7ad9\u70b9\uff09
-    tier1 = _dedupe(wild_candidates + list(candidate_hosts))
-    tier2 = [u for u in _dedupe(pub_domains) if u not in set(tier1)]
+    #    \u53d1\u5e03\u9875\u5730\u5740**\u672c\u8eab\u5c31\u662f\u9996\u9009\u5019\u9009**\u2014\u2014\u7ad9\u65b9\u5e38\u628a\u300c\u53d1\u5e03\u9875\u300d\u76f4\u63a5\u505a\u6210\u4e3b\u57df\u7684\u6d3b\u955c\u50cf
+    #    \uff0851\u5403\u74dc advise.nlwkmsv.cc \u5b9e\u6d4b 260KB \u5b8c\u6574\u7ad9 + 302 \u8df3\u65b0\u57df\uff1b\u82e5\u9884\u5148\u6392\u6389\u5b83\uff0c
+    #    \u5c31\u53ea\u5269\u5047\u95e8\u7ad9\u53ef\u9009\uff09\u3002\u662f\u5426\u5408\u683c\u4ea4\u7ed9\u8eab\u4efd\u6821\u9a8c + \u5185\u5bb9\u5f62\u6001\u5224\u3002
+    #    \u7b2c\u4e00\u5c42 = \u53d1\u5e03\u9875 + \u62bd\u94fe\u5019\u9009 + ext/\u5185\u7f6e\u5019\u9009\uff08\u65b0\u9c9c\u4e14\u53ef\u4fe1\uff09
+    #    \u7b2c\u4e8c\u5c42 = \u53d1\u5e03\u9875\u91cc\u7684\u9759\u6001\u5916\u94fe\uff08\u591a\u4e3a\u5e7f\u544a/\u5bfc\u822a/\u5047\u95e8\u7ad9\uff0c\u4ec5\u7b2c\u4e00\u5c42\u5168\u8d25\u65f6\u624d\u8bd5\uff09
+    tier1 = [u for u in _dedupe([publish_page] + wild_candidates + list(candidate_hosts))
+             if not _is_junk(u)]
+    _t1 = set(tier1)
+    tier2 = [u for u in _dedupe(pub_domains) if u not in _t1 and not _is_junk(u)]
 
     if not tier1 and not tier2:
+        _tr('  \u65e0\u4efb\u4f55\u5019\u9009\u53ef\u6d4b\uff08\u53d1\u5e03\u9875\u62bd\u94fe\u4e3a\u7a7a\u4e14\u65e0\u5185\u7f6e\u5019\u9009\uff09\u2192 \u8fd4\u56de\u7a7a')
         return ''
+    _tr('  \u5019\u9009: \u7b2c\u4e00\u5c42 %d \u4e2a / \u7b2c\u4e8c\u5c42 %d \u4e2a\uff08\u7b2c\u4e00\u5c42\u9996\u9009=%s\uff09'
+        % (len(tier1), len(tier2), _host_of(publish_page) or '-'))
 
     # 3) \u5206\u6ce2\u5b9e\u6d4b\uff08use_cache=False=\u5f3a\u5236\u5237\u65b0\uff0c\u4f46\u6210\u529f\u7ed3\u679c\u4ecd\u5199\u7f13\u5b58\u4f9b\u540e\u7eed init \u79d2\u5f00\uff09
-    host = _probe_all(tier1, headers, proxies, timeout, validate)
+    host = _probe_all(tier1, headers, proxies, timeout, validate, '\u4e00\u7ea7')
     if not host and tier2:
-        host = _probe_all(tier2, headers, proxies, timeout, validate)
+        host = _probe_all(tier2, headers, proxies, timeout, validate, '\u4e8c\u7ea7')
     if host:
         _CACHE[key] = (host, time.time() + _CACHE_TTL)
+        _tr('  \u2605 \u9009\u4e2d %s\uff08\u7f13\u5b58 30 \u5206\u949f\uff09' % host)
+    else:
+        _tr('  \u2605 \u5168\u90e8\u5931\u8d25 \u2192 \u8fd4\u56de\u7a7a\uff08\u8c03\u7528\u65b9\u5e94\u7acb\u5373\u5931\u8d25\uff0c\u4e0d\u518d\u9759\u9ed8\u7a7a\u8f6c\uff09')
     return host

@@ -44,7 +44,8 @@ class Spider(Spider):
         print(f"使用站点: {self.HOST}")
 
     def get_working_host(self):
-        """ext \u9501\u5b9a \u2192 \u5019\u9009\u57df\u9010\u4e2a\u5b9e\u6d4b\uff08\u4ee5\u97f3\u9891\u641c\u7d22 API \u901a\u7545\u4e3a\u51c6\uff09\u2192 \u5185\u7f6e\u9996\u9879\u515c\u5e95"""
+        """ext \u9501\u5b9a \u2192 \u5019\u9009\u57df**\u5e76\u884c**\u5b9e\u6d4b\uff08\u4ee5\u97f3\u9891\u641c\u7d22 API \u901a\u7545\u4e3a\u51c6\uff09\u2192 \u5168\u8d25\u8fd4 ''\u3002
+        2026-09-11\uff1a\u539f\u4e3a\u4e32\u884c\uff083\u00d78s\uff09+ \u672b\u9879\u6b7b\u57df\u515c\u5e95\uff0c\u662f\u300c\u8f6c\u5708\u4e14\u65e0\u5185\u5bb9\u300d\u7684\u6765\u6e90\u3002"""
         ext = getattr(self, '_ext', {}) or {}
         if ext.get('host'):
             return ext['host'].rstrip('/')
@@ -54,10 +55,58 @@ class Spider(Spider):
             if h and h not in seen:
                 seen.add(h)
                 ordered.append(h)
-        for h in ordered:
-            if self._api_ok(h):
-                return h
-        return ordered[0]
+        h = self._pick_parallel(ordered)
+        return h or ''
+
+    def _pick_parallel(self, cands):
+        """\u5019\u9009\u5e76\u884c\u63a2\u6d4b\uff1a\u4efb\u4e00 API \u901a\u7545\u5373\u8fd4\u56de\uff08\u603b\u8017\u65f6\u2248\u5355\u6b21\u8d85\u65f6\uff09\u3002"""
+        if not cands:
+            return ''
+        try:
+            from concurrent.futures import ThreadPoolExecutor, as_completed
+        except Exception:
+            ThreadPoolExecutor = None
+            as_completed = None
+        if not ThreadPoolExecutor or len(cands) < 2:
+            for h in cands:
+                if self._api_ok(h):
+                    return h
+            return ''
+        ex = ThreadPoolExecutor(max_workers=min(6, len(cands)))
+        try:
+            futs = dict((ex.submit(self._api_ok, h), h) for h in cands)
+            for f in as_completed(futs):
+                try:
+                    ok = f.result()
+                except Exception:
+                    ok = False
+                if ok:
+                    for x in futs:
+                        x.cancel()
+                    return futs[f]
+            return ''
+        finally:
+            ex.shutdown(wait=False)
+
+    def fetch(self, url, params=None, cookies=None, headers=None, timeout=10, verify=True,
+              stream=False, allow_redirects=True):
+        """requests \u76f4\u8fde\uff082026-09-11 \u6539\uff09\u3002
+
+        \u539f\u5b9e\u73b0\u7ee7\u627f App base \u7c7b\u7684 fetch\u2014\u2014\u8fd4\u56de\u7c7b\u578b\u4e0e rsp.text \u9884\u671f\u4e0d\u7b26\u65f6\uff0c
+        \u4e0b\u9762\u6bcf\u4e2a\u63a5\u53e3\u90fd\u4f1a except \u541e\u9519\u8fd4\u7a7a\uff0c\u75c7\u72b6=\u300c\u6709\u5206\u7c7b\u3001\u65e0\u5185\u5bb9\u300d\u3002
+        \u4e0e\u7981\u7247\u5929\u5802 2026-09-08 \u7684\u96f6\u6570\u636e\u6839\u56e0\u540c\u6b3e\uff0c\u6539\u76f4\u8fde\u4e0e\u5168\u5e93\u7eaa\u5f8b\u5bf9\u9f50\u3002
+        \u5f02\u5e38\u8fd4\u56de None\uff08\u8c03\u7528\u5904\u5df2\u505a None \u5224\u65ad\uff09\uff0c\u5931\u8d25\u539f\u56e0\u6253\u8fdb\u65e5\u5fd7\u4fbf\u4e8e\u6392\u67e5\u3002"""
+        h = headers or {'User-Agent': _UA}
+        try:
+            return requests.get(url, params=params, headers=h, cookies=cookies,
+                                timeout=timeout, verify=False, stream=stream,
+                                allow_redirects=allow_redirects)
+        except Exception as e:
+            try:
+                print('[UAA] fetch \u5f02\u5e38 %s \u2192 %s' % (str(url)[:70], str(e)[:60]))
+            except Exception:
+                pass
+            return None
 
     def _api_ok(self, host):
         try:
