@@ -119,51 +119,6 @@ _RE_NEXT = re.compile(r'class="next"[^>]*><a href="([^"]+)"')
 _AD_CAT_RE = re.compile('(?i)app|\u4e0b\u8f7d|qq|\u5fae\u4fe1|\u63a8\u7279|tg\u7fa4|\u5bfc\u822a|\u8054\u7cfb|\u5408\u4f5c|\u90ae\u7bb1|\u5173\u4e8e|\u5b58\u6863|\u6536\u85cf|\u767b\u9646|\u767b\u5f55')
 
 
-# \u2500\u2500 \u81ea\u8bca\u65ad\uff08\u4e34\u65f6\u6392\u969c\u7528\uff0c2026-09-11\uff09\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-# \u76ee\u7684\uff1aApp \u7aef\u6ca1\u6709\u53ef\u53d6\u7684\u65e5\u5fd7\u5de5\u5177\uff0c\u628a\u300c\u53d6\u57df\u5168\u8fc7\u7a0b\u300d\u76f4\u63a5\u644a\u6210 App \u91cc\u80fd\u770b\u89c1\u7684\u6587\u5b57\u3002
-# \u8bbe\u8ba1\uff1a\u5b8c\u5168\u81ea\u5305\u542b\u2014\u2014\u6700\u9700\u8981\u6392\u67e5\u7684\u573a\u666f\u6070\u6070\u662f\u300c\u540c\u7ea7\u6a21\u5757 hostresolver/explorer \u6ca1\u52a0\u8f7d\u5230\u300d\uff0c
-#      \u6240\u4ee5\u672c\u51fd\u6570\u4e0d\u4f9d\u8d56\u5b83\u4eec\uff0cimport \u5931\u8d25\u4e5f\u7167\u6837\u8f93\u51fa\u3002
-DIAG_TID = '__diag__'
-
-
-def _diag_lines(sp):
-    """\u628a\u53d6\u57df\u94fe\u8def\u644a\u6210\u53ef\u8bfb\u6587\u672c\u884c\uff08\u5728\u7b2c\u4e00\u5c42\u5206\u7c7b\u300c\u26a0\u8bca\u65ad\u300d\u91cc\u9010\u6761\u663e\u793a\uff09"""
-    out = []
-
-    def add(k, v):
-        out.append('%s: %s' % (k, v))
-
-    add('\u6700\u7ec8\u9009\u5b9a host', getattr(sp, 'host', '') or '(\u7a7a\u2605\u5730\u5740\u6ca1\u89e3\u6790\u51fa\u6765)')
-    add('hostresolver \u6a21\u5757', '\u5df2\u52a0\u8f7d' if resolve_host else '\u2605\u672a\u52a0\u8f7d(\u540c\u7ea7\u6a21\u5757\u6ca1\u8fdb\u8bbe\u5907)')
-    add('explorer \u6a21\u5757', '\u5df2\u52a0\u8f7d' if explore_hosts else '\u672a\u52a0\u8f7d')
-    ext = getattr(sp, '_ext', {}) or {}
-    add('ext.publish', ext.get('publish') or '(\u7a7a\uff0c\u7528\u5185\u7f6e)')
-    add('ext.hosts', ','.join(ext.get('hosts') or []) or '(\u7a7a)')
-    add('\u5185\u7f6e\u5019\u9009\u6570', len(getattr(sp, 'BUILTIN_HOSTS', []) or []))
-
-    # \u72ec\u7acb\u5b9e\u6d4b\u6700\u7ec8 host\uff08\u4e0d\u4f9d\u8d56 hostresolver\uff0c\u76f4\u63a5\u770b\u5b83\u5230\u5e95\u901a\u4e0d\u901a\uff09
-    u = getattr(sp, 'host', '') or ''
-    if u:
-        try:
-            r = requests.get(u.rstrip('/') + '/', headers=getattr(sp, 'headers', {}) or {},
-                             proxies=getattr(sp, 'proxies', {}) or {}, timeout=6, verify=False)
-            t = r.text or ''
-            add('\u5b9e\u6d4b\u8be5 host', 'HTTP %s / %dB / \u542b\u7ad9\u540d:%s'
-                % (r.status_code, len(t), '\u662f' if sp.getName() in t else '\u5426\u2605'))
-        except Exception as e:
-            add('\u5b9e\u6d4b\u8be5 host', '\u2605\u8fde\u4e0d\u4e0a: %s' % str(e)[:60])
-    else:
-        add('\u5b9e\u6d4b\u8be5 host', '(\u8df3\u8fc7\uff0chost \u4e3a\u7a7a)')
-
-    try:
-        import hostresolver as _hr
-        tr = _hr.last_trace()
-        if tr:
-            out.append('\u2500\u2500 \u9009\u7ad9\u8fc7\u7a0b \u2500\u2500')
-            out += tr[:30]
-    except Exception as e:
-        out.append('\u2605 \u8bfb\u9009\u7ad9\u8fc7\u7a0b\u5931\u8d25: %s' % str(e)[:60])
-    return out
 
 
 class Spider(BaseSpider):
@@ -212,10 +167,6 @@ class Spider(BaseSpider):
         }
         self.host = self.get_working_host()
         self.headers.update({'Origin': self.host, 'Referer': self.host + '/'})
-        try:
-            self._diag = _diag_lines(self)
-        except Exception:
-            self._diag = []
         print(f'使用站点: {self.host}')
 
     def getName(self):
@@ -311,6 +262,58 @@ class Spider(BaseSpider):
             t.start()
         for t in threads:
             t.join(timeout=5)
+        if not result[0] and publish:
+            # \u6df1\u5ea6\u62bd\u94fe\uff08\u5bf9\u6807 hostresolver.extract_publish_domains\uff09\uff1a\u53d1\u5e03\u9875\u4e0d\u662f\u6d3b\u955c\u50cf\u65f6\uff0c
+            # \u4ece\u5176 JS/HTML \u6316\u57fa\u57df\u2014\u2014\u542b words.random()+'.base.cc' \u6cdb\u89e3\u6790\u5f62\u6001\u2014\u2014\u751f\u6210\u5019\u9009\u518d\u63a2\uff0c
+            # \u4f7f gitee \u8fdc\u7a0b\u5bfc\u5165\u5f62\u6001\uff08\u65e0 hostresolver \u6a21\u5757\uff09\u4e0e\u672c\u5730\u5305\u540c\u7b49\u81ea\u52a8\u6362\u57df\u80fd\u529b\u3002
+            try:
+                _pr = requests.get(publish, headers=self.headers, proxies=self.proxies,
+                                   timeout=6, verify=False, allow_redirects=True)
+                _pt = _pr.text or ''
+            except Exception:
+                _pt = ''
+            if _pt:
+                # \u4f18\u5148\u4ece\u542b random() \u7684 <script> \u6bb5\u62bd\uff08\u90a3\u91cc\u624d\u662f\u6cdb\u89e3\u6790\u8bcd\u8868+\u57fa\u57df\uff09\uff0c\u515c\u5e95\u5168\u9875
+                _chunks = [c for c in re.findall(r'<script[^>]*>(.*?)</script>', _pt, re.S | re.I)
+                           if 'random(' in c]
+                _wsrc = '\n'.join(_chunks) if _chunks else _pt
+                _bases = []
+                for _m in re.findall(r'''['"]\.?((?:[a-z0-9-]+\.)+(?:cc|com|net|top|xyz|vip|app|link|click|org|info|site|online|icu|club|fun|store|live|me|tv))['"]''', _wsrc, re.I):
+                    _m = _m.lower().strip('.').strip()
+                    if _m and _m not in _bases and _m.count('.') <= 2:
+                        _bases.append(_m)
+                if not _bases:
+                    for _m in re.findall(r'''['"]\.?((?:[a-z0-9-]+\.)+(?:cc|com|net|top|xyz|vip|app|link|click|org|info|site|online|icu|club|fun|store|live|me|tv))['"]''', _pt, re.I):
+                        _m = _m.lower().strip('.').strip()
+                        if _m and _m not in _bases and _m.count('.') <= 2:
+                            _bases.append(_m)
+                _slds = [b for b in _bases if b.count('.') == 1]   # \u6cdb\u89e3\u6790\u57fa\u57df\uff08\u8bcd.sld.tld\uff09
+                _fulls = [b for b in _bases if b.count('.') > 1]   # \u5b8c\u6574\u57df\uff08\u5982 cloudfront \u56fa\u5b9a\u7ebf\u8def\uff09
+                _words = []
+                for w in re.findall(r'''['"]([a-z]{3,9})['"]''', _wsrc):
+                    if w.lower() not in _words:
+                        _words.append(w.lower())
+                if not _words:
+                    _words = ['berry', 'melon', 'apple', 'kiwi', 'lemon', 'mango',
+                              'peach', 'grape', 'plum', 'fig', 'papaya', 'guava']
+                _gen = []
+                for u in (_fulls[:3] + _slds[:3]):      # SLD/\u5b8c\u6574\u57df\u672c\u8eab\u4e5f\u76f4\u63a2\u4e00\u6b21
+                    _u = 'https://' + u
+                    if _u not in _gen:
+                        _gen.append(_u)
+                if _slds:
+                    for i in range(12):                 # \u8bcd\u00d7\u57fa\u57df\u8f6e\u8f6c\uff0c\u4e0d\u8ba9\u5355\u57fa\u57df\u9738\u5360\u540d\u989d
+                        if len(_gen) >= 12:
+                            break
+                        _b = _slds[i % len(_slds)]
+                        _u = 'https://' + _words[i % len(_words)] + '.' + _b
+                        if _u not in _gen:
+                            _gen.append(_u)
+                _t2 = [threading.Thread(target=_probe_one, args=(u,)) for u in _gen[:12]]
+                for t in _t2:
+                    t.start()
+                for t in _t2:
+                    t.join(timeout=10)
         return result[0] or ''
 
     def get_working_host(self):
@@ -398,27 +401,8 @@ class Spider(BaseSpider):
             })
         return out
 
-    def _diag_items(self):
-        """\u8bca\u65ad\u884c \u2192 App \u5217\u8868\u6761\u76ee\uff08\u70b9\u300c\u26a0\u8bca\u65ad\u300d\u5206\u7c7b\u5373\u53ef\u770b\u5230\u5168\u90e8\u53d6\u57df\u8fc7\u7a0b\uff09"""
-        return [{'vod_id': 'diag%d' % i, 'vod_name': '\u26a0 ' + str(x),
-                 'vod_pic': '', 'vod_remarks': ''}
-                for i, x in enumerate(getattr(self, '_diag', []) or [])]
 
-    def homeContent(self, *a, **kw):
-        """\u5916\u5c42\u5305\u88c5\uff1a\u539f\u7ed3\u679c + \u8ffd\u52a0\u300c\u26a0\u8bca\u65ad\u300d\u5206\u7c7b\uff08\u4e34\u65f6\u6392\u969c\uff0c\u5b9a\u4f4d App \u7aef\u65e0\u5185\u5bb9\u6839\u56e0\uff09"""
-        try:
-            r = self._homeContent(*a, **kw)
-        except Exception:
-            r = {'class': [], 'list': []}
-        try:
-            if isinstance(r, dict):
-                r['class'] = list(r.get('class') or []) + \
-                    [{'type_id': DIAG_TID, 'type_name': '\u26a0\u8bca\u65ad'}]
-        except Exception:
-            pass
-        return r
-
-    def _homeContent(self, flag):
+    def homeContent(self, flag):
         result = {'class': [], 'list': []}
         body = ''
         try:
@@ -445,10 +429,6 @@ class Spider(BaseSpider):
         return {}
 
     def categoryContent(self, tid, pg, filter, extend):
-        if tid == DIAG_TID:
-            items = self._diag_items()
-            return {'page': 1, 'pagecount': 1, 'limit': len(items),
-                    'total': len(items), 'list': items}
         result = {'list': []}
         path = f'/category/{tid}/'
         if str(pg) not in ('1', ''):

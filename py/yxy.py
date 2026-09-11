@@ -165,6 +165,58 @@ class Spider(BaseSpider):
             t.start()
         for t in threads:
             t.join(timeout=5)
+        if not result[0] and publish:
+            # \u6df1\u5ea6\u62bd\u94fe\uff08\u5bf9\u6807 hostresolver.extract_publish_domains\uff09\uff1a\u53d1\u5e03\u9875\u4e0d\u662f\u6d3b\u955c\u50cf\u65f6\uff0c
+            # \u4ece\u5176 JS/HTML \u6316\u57fa\u57df\u2014\u2014\u542b words.random()+'.base.cc' \u6cdb\u89e3\u6790\u5f62\u6001\u2014\u2014\u751f\u6210\u5019\u9009\u518d\u63a2\uff0c
+            # \u4f7f gitee \u8fdc\u7a0b\u5bfc\u5165\u5f62\u6001\uff08\u65e0 hostresolver \u6a21\u5757\uff09\u4e0e\u672c\u5730\u5305\u540c\u7b49\u81ea\u52a8\u6362\u57df\u80fd\u529b\u3002
+            try:
+                _pr = requests.get(publish, headers=self.headers, proxies=self.proxies,
+                                   timeout=6, verify=False, allow_redirects=True)
+                _pt = _pr.text or ''
+            except Exception:
+                _pt = ''
+            if _pt:
+                # \u4f18\u5148\u4ece\u542b random() \u7684 <script> \u6bb5\u62bd\uff08\u90a3\u91cc\u624d\u662f\u6cdb\u89e3\u6790\u8bcd\u8868+\u57fa\u57df\uff09\uff0c\u515c\u5e95\u5168\u9875
+                _chunks = [c for c in re.findall(r'<script[^>]*>(.*?)</script>', _pt, re.S | re.I)
+                           if 'random(' in c]
+                _wsrc = '\n'.join(_chunks) if _chunks else _pt
+                _bases = []
+                for _m in re.findall(r'''['"]\.?((?:[a-z0-9-]+\.)+(?:cc|com|net|top|xyz|vip|app|link|click|org|info|site|online|icu|club|fun|store|live|me|tv))['"]''', _wsrc, re.I):
+                    _m = _m.lower().strip('.').strip()
+                    if _m and _m not in _bases and _m.count('.') <= 2:
+                        _bases.append(_m)
+                if not _bases:
+                    for _m in re.findall(r'''['"]\.?((?:[a-z0-9-]+\.)+(?:cc|com|net|top|xyz|vip|app|link|click|org|info|site|online|icu|club|fun|store|live|me|tv))['"]''', _pt, re.I):
+                        _m = _m.lower().strip('.').strip()
+                        if _m and _m not in _bases and _m.count('.') <= 2:
+                            _bases.append(_m)
+                _slds = [b for b in _bases if b.count('.') == 1]   # \u6cdb\u89e3\u6790\u57fa\u57df\uff08\u8bcd.sld.tld\uff09
+                _fulls = [b for b in _bases if b.count('.') > 1]   # \u5b8c\u6574\u57df\uff08\u5982 cloudfront \u56fa\u5b9a\u7ebf\u8def\uff09
+                _words = []
+                for w in re.findall(r'''['"]([a-z]{3,9})['"]''', _wsrc):
+                    if w.lower() not in _words:
+                        _words.append(w.lower())
+                if not _words:
+                    _words = ['berry', 'melon', 'apple', 'kiwi', 'lemon', 'mango',
+                              'peach', 'grape', 'plum', 'fig', 'papaya', 'guava']
+                _gen = []
+                for u in (_fulls[:3] + _slds[:3]):      # SLD/\u5b8c\u6574\u57df\u672c\u8eab\u4e5f\u76f4\u63a2\u4e00\u6b21
+                    _u = 'https://' + u
+                    if _u not in _gen:
+                        _gen.append(_u)
+                if _slds:
+                    for i in range(12):                 # \u8bcd\u00d7\u57fa\u57df\u8f6e\u8f6c\uff0c\u4e0d\u8ba9\u5355\u57fa\u57df\u9738\u5360\u540d\u989d
+                        if len(_gen) >= 12:
+                            break
+                        _b = _slds[i % len(_slds)]
+                        _u = 'https://' + _words[i % len(_words)] + '.' + _b
+                        if _u not in _gen:
+                            _gen.append(_u)
+                _t2 = [threading.Thread(target=_probe_one, args=(u,)) for u in _gen[:12]]
+                for t in _t2:
+                    t.start()
+                for t in _t2:
+                    t.join(timeout=10)
         return result[0] or ''
 
     def get_working_host(self):
