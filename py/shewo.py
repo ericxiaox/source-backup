@@ -1,0 +1,372 @@
+# -*- coding: utf-8 -*-
+# \u5c04\u7a9d \u7ad9\u6e90\uff08\u82f9\u679cCMS \u578b \u00b7 \u6cdb\u89e3\u6790\u6362\u57df\u7248\uff0c2026-09-12 \u7531 xbpq/\u5c04\u7a9d.json py \u5316\uff09
+# \u53d6\u57df\u673a\u5236\uff082026-09-12 \u5b9e\u6d4b\uff09\uff1a
+#   \u4efb\u610f {\u8bcd}.shewo22.cc \u90fd\u89e3\u6790\uff08\u6cdb\u89e3\u6790=\u53d1\u5e03\u673a\u5236\uff0c\u65e0\u4f20\u7edf\u53d1\u5e03\u9875\uff09\uff1a
+#     - \u6839\u8def\u5f84 /            = \u843d\u5730\u58f3\uff083214B\uff0cJS \u70b9\u51fb\u8df3 /{\u4e2d\u6587\u8bcd}/\uff09
+#     - /vodtype|vodsearch|voddetail|vodplay/... \u6df1\u94fe = \u4efb\u610f\u6d3b\u8282\u70b9\u76f4\u63a5\u51fa\u5185\u5bb9
+#     - /{\u4e2d\u6587\u8bcd}/          = \u5185\u5bb9\u9996\u9875\uff08\u529b\u4e89\u4e0a\u6e38/\u594b\u53d1\u56fe\u5f3a/\u6301\u4e4b\u4ee5\u6052\uff09
+#   \u2192 \u63a2\u6d3b\u5fc5\u987b\u63a2\u6df1\u94fe\uff08/vodtype/55-1.html \u542b pornkvideos\uff09\uff0c\u4e0d\u80fd\u63a2\u6839\u3002
+#   \u4e0d\u540c\u5b50\u57df\u662f\u4e0d\u540c\u5185\u5bb9\u8282\u70b9\uff08md5 \u4e0d\u540c\uff09\uff0c\u4efb\u4e00\u53ef\u7528\u5373\u53ef\u3002
+# \u7ed3\u6784: \u5206\u7c7b /vodtype/{tid}-{pg}.html\uff1b\u641c\u7d22 /vodsearch/{wd}----------{pg}---.html
+#       \u8be6\u60c5 /voddetail/{id}.html\uff1b\u64ad\u653e /vodplay/{id}-{sid}-{nid}.html
+#       \u64ad\u653e\u9875 var player_aaaa={...url:m3u8}\uff08encrypt=0\uff09
+# \u5c01\u9762: \u5217\u8868 img[data-src]\uff08thjpg*.vip/upload/vod/...\uff09\uff0c\u65e0\u52a0\u5bc6\uff0c\u76f4\u94fe\u5373\u53ef\u3002
+#       \u6ce8\u610f\u522b\u6293\u5230\u5e7f\u544a\u56fe\uff08oss-accelerate.aliyuncs.com siteadmin\uff09\u3002
+import json
+import re
+import sys
+import os
+import random
+import string
+import html as _html
+from urllib.parse import urljoin
+
+import requests
+try:
+    from base.spider import Spider as BaseSpider
+except ImportError:
+    class BaseSpider(object):
+        def fetch(self, url, headers=None, timeout=10):
+            try:
+                res = requests.get(url, headers=headers, timeout=timeout, allow_redirects=True)
+                res.encoding = 'utf-8'
+                return res
+            except Exception:
+                return None
+
+try:
+    from hostresolver import resolve_host, parse_ext, probe_first
+except Exception:
+    try:
+        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from hostresolver import resolve_host, parse_ext, probe_first
+    except Exception:
+        resolve_host = None
+        probe_first = None
+        parse_ext = None
+
+_UA = ('Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 '
+       '(KHTML, like Gecko) Chrome/143.0.7499.192 Mobile Safari/537.36')
+
+# \u5206\u7c7b\u8868\uff08\u4e0e xbpq/\u5c04\u7a9d.json \u5206\u7c7b\u9010\u5b57\u4e00\u81f4\uff09
+_CATS = [
+    ('\u56fd\u4ea7\u7cbe\u54c1', '55'), ('\u534e\u8bed\u7cbe\u54c1', '63'), ('\u9ed1\u6599\u5403\u74dc', '58'), ('\u6b27\u7f8e\u5927\u5c4c', '60'),
+    ('\u52a8\u6f2b\u7981\u6f2b', '57'), ('\u5b66\u751f\u5408\u96c6', '65'), ('\u4e71\u4f26\u7cbe\u54c1', '64'), ('\u63a2\u82b1\u7ea6\u70ae', '61'),
+    ('\u65e5\u672c\u65e0\u7801', '86'), ('\u65e5\u672c\u6709\u7801', '80'), ('\u4e3b\u64ad\u7f51\u7ea2', '81'), ('\u56fd\u4ea7\u8272\u60c5', '12'),
+    ('\u65e5\u672c\u65e0\u78012', '20'), ('\u81ea\u62cd\u5077\u62cd', '21'), ('\u4eba\u59bb\u719f\u5973', '22'), ('\u9ed1\u4eba\u6d0b\u5c4c', '23'),
+    ('\u6b27\u7f8e\u7cbe\u54c1', '24'), ('\u5361\u901a\u52a8\u6f2b', '69'), ('\u4e71\u4f26\u4e2d\u51fa', '70'), ('\u4f20\u5a92\u539f\u521b', '71'),
+    ('\u53e3\u7206\u989c\u5c04', '72'), ('\u5c9b\u56fd\u5973\u4f18', '25'), ('\u841d\u8389\u5c11\u5973', '26'), ('\u91cd\u53e3\u8c03\u6559', '88'),
+    ('\u56fd\u4ea7\u76f4\u64ad', '56'), ('\u5c9b\u56fd\u7fa4\u4ea4', '73'), ('\u65e5\u672c\u6709\u78012', '74'), ('\u4e2d\u6587\u5b57\u5e55', '75'),
+    ('\u5403\u74dc\u7206\u6599', '76'), ('\u89d2\u8272\u626e\u6f14', '77'), ('\u6deb\u5a03\u81ea\u6170', '78'), ('\u97e9\u56fd\u76f4\u64ad', '84'),
+    ('\u516c\u5f00\u6f0f\u51fa', '85'), ('\u6237\u5916\u6253\u91ce', '89'),
+]
+
+# \u63a2\u6d3b\u6df1\u94fe\uff1a\u5206\u7c7b 55 \u7b2c\u4e00\u9875\uff08\u4efb\u4f55\u6d3b\u8282\u70b9\u90fd 200+pornkvideos\uff09
+_PROBE_PATH = '/vodtype/55-1.html'
+_MARK = 'pornkvideos'
+
+# \u5185\u7f6e\u5019\u9009\u8bcd\uff08yjewvzfn=2026-09-12 \u5b9e\u6d4b\u8282\u70b9\uff1b\u5176\u4f59\u4e3a\u5e38\u7528\u5b50\u57df\u8bcd\uff0c\u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5747\u89e3\u6790\uff09
+_BUILTIN_WORDS = ['yjewvzfn', 'www', 'm', 'wap', 'app', 'tv', 'h5', 'vip']
+
+_RE_ITEM = re.compile(
+    r'<div class="pornkvideos[^"]*">\s*<a href="(/voddetail/(\d+)\.html)"[^>]*>(.*?)</a>', re.S)
+_RE_IMG = re.compile(r'data-src="(https?://[^"]+/upload/vod/[^"]+)"')
+_RE_TITLE = re.compile(r'<h2>\s*(.*?)\s*</h2>', re.S)
+_RE_DATE = re.compile(r'<div class="vlength">\s*(.*?)\s*</div>', re.S)
+_RE_PAGE = re.compile(r'/vodtype/(?:\d+)-(\d+)\.html')
+_RE_EP = re.compile(r'<a[^>]*href="(/vodplay/(\d+)-(\d+)-(\d+)\.html)"[^>]*>(.*?)</a>', re.S)
+_RE_PLAYER = re.compile(r'var\s+player_aaaa\s*=\s*(\{.*?\})\s*;?\s*</script>', re.S)
+_AD_MARK = 'oss-accelerate.aliyuncs.com'
+
+
+def _clean(s):
+    return _html.unescape(re.sub(r'<[^>]+>', '', s or '')).replace('\xa0', ' ').strip()
+
+
+class Spider(BaseSpider):
+
+    # \u8bca\u65ad\u680f\u76ee\uff08\u4e34\u65f6\u8bbe\u65bd\uff1a\u771f\u673a\u9a8c\u8bc1\u901a\u8fc7\u540e\u6574\u4f53\u79fb\u9664\uff09
+    DIAG_TID = '__diag__'
+
+    def init(self, extend=""):
+        self.proxies = {}
+        self._ext = {}
+        ext_str = (extend or '').strip()
+        if ext_str:
+            try:
+                cfg = json.loads(ext_str)
+                if isinstance(cfg, dict):
+                    self.proxies = cfg.get('proxies') or {}
+                    for k in ('publish', 'host'):
+                        if cfg.get(k):
+                            self._ext[k] = str(cfg[k]).strip()
+                    if cfg.get('hosts'):
+                        hs = cfg['hosts'] if isinstance(cfg['hosts'], list) else [cfg['hosts']]
+                        self._ext['hosts'] = [str(h).strip() for h in hs if str(h).strip()]
+            except Exception:
+                self.proxies = {}
+                if parse_ext:
+                    try:
+                        self._ext = parse_ext(ext_str)
+                    except Exception:
+                        self._ext = {}
+        self.headers = {
+            'User-Agent': _UA,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'zh-CN,zh;q=0.9',
+            'Connection': 'keep-alive',
+        }
+        self.trace = []
+        self.host = self.get_working_host()
+        self.headers.update({'Origin': self.host, 'Referer': self.host + '/'})
+        print(f'使用站点: {self.host}')
+
+    def getName(self):
+        return "\u5c04\u7a9d"
+
+    def isVideoFormat(self, url):
+        return any(ext in (url or '') for ext in ['.m3u8', '.mp4', '.ts'])
+
+    def manualVideoCheck(self):
+        return False
+
+    def destroy(self):
+        pass
+
+    def localProxy(self, params):
+        return [200, "video/MP2T", ""]
+
+    def fetch(self, url, headers=None, timeout=8):
+        try:
+            req_headers = headers or self.headers
+            res = requests.get(url, headers=req_headers, proxies=self.proxies,
+                               timeout=timeout, verify=False, allow_redirects=True)
+            res.encoding = 'utf-8'
+            return res
+        except Exception as e:
+            print(f'fetch error: {url} {e}')
+            return None
+
+    # ---------- \u53d6\u57df ----------
+    def _probe_one(self, host_base, result):
+        """\u63a2\u6df1\u94fe\uff08\u6839\u662f\u843d\u5730\u58f3\uff0c\u63a2\u6839\u5fc5\u5931\u8d25\uff09\u3002host_base \u542b\u534f\u8bae\u4e0d\u542b\u8def\u5f84\u3002"""
+        if result[0]:
+            return
+        try:
+            r = requests.get(host_base + _PROBE_PATH, headers=self.headers,
+                             proxies=self.proxies, timeout=5, verify=False,
+                             allow_redirects=True)
+            ok = (r.status_code == 200 and _MARK in (r.text or ''))
+            self.trace.append(f'{host_base} -> {r.status_code} {"OK" if ok else "\u975e\u5185\u5bb9"}')
+            if ok and not result[0]:
+                result[0] = host_base
+        except Exception as e:
+            self.trace.append(f'{host_base} -> FAIL {str(e)[:40]}')
+
+    def _candidate_hosts(self):
+        cands = []
+        if self._ext.get('host'):
+            cands.append(self._ext['host'])
+        cands += list(self._ext.get('hosts') or [])
+        words = list(_BUILTIN_WORDS)
+        # \u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5747\u89e3\u6790\uff1a\u968f\u673a\u8bcd\u6269\u6c60\uff08\u4e0d\u540c\u8bcd=\u4e0d\u540c\u5185\u5bb9\u8282\u70b9\uff0c\u591a\u8bd5\u51e0\u4e2a\uff09
+        rnd = [''.join(random.choice(string.ascii_lowercase) for _ in range(6))
+               for _ in range(6)]
+        words += rnd
+        for w in words:
+            u = f'https://{w}.shewo22.cc'
+            if u not in cands:
+                cands.append(u)
+        return cands
+
+    def _resolve_inline(self, validate_probe):
+        """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff08gitee \u8fdc\u7a0b\u5bfc\u5165\u5f62\u6001\u53ea\u5269\u8fd9\u6761\u8def\uff09\u3002"""
+        import threading
+        cands = self._candidate_hosts()
+        if not cands:
+            return ''
+        result = [None]
+        threads = [threading.Thread(target=self._probe_one, args=(u, result))
+                   for u in cands[:16]]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=6)
+        return result[0] or ''
+
+    def get_working_host(self):
+        # \u9501\u5b9a\u57df\uff1ahostresolver \u9010\u6e90\u540c\u8bed\u4e49\u2014\u2014\u586b\u4e86 host@ \u5c31\u53ea\u7528\u5b83
+        if self._ext.get('host'):
+            return self._ext['host'].rstrip('/')
+        if resolve_host:
+            try:
+                h = resolve_host(
+                    publish_page='',
+                    candidate_hosts=self._candidate_hosts(),
+                    headers=self.headers,
+                    proxies=self.proxies,
+                    timeout=8,
+                    validate=lambda host, text: _MARK in (text or ''),
+                    probe_path=_PROBE_PATH,
+                )
+                if h:
+                    return h.rstrip('/')
+            except Exception:
+                pass
+        if probe_first:
+            try:
+                h = probe_first(self._candidate_hosts(), headers=self.headers,
+                                proxies=self.proxies, timeout=8,
+                                validate=lambda host, text: _MARK in (text or ''),
+                                tag='\u5c04\u7a9d\u515c\u5e95')
+                if h:
+                    return h.rstrip('/')
+            except Exception:
+                pass
+        return self._resolve_inline(None)
+
+    # ---------- \u8bca\u65ad\uff08\u4e34\u65f6\u8bbe\u65bd\uff0c\u771f\u673a\u9a8c\u8bc1\u901a\u8fc7\u540e\u79fb\u9664\uff09 ----------
+    def _diag_lines(self):
+        lines = [
+            '\u6a21\u5757: hostresolver=%s probe_first=%s parse_ext=%s' % (
+                '\u6709' if resolve_host else '\u65e0', '\u6709' if probe_first else '\u65e0',
+                '\u6709' if parse_ext else '\u65e0'),
+            'ext: %s' % json.dumps(self._ext, ensure_ascii=False),
+            'host: %s' % self.host,
+        ]
+        r = self.fetch(self.host + _PROBE_PATH, timeout=8)
+        if r:
+            lines.append('\u72ec\u7acb\u5b9e\u6d4b: %s %s %s' % (
+                r.status_code, len(r.text or ''),
+                '\u542b\u7ad9\u540d\u6807\u8bb0' if _MARK in (r.text or '') else '\u2757\u65e0\u7ad9\u540d\u6807\u8bb0'))
+        else:
+            lines.append('\u72ec\u7acb\u5b9e\u6d4b: \u8bf7\u6c42\u5931\u8d25')
+        lines += ['trace] ' + x for x in self.trace[:12]]
+        return lines
+
+    # ---------- \u63a5\u53e3 ----------
+    def homeContent(self, filter):
+        classes = [{'type_name': n, 'type_id': tid} for n, tid in _CATS]
+        classes.append({'type_name': '\u26a0\u8bca\u65ad', 'type_id': self.DIAG_TID})
+        return {'class': classes, 'filters': {}}
+
+    def homeVideoContent(self):
+        return {'list': []}
+
+    def _parse_list(self, html):
+        out = []
+        for m in _RE_ITEM.finditer(html):
+            href, vid, chunk = m.group(1), m.group(2), m.group(3)
+            img = _RE_IMG.search(chunk)
+            pic = img.group(1) if img else ''
+            t = _RE_TITLE.search(chunk)
+            name = _clean(t.group(1)) if t else ''
+            d = _RE_DATE.search(chunk)
+            remark = _clean(d.group(1))[:12] if d else ''
+            if vid and name:
+                out.append({'vod_id': vid, 'vod_name': name,
+                            'vod_pic': pic, 'vod_remarks': remark})
+        return out
+
+    def _pagecount(self, html):
+        nums = [int(x) for x in _RE_PAGE.findall(html)]
+        return max(nums) if nums else 1
+
+    def categoryContent(self, tid, pg, filter, extend):
+        pg = int(pg or 1)
+        if tid == self.DIAG_TID:
+            lines = self._diag_lines()
+            lst = [{'vod_id': 'diag', 'vod_name': l, 'vod_pic': '',
+                    'vod_remarks': ''} for l in lines]
+            return {'list': lst, 'page': 1, 'pagecount': 1, 'limit': len(lst),
+                    'total': len(lst)}
+        url = f'{self.host}/vodtype/{tid}-{pg}.html'
+        res = self.fetch(url)
+        result = {'list': [], 'page': pg, 'pagecount': 1, 'limit': 20, 'total': 0}
+        if not res or res.status_code != 200:
+            return result
+        html = res.text or ''
+        result['list'] = self._parse_list(html)
+        result['pagecount'] = self._pagecount(html)
+        result['limit'] = len(result['list'])
+        result['total'] = result['pagecount'] * max(len(result['list']), 1)
+        return result
+
+    def searchContent(self, key, quick, pg=1):
+        pg = int(pg or 1)
+        url = f'{self.host}/vodsearch/{key}----------{pg}---.html'
+        res = self.fetch(url)
+        if not res or res.status_code != 200:
+            return {'list': []}
+        return {'list': self._parse_list(res.text or ''), 'page': pg}
+
+    def detailContent(self, ids):
+        vid = ids[0]
+        url = f'{self.host}/voddetail/{vid}.html'
+        res = self.fetch(url)
+        if not res or res.status_code != 200:
+            return {'list': []}
+        html = res.text or ''
+        h1 = re.search(r'<h1[^>]*>(.*?)</h1>', html, re.S)
+        name = _clean(h1.group(1)) if h1 else str(vid)
+        pic = ''
+        for m in re.finditer(r'(https?://[^"\']+/upload/vod/[^"\']+\.(?:jpg|png|webp))', html):
+            if _AD_MARK not in m.group(1):
+                pic = m.group(1)
+                break
+        # \u5206\u96c6\uff08\u77ed\u7247\u7ad9\u591a\u4e3a\u5355\u96c6\uff1b\u951a\u6587\u672c\u5e38\u4e3a\u7a7a \u2192 \u6309\u94fe\u63a5\u5e8f\u53f7\u751f\u6210\u300c\u7b2cN\u96c6\u300d\uff09
+        eps = []
+        for m in _RE_EP.finditer(html):
+            path, sid, nid, text = m.group(1), m.group(3), m.group(4), _clean(m.group(5))
+            ep_name = text or (f'第{nid}集' if int(nid) > 1 else '\u64ad\u653e')
+            eps.append(f'{ep_name}${path}')
+        if not eps:
+            eps = [f'播放$/vodplay/{vid}-1-1.html']
+        vod = {
+            'vod_id': vid,
+            'vod_name': name,
+            'vod_pic': pic,
+            'vod_content': '\u8d44\u6e90\u6765\u81ea\u4e8e\u7f51\u7edc\uff0c\u8bf7\u52ff\u76f8\u4fe1\u4efb\u4f55\u5e7f\u544a',
+            'vod_play_from': '\u5c04\u7a9d',
+            'vod_play_url': '#'.join(eps),
+        }
+        return {'list': [vod]}
+
+    def playerContent(self, flag, id, vipFlags=None):
+        # id \u5f62\u5982 /vodplay/491059-1-1.html \u6216 491059-1-1
+        path = id if str(id).startswith('/') else f'/vodplay/{id}.html'
+        play_url = self.host + path
+        res = self.fetch(play_url)
+        if not res or res.status_code != 200:
+            return {'parse': 1, 'url': play_url}
+        m = _RE_PLAYER.search(res.text or '')
+        real = ''
+        if m:
+            try:
+                cfg = json.loads(m.group(1))
+                real = cfg.get('url', '') or ''
+                if str(cfg.get('encrypt', '0')) == '1' and real:
+                    import base64
+                    real = base64.b64decode(real).decode('utf-8')
+            except Exception:
+                real = ''
+        if not real:
+            mm = re.search(r'(https?://[^"\'\\\s]+\.m3u8[^"\'\\\s]*)', res.text or '')
+            real = mm.group(1) if mm else ''
+        if not real:
+            return {'parse': 1, 'url': play_url}
+        real = real.replace('\\/', '/')
+        if real.startswith('//'):
+            real = 'https:' + real
+        elif not real.startswith('http'):
+            real = urljoin(play_url, real)
+        return {
+            'parse': 0,
+            'playUrl': '',
+            'url': real,
+            'header': {
+                'User-Agent': _UA,
+                'Referer': play_url,
+                'Origin': self.host,
+            },
+        }
