@@ -17,7 +17,6 @@ import re
 import sys
 import os
 import random
-import string
 import html as _html
 from urllib.parse import urljoin
 
@@ -83,6 +82,10 @@ def _clean(s):
     return _html.unescape(re.sub(r'<[^>]+>', '', s or '')).replace('\xa0', ' ').strip()
 
 
+# \u5206\u96c6\u540d\u5e7f\u544a\u9ed1\u540d\u5355\uff08\u5bf9\u9f50\u6bcf\u65e5\u5927\u8d5b._valid_ep_name \u7eaa\u5f8b\uff09
+_AD_NAME_RE = re.compile('(<|http|www\\.|\\.com|\\.cc|\u516c\u4f17\u53f7|\u5173\u6ce8|\u798f\u5229|\u66f4\u591a|APP|app|\u4e0b\u8f7d|\u5730\u5740\u53d1\u5e03|\u6700\u65b0\u5730\u5740)')
+
+
 class Spider(BaseSpider):
 
     # \u8bca\u65ad\u680f\u76ee\uff08\u4e34\u65f6\u8bbe\u65bd\uff1a\u771f\u673a\u9a8c\u8bc1\u901a\u8fc7\u540e\u6574\u4f53\u79fb\u9664\uff09
@@ -117,9 +120,14 @@ class Spider(BaseSpider):
             'Connection': 'keep-alive',
         }
         self.trace = []
-        self.host = self.get_working_host()
+        # \u53d6\u57df\u7edd\u4e0d\u8bb8\u70b8 init\u2014\u2014\u5931\u8d25\u7559\u7a7a\uff0c\u61d2\u91cd\u8bd5\u515c\u5e95\uff0c\u4fdd\u8bc1\u5206\u7c7b\u5fc5\u51fa
+        try:
+            self.host = self.get_working_host()
+        except Exception as e:
+            self.host = ''
+            self.trace.append('init\u53d6\u57df\u5f02\u5e38: %s' % str(e)[:60])
         self.headers.update({'Origin': self.host, 'Referer': self.host + '/'})
-        print(f'使用站点: {self.host}')
+        print('\u4f7f\u7528\u7ad9\u70b9: %s' % self.host)
 
     def getName(self):
         return "\u5c04\u7a9d"
@@ -136,7 +144,9 @@ class Spider(BaseSpider):
     def localProxy(self, params):
         return [200, "video/MP2T", ""]
 
-    def fetch(self, url, headers=None, timeout=8):
+    def _http(self, url, headers=None, timeout=8):
+        # requests \u76f4\u8fde\u5305\u88c5\u3002\u26a0\u523b\u610f\u4e0d\u53eb fetch\uff1aApp \u57fa\u7c7b\u6709\u540c\u540d\u65b9\u6cd5\uff08\u8fd4\u56de\u7c7b\u578b\u4e0e
+        # rsp.text \u9884\u671f\u4e0d\u7b26\u65f6\u5404\u63a5\u53e3 except \u541e\u9519\u8fd4\u7a7a=\u96f6\u6570\u636e\u6839\u56e0\uff09\uff0c\u649e\u540d\u5fc5\u70b8\u771f\u673a\u3002
         try:
             req_headers = headers or self.headers
             res = requests.get(url, headers=req_headers, proxies=self.proxies,
@@ -144,7 +154,7 @@ class Spider(BaseSpider):
             res.encoding = 'utf-8'
             return res
         except Exception as e:
-            print(f'fetch error: {url} {e}')
+            print('http error: %s %s' % (url, e))
             return None
 
     # ---------- \u53d6\u57df ----------
@@ -157,34 +167,38 @@ class Spider(BaseSpider):
                              proxies=self.proxies, timeout=5, verify=False,
                              allow_redirects=True)
             ok = (r.status_code == 200 and _MARK in (r.text or ''))
-            self.trace.append(f'{host_base} -> {r.status_code} {"OK" if ok else "\u975e\u5185\u5bb9"}')
+            self.trace.append('%s -> %s %s' % (host_base, r.status_code, 'OK' if ok else '\u975e\u5185\u5bb9'))
             if ok and not result[0]:
                 result[0] = host_base
         except Exception as e:
-            self.trace.append(f'{host_base} -> FAIL {str(e)[:40]}')
+            self.trace.append('%s -> FAIL %s' % (host_base, str(e)[:40]))
 
     def _candidate_hosts(self):
+        """hostresolver \u7528\u7684\u5019\u9009\uff1aext + \u5185\u7f6e\u8bcd\uff08\u4e0d\u542b\u968f\u673a\u8bcd\uff0c\u63a7\u5236\u6700\u574f\u8017\u65f6\uff09\u3002"""
         cands = []
         if self._ext.get('host'):
             cands.append(self._ext['host'])
         cands += list(self._ext.get('hosts') or [])
-        words = list(_BUILTIN_WORDS)
-        # \u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5747\u89e3\u6790\uff1a\u968f\u673a\u8bcd\u6269\u6c60\uff08\u4e0d\u540c\u8bcd=\u4e0d\u540c\u5185\u5bb9\u8282\u70b9\uff0c\u591a\u8bd5\u51e0\u4e2a\uff09
-        rnd = [''.join(random.choice(string.ascii_lowercase) for _ in range(6))
-               for _ in range(6)]
-        words += rnd
-        for w in words:
-            u = f'https://{w}.shewo22.cc'
+        for w in _BUILTIN_WORDS:
+            u = 'https://%s.shewo22.cc' % w
             if u not in cands:
                 cands.append(u)
         return cands
 
-    def _resolve_inline(self, validate_probe):
-        """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff08gitee \u8fdc\u7a0b\u5bfc\u5165\u5f62\u6001\u53ea\u5269\u8fd9\u6761\u8def\uff09\u3002
-        \u6ce8\u610f\u4e0d\u8981\u7ed9 join \u8bbe\u77ed\u8d85\u65f6\uff1a\u624b\u673a\u7f51\u7edc DNS+TLS \u6bd4 PC \u6162\u5f97\u591a\uff0c
-        \u63a2\u6d3b\u7ebf\u7a0b\u81ea\u5e26 5s \u8d85\u65f6\u81ea\u7136\u4f1a\u9000\uff0cjoin \u7b49\u6ee1\u5373\u53ef\uff08\u6700\u574f ~10s\uff09\u3002"""
+    def _cands_random(self, n=8):
+        """\u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5747\u89e3\u6790\uff1a\u968f\u673a\u8bcd\u6269\u6c60\uff08\u4e0d\u540c\u8bcd=\u4e0d\u540c\u5185\u5bb9\u8282\u70b9\uff09\u3002"""
+        out, seen = [], set()
+        while len(out) < n:
+            w = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(6))
+            if w in seen:
+                continue
+            seen.add(w)
+            out.append('https://%s.shewo22.cc' % w)
+        return out
+
+    def _probe_round(self, cands, wait):
+        """\u4e00\u8f6e\u5e76\u884c\u63a2\u6d4b\uff0cwait \u79d2\u603b\u95f8\uff08DNS \u5361\u6b7b\u7ebf\u7a0b\u7531\u95f8\u6536\u5c38\uff09\u3002\u8fd4\u56de\u547d\u4e2d\u6216 ''\u3002"""
         import threading
-        cands = self._candidate_hosts()
         if not cands:
             return ''
         result = [None]
@@ -193,8 +207,18 @@ class Spider(BaseSpider):
         for t in threads:
             t.start()
         for t in threads:
-            t.join()
+            t.join(timeout=wait)
         return result[0] or ''
+
+    def _resolve_inline(self, validate_probe):
+        """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff08gitee \u8fdc\u7a0b\u5bfc\u5165\u5f62\u6001\u53ea\u5269\u8fd9\u6761\u8def\uff09\u3002
+        \u4e24\u6bb5\u5f0f\uff1a\u5148\u5185\u7f6e\u9ad8\u547d\u4e2d\u8bcd\uff088s \u95f8\uff09\uff0c\u5168\u5931\u8d25\u518d\u968f\u673a\u8bcd\u6269\u6c60\uff088s \u95f8\uff09\u3002
+        \u771f\u673a DNS \u5bf9\u6cdb\u89e3\u6790\u968f\u673a\u5b50\u57df\u53ef\u80fd\u5361\u5f88\u4e45\u2014\u2014\u603b\u95f8\u5fc5\u987b\u5b58\u5728\uff0c\u5426\u5219 App \u6390\u6b7b init\u3002"""
+        h = self._probe_round(self._candidate_hosts(), 8)
+        if h:
+            return h
+        self.trace.append('\u5185\u7f6e\u8bcd\u672a\u547d\u4e2d\uff0c\u968f\u673a\u8bcd\u6269\u6c60')
+        return self._probe_round(self._cands_random(8), 8)
 
     def get_working_host(self):
         # \u9501\u5b9a\u57df\uff1ahostresolver \u9010\u6e90\u540c\u8bed\u4e49\u2014\u2014\u586b\u4e86 host@ \u5c31\u53ea\u7528\u5b83
@@ -236,7 +260,7 @@ class Spider(BaseSpider):
             'ext: %s' % json.dumps(self._ext, ensure_ascii=False),
             'host: %s' % self.host,
         ]
-        r = self.fetch(self.host + _PROBE_PATH, timeout=8)
+        r = self._http(self.host + _PROBE_PATH, timeout=8)
         if r:
             lines.append('\u72ec\u7acb\u5b9e\u6d4b: %s %s %s' % (
                 r.status_code, len(r.text or ''),
@@ -245,6 +269,13 @@ class Spider(BaseSpider):
             lines.append('\u72ec\u7acb\u5b9e\u6d4b: \u8bf7\u6c42\u5931\u8d25')
         lines += ['trace] ' + x for x in self.trace[:12]]
         return lines
+
+    def _valid_ep_name(self, s, max_len=20):
+        """\u5206\u96c6\u540d\u6e05\u6d17\uff08\u5bf9\u9f50\u5df2\u9a8c\u8bc1\u6e90\u7eaa\u5f8b\uff09\uff1a\u7a7a\u3001\u8d85\u957f\u3001\u547d\u4e2d\u5e7f\u544a\u9ed1\u540d\u5355 \u2192 \u8fd4\u56de ''\u3002"""
+        s = _clean(s)
+        if not s or len(s) > max_len or _AD_NAME_RE.search(s):
+            return ''
+        return s
 
     def _ensure_host(self):
         """init \u65f6\u53d6\u57df\u5931\u8d25\uff08\u624b\u673a\u7f51\u7edc\u6162\uff09\u2192 \u9996\u6b21\u771f\u6b63\u8bbf\u95ee\u65f6\u518d\u8bd5\u4e00\u6b21\u3002"""
@@ -255,7 +286,7 @@ class Spider(BaseSpider):
         if h:
             self.host = h
             self.headers.update({'Origin': self.host, 'Referer': self.host + '/'})
-            print(f'懒重试命中: {self.host}')
+            print('\u61d2\u91cd\u8bd5\u547d\u4e2d: %s' % self.host)
 
     # ---------- \u63a5\u53e3 ----------
     def homeContent(self, filter):
@@ -266,7 +297,7 @@ class Spider(BaseSpider):
     def homeVideoContent(self):
         # App \u9996\u9875\u5237\u65b0\u7684\u63a8\u8350\u4f4d\u8d70\u8fd9\u91cc\u2014\u2014\u6293\u7b2c\u4e00\u5206\u7c7b\u9875\u586b\u4e0a\uff08\u4e4b\u524d\u8fd4\u56de\u7a7a\u5bfc\u81f4\u300c\u5237\u65b0\u4e0d\u51fa\u4e1c\u897f\u300d\u89c2\u611f\uff09
         try:
-            res = self.fetch(self.host + _PROBE_PATH)
+            res = self._http(self.host + _PROBE_PATH)
             if res and res.status_code == 200:
                 lst = self._parse_list(res.text or '')[:12]
                 if lst:
@@ -303,8 +334,8 @@ class Spider(BaseSpider):
             return {'list': lst, 'page': 1, 'pagecount': 1, 'limit': len(lst),
                     'total': len(lst)}
         self._ensure_host()
-        url = f'{self.host}/vodtype/{tid}-{pg}.html'
-        res = self.fetch(url)
+        url = '%s/vodtype/%s-%d.html' % (self.host, tid, pg)
+        res = self._http(url)
         result = {'list': [], 'page': pg, 'pagecount': 1, 'limit': 20, 'total': 0}
         if not res or res.status_code != 200:
             return result
@@ -318,8 +349,8 @@ class Spider(BaseSpider):
     def searchContent(self, key, quick, pg=1):
         pg = int(pg or 1)
         self._ensure_host()
-        url = f'{self.host}/vodsearch/{key}----------{pg}---.html'
-        res = self.fetch(url)
+        url = '%s/vodsearch/%s----------%d---.html' % (self.host, key, pg)
+        res = self._http(url)
         if not res or res.status_code != 200:
             return {'list': []}
         return {'list': self._parse_list(res.text or ''), 'page': pg}
@@ -327,8 +358,8 @@ class Spider(BaseSpider):
     def detailContent(self, ids):
         vid = ids[0]
         self._ensure_host()
-        url = f'{self.host}/voddetail/{vid}.html'
-        res = self.fetch(url)
+        url = '%s/voddetail/%s.html' % (self.host, vid)
+        res = self._http(url)
         if not res or res.status_code != 200:
             return {'list': []}
         html = res.text or ''
@@ -343,10 +374,10 @@ class Spider(BaseSpider):
         eps = []
         for m in _RE_EP.finditer(html):
             path, sid, nid, text = m.group(1), m.group(3), m.group(4), _clean(m.group(5))
-            ep_name = text or (f'第{nid}集' if int(nid) > 1 else '\u64ad\u653e')
-            eps.append(f'{ep_name}${path}')
+            ep_name = self._valid_ep_name(text) or ('\u7b2c%s\u96c6' % nid if int(nid) > 1 else '\u64ad\u653e')
+            eps.append('%s$%s' % (ep_name, path))
         if not eps:
-            eps = [f'播放$/vodplay/{vid}-1-1.html']
+            eps = ['\u64ad\u653e$/vodplay/%s-1-1.html' % vid]
         vod = {
             'vod_id': vid,
             'vod_name': name,
@@ -359,10 +390,10 @@ class Spider(BaseSpider):
 
     def playerContent(self, flag, id, vipFlags=None):
         # id \u5f62\u5982 /vodplay/491059-1-1.html \u6216 491059-1-1
-        path = id if str(id).startswith('/') else f'/vodplay/{id}.html'
+        path = id if str(id).startswith('/') else '/vodplay/%s.html' % id
         self._ensure_host()
         play_url = self.host + path
-        res = self.fetch(play_url)
+        res = self._http(play_url)
         if not res or res.status_code != 200:
             return {'parse': 1, 'url': play_url}
         m = _RE_PLAYER.search(res.text or '')

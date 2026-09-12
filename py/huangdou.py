@@ -78,7 +78,6 @@ class _AESCBC:
 
 
 class Spider(BaseSpider):
-    DIAG_TID = '__diag__'
 
     def __init__(self):
         self.hosts = list(HOSTS)
@@ -281,30 +280,10 @@ class Spider(BaseSpider):
     def localProxy(self, params):
         return [200, "video/MP2T", ""]
 
-    # ---------- \u8bca\u65ad\uff08\u4e34\u65f6\u8bbe\u65bd\uff0c\u771f\u673a\u9a8c\u8bc1\u901a\u8fc7\u540e\u79fb\u9664\uff09 ----------
-    def _diag_lines(self):
-        lines = [
-            '\u6a21\u5757: hostresolver=%s probe_first=%s parse_ext=%s' % (
-                '\u6709' if resolve_host else '\u65e0', '\u6709' if probe_first else '\u65e0',
-                '\u6709' if parse_ext else '\u65e0'),
-            'ext: %s' % json.dumps(self._ext, ensure_ascii=False),
-            'host: %s' % self.host,
-            '\u6c60(%d): %s' % (len(self.hosts), ' | '.join(self.hosts)),
-        ]
-        try:
-            obj = self._api('/drama/list', {'page': '1', 'page_size': '1'})
-            n = len(self._list(obj))
-            lines.append('\u72ec\u7acb\u5b9e\u6d4b /drama/list: %s \u6761\u6570\u636e' % ('\u6709(%d)' % n if n else '\u27570 \u6761'))
-        except Exception as e:
-            lines.append('\u72ec\u7acb\u5b9e\u6d4b: FAIL %s' % str(e)[:50])
-        lines += ['trace] ' + x for x in self.trace[:12]]
-        return lines
-
     # ---------- \u63a5\u53e3 ----------
     def homeContent(self, filter):
         data = self._api("/drama/list", {"page": "1", "page_size": "18"})
         classes = self._classes()
-        classes.append({"type_id": self.DIAG_TID, "type_name": "\u26a0\u8bca\u65ad"})
         return {"class": classes, "filters": self._filters(classes), "list": [self._vod(x) for x in self._list(data)], "parse": 0, "jx": 0}
 
     def homeVideoContent(self):
@@ -313,10 +292,6 @@ class Spider(BaseSpider):
 
     def categoryContent(self, tid, pg, filter, extend):
         pg = int(pg or 1)
-        if tid == self.DIAG_TID:
-            lines = self._diag_lines()
-            lst = [{'vod_id': 'diag', 'vod_name': l, 'vod_pic': '', 'vod_remarks': ''} for l in lines]
-            return {'list': lst, 'page': 1, 'pagecount': 1, 'limit': len(lst), 'total': len(lst)}
         extend = extend or {}
         if tid == "yuandou":
             data = self._api("/drama/navBlock", {"code": "yuandou", "tab": "recommend", "page": str(pg)})
@@ -444,8 +419,6 @@ class Spider(BaseSpider):
         fs = {}
         for c in classes:
             tid = c["type_id"]
-            if tid == self.DIAG_TID:
-                continue
             tabs = self._nav_filter(tid) if tid not in ("all", "yuandou") else []
             fs[tid] = ([{"key": "sub", "name": "\u5b50\u5206\u7c7b", "value": [{"n": t.get("name", "\u9ed8\u8ba4"), "v": str(i)} for i, t in enumerate(tabs)]}] if tabs else []) + common
         return fs
