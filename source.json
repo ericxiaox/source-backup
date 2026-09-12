@@ -137,7 +137,7 @@
     },
     {
       "key": "py_hlw",
-      "name": "\ud83d\udcf1\u9ed1\u6599\u7f51\uff5c\u9ed1\u6599",
+      "name": "\ud83d\udcf1\u9ed1\u6599\u7f51\uff5c\u77ed\u5267",
       "type": 3,
       "api": "./py/hlw.py",
       "ext": "publish@https://hlwf6.com/",
@@ -149,7 +149,7 @@
     },
     {
       "key": "py_51aw",
-      "name": "\ud83d\udcf151\u6697\u7f51",
+      "name": "\ud83d\udcf151\u6697\u7f51\uff5c\u77ed\u5267",
       "type": 3,
       "api": "./py/51aw.py",
       "ext": "publish@https://51aw34.com/",

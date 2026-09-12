@@ -384,7 +384,51 @@ class Spider(Spider):
             return {'list': []}
 
     # ============ \u5206\u7c7b\u5185\u5bb9 ============
-    def categoryContent(self, cid, pg, filter, ext):
+    # \u2500\u2500 \u5165\u53e3\u81ea\u6108\uff082026-09-12 \u63a8\u5e7f\uff0c\u7279\u5316\uff1a\u672c\u6e90\u7684 host \u8f7d\u4f53\u662f _xurl\uff09\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    # \u80cc\u666f\uff1a_detect_domain \u53ea\u5728 init \u8dd1\u4e00\u6b21\uff0c\u5168\u8d25\u5373\u9501\u9759\u6001\u9996\u57df \u2192 \u771f\u673a\u300c\u6709\u5206\u7c7b\u65e0\u89c6\u9891\u300d\u3002
+    def _ensure_host(self, force=False):
+        if force or not getattr(self, '_xurl', None):
+            try:
+                self._detect_domain()
+            except Exception:
+                pass
+        return getattr(self, '_xurl', '') or ''
+
+    def categoryContent(self, *a, **kw):
+        """\u5165\u53e3\u81ea\u6108 + \u7a7a\u7ed3\u679c\u91cd\u8bd5\u4e00\u6b21\uff08\u539f\u5b9e\u73b0\u89c1 _categoryContent\uff09"""
+        try:
+            self._ensure_host()
+        except Exception:
+            pass
+        r = self._categoryContent(*a, **kw)
+        if isinstance(r, dict) and not r.get('list'):
+            try:
+                self._ensure_host(force=True)
+                r2 = self._categoryContent(*a, **kw)
+                if isinstance(r2, dict) and r2.get('list'):
+                    return r2
+            except Exception:
+                pass
+        return r
+
+    def searchContent(self, *a, **kw):
+        """\u5165\u53e3\u81ea\u6108 + \u7a7a\u7ed3\u679c\u91cd\u8bd5\u4e00\u6b21\uff08\u539f\u5b9e\u73b0\u89c1 _searchContent\uff09"""
+        try:
+            self._ensure_host()
+        except Exception:
+            pass
+        r = self._searchContent(*a, **kw)
+        if isinstance(r, dict) and not r.get('list'):
+            try:
+                self._ensure_host(force=True)
+                r2 = self._searchContent(*a, **kw)
+                if isinstance(r2, dict) and r2.get('list'):
+                    return r2
+            except Exception:
+                pass
+        return r
+
+    def _categoryContent(self, cid, pg, filter, ext):
         page = int(pg) if pg else 1
         cid = str(cid)
 
@@ -630,7 +674,7 @@ class Spider(Spider):
             print(f"player error: {e}")
             return {"parse": 1, "playUrl": "", "url": id, "header": json.dumps(self._req_headers())}
 
-    def searchContent(self, key, quick, page='1'):
+    def _searchContent(self, key, quick, page='1'):
         page = int(page) if page else 1
         size = 20
         params = {'page': page, 'size': size, 'keyword': key}

@@ -290,7 +290,86 @@ class Spider(BaseSpider):
     def homeVideoContent(self):
         return {}
 
-    def categoryContent(self, tid, pg, filter, extend):
+    # \u2500\u2500 \u5165\u53e3\u81ea\u6108\uff082026-09-12 \u5168\u91cf\u63a8\u5e7f\uff0c\u6a21\u677f\u540c \u9ed1\u6599\u4e0d\u6253\u70ca\uff09\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    # \u80cc\u666f\uff1ainit \u53ea\u8dd1\u4e00\u6b21\uff0cApp \u51b7\u542f\u52a8\u7f51\u7edc\u672a\u5c31\u7eea/\u77ac\u65f6\u6296\u52a8/\u7ad9\u65b9\u6362\u57df \u2192 \u53d6\u57df\u5931\u8d25\u540e host \u6c38\u4e45\u4e3a\u7a7a\uff0c
+    #      \u5206\u7c7b(\u5185\u7f6e\u515c\u5e95)\u7167\u5e38\u663e\u793a\u3001\u5217\u8868\u6c38\u8fdc\u7a7a \u2014\u2014 \u771f\u673a\u75c7\u72b6\u300c\u6709\u5206\u7c7b\u65e0\u89c6\u9891\u300d\u3002
+    # \u4e09\u4ef6\u5957\uff1a\u2460\u5165\u53e3\u61d2\u91cd\u89e3\u6790 \u2461\u5217\u8868\u7a7a \u2192 \u63a2\u6d3b/\u6362\u57df\u540e\u91cd\u8bd5\u4e00\u6b21 \u2462\u9996\u8f6e\u5168\u8d25\u65f6\u9759\u6001\u515c\u5e95\u3002
+    def _ensure_host(self, force=False):
+        old = getattr(self, 'host', '') or ''
+        if old and not force:
+            return old
+        _rq = globals().get('requests') or globals().get('rq')
+        if old and _rq is not None:
+            # \u5148\u63a2\u6d3b\u5f53\u524d host\uff1a\u6d3b\u7740=\u53ea\u662f\u5076\u53d1\u6296\u52a8\uff0c\u4e0d\u52a8\uff1b\u8fde\u4e0d\u4e0a=\u7591\u4f3c\u6362\u57df\uff0c\u91cd\u89e3\u6790
+            try:
+                _r = _rq.get(old.rstrip('/') + '/', headers=getattr(self, 'headers', {}) or {},
+                             proxies=getattr(self, 'proxies', {}) or {},
+                             timeout=6, verify=False)
+                if getattr(_r, 'status_code', 0) == 200:
+                    return old
+            except Exception:
+                pass
+        h = ''
+        try:
+            _fn = getattr(self, 'get_working_host', None) or getattr(self, '_pick_host', None)
+            if _fn:
+                h = (_fn() or '').rstrip('/')
+        except Exception:
+            h = ''
+        if h:
+            self.host = h
+        elif not old:
+            for _c in (getattr(self, 'BUILTIN_HOSTS', None), globals().get('BUILTIN_HOSTS'),
+                       globals().get('HOSTS'), getattr(self, 'HOSTS', None)):
+                if _c:
+                    _v = _c[0] if isinstance(_c, (list, tuple)) else _c
+                    if _v:
+                        self.host = str(_v).rstrip('/')
+                        break
+        else:
+            self.host = old
+        try:
+            self.headers.update({'Origin': self.host, 'Referer': self.host + '/'})
+        except Exception:
+            pass
+        print(f'[ensure_host] 使用站点: {self.host}')
+        return self.host
+
+    def categoryContent(self, *a, **kw):
+        """\u5165\u53e3\u81ea\u6108 + \u7a7a\u7ed3\u679c\u91cd\u8bd5\u4e00\u6b21\uff08\u539f\u5b9e\u73b0\u89c1 _categoryContent\uff09"""
+        try:
+            self._ensure_host()
+        except Exception:
+            pass
+        r = self._categoryContent(*a, **kw)
+        if isinstance(r, dict) and not r.get('list'):
+            try:
+                self._ensure_host(force=True)
+                r2 = self._categoryContent(*a, **kw)
+                if isinstance(r2, dict) and r2.get('list'):
+                    return r2
+            except Exception:
+                pass
+        return r
+
+    def searchContent(self, *a, **kw):
+        """\u5165\u53e3\u81ea\u6108 + \u7a7a\u7ed3\u679c\u91cd\u8bd5\u4e00\u6b21\uff08\u539f\u5b9e\u73b0\u89c1 _searchContent\uff09"""
+        try:
+            self._ensure_host()
+        except Exception:
+            pass
+        r = self._searchContent(*a, **kw)
+        if isinstance(r, dict) and not r.get('list'):
+            try:
+                self._ensure_host(force=True)
+                r2 = self._searchContent(*a, **kw)
+                if isinstance(r2, dict) and r2.get('list'):
+                    return r2
+            except Exception:
+                pass
+        return r
+
+    def _categoryContent(self, tid, pg, filter, extend):
         result = {'list': []}
         path = tid.replace('{pg}', str(pg)) if '{pg}' in tid else tid
         try:
@@ -299,7 +378,7 @@ class Spider(BaseSpider):
             pass
         return result
 
-    def searchContent(self, key, quick, pg='1'):
+    def _searchContent(self, key, quick, pg='1'):
         result = {'list': []}
         try:
             path = f'/?k={quote(key)}'
