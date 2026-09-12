@@ -10,8 +10,7 @@
 # \u7ed3\u6784: \u5206\u7c7b /vodtype/{tid}-{pg}.html\uff1b\u641c\u7d22 /vodsearch/{wd}----------{pg}---.html
 #       \u8be6\u60c5 /voddetail/{id}.html\uff1b\u64ad\u653e /vodplay/{id}-{sid}-{nid}.html
 #       \u64ad\u653e\u9875 var player_aaaa={...url:m3u8}\uff08encrypt=0\uff09
-# \u5c01\u9762: \u5217\u8868 img[data-src]\uff08thjpg*.vip/upload/vod/...\uff09\uff0c\u65e0\u52a0\u5bc6\uff0c\u76f4\u94fe\u5373\u53ef\u3002
-#       \u6ce8\u610f\u522b\u6293\u5230\u5e7f\u544a\u56fe\uff08oss-accelerate.aliyuncs.com siteadmin\uff09\u3002
+#       \u6ce8\u610f\u522b\u6293\u5230\u5e7f\u544a\u56fe\uff08\u6a2a\u5e45/\u5e95\u98d8\uff0chost \u9ed1\u540d\u5355\u89c1 _AD_HOST_RE\uff09\u3002
 import json
 import re
 import sys
@@ -69,13 +68,16 @@ _BUILTIN_WORDS = ['yjewvzfn', 'www', 'm', 'wap', 'app', 'tv', 'h5', 'vip']
 
 _RE_ITEM = re.compile(
     r'<div class="pornkvideos[^"]*">\s*<a href="(/voddetail/(\d+)\.html)"[^>]*>(.*?)</a>', re.S)
-_RE_IMG = re.compile(r'data-src="(https?://[^"]+/upload/vod/[^"]+)"')
+# \u5c01\u9762\u56fe\u5e8a\u4e0d\u6b62\u4e00\u5bb6\uff1a\u524d\u6bb5\u5206\u7c7b thjpg*.vip/upload/vod\uff0c\u540e\u6bb5\u5206\u7c7b img.xxibaocdn.com/video/...
+# \uff082026-09-12 \u5b9e\u6d4b tid=55 vs tid=12/89\uff09\uff0c\u6545\u53ea\u8ba4 data-src \u4efb\u610f http \u56fe + \u5e7f\u544a host \u9ed1\u540d\u5355\u3002
+_RE_IMG = re.compile(r'data-src="(https?://[^"]+)"')
+# \u5e7f\u544a\u56fe host\uff08\u9875\u5185\u6a2a\u5e45/\u5e95\u98d8\uff0c\u4e0d\u5728\u6761\u76ee\u5757\u5185\uff0c\u9632\u5fa1\u6027\u8fc7\u6ee4\uff09
+_AD_HOST_RE = re.compile(r'alicdn\.com|baiducdn2img\.top|oss-accelerate\.aliyuncs\.com|shsrdzs\.com')
 _RE_TITLE = re.compile(r'<h2>\s*(.*?)\s*</h2>', re.S)
 _RE_DATE = re.compile(r'<div class="vlength">\s*(.*?)\s*</div>', re.S)
 _RE_PAGE = re.compile(r'/vodtype/(?:\d+)-(\d+)\.html')
 _RE_EP = re.compile(r'<a[^>]*href="(/vodplay/(\d+)-(\d+)-(\d+)\.html)"[^>]*>(.*?)</a>', re.S)
 _RE_PLAYER = re.compile(r'var\s+player_aaaa\s*=\s*(\{.*?\})\s*;?\s*</script>', re.S)
-_AD_MARK = 'oss-accelerate.aliyuncs.com'
 
 
 def _clean(s):
@@ -289,8 +291,13 @@ class Spider(BaseSpider):
         out = []
         for m in _RE_ITEM.finditer(html):
             href, vid, chunk = m.group(1), m.group(2), m.group(3)
-            img = _RE_IMG.search(chunk)
-            pic = img.group(1) if img else ''
+            pic = ''
+            for img in _RE_IMG.finditer(chunk):
+                u = img.group(1)
+                if _AD_HOST_RE.search(u):
+                    continue
+                pic = u
+                break
             t = _RE_TITLE.search(chunk)
             name = _clean(t.group(1)) if t else ''
             d = _RE_DATE.search(chunk)
@@ -339,10 +346,13 @@ class Spider(BaseSpider):
         h1 = re.search(r'<h1[^>]*>(.*?)</h1>', html, re.S)
         name = _clean(h1.group(1)) if h1 else str(vid)
         pic = ''
-        for m in re.finditer(r'(https?://[^"\']+/upload/vod/[^"\']+\.(?:jpg|png|webp))', html):
-            if _AD_MARK not in m.group(1):
-                pic = m.group(1)
-                break
+        # \u8be6\u60c5\u9875\u5c01\u9762\u540c\u6837\u662f\u591a\u56fe\u5e8a\uff08thjpg*.vip / xxibaocdn\uff09\uff0c\u53ea\u6ee4\u5e7f\u544a host
+        for m in re.finditer(r'(https?://[^"\']+?\.(?:jpg|png|webp)(?:\?[^"\']*)?)', html):
+            u = m.group(1)
+            if _AD_HOST_RE.search(u):
+                continue
+            pic = u
+            break
         # \u5206\u96c6\uff08\u77ed\u7247\u7ad9\u591a\u4e3a\u5355\u96c6\uff1b\u951a\u6587\u672c\u5e38\u4e3a\u7a7a \u2192 \u6309\u94fe\u63a5\u5e8f\u53f7\u751f\u6210\u300c\u7b2cN\u96c6\u300d\uff09
         eps = []
         for m in _RE_EP.finditer(html):

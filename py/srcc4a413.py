@@ -15,6 +15,7 @@ import json
 import re
 import sys
 import os
+import time
 import random
 import html as _html
 from urllib.parse import urljoin
@@ -76,6 +77,19 @@ _AD_MARK = 'xn-tokaa2|fanpppas|jidi21df|ivvpdh'
 
 def _clean(s):
     return _html.unescape(re.sub(r'<[^>]+>', '', s or '')).replace('\xa0', ' ').strip()
+
+
+def _valid_page(text):
+    """\u5185\u5bb9\u9875\u5224\u5b9a\uff1a\u65e2\u6709\u6807\u8bb0\u3001\u5217\u8868\u53c8\u8db3\u591f\u6ee1\uff08\u226510 \u6761\uff09\u3002
+    \u9632\u4e24\u7c7b\u5751\uff1a\u53cd\u722c\u58f3\u9875\uff08Redirecting... JS \u58f3\uff0c200 \u4f46\u65e0\u5185\u5bb9\uff09\u3001\u6b8b\u7f3a\u8282\u70b9\u3002"""
+    t = text or ''
+    return _MARK in t and t.count('class="thumbnail"') >= 10
+
+
+def _looks_shell(text):
+    """\u7591\u4f3c\u53cd\u722c\u58f3\u9875\uff1a\u6761\u76ee\u4e3a 0 \u6216\u7279\u5f81\u5f02\u5e38\u3002\u547d\u4e2d\u65f6\u4e0a\u5c42\u91cd\u8bd5\u3002"""
+    t = text or ''
+    return (not t) or len(t) < 10000 or 'Redirecting' in t
 
 
 # \u5206\u96c6\u540d\u5e7f\u544a\u9ed1\u540d\u5355\uff08\u5bf9\u9f50\u6bcf\u65e5\u5927\u8d5b._valid_ep_name \u7eaa\u5f8b\uff09
@@ -161,7 +175,7 @@ class Spider(BaseSpider):
             r = requests.get(host_base + _PROBE_PATH, headers=self.headers,
                              proxies=self.proxies, timeout=5, verify=False,
                              allow_redirects=True)
-            ok = (r.status_code == 200 and _MARK in (r.text or ''))
+            ok = (r.status_code == 200 and _valid_page(r.text))
             self.trace.append('%s -> %s %s' % (host_base, r.status_code, 'OK' if ok else '\u975e\u5185\u5bb9'))
             if ok and not result[0]:
                 result[0] = host_base
@@ -227,7 +241,7 @@ class Spider(BaseSpider):
                     headers=self.headers,
                     proxies=self.proxies,
                     timeout=8,
-                    validate=lambda host, text: _MARK in (text or ''),
+                    validate=lambda host, text: _valid_page(text),
                     probe_path=_PROBE_PATH,
                 )
                 if h:
@@ -238,7 +252,7 @@ class Spider(BaseSpider):
             try:
                 h = probe_first(self._candidate_hosts(), headers=self.headers,
                                 proxies=self.proxies, timeout=8,
-                                validate=lambda host, text: _MARK in (text or ''),
+                                validate=lambda host, text: _valid_page(text),
                                 tag='\u6781\u4e50\u7981\u533a\u515c\u5e95')
                 if h:
                     return h.rstrip('/')
@@ -286,11 +300,9 @@ class Spider(BaseSpider):
         # App \u9996\u9875\u5237\u65b0\u7684\u63a8\u8350\u4f4d\u8d70\u8fd9\u91cc\u2014\u2014\u6293 /jlhs\uff08\u6700\u65b0\u805a\u5408\u9875\uff0c\u5b9e\u6d4b 60 \u6761\uff09
         try:
             self._ensure_host()
-            res = self._http(self.host + '/jlhs')
-            if res and res.status_code == 200:
-                lst = self._parse_list(res.text or '')[:12]
-                if lst:
-                    return {'list': lst}
+            lst = self._parse_list(self._get_page(self.host + '/jlhs'))[:12]
+            if lst:
+                return {'list': lst}
         except Exception:
             pass
         return {'list': []}
@@ -314,6 +326,18 @@ class Spider(BaseSpider):
         nums = [int(x) for x in _RE_PAGE.findall(html)]
         return max(nums) if nums else 1
 
+    def _get_page(self, url):
+        """GET \u5206\u7c7b/\u641c\u7d22\u9875\uff1b\u7591\u4f3c\u53cd\u722c\u58f3\u9875\u6216\u7a7a\u7ed3\u679c\u81ea\u52a8\u91cd\u8bd5\uff08\u6700\u591a 3 \u6b21\uff09\u3002
+        \u5b9e\u6d4b\u58f3\u9875=200 \u4f46 JS challenge \u58f3\uff08Redirecting...\uff09\uff0crequests \u62ff\u5230\u4e5f\u89e3\u6790\u4e0d\u51fa\u3002"""
+        for i in range(3):
+            res = self._http(url)
+            html = res.text or '' if res else ''
+            if not _looks_shell(html):
+                return html
+            self.trace.append('\u7591\u4f3c\u58f3\u9875/\u7a7a(\u7b2c%d\u6b21): %s' % (i + 1, len(html)))
+            time.sleep(0.6)
+        return html if res else ''
+
     def categoryContent(self, tid, pg, filter, extend):
         pg = int(pg or 1)
         if tid == self.DIAG_TID:
@@ -324,12 +348,9 @@ class Spider(BaseSpider):
                     'total': len(lst)}
         self._ensure_host()
         url = '%s/vodtype/%s-%d/' % (self.host, tid, pg)
-        res = self._http(url)
-        result = {'list': [], 'page': pg, 'pagecount': 1, 'limit': 20, 'total': 0}
-        if not res or res.status_code != 200:
-            return result
-        html = res.text or ''
-        result['list'] = self._parse_list(html)
+        html = self._get_page(url)
+        result = {'list': self._parse_list(html), 'page': pg,
+                  'pagecount': 1, 'limit': 20, 'total': 0}
         result['pagecount'] = self._pagecount(html)
         result['limit'] = len(result['list'])
         result['total'] = result['pagecount'] * max(len(result['list']), 1)
@@ -339,19 +360,16 @@ class Spider(BaseSpider):
         pg = int(pg or 1)
         self._ensure_host()
         url = '%s/vodsearch/%s----------%d---/' % (self.host, key, pg)
-        res = self._http(url)
-        if not res or res.status_code != 200:
-            return {'list': []}
-        return {'list': self._parse_list(res.text or ''), 'page': pg}
+        html = self._get_page(url)
+        return {'list': self._parse_list(html), 'page': pg}
 
     def detailContent(self, ids):
         vid = ids[0]
         self._ensure_host()
         url = '%s/voddetail/%s/' % (self.host, vid)
-        res = self._http(url)
-        if not res or res.status_code != 200:
+        html = self._get_page(url)
+        if not html:
             return {'list': []}
-        html = res.text or ''
         tt = re.search(r'<title>(.*?)</title>', html, re.S)
         name = _clean(tt.group(1)) if tt else str(vid)
         pic = ''
@@ -388,11 +406,8 @@ class Spider(BaseSpider):
         path = id if str(id).startswith('/') else '/vodplay/%s/' % id
         self._ensure_host()
         play_url = self.host + path
-        res = self._http(play_url)
-        if not res or res.status_code != 200:
-            return {'parse': 1, 'url': play_url}
+        html = self._get_page(play_url)
         real = ''
-        html = res.text or ''
         m = _RE_PLAYER.search(html)
         if m:
             try:
