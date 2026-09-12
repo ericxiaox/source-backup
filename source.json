@@ -1,11 +1,22 @@
 {
-  "sites_count": 25,
+  "sites_count": 20,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
   "warningText": "\u4e13\u5c5e\u5305 v0.1 \u00b7 \u81ea\u7528",
   "spider": "",
   "sites": [
+    {
+      "key": "py_\u76f4\u64ad",
+      "name": "\ud83d\udcf1\u76f4\u64ad\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/zhibo.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2
+    },
     {
       "key": "py_mrds",
       "name": "\ud83d\udcf1\u6bcf\u65e5\u5927\u8d5b\uff5c\u9ed1\u6599",
@@ -207,76 +218,10 @@
       "changeable": 1
     },
     {
-      "key": "py_\u76f4\u64ad",
-      "name": "\ud83d\udcf1\u76f4\u64ad\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./xbpq/zhibo.py",
-      "searchable": 1,
-      "changeable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "playerType": 2
-    },
-    {
       "key": "py_huangdou",
       "name": "\ud83d\udcf1\u9ec4\u8c46\u77ed\u5267",
       "type": 3,
-      "api": "./xbpq/huangdou.py",
-      "searchable": 1,
-      "changeable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "playerType": 2
-    },
-    {
-      "key": "py_\u571f\u8c46",
-      "name": "\ud83d\udcf1\u571f\u8c46\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./xbpq/tudou.py",
-      "searchable": 1,
-      "changeable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "playerType": 2
-    },
-    {
-      "key": "py_\u4e00\u8d77\u968f\u7f18",
-      "name": "\ud83d\udcf1\u968f\u7f18\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./xbpq/yiqisuiyuan.py",
-      "searchable": 1,
-      "changeable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "playerType": 2
-    },
-    {
-      "key": "py_\u65b0\u571f\u8c46",
-      "name": "\ud83d\udcf1\u65b0\u8c46\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./xbpq/xintudou.py",
-      "searchable": 1,
-      "changeable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "playerType": 2
-    },
-    {
-      "key": "py_stripchat",
-      "name": "\ud83d\udcf1Strip\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./xbpq/stripchat.py",
-      "searchable": 1,
-      "changeable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "playerType": 2
-    },
-    {
-      "key": "py_\u64b8\u4e00\u64b8",
-      "name": "\ud83d\udcf1\u64b8\u4e00\u64b8\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./xbpq/luyilu.py",
+      "api": "./py/huangdou.py",
       "searchable": 1,
       "changeable": 1,
       "quickSearch": 1,
@@ -1035,6 +980,66 @@
       "filterable": 1,
       "ext": "./xbpq/lscd.json",
       "off_reason": "\u975epy\u6e90 py \u5316\u6539\u9020(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85\u9010\u4e2a\u6539\u9020\u56de\u4e0a\u7ebf"
+    },
+    {
+      "key": "py_\u571f\u8c46",
+      "name": "\ud83d\udcf1\u571f\u8c46\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/tudou.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2,
+      "off_reason": "\u672a\u6539\u9020\u65e7py\u6e90(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85 py \u5316\u6539\u9020\u540e\u56de\u4e0a\u7ebf"
+    },
+    {
+      "key": "py_\u4e00\u8d77\u968f\u7f18",
+      "name": "\ud83d\udcf1\u968f\u7f18\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/yiqisuiyuan.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2,
+      "off_reason": "\u672a\u6539\u9020\u65e7py\u6e90(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85 py \u5316\u6539\u9020\u540e\u56de\u4e0a\u7ebf"
+    },
+    {
+      "key": "py_\u65b0\u571f\u8c46",
+      "name": "\ud83d\udcf1\u65b0\u8c46\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/xintudou.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2,
+      "off_reason": "\u672a\u6539\u9020\u65e7py\u6e90(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85 py \u5316\u6539\u9020\u540e\u56de\u4e0a\u7ebf"
+    },
+    {
+      "key": "py_stripchat",
+      "name": "\ud83d\udcf1Strip\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/stripchat.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2,
+      "off_reason": "\u672a\u6539\u9020\u65e7py\u6e90(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85 py \u5316\u6539\u9020\u540e\u56de\u4e0a\u7ebf"
+    },
+    {
+      "key": "py_\u64b8\u4e00\u64b8",
+      "name": "\ud83d\udcf1\u64b8\u4e00\u64b8\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./xbpq/luyilu.py",
+      "searchable": 1,
+      "changeable": 1,
+      "quickSearch": 1,
+      "filterable": 1,
+      "playerType": 2,
+      "off_reason": "\u672a\u6539\u9020\u65e7py\u6e90(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85 py \u5316\u6539\u9020\u540e\u56de\u4e0a\u7ebf"
     }
   ]
 }

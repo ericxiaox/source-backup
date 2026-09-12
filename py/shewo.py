@@ -180,7 +180,9 @@ class Spider(BaseSpider):
         return cands
 
     def _resolve_inline(self, validate_probe):
-        """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff08gitee \u8fdc\u7a0b\u5bfc\u5165\u5f62\u6001\u53ea\u5269\u8fd9\u6761\u8def\uff09\u3002"""
+        """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff08gitee \u8fdc\u7a0b\u5bfc\u5165\u5f62\u6001\u53ea\u5269\u8fd9\u6761\u8def\uff09\u3002
+        \u6ce8\u610f\u4e0d\u8981\u7ed9 join \u8bbe\u77ed\u8d85\u65f6\uff1a\u624b\u673a\u7f51\u7edc DNS+TLS \u6bd4 PC \u6162\u5f97\u591a\uff0c
+        \u63a2\u6d3b\u7ebf\u7a0b\u81ea\u5e26 5s \u8d85\u65f6\u81ea\u7136\u4f1a\u9000\uff0cjoin \u7b49\u6ee1\u5373\u53ef\uff08\u6700\u574f ~10s\uff09\u3002"""
         import threading
         cands = self._candidate_hosts()
         if not cands:
@@ -191,7 +193,7 @@ class Spider(BaseSpider):
         for t in threads:
             t.start()
         for t in threads:
-            t.join(timeout=6)
+            t.join()
         return result[0] or ''
 
     def get_working_host(self):
@@ -244,6 +246,17 @@ class Spider(BaseSpider):
         lines += ['trace] ' + x for x in self.trace[:12]]
         return lines
 
+    def _ensure_host(self):
+        """init \u65f6\u53d6\u57df\u5931\u8d25\uff08\u624b\u673a\u7f51\u7edc\u6162\uff09\u2192 \u9996\u6b21\u771f\u6b63\u8bbf\u95ee\u65f6\u518d\u8bd5\u4e00\u6b21\u3002"""
+        if self.host:
+            return
+        self.trace.append('\u61d2\u91cd\u8bd5: \u91cd\u65b0\u53d6\u57df')
+        h = self.get_working_host()
+        if h:
+            self.host = h
+            self.headers.update({'Origin': self.host, 'Referer': self.host + '/'})
+            print(f'懒重试命中: {self.host}')
+
     # ---------- \u63a5\u53e3 ----------
     def homeContent(self, filter):
         classes = [{'type_name': n, 'type_id': tid} for n, tid in _CATS]
@@ -251,6 +264,15 @@ class Spider(BaseSpider):
         return {'class': classes, 'filters': {}}
 
     def homeVideoContent(self):
+        # App \u9996\u9875\u5237\u65b0\u7684\u63a8\u8350\u4f4d\u8d70\u8fd9\u91cc\u2014\u2014\u6293\u7b2c\u4e00\u5206\u7c7b\u9875\u586b\u4e0a\uff08\u4e4b\u524d\u8fd4\u56de\u7a7a\u5bfc\u81f4\u300c\u5237\u65b0\u4e0d\u51fa\u4e1c\u897f\u300d\u89c2\u611f\uff09
+        try:
+            res = self.fetch(self.host + _PROBE_PATH)
+            if res and res.status_code == 200:
+                lst = self._parse_list(res.text or '')[:12]
+                if lst:
+                    return {'list': lst}
+        except Exception:
+            pass
         return {'list': []}
 
     def _parse_list(self, html):
@@ -280,6 +302,7 @@ class Spider(BaseSpider):
                     'vod_remarks': ''} for l in lines]
             return {'list': lst, 'page': 1, 'pagecount': 1, 'limit': len(lst),
                     'total': len(lst)}
+        self._ensure_host()
         url = f'{self.host}/vodtype/{tid}-{pg}.html'
         res = self.fetch(url)
         result = {'list': [], 'page': pg, 'pagecount': 1, 'limit': 20, 'total': 0}
@@ -294,6 +317,7 @@ class Spider(BaseSpider):
 
     def searchContent(self, key, quick, pg=1):
         pg = int(pg or 1)
+        self._ensure_host()
         url = f'{self.host}/vodsearch/{key}----------{pg}---.html'
         res = self.fetch(url)
         if not res or res.status_code != 200:
@@ -302,6 +326,7 @@ class Spider(BaseSpider):
 
     def detailContent(self, ids):
         vid = ids[0]
+        self._ensure_host()
         url = f'{self.host}/voddetail/{vid}.html'
         res = self.fetch(url)
         if not res or res.status_code != 200:
@@ -335,6 +360,7 @@ class Spider(BaseSpider):
     def playerContent(self, flag, id, vipFlags=None):
         # id \u5f62\u5982 /vodplay/491059-1-1.html \u6216 491059-1-1
         path = id if str(id).startswith('/') else f'/vodplay/{id}.html'
+        self._ensure_host()
         play_url = self.host + path
         res = self.fetch(play_url)
         if not res or res.status_code != 200:
