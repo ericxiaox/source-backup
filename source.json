@@ -67,7 +67,7 @@
     },
     {
       "key": "py_vhub",
-      "name": "\ud83d\udcf1VHUB\u00b7\u0058\u0076\u0069\u0064\u0065\u006f\u0073\u514d\u5899",
+      "name": "\ud83d\udcf1VHUB\u00b7\u0058\u0076\u0069\u0064\u0065\u006f\u0073\u514d\u5899\uff5c\u89c6\u9891",
       "type": 3,
       "api": "./py/vhub.py",
       "style": {
@@ -78,7 +78,7 @@
     },
     {
       "key": "py_jptt",
-      "name": "\ud83d\udcf1\u7981\u7247\u5929\u5802",
+      "name": "\ud83d\udcf1\u7981\u7247\u5929\u5802\uff5c\u89c6\u9891",
       "type": 3,
       "api": "./py/jptt.py",
       "ext": "publish@https://jptt.tv;hosts@https://2026ajptttv.work,https://jptttv2026a.work",
@@ -90,9 +90,9 @@
     },
     {
       "key": "py_airen",
-      "name": "\ud83d\udcf1AI\u4eba\u77ed\u5267",
+      "name": "\ud83d\udcf12048\u77ed\u5267",
       "type": 3,
-      "api": "./py/airdj.py",
+      "api": "./py/airen.py",
       "ext": "hosts@https://mdcmai4.xyz,https://mdcmai5.xyz,https://mdcmai3.xyz,https://mdcmai2.xyz",
       "style": {
         "type": "rect",
@@ -102,7 +102,7 @@
     },
     {
       "key": "py_xjiao",
-      "name": "\ud83d\udcf1\u9999\u8549\u89c6\u9891",
+      "name": "\ud83d\udcf1\u9999\u8549\u89c6\u9891\uff5c\u89c6\u9891",
       "type": 3,
       "api": "./py/xjsp.py",
       "ext": "hosts@https://h5.xxoox35.org,https://h5.xxoo168.org",
@@ -125,7 +125,7 @@
     },
     {
       "key": "py_wxts",
-      "name": "\ud83d\udcf1\u65e0\u9650\u81c0\u5c71",
+      "name": "\ud83d\udcf1\u65e0\u9650\u81c0\u5c71\uff5c\u89c6\u9891",
       "type": 3,
       "api": "./py/wxts.py",
       "ext": "publish@https://wuxiants.github.io/",
@@ -161,7 +161,7 @@
     },
     {
       "key": "py_yxy",
-      "name": "\ud83d\udcf1\u7389\u7f9e\u56ed",
+      "name": "\ud83d\udcf1\u7389\u7f9e\u56ed\uff5c\u89c6\u9891",
       "type": 3,
       "api": "./py/yxy.py",
       "ext": "publish@https://dizhi8.cc/yxy/",
@@ -184,7 +184,7 @@
     },
     {
       "key": "py_dy",
-      "name": "\ud83d\udcf1\u6296\u9634",
+      "name": "\ud83d\udcf1\u6296\u9634\uff5c\u89c6\u9891",
       "type": 3,
       "api": "./py/dy.py",
       "ext": "publish@https://github.com/kissav12/douyin",
