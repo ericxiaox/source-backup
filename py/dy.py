@@ -193,6 +193,7 @@ class Spider(BaseSpider):
         self._feed_done = False
         self._feed_err = 0
         self._feed_lock = threading.Lock()       # \u4e3b\u7ebf\u7a0b\u64ad\u653e\u53d6\u6d41 \u4e0e \u540e\u53f0\u9884\u53d6\u7ebf\u7a0b \u4e92\u65a5
+        self._feed_pf_seq = 0                    # \u5df2\u5728\u540e\u53f0\u9884\u53d6\u5230\u7684\u76ee\u6807\u6761\u6570\uff08\u53bb\u91cd\u8d77\u7ebf\u7a0b\uff09
         print(f'使用站点: {self.host}')
 
     def getName(self):
@@ -639,21 +640,23 @@ class Spider(BaseSpider):
         u = (it.get('video_url') or it.get('preview_url') or '').strip()
         if u and not u.startswith('http'):
             u = urljoin(self.host + '/', u)
-        # \u63d0\u524d\u9884\u53d6\uff1a\u8ddd\u7f13\u5b58\u672b\u5c3e \u22643 \u6761\u65f6\u540e\u53f0\u62c9\u4e0b\u4e00\u9875\uff0c\u6ed1\u52a8\u5230\u65f6\u4e0d\u7b49
-        if len(items) - seq <= 3 and not self._feed_done:
+        # \u4e00\u5f00\u64ad\u5c31\u9884\u53d6\uff08\u5bf9\u9f50 Legado \u6c89\u6d78\u6d41\u65b9\u6848\uff09\uff1a\u5f53\u524d\u6761\u5f00\u64ad\u77ac\u95f4\uff0c\u540e\u53f0\u628a
+        # \u540e 40 \u6761\uff08\u7ea6 2 \u9875\uff09\u5907\u8db3\uff0c\u6ed1\u52a8\u5230\u65f6\u96f6\u7b49\u5f85\uff1b\u53bb\u91cd\u9632\u91cd\u590d\u8d77\u7ebf\u7a0b\u3002
+        if not self._feed_done and len(items) < seq + 40 and self._feed_pf_seq < seq + 40:
+            self._feed_pf_seq = seq + 40
             try:
-                threading.Thread(target=self._feed_ensure, args=(seq + 20,),
+                threading.Thread(target=self._feed_ensure, args=(seq + 40,),
                                  daemon=True).start()
             except Exception:
                 pass
         return u
 
     def _feed_detail(self):
-        items = self._feed_ensure(20)            # \u9884\u62c9\u7b2c 1 \u9875\u53d6\u5c01\u9762
+        items = self._feed_ensure(40)            # \u9884\u62c9 2 \u9875\u53d6\u5c01\u9762 + \u9996\u5c4f\u5907\u64ad
         if not items:
             # \u968f\u673a\u8d77\u59cb\u9875\u53ef\u80fd\u843d\u7a7a \u2192 \u56de\u843d page1 \u518d\u8bd5\u4e00\u6b21
             self._feed_next, self._feed_done, self._feed_err = 1, False, 0
-            items = self._feed_ensure(20)
+            items = self._feed_ensure(40)
         pic = ''
         if items:
             cov = items[0].get('first_img') or items[0].get('cover_img') or ''
@@ -661,7 +664,8 @@ class Spider(BaseSpider):
                 if not cov.startswith('http'):
                     cov = urljoin(self.host + '/', cov)
                 pic = self._pic(cov)
-        eps = '#'.join('\u7b2c%d\u6761$feed_%d' % (i, i) for i in range(1, self.FEED_MAX_EP + 1))
+        # \u96c6\u540d\u7528\u96f6\u5bbd\u7a7a\u683c\uff1aApp \u5207\u96c6\u63d0\u793a/\u9009\u96c6\u5217\u8868\u663e\u793a\u4e3a\u7a7a\uff0c\u89c6\u89c9\u65e0\u300c\u7b2cN\u6761\u300d\u5b57\u6837
+        eps = '#'.join('\u200b$feed_%d' % i for i in range(1, self.FEED_MAX_EP + 1))
         return {'list': [{
             'vod_id': self.FEED_TID,
             'vod_name': '\U0001f525\u6296\u9634 \u00b7 \u968f\u673a\u5237',
@@ -686,6 +690,7 @@ class Spider(BaseSpider):
                 self._feed_next = random.randint(1, 8)
                 self._feed_done = False
                 self._feed_err = 0
+                self._feed_pf_seq = 0
                 return self._feed_detail()
             body = self._get(f'/video/detail/{vid}').text or ''
             title = ''
