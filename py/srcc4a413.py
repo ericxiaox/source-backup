@@ -98,9 +98,6 @@ _AD_NAME_RE = re.compile('(<|http|www\\.|\\.com|\\.cc|\u516c\u4f17\u53f7|\u5173\
 
 class Spider(BaseSpider):
 
-    # \u8bca\u65ad\u680f\u76ee\uff08\u4e34\u65f6\u8bbe\u65bd\uff1a\u771f\u673a\u9a8c\u8bc1\u901a\u8fc7\u540e\u6574\u4f53\u79fb\u9664\uff09
-    DIAG_TID = '__diag__'
-
     def init(self, extend=""):
         self.proxies = {}
         self._ext = {}
@@ -271,29 +268,9 @@ class Spider(BaseSpider):
             self.headers.update({'Origin': self.host, 'Referer': self.host + '/'})
             print('\u61d2\u91cd\u8bd5\u547d\u4e2d: %s' % self.host)
 
-    # ---------- \u8bca\u65ad\uff08\u4e34\u65f6\u8bbe\u65bd\uff0c\u771f\u673a\u9a8c\u8bc1\u901a\u8fc7\u540e\u79fb\u9664\uff09 ----------
-    def _diag_lines(self):
-        lines = [
-            '\u6a21\u5757: hostresolver=%s probe_first=%s parse_ext=%s' % (
-                '\u6709' if resolve_host else '\u65e0', '\u6709' if probe_first else '\u65e0',
-                '\u6709' if parse_ext else '\u65e0'),
-            'ext: %s' % json.dumps(self._ext, ensure_ascii=False),
-            'host: %s' % self.host,
-        ]
-        r = self._http(self.host + _PROBE_PATH, timeout=8)
-        if r:
-            lines.append('\u72ec\u7acb\u5b9e\u6d4b: %s %s %s' % (
-                r.status_code, len(r.text or ''),
-                '\u542b\u7ad9\u540d\u6807\u8bb0' if _MARK in (r.text or '') else '\u2757\u65e0\u7ad9\u540d\u6807\u8bb0'))
-        else:
-            lines.append('\u72ec\u7acb\u5b9e\u6d4b: \u8bf7\u6c42\u5931\u8d25')
-        lines += ['trace] ' + x for x in self.trace[:12]]
-        return lines
-
     # ---------- \u63a5\u53e3 ----------
     def homeContent(self, filter):
         classes = [{'type_name': n, 'type_id': tid} for n, tid in _CATS]
-        classes.append({'type_name': '\u26a0\u8bca\u65ad', 'type_id': self.DIAG_TID})
         return {'class': classes, 'filters': {}}
 
     def homeVideoContent(self):
@@ -340,12 +317,6 @@ class Spider(BaseSpider):
 
     def categoryContent(self, tid, pg, filter, extend):
         pg = int(pg or 1)
-        if tid == self.DIAG_TID:
-            lines = self._diag_lines()
-            lst = [{'vod_id': 'diag', 'vod_name': l, 'vod_pic': '',
-                    'vod_remarks': ''} for l in lines]
-            return {'list': lst, 'page': 1, 'pagecount': 1, 'limit': len(lst),
-                    'total': len(lst)}
         self._ensure_host()
         url = '%s/vodtype/%s-%d/' % (self.host, tid, pg)
         html = self._get_page(url)

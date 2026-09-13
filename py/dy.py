@@ -12,6 +12,8 @@ import sys
 import os
 import html as _html
 import time
+import random
+import threading
 import base64
 from collections import OrderedDict
 from urllib.parse import quote, urljoin
@@ -144,6 +146,17 @@ class Spider(BaseSpider):
         'https://dys18.com',
     ]
 
+    # \u2500\u2500 \u6c89\u6d78\u6d41\uff08\ud83d\udd25\u5237\u89c6\u9891\uff09\u2500\u2500 2026-09-13 PC \u5b9e\u6d4b\uff1a
+    # POST /api.php/api/video/videolist  body: page=N
+    # \u54cd\u5e94 data = AES-128-CBC(key/iv \u56fa\u5b9a, PKCS7) base64 -> json.data.list\uff0c\u6bcf\u9875 20 \u6761\uff1b
+    # video_url/preview_url \u4e3a\u76f8\u5bf9\u8def\u5f84\uff08\u62fc host\uff09\uff0c\u6307\u5411 xv.dzuxta.cn \u7684 m3u8\uff1b
+    # \u8be6\u60c5\u9875\u7b7e\u540d\u6d41 exp\u22483h\uff0cfeed \u6d41\u73b0\u53d6\u73b0\u64ad\u65e0\u8fc7\u671f\u95ee\u9898\uff1b3 \u9875 60 \u6761\u65e0\u91cd\u590d\u3002
+    FEED_API = '/api.php/api/video/videolist'
+    FEED_KEY = b'2acf7e91e9864673'
+    FEED_IV = b'1c29882d3ddfcfd6'
+    FEED_TID = 'feed'
+    FEED_MAX_EP = 150   # \u9884\u751f\u6210\u96c6\u6570\uff08\u7ea6 8 \u9875\uff09\uff0c\u5237\u5b8c\u9000\u51fa\u91cd\u8fdb\u6362\u4e00\u6279
+
     def init(self, extend=""):
         self.proxies = {}
         self._ext = {}
@@ -174,6 +187,12 @@ class Spider(BaseSpider):
         }
         self.host = self.get_working_host()
         self.headers.update({'Origin': self.host, 'Referer': self.host + '/'})
+        # \u6c89\u6d78\u6d41\u7f13\u5b58\uff1aitems=\u5df2\u62c9\u6761\u76ee\uff1bnext=\u4e0b\u4e00\u9875\u7801\uff1bdone=\u5230\u5e95\uff1berr=\u8fde\u7eed\u5931\u8d25\u8ba1\u6570
+        self._feed_items = []
+        self._feed_next = random.randint(1, 8)   # \u968f\u673a\u8d77\u59cb\u9875\uff0c\u6bcf\u6b21\u8fdb\u5165\u6362\u4e00\u6279
+        self._feed_done = False
+        self._feed_err = 0
+        self._feed_lock = threading.Lock()       # \u4e3b\u7ebf\u7a0b\u64ad\u653e\u53d6\u6d41 \u4e0e \u540e\u53f0\u9884\u53d6\u7ebf\u7a0b \u4e92\u65a5
         print(f'使用站点: {self.host}')
 
     def getName(self):
@@ -412,6 +431,8 @@ class Spider(BaseSpider):
                 continue
             seen.add(cate)
             result['class'].append({'type_id': cate, 'type_name': name})
+        # \u6c89\u6d78\u6d41\u5165\u53e3\u7f6e\u9876\uff08\u6296\u97f3\u5f0f\u4e0a\u4e0b\u6ed1\uff0c\u8be6\u60c5=150\u96c6\u968f\u673a\u6d41\uff0c\u64ad\u653e\u5668\u7ad6\u6ed1\u5207\u96c6\uff09
+        result['class'].insert(0, {'type_id': self.FEED_TID, 'type_name': '\U0001f525\u5237\u89c6\u9891'})
         # \u9996\u9875\u5217\u8868\u4e3a JS \u6a21\u677f\u6e32\u67d3\uff0c\u6539\u7528\u7cbe\u9009\u9875\uff08\u670d\u52a1\u7aef\u6e32\u67d3\u3001\u6761\u76ee\u5e26\u7b7e\u540d data-url\uff09
         try:
             result['list'] = self._parse_list(self._get('/featured').text or '')
@@ -503,6 +524,15 @@ class Spider(BaseSpider):
 
     def _categoryContent(self, tid, pg, filter, extend):
         result = {'list': []}
+        if str(tid) == self.FEED_TID:
+            if str(pg) in ('1', ''):
+                result['list'] = [{
+                    'vod_id': self.FEED_TID,
+                    'vod_name': '\U0001f525\u968f\u673a\u5237 \u00b7 \u4e0a\u4e0b\u6ed1\u5207\u6362',
+                    'vod_pic': '',
+                    'vod_remarks': '\u7ad6\u6ed1\u5207\u6362\u89c6\u9891',
+                }]
+            return result
         path = f'/video/{tid}/best-recently'
         if str(pg) not in ('1', ''):
             path += f'/{pg}'
@@ -561,10 +591,102 @@ class Spider(BaseSpider):
             return ''
         return urljoin(self.host + '/', du)
 
+    # \u2500\u2500 \u6c89\u6d78\u6d41\uff08\ud83d\udd25\u5237\u89c6\u9891\uff09\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    def _feed_ensure(self, n):
+        """\u786e\u4fdd\u7f13\u5b58\u6761\u76ee \u2265 n \u6761\uff1b\u4e0d\u8db3\u65f6\u6309\u9875\u7eed\u62c9\uff08\u52a8\u6001\u5f80\u540e\u7ffb\u9875\u8865\u4f4d\uff09\u3002
+        \u5355\u6b21\u8c03\u7528\u6700\u591a\u62c9 12 \u9875\u9632\u5361\u987f\uff1b\u77ac\u65f6\u5931\u8d25\u4e0d\u9500\u6bc1\u7f13\u5b58\uff0c\u8fde\u7eed 2 \u8f6e\u5931\u8d25\u624d\u5224\u5230\u5e95\u3002
+        \u52a0\u9501\uff1a\u9884\u53d6\u7ebf\u7a0b\u4e0e\u53d6\u6d41\u7ebf\u7a0b\u4e92\u65a5\uff0c\u9632\u540c\u9875\u91cd\u590d\u62c9\u53d6\u3002"""
+        with self._feed_lock:
+            return self._feed_ensure_locked(n)
+
+    def _feed_ensure_locked(self, n):
+        tries = 0
+        while len(self._feed_items) < n and not self._feed_done and tries < 12:
+            tries += 1
+            try:
+                r = requests.post(self.host + self.FEED_API,
+                                  data={'page': str(self._feed_next)},
+                                  headers=self.headers, proxies=self.proxies,
+                                  timeout=12, verify=False)
+                raw = (r.json() or {}).get('data') or ''
+                from Crypto.Cipher import AES
+                p = AES.new(self.FEED_KEY, AES.MODE_CBC, self.FEED_IV).decrypt(
+                    base64.b64decode(raw + '=' * (-len(raw) % 4)))
+                if p and 1 <= p[-1] <= 16:
+                    p = p[:-p[-1]]
+                lst = ((json.loads(p.decode('utf-8')).get('data') or {}).get('list')) or []
+                if not lst:
+                    self._feed_done = True      # \u7ad9\u65b9\u6b63\u5e38\u8fd4\u56de\u4f46\u65e0\u6570\u636e = \u5230\u5e95
+                    break
+                self._feed_err = 0
+                self._feed_items.extend(lst)
+                self._feed_next += 1
+            except Exception:
+                self._feed_err += 1
+                if self._feed_err >= 2:
+                    self._feed_done = True
+                break                            # \u672c\u6b21\u5148\u8fd4\u56de\u5df2\u6709\u5185\u5bb9\uff0c\u4e0b\u6b21\u8c03\u7528\u518d\u8bd5
+        return self._feed_items
+
+    def _feed_media(self, seq):
+        """\u7b2c seq \u6761\uff081-based\uff09\u64ad\u653e\u5730\u5740\uff1b\u7f13\u5b58\u4e0d\u8db3\u81ea\u52a8\u8865\u4f4d\uff0c\u5e76\u540e\u53f0\u9884\u53d6\u540e\u4e00\u9875\u3002"""
+        if seq < 1:
+            return ''
+        items = self._feed_ensure(seq)
+        if len(items) < seq:
+            return ''
+        it = items[seq - 1]
+        u = (it.get('video_url') or it.get('preview_url') or '').strip()
+        if u and not u.startswith('http'):
+            u = urljoin(self.host + '/', u)
+        # \u63d0\u524d\u9884\u53d6\uff1a\u8ddd\u7f13\u5b58\u672b\u5c3e \u22643 \u6761\u65f6\u540e\u53f0\u62c9\u4e0b\u4e00\u9875\uff0c\u6ed1\u52a8\u5230\u65f6\u4e0d\u7b49
+        if len(items) - seq <= 3 and not self._feed_done:
+            try:
+                threading.Thread(target=self._feed_ensure, args=(seq + 20,),
+                                 daemon=True).start()
+            except Exception:
+                pass
+        return u
+
+    def _feed_detail(self):
+        items = self._feed_ensure(20)            # \u9884\u62c9\u7b2c 1 \u9875\u53d6\u5c01\u9762
+        if not items:
+            # \u968f\u673a\u8d77\u59cb\u9875\u53ef\u80fd\u843d\u7a7a \u2192 \u56de\u843d page1 \u518d\u8bd5\u4e00\u6b21
+            self._feed_next, self._feed_done, self._feed_err = 1, False, 0
+            items = self._feed_ensure(20)
+        pic = ''
+        if items:
+            cov = items[0].get('first_img') or items[0].get('cover_img') or ''
+            if cov:
+                if not cov.startswith('http'):
+                    cov = urljoin(self.host + '/', cov)
+                pic = self._pic(cov)
+        eps = '#'.join('\u7b2c%d\u6761$feed_%d' % (i, i) for i in range(1, self.FEED_MAX_EP + 1))
+        return {'list': [{
+            'vod_id': self.FEED_TID,
+            'vod_name': '\U0001f525\u6296\u9634 \u00b7 \u968f\u673a\u5237',
+            'vod_pic': pic,
+            'type_name': '\u5237\u89c6\u9891',
+            'vod_year': '',
+            'vod_area': '',
+            'vod_remarks': '\u7ad6\u6ed1\u5207\u6362\u89c6\u9891',
+            'vod_actor': '',
+            'vod_director': '',
+            'vod_content': '\u64ad\u653e\u5668\u4e2d\u95f4\u4e0a\u4e0b\u6ed1\u5207\u6362\u89c6\u9891\uff1b\u5237\u5b8c\u9000\u51fa\u91cd\u8fdb\u6362\u4e00\u6279',
+            'vod_play_from': 'douyin18',
+            'vod_play_url': eps,
+        }]}
+
     def detailContent(self, ids):
         result = {'list': []}
         try:
             vid = str(ids[0])
+            if vid == self.FEED_TID:
+                self._feed_items = []            # \u6bcf\u6b21\u8fdb\u8be6\u60c5\u91cd\u7f6e = \u6362\u4e00\u6279
+                self._feed_next = random.randint(1, 8)
+                self._feed_done = False
+                self._feed_err = 0
+                return self._feed_detail()
             body = self._get(f'/video/detail/{vid}').text or ''
             title = ''
             m = re.search(r'<title>([^<]+)</title>', body)
@@ -596,7 +718,11 @@ class Spider(BaseSpider):
     def playerContent(self, flag, id, vipFlags):
         result = {'parse': 0, 'playUrl': '', 'url': '', 'header': {'User-Agent': _UA}}
         try:
-            url = self._media_url(str(id))
+            sid = str(id)
+            if sid.startswith('feed_'):
+                url = self._feed_media(int(sid[5:]))
+            else:
+                url = self._media_url(sid)
             if url:
                 result['url'] = url
                 result['header'] = {'User-Agent': _UA, 'Referer': self.host + '/'}
