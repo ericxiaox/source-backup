@@ -597,10 +597,9 @@ class Spider(Spider):
         ext = getattr(self, '_ext', {}) or {}
         if ext.get('host'):
             return ext['host'].rstrip('/')
-        publish = ext.get('publish') or 'https://advise.nlwkmsv.cc/'
+        publish = ext.get('publish') or 'https://51cgf15.com/'
         builtin_hosts = [
-            'https://advise.ucorfqmp.cc/',    # 2026-09-08 \u5b9e\u6d4b\u73b0\u5f79\u955c\u50cf(266KB\u5b8c\u6574\u7ad9)
-            'https://advise.nlwkmsv.cc/',     # \u65e7\u57fa\u57df\uff0c302 -> ucorfqmp.cc
+            'https://advise.nlwkmsv.cc/',     # \u65e7\u57fa\u57df\uff0c302 -> ucorfqmp.cc\uff082026-09-08 \u8f6e\u6362\u5feb\u7167\uff1bucorfqmp.cc \u5df2\u5931\u6548\u5df2\u5220\uff0c\u672c\u57df 302 \u53ef\u80fd\u4ecd\u8df3\u5f53\u524d\u6d3b\u57df\uff0c\u7559\u4f5c\u515c\u5e95\uff09
         ]
 
         def _validate(host, text):

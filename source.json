@@ -27,7 +27,7 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://www.njttvylz.cc;hosts@https://barrel.lsaazihd.cc;mail@mrds.club@gmail.com"
+      "ext": "publish@https://mrdsm4.com,https://mrdsw17.com,https://mrdsm3.com,https://car.pvtlbzgj.cc,https://gitlab.com/mrds/mrds/-/raw/main/README.md;mail@mrds.club@gmail.com"
     },
     {
       "key": "py_heiliao",
@@ -51,14 +51,14 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://huangguo5.com,https://huangguo3.com,https://huangguoai.pages.dev,https://huangguoai.github.io,https://gitlab.com/huangguo/huangguo,https://huangguo4.com,https://huangguoai.ai;hosts@https://thu.huxrzdjnv.cc;mail@huangguoaiai@gmail.com"
+      "ext": "publish@https://huangguo5.com,https://huangguo3.com,https://huangguoai.pages.dev,https://huangguoai.github.io,https://gitlab.com/huangguo/huangguo/-/raw/main/README.md,https://huangguo4.com,https://huangguoai.ai;hosts@https://thu.huxrzdjnv.cc;mail@huangguoaiai@gmail.com"
     },
     {
       "key": "py_51xigua",
       "name": "\ud83d\udcf151\u5403\u74dc\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/51xigua.py",
-      "ext": "publish@https://advise.nlwkmsv.cc,https://gitlab.com/51chiguawang/51cg;hosts@https://advise.ucorfqmp.cc;mail@51cgfun@gmail.com,51cgfun@pm.me,chigua.com@pm.me",
+      "ext": "publish@https://51cgf15.com,https://gitlab.com/51chiguawang/51cg/-/raw/main/README.md;mail@51cgfun@gmail.com,51cgfun@pm.me,chigua.com@pm.me;hosts@https://advise.ajtnqsla.cc",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -70,7 +70,7 @@
       "name": "\ud83d\udcf1\u6bcf\u65e5\u5927\u4e71\u6597\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/daluandou.py",
-      "ext": "publish@https://idld65.com;hosts@https://border.loewkgyyv.cc,https://capture.loewkgyyv.cc,https://fe7.loewkgyyv.cc",
+      "ext": "publish@https://idld66.com,https://idld65.com,https://border.loewkgyyv.cc,https://capture.loewkgyyv.cc,https://fe7.loewkgyyv.cc,https://gitlab.com/group305134/mrdld/-/raw/main/README.md;mail@mrdldfun666@gmail.com",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -93,7 +93,7 @@
       "name": "\ud83d\udcf1\u7981\u7247\u5929\u5802\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/jptt.py",
-      "ext": "publish@https://jptt.tv;hosts@https://2026ajptttv.work,https://jptttv2026a.work",
+      "ext": "publish@https://jptt.tv,https://2026ajptttv.work,https://jptttv2026a.work",
       "style": {
         "type": "rect",
         "ratio": 1

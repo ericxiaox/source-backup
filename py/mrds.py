@@ -320,7 +320,7 @@ class Spider(BaseSpider):
         # 0) ext \u9501\u5b9a\u4e3b\u9875\uff1a\u6700\u9ad8\u4f18\u5148\u7ea7\uff0c\u8df3\u8fc7\u4e00\u5207\u63a2\u6d4b\uff08\u7ad9\u70b9\u7ed3\u6784\u5927\u6539\u65f6\u7684\u7ec8\u6781\u515c\u5e95\uff09
         if ext.get('host'):
             return ext['host'].rstrip('/')
-        publish = ext.get('publish') or 'https://www.njttvylz.cc/'
+        publish = ext.get('publish') or 'https://gitlab.com/mrds/mrds/-/raw/main/README.md'
         # \u53d1\u5e03\u9875\u4f1a\u81ea\u52a8\u6df1\u5ea6\u62bd\u94fe\u751f\u6210 iljzezhab \u6cdb\u89e3\u6790\u5019\u9009\uff1b\u5185\u7f6e\u5217\u8868\u4ec5\u4f5c\u53d1\u5e03\u9875\u5931\u8054\u65f6\u7684\u5907\u4efd
         builtin_hosts = [
             'https://big.iljzezhab.cc/',      # 2026-09-08 \u5b9e\u6d4b\u6d3b\u955c\u50cf(254KB\u5b8c\u6574\u7ad9,20\u5206\u7c7b)

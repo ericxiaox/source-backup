@@ -238,7 +238,7 @@ class Spider(BaseSpider):
         ext = getattr(self, '_ext', {}) or {}
         if ext.get('host'):
             return ext['host'].rstrip('/')
-        publish = ext.get('publish') or 'https://idld65.com/'
+        publish = ext.get('publish') or 'https://gitlab.com/group305134/mrdld/-/raw/main/README.md'
         builtin_hosts = [
             'https://border.ekszkcyce.cc/',   # 2026-09-11 \u5f53\u524d\u6d3b\u955c\u50cf
             'https://capture.ekszkcyce.cc/',

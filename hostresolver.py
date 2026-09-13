@@ -487,6 +487,28 @@ def split_publish_pages(publish_page):
 
 
 # ---------------------------------------------------------------- \u63a2\u6d4b
+def _js_redirect(t):
+    """\u4ece JS \u8df3\u8f6c\u58f3\u63d0\u53d6\u76ee\u6807 URL\uff08\u7eaf JS \u58f3\u65e0 <a href> \u65f6\u515c\u5e95\u8ddf\u968f\uff09\u3002
+
+    \u8986\u76d6\uff1awindow.location.replace('...') / window.location.href='...' /
+    location.replace('...') / location.href='...' / <meta http-equiv=refresh ... url=...>\u3002
+    \u8fd4\u56de\u53bb\u5c3e\u659c\u6760\u7684\u7edd\u5bf9 http(s) URL\uff0c\u5426\u5219 ''\u3002"""
+    pats = [
+        r'window\.location\.replace\(\s*[\'"](https?://[^\'"]+)[\'"]',
+        r'window\.location\.href\s*=\s*[\'"](https?://[^\'"]+)[\'"]',
+        r'location\.replace\(\s*[\'"](https?://[^\'"]+)[\'"]',
+        r'location\.href\s*=\s*[\'"](https?://[^\'"]+)[\'"]',
+        r'<meta[^>]+http-equiv=["\']?refresh["\']?[^>]+content=["\']?[^\'">]*url=([^"\'>\s]+)',
+    ]
+    for p in pats:
+        m = re.search(p, t, re.I)
+        if m:
+            u = m.group(1).strip().rstrip('/')
+            if re.match(r'^https?://', u):
+                return u
+    return None
+
+
 def _probe(url, headers, proxies, timeout, depth=0, validate=None):
     """\u6d4b\u8bd5\u5355\u57df\u540d\uff1a\u8df3\u8f6c\u58f3\u5219\u8ddf\u968f <a href>\uff08\u6700\u591a2\u5c42\uff09\uff1b\u771f\u5185\u5bb9\u8fd4\u56de\u6700\u7ec8 host\uff1b\u5931\u8d25 None\u3002
     validate(final_host, text) -> bool\uff1a\u5185\u5bb9\u8eab\u4efd\u6821\u9a8c\uff08\u9632\u5e7f\u544a\u95e8\u7ad9/\u7b2c\u4e09\u65b9\u9875\u5192\u5145\uff09\u3002
@@ -506,6 +528,10 @@ def _probe(url, headers, proxies, timeout, depth=0, validate=None):
                 target = m.group(1).rstrip('/')
                 if target and target != final:
                     return _probe(target, headers, proxies, timeout, depth + 1, validate)
+            # \u2461 \u7eaf JS / meta \u8df3\u8f6c\u58f3\uff08\u65e0 <a href> \u65f6\uff09\uff1a\u8ddf\u968f window.location / location.replace / meta refresh
+            js = _js_redirect(t)
+            if js and js != final:
+                return _probe(js, headers, proxies, timeout, depth + 1, validate)
         if len(t) > 5000 or ('article' in t and 'category' in t):
             if not _looks_like_content(t):
                 return None                     # \u5047\u95e8\u7ad9\uff1a\u516c\u544a\u9875/\u5bfc\u822a\u9875\uff0c\u4e0d\u542b\u5185\u5bb9\u7ed3\u6784
