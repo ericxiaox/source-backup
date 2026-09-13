@@ -107,8 +107,11 @@ class Spider(BaseSpider):
         \u5e26\u5185\u5bb9\u5f62\u6001\u5224\uff0c\u9632\u6b62\u547d\u4e2d\u53d1\u5e03\u9875/\u95e8\u6237\u516c\u544a\u9875\uff08\u6709\u7ad9\u540d\u4f46\u65e0\u5185\u5bb9\uff09\u3002"""
         import threading
         candidates = []
-        if publish:
-            candidates.append(publish)
+        # \u591a\u53d1\u5e03\u9875\uff082026-09-13\uff09\uff1apublish \u53ef\u80fd\u662f\u9017\u53f7\u4e32\uff08\u7f51\u5740\u578b + GitHub \u578b\u5e76\u5b58\uff09\uff0c
+        # \u62c6\u6210\u591a\u6761\u5019\u9009\u5206\u522b\u5e76\u884c\u6293\uff1b\u975e\u7edd\u5bf9\u5730\u5740\uff08\u76f8\u5bf9\u8def\u5f84\uff09\u65e0\u6cd5\u72ec\u7acb\u6293\u53d6\uff0c\u4e22\u5f03\u3002
+        _pages = [x for x in re.split(r'[,\s;]+', str(publish or ''))
+                  if x.startswith('http')]
+        candidates += _pages or ([str(publish)] if publish else [])
         candidates += list(self._ext.get('hosts') or [])
         candidates += list(builtin or [])
         seen = set(); deduped = []
@@ -156,27 +159,70 @@ class Spider(BaseSpider):
             # \u6df1\u5ea6\u62bd\u94fe\uff08\u5bf9\u6807 hostresolver.extract_publish_domains\uff09\uff1a\u53d1\u5e03\u9875\u4e0d\u662f\u6d3b\u955c\u50cf\u65f6\uff0c
             # \u4ece\u5176 JS/HTML \u6316\u57fa\u57df\u2014\u2014\u542b words.random()+'.base.cc' \u6cdb\u89e3\u6790\u5f62\u6001\u2014\u2014\u751f\u6210\u5019\u9009\u518d\u63a2\uff0c
             # \u4f7f gitee \u8fdc\u7a0b\u5bfc\u5165\u5f62\u6001\uff08\u65e0 hostresolver \u6a21\u5757\uff09\u4e0e\u672c\u5730\u5305\u540c\u7b49\u81ea\u52a8\u6362\u57df\u80fd\u529b\u3002
-            try:
-                _pr = requests.get(publish, headers=self.headers, proxies=self.proxies,
-                                   timeout=6, verify=False, allow_redirects=True)
-                _pt = _pr.text or ''
-            except Exception:
-                _pt = ''
+            # \u591a\u53d1\u5e03\u9875**\u5e76\u884c**\u6293\u53d6\uff082026-09-13\uff09\uff1aN \u9875\u8017\u65f6 \u2248max\uff0c\u800c\u975e\u9010\u9875\u76f8\u52a0\u3002
+            # \u542b JS \u58f3\u8ddf\u968f\u2014\u2014\u53d1\u5e03\u9875\u53ea\u6709\u7a7a\u5bb9\u5668\u3001\u771f\u5b9e\u7ebf\u8def\u5728 <script src="publish.js"> \u91cc
+            # \uff08\u9ec4\u679c pages.dev/github.io \u540c\u6b3e\uff09\u3002\u6293\u56de\u7684 JS \u4e00\u5e76\u5e76\u5165 _pt \u4f9b\u4e0b\u65b9\u6b63\u5219\u62bd\u53d6\u3002
+            # HTTP \u5ba2\u6237\u7aef\u540d\u9010\u6e90\u4e0d\u540c\uff1a\u591a\u6570\u6e90 `import requests`\uff0c\u9ec4\u679c\u662f `import requests as rq`\u3002
+            # \u7edf\u4e00\u89e3\u6790\uff0c\u907f\u514d NameError \u88ab except \u541e\u6389 \u2192 \u6df1\u62bd\u94fe\u9759\u9ed8\u5931\u6548\u3002
+            _http = globals().get('requests') or globals().get('rq')
+            _texts = []
+            _srcs = _pages if _pages else ([str(publish)] if publish else [])
+
+            def _grab(_u):
+                try:
+                    _r = _http.get(_u, headers=self.headers, proxies=self.proxies,
+                                      timeout=6, verify=False, allow_redirects=True)
+                except Exception:
+                    return
+                if _r.status_code != 200 or not _r.text:
+                    return
+                _texts.append(_r.text)
+                for _s in re.findall(r'<script[^>]+src=["\']([^"\']+)["\']',
+                                     _r.text, re.I)[:2]:
+                    _s = _s.strip()
+                    if not _s or _s.startswith('data:'):
+                        continue
+                    if not _s.startswith('http'):
+                        _s = _u.rstrip('/') + '/' + _s.lstrip('/')
+                    if re.search(r'(gstatic|google|jquery|bootstrap|jsdelivr|unpkg|'
+                                 r'github|gitlab|baidu|cloudflare|fontawesome)', _s, re.I):
+                        continue
+                    try:
+                        _jr = _http.get(_s, headers=self.headers,
+                                           proxies=self.proxies, timeout=6,
+                                           verify=False, allow_redirects=True)
+                        if _jr.status_code == 200 and _jr.text:
+                            _texts.append(_jr.text)
+                    except Exception:
+                        pass
+
+            _gts = [threading.Thread(target=_grab, args=(u,)) for u in _srcs]
+            for _gt in _gts:
+                _gt.start()
+            for _gt in _gts:
+                _gt.join(timeout=8)
+            _pt = '\n'.join(_texts)
             if _pt:
                 # \u4f18\u5148\u4ece\u542b random() \u7684 <script> \u6bb5\u62bd\uff08\u90a3\u91cc\u624d\u662f\u6cdb\u89e3\u6790\u8bcd\u8868+\u57fa\u57df\uff09\uff0c\u515c\u5e95\u5168\u9875
                 _chunks = [c for c in re.findall(r'<script[^>]*>(.*?)</script>', _pt, re.S | re.I)
                            if 'random(' in c]
                 _wsrc = '\n'.join(_chunks) if _chunks else _pt
                 _bases = []
-                for _m in re.findall(r'''['"]\.?((?:[a-z0-9-]+\.)+(?:cc|com|net|top|xyz|vip|app|link|click|org|info|site|online|icu|club|fun|store|live|me|tv))['"]''', _wsrc, re.I):
+                for _m in re.findall(r'''['"]\.?((?:[a-z0-9-]+\.)+(?:cc|com|net|top|xyz|vip|app|link|click|org|info|site|online|icu|club|fun|store|live|me|tv))/?['"]''', _wsrc, re.I):
                     _m = _m.lower().strip('.').strip()
                     if _m and _m not in _bases and _m.count('.') <= 2:
                         _bases.append(_m)
                 if not _bases:
-                    for _m in re.findall(r'''['"]\.?((?:[a-z0-9-]+\.)+(?:cc|com|net|top|xyz|vip|app|link|click|org|info|site|online|icu|club|fun|store|live|me|tv))['"]''', _pt, re.I):
+                    for _m in re.findall(r'''['"]\.?((?:[a-z0-9-]+\.)+(?:cc|com|net|top|xyz|vip|app|link|click|org|info|site|online|icu|club|fun|store|live|me|tv))/?['"]''', _pt, re.I):
                         _m = _m.lower().strip('.').strip()
                         if _m and _m not in _bases and _m.count('.') <= 2:
                             _bases.append(_m)
+                # \u5254\u7b2c\u4e09\u65b9\u57df\uff08gitlab/github/\u7edf\u8ba1/\u5b57\u4f53\u7b49\u6df7\u5728\u9875\u9762 script src \u91cc\uff0c
+                # \u4f1a\u88ab\u62bd\u51fa\u5f53\u57fa\u57df \u2192 \u751f\u6210 viewport.gitlab.com \u8fd9\u7c7b\u65e0\u6548\u5019\u9009\u767d\u8017\u63a2\u6d4b\uff09
+                _bases = [b for b in _bases if not re.search(
+                    r'(google|gstatic|baidu|jquery|bootstrap|jsdelivr|unpkg|'
+                    r'github|gitlab|cloudflare|fontawesome|w3\.org|schema\.org|'
+                    r'twitter|youtube|apple|microsoft|bing)', b, re.I)]
                 _slds = [b for b in _bases if b.count('.') == 1]   # \u6cdb\u89e3\u6790\u57fa\u57df\uff08\u8bcd.sld.tld\uff09
                 _fulls = [b for b in _bases if b.count('.') > 1]   # \u5b8c\u6574\u57df\uff08\u5982 cloudfront \u56fa\u5b9a\u7ebf\u8def\uff09
                 _words = []

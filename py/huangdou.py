@@ -171,35 +171,53 @@ class Spider(BaseSpider):
             except Exception:
                 pass
 
-    def _publish_candidates(self, publish):
+    def _publish_candidates(self, pages):
         """\u6293\u53d1\u5e03\u9875/\u5b98\u65b9\u5165\u53e3\u9875\uff0c\u62bd\u51fa\u5176\u4e2d\u51fa\u73b0\u7684\u5019\u9009\u57df\u540d\uff08\u672c\u57df + \u9875\u9762\u5185 http(s) \u57df\u540d\uff09\u3002
         \u9ec4\u8c46\u4e09\u57df\u975e\u6cdb\u89e3\u6790\uff08\u968f\u673a\u5b50\u57df NXDOMAIN\uff09\uff0c\u4e0d\u505a\u6269\u8bcd\uff1b\u9875\u9762\u4e3a JS \u5355\u9875\u6216\u53d6\u4e0d\u5230\u65f6
-        \u9759\u9ed8\u8fd4\u56de []\uff0c\u9000\u56de\u5185\u7f6e\u6c60\uff0c\u96f6\u526f\u4f5c\u7528\u3002"""
-        if not publish:
+        \u9759\u9ed8\u8fd4\u56de []\uff0c\u9000\u56de\u5185\u7f6e\u6c60\uff0c\u96f6\u526f\u4f5c\u7528\u3002
+
+        \u591a\u53d1\u5e03\u9875**\u5e76\u884c**\u6293\u53d6\uff082026-09-13\uff09\uff1apages \u53ef\u4e3a\u5355\u4e2a URL \u6216 URL \u5217\u8868\uff0c
+        N \u9875\u8017\u65f6 \u2248max \u800c\u975e\u76f8\u52a0\u3002"""
+        if isinstance(pages, str):
+            pages = [pages]
+        pages = [p for p in (pages or []) if p]
+        if not pages:
             return []
-        out = []
-        m = re.match(r'^https?://([^/]+)', str(publish), re.I)
-        if m:
-            out.append('https://' + m.group(1).lower())
-        try:
-            r = self.session.get(publish, headers={'User-Agent': _UA},
-                                 timeout=8, verify=False, allow_redirects=True)
-            t = r.text or ''
-            cands = [getattr(r, 'url', '')] + re.findall(
-                r'https?://[a-z0-9.-]+\.[a-z]{2,15}', t, re.I)
-            for u in cands:
-                mm = re.match(r'^https?://([a-z0-9.-]+\.[a-z]{2,15})', str(u), re.I)
-                if not mm:
-                    continue
-                d = mm.group(1).lower()
-                # \u5254\u7b2c\u4e09\u65b9\u7edf\u8ba1/\u5b57\u4f53/\u5ba2\u670d/\u4ed3\u5e93\u57df\uff0c\u53ea\u7559\u7591\u4f3c\u7ad9\u70b9\u57df
-                if re.search(r'(google|gstatic|baidu|schema\.org|w3\.org|fonts\.|'
-                             r'kf\.|weibo|jquery|bootstrap|github|cloudflare|'
-                             r'jsdelivr|unpkg)', d):
-                    continue
-                out.append('https://' + d)
-        except Exception:
-            pass
+        import threading
+        out, _lk = [], threading.Lock()
+
+        def _one(publish):
+            got = []
+            m = re.match(r'^https?://([^/]+)', str(publish), re.I)
+            if m:
+                got.append('https://' + m.group(1).lower())
+            try:
+                r = self.session.get(publish, headers={'User-Agent': _UA},
+                                     timeout=8, verify=False, allow_redirects=True)
+                t = r.text or ''
+                cands = [getattr(r, 'url', '')] + re.findall(
+                    r'https?://[a-z0-9.-]+\.[a-z]{2,15}', t, re.I)
+                for u in cands:
+                    mm = re.match(r'^https?://([a-z0-9.-]+\.[a-z]{2,15})', str(u), re.I)
+                    if not mm:
+                        continue
+                    d = mm.group(1).lower()
+                    # \u5254\u7b2c\u4e09\u65b9\u7edf\u8ba1/\u5b57\u4f53/\u5ba2\u670d/\u4ed3\u5e93\u57df\uff0c\u53ea\u7559\u7591\u4f3c\u7ad9\u70b9\u57df
+                    if re.search(r'(google|gstatic|baidu|schema\.org|w3\.org|fonts\.|'
+                                 r'kf\.|weibo|jquery|bootstrap|github|cloudflare|'
+                                 r'jsdelivr|unpkg)', d):
+                        continue
+                    got.append('https://' + d)
+            except Exception:
+                pass
+            with _lk:
+                out.extend(got)
+
+        ths = [threading.Thread(target=_one, args=(p,)) for p in pages]
+        for t in ths:
+            t.start()
+        for t in ths:
+            t.join(timeout=10)
         seen, res = set(), []
         for u in out:
             if u not in seen:
@@ -223,8 +241,11 @@ class Spider(BaseSpider):
                 self.hosts.insert(0, h)
         # \u53d1\u5e03\u9875\u5019\u9009\uff08\u771f\u63a5\u5165\uff1a\u6293\u9875\u9762\u62bd\u57df\uff0c\u6392\u5185\u7f6e\u6c60\u4e4b\u524d\u4e00\u8d77\u5b9e\u6d4b\uff09
         if not locked:
-            pub = self._ext.get('publish') or self.PUBLISH_PAGE
-            for h in reversed(self._publish_candidates(pub)):
+            # \u591a\u53d1\u5e03\u9875\uff082026-09-13\uff09\uff1aext publish@ \u53ef\u80fd\u662f\u9017\u53f7\u4e32 \u2192 \u62c6\u5f00\u4e00\u8d77\u5e76\u884c\u6293
+            _pubs = [x for x in re.split(
+                r'[,\s;]+', str(self._ext.get('publish') or self.PUBLISH_PAGE or ''))
+                if x.startswith('http')]
+            for h in reversed(self._publish_candidates(_pubs)):
                 if h not in self.hosts:
                     self.hosts.insert(0, h)
         self._apply_host(self.hosts[self._hi])

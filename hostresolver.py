@@ -32,6 +32,20 @@ v2.3 \u76f8\u5bf9 v2 \u7684\u6839\u56e0\u7ea7\u5347\u7ea7\uff082026-09-11\uff0c\
  10.\u3010\u53ef\u89c2\u6d4b\u3011last_trace() \u8fd4\u56de\u4e0a\u4e00\u6b21\u9009\u7ad9\u5168\u8fc7\u7a0b\u7684\u9010\u884c\u8bb0\u5f55\uff08\u53d1\u5e03\u9875\u6293\u53d6\u3001\u62bd\u5230\u7684\u57fa\u57df\u3001
      \u5019\u9009\u6e05\u5355\u3001\u6bcf\u4e2a\u5019\u9009\u7684\u5b9e\u6d4b\u7ed3\u679c\uff09\uff0c\u4f9b\u6e90\u5185\u300c\u8bca\u65ad\u300d\u680f\u76ee\u76f4\u63a5\u5c55\u793a\u3002
 
+v2.4 \u76f8\u5bf9 v2.3 \u7684\u6839\u56e0\u7ea7\u5347\u7ea7\uff082026-09-13\uff0c\u56e0\u9ec4\u679c\u77ed\u5267\u300cpublish.js \u91cc\u7684\u65b0\u57fa\u57df\u5403\u4e0d\u5230\u300d\u590d\u76d8\uff09\uff1a
+ 11.\u3010\u53d1\u5e03\u9875\u5e76\u884c\u6293\u53d6\u3011\u591a\u53d1\u5e03\u9875\uff08\u7f51\u5740\u578b + GitHub \u578b + GitLab \u578b\u6df7\u7f16\uff09\u7531**\u9010\u9875\u4e32\u884c**\u6539\u4e3a
+     \u5e76\u884c\uff08`_extract_pages`\uff09\uff1aN \u9875\u8017\u65f6\u4ece N\u00d7 \u964d\u4e3a \u2248max\u3002\u5408\u5e76\u987a\u5e8f\u4ecd\u6309 pages \u539f\u5e8f \u2192
+     \u7ed3\u679c\u786e\u5b9a\uff0c\u4e0d\u53d7\u7ebf\u7a0b\u5b8c\u6210\u65f6\u5e8f\u5f71\u54cd\uff1b\u6bcf\u9875 trace \u72ec\u7acb\u6536\u96c6\u540e\u6309\u5e8f\u5199\u56de\uff08\u591a\u7ebf\u7a0b\u5199\u540c\u4e00
+     _TRACE \u4f1a\u4e32\u884c\u4e71\u5e8f\uff09\u3002
+ 12.\u3010\u8ddf\u968f\u5916\u94fe JS\u3011\u53d1\u5e03\u9875\u5e38\u505a\u6210 **JS \u58f3**\uff08HTML \u53ea\u6709 `<div id=\"main\">` + 
+     `<script src=\"publish.js\">`\uff0c\u9ec4\u679c pages.dev/github.io \u540c\u6b3e\uff09\u2014\u2014HTML \u62bd\u5230\u7684\u57fa\u57df\u4e3a 0\uff0c
+     \u771f\u5b9e\u7ebf\u8def\uff08`urls=['xxx.cc/', ...]`\uff09\u5168\u5728\u90a3\u4e2a JS \u91cc\u3002\u65b0\u589e\uff1aHTML \u9636\u6bb5\u62bd\u4e0d\u5230\u57fa\u57df\u65f6\uff0c
+     \u8ddf\u968f\u540c\u6e90\u5916\u94fe JS\uff08\u22643 \u4e2a\u3001\u22642MB\u3001\u5254\u7b2c\u4e09\u65b9 CDN\uff09\u518d\u626b\u4e00\u904d\u3002
+ 13.\u3010\u6570\u7ec4\u5bb9\u5fcd\u5c3e\u659c\u6760\u3011\u7ad9\u65b9\u6570\u7ec4\u5199\u6cd5\u662f `urls=['mvbessfgf.cc/', 'huxrzdjnv.cc/']`\uff08**\u5e26\u5c3e\u659c\u6760**\uff09\uff0c
+     \u65e7 _ARR_PAT \u8981\u6c42\u6570\u7ec4\u5143\u7d20\u4e3a\u7eaf\u57df\u540d \u2192 \u62bd 0 \u6761\u3002\u73b0\u5141\u8bb8\u5143\u7d20\u5c3e\u90e8 `/`\u3002
+     \uff08`urls[randomNum(0,urls.length-1)]` \u8fd9\u79cd**\u53d8\u91cf\u5f15\u7528**\u5f62\u6001\u65e0\u9700\u5355\u72ec\u89e3\u6790\u2014\u2014\u6570\u7ec4\u672c\u4f53
+      \u5df2\u88ab\u62bd\u51fa\uff0c\u57fa\u57df\u5373\u6570\u7ec4\u503c\u3002\uff09
+
 \u8c03\u7528\u65b9\uff08\u5404 py \u6e90\uff09\u53ea\u9700\u58f0\u660e\uff1a
   PUBLISH_PAGE = 'https://xxx.xxx/'          # \u7a33\u5b9a\u53d1\u5e03\u9875\uff08\u53ef\u7a7a\uff09
   CANDIDATE_HOSTS = ['https://a/', ...]      # \u5df2\u77e5\u955c\u50cf\uff0c\u6309\u5b58\u6d3b\u6392\u5e8f
@@ -40,16 +54,19 @@ v2.3 \u76f8\u5bf9 v2 \u7684\u6839\u56e0\u7ea7\u5347\u7ea7\uff082026-09-11\uff0c\
   # \u8fd4\u56de\u53ef\u80fd\u662f ''\uff0c\u8c03\u7528\u65b9\u63a5\u53e3\u5c42 try/except \u515c\u4f4f\u5373\u53ef
 
 ext \u673a\u5236\uff08\u5f71\u89c6.json \u7ad9\u70b9\u6761\u76ee ext \u5b57\u6bb5\uff0cgitee \u7f51\u9875\u53ef\u76f4\u63a5\u6539\uff09\uff1a
-  \u6587\u672c: publish@https://...;hosts@https://a,https://b;host@https://...
-  JSON: {\"publish\":\"...\",\"hosts\":[\"...\"],\"host\":\"...\",\"proxies\":{...}}
-  - host@   \u9501\u5b9a\u4e3b\u9875\uff08\u6700\u9ad8\u4f18\u5148\u7ea7\uff0c\u8df3\u8fc7\u4e00\u5207\u63a2\u6d4b\uff0c\u7ad9\u70b9\u7ed3\u6784\u5927\u6539\u65f6\u7528\uff09
-  - publish@ \u53d1\u5e03\u9875\u5730\u5740\uff08\u53d1\u5e03\u9875\u6362\u4e86\u6539\u8fd9\u91cc\uff09
+  \u6587\u672c: publish@https://a,https://b;hosts@https://c,https://d;host@https://e;mail@x@y.com
+  JSON: {\"publish\":[\"...\"],\"hosts\":[\"...\"],\"host\":\"...\",\"mails\":[\"...\"],\"proxies\":{...}}
+  - host@   \u9501\u5b9a\u4e3b\u9875\uff08\u6700\u9ad8\u4f18\u5148\u7ea7\uff0c\u8df3\u8fc7\u4e00\u5207\u63a2\u6d4b\uff0c\u7ad9\u70b9\u7ed3\u6784\u5927\u6539\u65f6\u7528\uff1b**\u53ea\u8ba4\u4e00\u4e2a**\uff09
+  - publish@ \u53d1\u5e03\u9875\u5730\u5740\uff082026-09-13 \u8d77**\u53ef\u591a\u4e2a**\uff1a\u9017\u53f7\u5206\u9694\uff0c\u5982 \u7f51\u5740\u578b + GitHub \u578b\u5e76\u5b58\uff1b
+             **\u5e76\u884c**\u6293\u53d6\u3001\u7ed3\u679c\u6309\u586b\u5199\u987a\u5e8f\u5408\u5e76\u2014\u2014\u4e00\u4e2a\u6302\u4e86\u4e0d\u5f71\u54cd\u53e6\u4e00\u4e2a\uff0c\u8017\u65f6\u4e0d\u53e0\u52a0\uff09
   - hosts@  \u65b0\u589e\u5019\u9009\u955c\u50cf\uff08\u5b9e\u6d4b\u987a\u5e8f\u4ec5\u6392\u5728\u53d1\u5e03\u9875\u6cdb\u89e3\u6790\u5019\u9009\u4e4b\u540e\uff09
+  - mail@   \u90ae\u7bb1\u6e20\u9053\uff08\u53ef\u591a\u4e2a\uff1b\u6e90\u4fa7\u4e0d\u6d88\u8d39\uff0c\u4f9b\u7ba1\u7406\u53f0/\u624b\u673a\u7aef\u53ef\u8bfb\u53ef\u590d\u5236\uff0c\u5931\u8054\u65f6\u4eba\u5de5\u53d1\u4fe1\u53d6\u65b0\u5740\uff09
 """
 import re
 import time
 import random
 import base64
+from urllib.parse import urljoin
 
 try:
     import requests
@@ -108,7 +125,22 @@ def parse_ext(ext_str):
             items = [x.strip().rstrip('/') for x in v.split(',') if x.strip()]
             if items:
                 out.setdefault('hosts', []).extend(items)
-        elif k in ('publish', 'host'):
+        elif k == 'publish':
+            # \u591a\u53d1\u5e03\u9875\uff082026-09-13 \u7528\u6237\u5b9a\uff1a\u7f51\u5740\u578b + GitHub \u578b\u7b49\u53ef\u5e76\u5b58\uff09\uff1a
+            # `publish@a,b` \u9017\u53f7\u5206\u9694\uff1b\u5199\u6210\u4e24\u6761 publish@ \u4e5f\u7d2f\u52a0\uff0c\u4e0d\u4e92\u76f8\u8986\u76d6\u3002
+            # \u5bf9\u5916\u4ecd\u662f**\u4e00\u4e2a\u9017\u53f7\u4e32**\u2014\u2014\u5404\u6e90\u7167\u65e7 `ext.get('publish') or ''` \u53d6\u7528\uff0c
+            # \u7531 resolve_host \u5185\u90e8\u62c6\u5206\uff0c\u6545\u6240\u6709\u5df2\u4e0a\u7ebf\u6e90\u96f6\u6539\u52a8\u3002
+            items = [x.strip().rstrip('/') for x in v.split(',') if x.strip()]
+            if items:
+                cur = [x for x in (out.get('publish') or '').split(',') if x]
+                out['publish'] = ','.join(dict.fromkeys(cur + items))
+        elif k == 'mail':
+            # \u90ae\u7bb1\u6e20\u9053\uff082026-09-13 \u65b0\u589e\uff09\uff1a`mail@a@x.com,b@y.com`\u3002\u6e90\u4fa7\u4e0d\u6d88\u8d39\uff0c
+            # \u4f9b\u7ba1\u7406\u53f0/\u624b\u673a\u7aef\u53ef\u8bfb\u53ef\u590d\u5236\uff08\u5931\u8054\u65f6\u4eba\u5de5\u53d1\u4fe1\u53d6\u65b0\u5740\uff09\u3002
+            items = [x.strip() for x in v.split(',') if x.strip()]
+            if items:
+                out.setdefault('mails', []).extend(items)
+        elif k == 'host':
             out[k] = v
     return out
 
@@ -124,10 +156,17 @@ def ext_of(extend):
             out = {}
             for k in ('publish', 'host'):
                 if extend.get(k):
-                    out[k] = str(extend[k]).strip()
+                    v = extend[k]
+                    if k == 'publish' and isinstance(v, (list, tuple)):
+                        v = ','.join(str(x).strip() for x in v if str(x).strip())
+                    out[k] = str(v).strip()
             if extend.get('hosts'):
                 hs = extend['hosts'] if isinstance(extend['hosts'], list) else [extend['hosts']]
                 out['hosts'] = [str(h).strip() for h in hs if str(h).strip()]
+            ms = extend.get('mails') or extend.get('mail')
+            if ms:
+                ms = ms if isinstance(ms, list) else [ms]
+                out['mails'] = [str(m).strip() for m in ms if str(m).strip()]
             return out
         s = str(extend).strip()
         if not s:
@@ -174,7 +213,16 @@ _B64_SHELL_PAT = re.compile(r"Base64\.decode\(\s*['\"]([A-Za-z0-9+/=]{100,})['\"
 # v2.3 \u7ebf\u8def\u8868\uff08\u57fa\u57df\u88ab\u85cf\u8fdb\u6a21\u677f\u5b57\u7b26\u4e32 / \u6570\u7ec4\uff0c\u4e0d\u518d\u4ee5 random()+'.\u57fa\u57df' \u5f62\u6001\u51fa\u73b0\uff09
 _TICK_PAT = re.compile(r'`([^`]{4,800})`', re.S)
 _DOMLINE_PAT = re.compile(r'^[a-z0-9][a-z0-9.-]*\.[a-z]{2,15}$', re.I)
-_ARR_PAT = re.compile(r'\[((?:\s*[\'"][a-z0-9.-]*\.[a-z]{2,15}[\'"]\s*,?)+)\]', re.I)
+# \u6570\u7ec4\u5143\u7d20**\u5141\u8bb8\u5c3e\u90e8 / **\uff082026-09-13 v2.4\uff09\uff1a\u7ad9\u65b9\u5199\u4f5c urls=['mvbessfgf.cc/','huxrzdjnv.cc/']
+# \u2014\u2014\u5c3e\u659c\u6760\u5f88\u5e38\u89c1\uff0c\u65e7\u6b63\u5219\u8981\u6c42\u7eaf\u57df\u540d \u2192 \u6574\u7ec4\u62bd 0 \u6761\uff08\u9ec4\u679c publish.js \u5c31\u662f\u8fd9\u5f62\u6001\uff09\u3002
+# **\u7ec4\u5916\u5fc5\u987b\u5bb9\u5c3e\u7a7a\u767d**\uff082026-09-13 \u5b9e\u6d4b\u63ea\u51fa\uff09\uff1a\u771f\u5b9e\u5199\u6cd5\u662f\u591a\u884c\u6570\u7ec4\u3001\u672b\u5143\u7d20\u540e\u8fd8\u6709 `,\n]`\uff0c
+# \u65e7\u5f0f `...,?)\]` \u8981\u6c42 `]` \u7d27\u8ddf\u6700\u540e\u4e00\u4e2a\u5143\u7d20 \u2192 \u8de8\u884c\u6570\u7ec4\u5168\u6570\u6f0f\u62bd\uff08\u5355\u884c\u624d\u78b0\u5de7\u80fd\u8fc7\uff09\u3002
+_ARR_PAT = re.compile(
+    r'\[((?:\s*[\'"][a-z0-9.-]*\.[a-z]{2,15}/?[\'"]\s*,?)+)\s*\]', re.I)
+# v2.4 JS \u58f3\u8ddf\u968f\uff1a\u53d1\u5e03\u9875\u628a\u5185\u5bb9\u653e\u8fdb\u5916\u94fe JS\uff08<div id="main"> + <script src="publish.js">\uff09
+_JS_SRC_PAT = re.compile(r'<script[^>]+src\s*=\s*["\']([^"\']+)["\']', re.I)
+_MAX_JS_PAGES = 3                     # \u6bcf\u4e2a\u53d1\u5e03\u9875\u6700\u591a\u8ddf\u968f\u51e0\u4e2a\u5916\u94fe JS
+_MAX_JS_BYTES = 2 * 1024 * 1024       # \u5355\u4e2a JS \u622a\u65ad\u4e0a\u9650\uff08\u9632\u70b8\u5185\u5b58\uff09
 # \u53d1\u5e03\u9875\u91cc\u5fc5\u7136\u6df7\u5165\u7684\u7b2c\u4e09\u65b9\u5927\u5e73\u53f0/\u7edf\u8ba1/\u5e7f\u544a\u57df\u2014\u2014\u63a2\u6d4b\u5b83\u4eec\u4f1a\u628a\u5927\u9875\u9762\u8bef\u5224\u6210"\u7ad9\u70b9\u53ef\u7528"
 _JUNK_HOST_PAT = re.compile(
     r'(googletagmanager|google-analytics|googleads|gstatic|google\.|gitlab\.|github\.|'
@@ -246,52 +294,161 @@ def extract_line_bases(text):
             continue
         lines = []
         for l in body.split('\n'):
-            l = l.strip().strip(',').strip('"\'').strip()
+            l = l.strip().strip(',').strip('"\'').strip().rstrip('/')
             lines.append(l)
         lines = [l for l in lines if l]
         if len(lines) >= 2 and all(_DOMLINE_PAT.match(l) for l in lines):
             out += lines
     for m in _ARR_PAT.finditer(text):
-        items = re.findall(r'[\'"]([a-z0-9.-]*\.[a-z]{2,15})[\'"]', m.group(1), re.I)
+        # \u5143\u7d20\u53ef\u5e26\u5c3e\u659c\u6760\uff08['a.cc/', 'b.cc/']\uff09\u2014\u2014v2.4 \u8d77\u5bb9\u5fcd
+        items = re.findall(r'[\'"]([a-z0-9.-]*\.[a-z]{2,15})/?[\'"]', m.group(1), re.I)
         if len(items) >= 2:
             out += items
     return [b for b in dict.fromkeys(out) if not _JUNK_HOST_PAT.search(b)]
 
 
-def extract_publish_domains(publish_page, headers, proxies, timeout):
+def _scan_text(t, static, wilds):
+    """\u4ece\u4e00\u6bb5\u6587\u672c\u62bd\u5019\u9009\uff08\u9759\u6001\u955c\u50cf\u94fe\u63a5\u8fdb static\u3001\u57fa\u57df\u8fdb wilds\uff09\u3002
+    HTML \u672c\u4f53 / b64 \u89e3\u7801\u9875 / \u5916\u94fe JS \u4e09\u79cd\u6765\u6e90\u5171\u7528\u540c\u4e00\u5957\u5224\u636e\u3002"""
+    t = t or ''
+    for l in re.findall(r'href=["\'](https?://[^"\']+)["\']', t, re.I):
+        m = re.match(r'https?://([a-z0-9.-]+\.[a-z]{2,})', l, re.I)
+        if m and not _JUNK_HOST_PAT.search(m.group(1)):
+            static.append('https://' + m.group(1))
+    for m in _WILD_PAT.finditer(t):
+        wilds.add(m.group(1))
+    for b in extract_line_bases(t):
+        wilds.add(b)
+
+
+def _fetch_text(url, headers, proxies, timeout, cap=_MAX_JS_BYTES):
+    """GET \u53d6\u6587\u672c\uff08\u5931\u8d25/\u975e 200 \u2192 ''\uff09\uff1b\u8d85 cap \u622a\u65ad\u3002\u7528\u4e8e\u8ddf\u968f\u5916\u94fe JS\u3002"""
+    if requests is None or not url:
+        return ''
+    try:
+        r = requests.get(url, headers=headers, proxies=proxies, timeout=timeout,
+                         verify=False, allow_redirects=True)
+        if r.status_code != 200:
+            return ''
+        t = r.text or ''
+        return t if len(t) <= cap else t[:cap]
+    except Exception:
+        return ''
+
+
+def _js_candidates(html, base_url):
+    """\u53d1\u5e03\u9875\u91cc\u7684\u5916\u94fe JS\uff08JS \u58f3\u8ddf\u968f\u7528\uff09\u3002\u76f8\u5bf9\u8def\u5f84\u6309\u53d1\u5e03\u9875\u5730\u5740\u8865\u5168\uff1b
+    \u5254\u7b2c\u4e09\u65b9 CDN/\u7edf\u8ba1\u57df\uff0c\u4fdd\u5e8f\u53bb\u91cd\uff0c\u6700\u591a _MAX_JS_PAGES \u4e2a\u3002"""
+    out = []
+    for m in _JS_SRC_PAT.finditer(html or ''):
+        raw = (m.group(1) or '').strip()
+        if not raw or raw.startswith('data:'):
+            continue
+        u = urljoin(base_url or '', raw)
+        if not re.match(r'^https?://', u):
+            continue
+        if _is_junk(u) or u in out:
+            continue
+        out.append(u)
+        if len(out) >= _MAX_JS_PAGES:
+            break
+    return out
+
+
+def extract_publish_domains(publish_page, headers, proxies, timeout, _sink=None):
     """\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe\u3002\u8fd4\u56de (\u9759\u6001\u955c\u50cf\u94fe\u63a5\u5217\u8868, \u6cdb\u89e3\u6790/\u7ebf\u8def\u8868\u57fa\u57df\u5217\u8868)\u3002
-    JS \u6e32\u67d3\u4f46\u65e0 b64 \u58f3\u7684\u9875\u9762\u9759\u6001\u94fe\u63a5\u4ecd\u53ef\u80fd\u4e3a\u7a7a\u2014\u2014\u57fa\u57df\u8bc6\u522b\u662f\u4e3b\u901a\u9053\u3002"""
+    JS \u6e32\u67d3\u4f46\u65e0 b64 \u58f3\u7684\u9875\u9762\u9759\u6001\u94fe\u63a5\u4ecd\u53ef\u80fd\u4e3a\u7a7a\u2014\u2014\u57fa\u57df\u8bc6\u522b\u662f\u4e3b\u901a\u9053\uff1b
+    \u82e5 HTML \u9636\u6bb5\u57fa\u57df\u4e3a 0\uff08JS \u58f3\u5f62\u6001\uff1a\u5185\u5bb9\u5728\u5916\u94fe js\uff09\uff0c\u81ea\u52a8**\u8ddf\u968f\u5916\u94fe JS** \u518d\u626b\u4e00\u904d\u3002
+
+    _sink\uff1a\u53ef\u9009 list\uff0c\u672c\u9875\u7684 trace \u884c\u5199\u5165\u5b83\u800c\u975e\u5168\u5c40 _TRACE\u2014\u2014\u5e76\u884c\u6293\u591a\u9875\u65f6\u5404\u9875\u72ec\u7acb
+    \u6536\u96c6\u3001\u7531\u8c03\u7528\u65b9\u6309\u5e8f\u5199\u56de\uff0c\u907f\u514d\u591a\u7ebf\u7a0b\u4ea4\u9519\u5bfc\u81f4\u8bca\u65ad\u8bb0\u5f55\u4e71\u5e8f\u3002"""
+    log = _sink.append if _sink is not None else _tr
     if requests is None or not publish_page:
         return [], []
     try:
         r = requests.get(publish_page, headers=headers, proxies=proxies,
                          timeout=timeout, verify=False, allow_redirects=True)
-        _tr('[\u53d1\u5e03\u9875] %s \u2192 HTTP %s / %dB' % (_host_of(publish_page) or publish_page,
+        log('[\u53d1\u5e03\u9875] %s \u2192 HTTP %s / %dB' % (_host_of(publish_page) or publish_page,
                                              r.status_code, len(r.text or '')))
         if r.status_code != 200:
-            _tr('  \u2717 \u53d1\u5e03\u9875\u975e 200\uff0c\u62bd\u94fe\u4e2d\u6b62')
+            log('  \u2717 \u53d1\u5e03\u9875\u975e 200\uff0c\u62bd\u94fe\u4e2d\u6b62')
             return [], []
     except Exception as e:
-        _tr('[\u53d1\u5e03\u9875] %s \u6293\u53d6\u5f02\u5e38: %s' % (_host_of(publish_page) or publish_page,
+        log('[\u53d1\u5e03\u9875] %s \u6293\u53d6\u5f02\u5e38: %s' % (_host_of(publish_page) or publish_page,
                                        str(e)[:60]))
         return [], []
-    texts = _expand_b64_shells(r.text or '')
-    if len(texts) > 1:
-        _tr('  \u5c55\u5f00 b64 \u58f3 %d \u4e2a' % (len(texts) - 1))
+    html = r.text or ''
     static, wilds = [], set()
+    # \u2460 HTML \u672c\u4f53\uff08\u542b b64 \u58f3\u89e3\u7801\u9875\uff09
+    texts = _expand_b64_shells(html)
+    if len(texts) > 1:
+        log('  \u5c55\u5f00 b64 \u58f3 %d \u4e2a' % (len(texts) - 1))
     for t in texts:
-        for l in re.findall(r'href=["\'](https?://[^"\']+)["\']', t, re.I):
-            m = re.match(r'https?://([a-z0-9.-]+\.[a-z]{2,})', l, re.I)
-            if m and not _JUNK_HOST_PAT.search(m.group(1)):
-                static.append('https://' + m.group(1))
-        for m in _WILD_PAT.finditer(t):
-            wilds.add(m.group(1))
-        for b in extract_line_bases(t):
-            wilds.add(b)
-    _tr('  \u62bd\u94fe: \u9759\u6001\u94fe\u63a5 %d \u4e2a / \u57fa\u57df %d \u4e2a %s'
+        _scan_text(t, static, wilds)
+    # \u2461 JS \u58f3\u8ddf\u968f\uff1aHTML \u62bd\u4e0d\u5230\u57fa\u57df \u2192 \u7ebf\u8def\u5728 <script src="publish.js"> \u91cc\uff08\u9ec4\u679c\u540c\u6b3e\u5f62\u6001\uff09
+    if not wilds:
+        js_urls = _js_candidates(html, publish_page)
+        if js_urls:
+            log('  JS \u58f3\u8ddf\u968f %d \u4e2a: %s'
+                % (len(js_urls), ', '.join(u.split('//', 1)[-1] for u in js_urls)))
+            for ju in js_urls:
+                jt = _fetch_text(ju, headers, proxies, timeout)
+                if not jt:
+                    log('    \u2717 %s \u53d6\u4e0d\u5230' % _host_of(ju))
+                    continue
+                log('    \u2713 %s %dB' % (_host_of(ju), len(jt)))
+                for t in _expand_b64_shells(jt):
+                    _scan_text(t, static, wilds)
+    log('  \u62bd\u94fe: \u9759\u6001\u94fe\u63a5 %d \u4e2a / \u57fa\u57df %d \u4e2a %s'
         % (len(dict.fromkeys(static)), len(wilds),
            ('\u2192 ' + ', '.join(sorted(wilds)[:6])) if wilds else ''))
     return list(dict.fromkeys(static)), list(wilds)
+
+
+def _extract_pages(pages, headers, proxies, timeout):
+    """**\u5e76\u884c**\u6293\u53d6\u591a\u4e2a\u53d1\u5e03\u9875\u5e76\u62bd\u94fe\uff08v2.4\uff0c2026-09-13\uff09\u3002
+
+    \u8fd4\u56de (pub_domains, bases, traces)\uff1a
+      - pub_domains / bases \u6309 **pages \u539f\u5e8f**\u5408\u5e76\uff08\u7ed3\u679c\u786e\u5b9a\uff0c\u4e0d\u53d7\u7ebf\u7a0b\u5b8c\u6210\u65f6\u5e8f\u5f71\u54cd\uff09
+      - traces = \u9010\u9875 trace \u884c\u5217\u8868\uff0c\u8c03\u7528\u65b9\u6309\u5e8f\u5199\u56de _TRACE\uff08\u591a\u7ebf\u7a0b\u4e0d\u53ef\u76f4\u63a5\u5199\u5168\u5c40\u5217\u8868\uff09
+    \u7ebf\u7a0b\u6c60\u4e0d\u53ef\u7528\u65f6\u9000\u56de\u4e32\u884c\uff0c\u884c\u4e3a\u7b49\u4ef7\u3002"""
+    n = len(pages or [])
+    if not n:
+        return [], [], []
+    results = [None] * n
+    traces = [[] for _ in range(n)]
+    if not (ThreadPoolExecutor and as_completed) or n == 1:
+        for i, pg in enumerate(pages):
+            try:
+                results[i] = extract_publish_domains(pg, headers, proxies,
+                                                     timeout, traces[i])
+            except Exception:
+                results[i] = ([], [])
+    else:
+        ex = ThreadPoolExecutor(max_workers=min(6, n))
+        try:
+            futs = {}
+            for i, pg in enumerate(pages):
+                futs[ex.submit(extract_publish_domains, pg, headers, proxies,
+                               timeout, traces[i])] = i
+            for f in as_completed(list(futs)):
+                i = futs[f]
+                try:
+                    results[i] = f.result()
+                except Exception:
+                    results[i] = ([], [])
+        finally:
+            ex.shutdown(wait=False)
+    pub_domains, bases = [], []
+    for i in range(n):
+        s, b = results[i] or ([], [])
+        for u in s:
+            if u not in pub_domains:
+                pub_domains.append(u)
+        for x in b:
+            if x not in bases:
+                bases.append(x)
+    return pub_domains, bases, traces
 
 
 def _dedupe(urls):
@@ -306,6 +463,26 @@ def _dedupe(urls):
         if u2 not in seen:
             seen.add(u2)
             out.append(u2)
+    return out
+
+
+def split_publish_pages(publish_page):
+    """\u5f52\u4e00 publish_page \u53c2\u6570 \u2192 \u53d1\u5e03\u9875 URL \u5217\u8868\uff08\u4fdd\u5e8f\u53bb\u91cd\uff0c2026-09-13 \u591a\u53d1\u5e03\u9875\uff09\u3002
+
+    \u63a5\u53d7\uff1aNone / '' / 'https://a' / 'https://a,https://b' / ['https://a', ...]\u3002
+    \u53ea\u8ba4 http(s) \u7edd\u5bf9\u5730\u5740\uff08\u76f8\u5bf9\u8def\u5f84\u5982 `/homeway.html` \u65e0\u6cd5\u72ec\u7acb\u6293\u53d6\uff0c\u76f4\u63a5\u4e22\u5f03\uff09\uff1b
+    \u9017\u53f7\u3001\u5206\u53f7\u3001\u7a7a\u767d\u90fd\u5f53\u5206\u9694\u7b26\u2014\u2014ext \u91cc\u7528\u9017\u53f7\uff0c\u624b\u5de5\u586b\u65f6\u5206\u53f7\u4e5f\u5e38\u89c1\u3002"""
+    if not publish_page:
+        return []
+    if isinstance(publish_page, (list, tuple)):
+        raw = [str(x) for x in publish_page]
+    else:
+        raw = re.split(r'[,\s;]+', str(publish_page))
+    out = []
+    for u in raw:
+        u = (u or '').strip().rstrip('/')
+        if u and re.match(r'^https?://\S+$', u) and u not in out:
+            out.append(u)
     return out
 
 
@@ -398,15 +575,17 @@ def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
 
     validate(final_host, text)->bool\uff1a\u7ad9\u70b9\u8eab\u4efd\u6821\u9a8c\u56de\u8c03\u3002
     site_key\uff1a\u7ad9\u540d\u5173\u952e\u8bcd\uff1bvalidate \u7f3a\u7701\u65f6\u81ea\u52a8\u7528\u5b83\u751f\u6210\u6821\u9a8c\uff08\u518d\u4e0d\u4f20\u5219\u9000\u5230\u5185\u5bb9\u5f62\u6001\u5224\uff09\u3002
+    publish_page\uff1a\u5355\u4e2a\u53d1\u5e03\u9875 URL\uff0c\u6216\u591a\u4e2a\uff08\u5217\u8868 / \u9017\u53f7\u00b7\u5206\u53f7\u5206\u9694\u4e32\uff09\u2014\u2014**\u5e76\u884c\u6293\u3001\u6309\u5e8f\u5408\u5e76**\u3002
     \u987a\u5e8f\uff1a\u53d1\u5e03\u9875\u57fa\u57df\u5019\u9009\uff08\u6700\u65b0\u9c9c\uff09> ext/\u5185\u7f6e\u5019\u9009 > \u53d1\u5e03\u9875\u9759\u6001\u94fe\u63a5\u3002
     \u5168\u8fc7\u7a0b\u5199\u5165 last_trace()\uff0c\u4f9b\u6e90\u5185\u300c\u8bca\u65ad\u300d\u680f\u76ee\u5c55\u793a\u3002"""
     del _TRACE[:]
     candidate_hosts = candidate_hosts or []
+    pages = split_publish_pages(publish_page)      # \u591a\u53d1\u5e03\u9875\uff082026-09-13\uff09
     _tr('== \u9009\u7ad9\u5f00\u59cb (publish=%s | site_key=%s) =='
-        % (_host_of(publish_page) or '(\u65e0)', site_key or '(\u672a\u4f20)'))
+        % ('\u3001'.join([_host_of(p) for p in pages]) or '(\u65e0)', site_key or '(\u672a\u4f20)'))
     if validate is None and site_key:
         validate = _auto_validate(site_key)
-    key = (publish_page or '', tuple(candidate_hosts), site_key or '')
+    key = (tuple(pages), tuple(candidate_hosts), site_key or '')
     if use_cache:
         hit = _CACHE.get(key)
         if hit and time.time() < hit[1]:
@@ -415,13 +594,12 @@ def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
             return hit[0]
 
     # 1) \u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe\uff08\u57fa\u57df\u81ea\u52a8\u751f\u6210\u5019\u9009 + \u9759\u6001\u955c\u50cf\u94fe\u63a5\uff09
-    pub_domains, bases = [], []
-    if publish_page:
-        try:
-            pub_domains, bases = extract_publish_domains(
-                publish_page, headers, proxies, timeout)
-        except Exception:
-            pub_domains, bases = [], []
+    #    \u591a\u4e2a\u53d1\u5e03\u9875\uff08\u7f51\u5740\u578b + GitHub \u578b\u7b49\uff09**\u5e76\u884c**\u6293\u53d6\u3001\u7ed3\u679c\u6309\u586b\u5199\u987a\u5e8f\u5408\u5e76\uff1a
+    #    \u4e00\u9875\u6302\u4e86\u4e0d\u5f71\u54cd\u5176\u4ed6\u9875\uff0cN \u9875\u8017\u65f6\u4ece N\u00d7 \u964d\u4e3a \u2248max\uff08v2.4\uff0c2026-09-13\uff09\u3002
+    pub_domains, bases, _pg_traces = _extract_pages(pages, headers, proxies, timeout)
+    for _lines in _pg_traces:                 # trace \u6309 pages \u539f\u5e8f\u5199\u56de\uff08\u5e76\u884c\u4e0b\u4e0d\u53ef\u4e71\u5e8f\uff09
+        for _l in _lines:
+            _tr(_l)
     words = random.sample(_WILD_WORDS, min(4, len(_WILD_WORDS)))
     wild_candidates = []
     for b in bases:
@@ -434,7 +612,7 @@ def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
     #    \u5c31\u53ea\u5269\u5047\u95e8\u7ad9\u53ef\u9009\uff09\u3002\u662f\u5426\u5408\u683c\u4ea4\u7ed9\u8eab\u4efd\u6821\u9a8c + \u5185\u5bb9\u5f62\u6001\u5224\u3002
     #    \u7b2c\u4e00\u5c42 = \u53d1\u5e03\u9875 + \u62bd\u94fe\u5019\u9009 + ext/\u5185\u7f6e\u5019\u9009\uff08\u65b0\u9c9c\u4e14\u53ef\u4fe1\uff09
     #    \u7b2c\u4e8c\u5c42 = \u53d1\u5e03\u9875\u91cc\u7684\u9759\u6001\u5916\u94fe\uff08\u591a\u4e3a\u5e7f\u544a/\u5bfc\u822a/\u5047\u95e8\u7ad9\uff0c\u4ec5\u7b2c\u4e00\u5c42\u5168\u8d25\u65f6\u624d\u8bd5\uff09
-    tier1 = [u for u in _dedupe([publish_page] + wild_candidates + list(candidate_hosts))
+    tier1 = [u for u in _dedupe(list(pages) + wild_candidates + list(candidate_hosts))
              if not _is_junk(u)]
     _t1 = set(tier1)
     tier2 = [u for u in _dedupe(pub_domains) if u not in _t1 and not _is_junk(u)]
@@ -443,7 +621,8 @@ def resolve_host(publish_page=None, candidate_hosts=None, headers=None,
         _tr('  \u65e0\u4efb\u4f55\u5019\u9009\u53ef\u6d4b\uff08\u53d1\u5e03\u9875\u62bd\u94fe\u4e3a\u7a7a\u4e14\u65e0\u5185\u7f6e\u5019\u9009\uff09\u2192 \u8fd4\u56de\u7a7a')
         return ''
     _tr('  \u5019\u9009: \u7b2c\u4e00\u5c42 %d \u4e2a / \u7b2c\u4e8c\u5c42 %d \u4e2a\uff08\u7b2c\u4e00\u5c42\u9996\u9009=%s\uff09'
-        % (len(tier1), len(tier2), _host_of(publish_page) or '-'))
+        % (len(tier1), len(tier2),
+           '\u3001'.join([_host_of(p) for p in pages]) or '-'))
 
     # 3) \u5206\u6ce2\u5b9e\u6d4b\uff08use_cache=False=\u5f3a\u5236\u5237\u65b0\uff0c\u4f46\u6210\u529f\u7ed3\u679c\u4ecd\u5199\u7f13\u5b58\u4f9b\u540e\u7eed init \u79d2\u5f00\uff09
     host = _probe_all(tier1, headers, proxies, timeout, validate, '\u4e00\u7ea7')

@@ -101,7 +101,10 @@ class Spider(Spider):
             if h not in cands:
                 cands.append(h)
         pub = self._ext.get('publish')
-        pages = ([pub] if pub else []) + self.PUBLISH_PAGES
+        # \u591a\u53d1\u5e03\u9875\uff082026-09-13\uff09\uff1aext \u7684 publish@ \u53ef\u80fd\u662f\u9017\u53f7\u4e32\uff08\u7f51\u5740\u578b + GitHub \u578b\u5e76\u5b58\uff09\uff0c
+        # \u5148\u62c6\u5f00\uff0c\u518d\u62fc\u5185\u7f6e\u53d1\u5e03\u9875\u6e05\u5355\uff0c\u4e00\u8d77\u5e76\u884c\u6293\u3002
+        pub_pages = [x for x in re.split(r'[,\s;]+', str(pub or '')) if x.startswith('http')]
+        pages = pub_pages + self.PUBLISH_PAGES
         h = self._host_from_publish(pages)
         if h:
             if h in cands:
@@ -122,21 +125,38 @@ class Spider(Spider):
         return result[0] or (cands[0] if cands else '')
 
     def _host_from_publish(self, pages):
-        """\u4ece\u53d1\u5e03\u9875\u62a0\u5f53\u524d h5_url\uff08config.js \u662f\u7eaf JS \u914d\u7f6e\uff0c\u6b63\u5219\u6700\u7a33\uff09\u3002"""
-        for p in pages:
+        """\u4ece\u53d1\u5e03\u9875\u62a0\u5f53\u524d h5_url\uff08config.js \u662f\u7eaf JS \u914d\u7f6e\uff0c\u6b63\u5219\u6700\u7a33\uff09\u3002
+
+        \u591a\u53d1\u5e03\u9875**\u5e76\u884c**\u6293\u53d6\uff082026-09-13\uff09\uff1aN \u9875\u8017\u65f6 \u2248max\uff08\u539f\u4e3a\u9010\u9875\u4e32\u884c\uff0c\u7ad9\u65b9\u9875\u6162\u65f6
+        \u51b7\u542f\u52a8\u767d\u7b49 N\u00d78s\uff09\uff1b\u4efb\u4e00\u9875\u5148\u547d\u4e2d\u5373\u91c7\u7528\uff0c\u5176\u4f59\u7ebf\u7a0b\u81ea\u7136\u7ed3\u675f\u3002"""
+        import threading
+        found = []
+        _ua = self.headers['User-Agent']
+
+        def _one(p):
+            if found:
+                return
             try:
-                r = self._req(str(p), headers={'User-Agent': self.headers['User-Agent']}, timeout=8)
+                r = self._req(str(p), headers={'User-Agent': _ua}, timeout=8)
                 if not r or r.status_code != 200:
-                    continue
+                    return
                 m = re.search(r'''["']h5_url["']\s*:\s*["'](https?://[^"']+)["']''', r.text)
                 if m:
-                    return m.group(1).strip().rstrip('/')
+                    if not found:
+                        found.append(m.group(1).strip().rstrip('/'))
+                    return
                 m2 = re.search(r'https?://h5\.[a-zA-Z0-9.\-]+', r.text)
-                if m2:
-                    return m2.group(0).strip().rstrip('/')
+                if m2 and not found:
+                    found.append(m2.group(0).strip().rstrip('/'))
             except Exception:
-                continue
-        return ''
+                return
+
+        ths = [threading.Thread(target=_one, args=(p,)) for p in pages]
+        for t in ths:
+            t.start()
+        for t in ths:
+            t.join(timeout=8)
+        return found[0] if found else ''
 
     def _alive(self, host):
         """\u9a8c\u6d3b\uff1a\u80fd\u62ff\u5230 retcode \u5373\u89c6\u4e3a\u53ef\u7528\u63a5\u53e3\u57df\u3002"""

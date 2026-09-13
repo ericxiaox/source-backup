@@ -27,7 +27,7 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://www.njttvylz.cc;hosts@https://barrel.lsaazihd.cc"
+      "ext": "publish@https://www.njttvylz.cc;hosts@https://barrel.lsaazihd.cc;mail@mrds.club@gmail.com"
     },
     {
       "key": "py_heiliao",
@@ -39,7 +39,7 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://www.wkcdhiqk.cc"
+      "ext": "publish@https://www.wkcdhiqk.cc;mail@heiliaobdy@gmail.com"
     },
     {
       "key": "py_huangguo",
@@ -51,14 +51,14 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://huangguo5.com;hosts@https://huangguoai.com"
+      "ext": "publish@https://huangguo5.com,https://huangguo3.com,https://huangguoai.pages.dev,https://huangguoai.github.io,https://gitlab.com/huangguo/huangguo,https://huangguo4.com,https://huangguoai.ai;hosts@https://thu.huxrzdjnv.cc;mail@huangguoaiai@gmail.com"
     },
     {
       "key": "py_51xigua",
       "name": "\ud83d\udcf151\u5403\u74dc\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/51xigua.py",
-      "ext": "publish@https://advise.nlwkmsv.cc;hosts@https://advise.ucorfqmp.cc",
+      "ext": "publish@https://advise.nlwkmsv.cc,https://gitlab.com/51chiguawang/51cg;hosts@https://advise.ucorfqmp.cc;mail@51cgfun@gmail.com,51cgfun@pm.me,chigua.com@pm.me",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -134,14 +134,14 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "hosts@https://www.uaa2601.com,https://uaa2601.com,https://uaa001.com"
+      "ext": "publish@https://uaadizhi.com;hosts@https://www.uaa2601.com,https://www.uaa2602.com,https://www.uaa008.com,https://www.uaa2603.com,https://www.uaa2604.com,https://www.uaa2605.com,https://www.uaa2606.com,https://www.uaa2607.com,https://www.uaa2608.com,https://www.uaa2609.com,https://www.uaa2610.com"
     },
     {
       "key": "py_wxts",
       "name": "\ud83d\udcf1\u65e0\u9650\u81c0\u5c71\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/wxts.py",
-      "ext": "publish@https://wuxiants.github.io/",
+      "ext": "publish@https://wuxiants.github.io/;mail@wuxiants@gmail.com",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -165,7 +165,7 @@
       "name": "\ud83d\udcf151\u6697\u7f51\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/51aw.py",
-      "ext": "publish@https://51aw34.com/",
+      "ext": "publish@https://51aw34.com/;mail@anwangchigua@gmail.com",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -177,7 +177,7 @@
       "name": "\ud83d\udcf1\u7389\u7f9e\u56ed\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/yxy.py",
-      "ext": "publish@https://dizhi8.cc/yxy/",
+      "ext": "publish@https://dizhi8.cc/yxy/,https://penzu.com/public/42071993",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -201,7 +201,7 @@
       "name": "\ud83d\udcf1\u6296\u9634\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/dy.py",
-      "ext": "publish@https://github.com/kissav12/douyin",
+      "ext": "publish@https://github.com/kissav12/douyin;mail@yeqi451@gmail.com",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -213,7 +213,7 @@
       "name": "\ud83d\udcf191\u7206\u6599\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/91bl.py",
-      "ext": "publish@https://t91bl.com/",
+      "ext": "publish@https://91blv.com/tbml.html;mail@chiguatiantang@gmail.com",
       "style": {
         "type": "rect",
         "ratio": 1
