@@ -50,7 +50,8 @@
         "type": "rect",
         "ratio": 1
       },
-      "changeable": 1
+      "changeable": 1,
+      "ext": "publish@https://huangguo5.com;hosts@https://huangguoai.com"
     },
     {
       "key": "py_51xigua",
@@ -132,7 +133,8 @@
         "type": "rect",
         "ratio": 1
       },
-      "changeable": 1
+      "changeable": 1,
+      "ext": "hosts@https://www.uaa2601.com,https://uaa2601.com,https://uaa001.com"
     },
     {
       "key": "py_wxts",
@@ -191,7 +193,8 @@
         "type": "rect",
         "ratio": 1
       },
-      "changeable": 1
+      "changeable": 1,
+      "ext": "hosts@https://xn---jifanggecom-ud8sv658aesydp6a.xn--9kq80g37uthu.com,https://xn--u2uy07cd3d2mxd2a.com,https://jfgso.xyz"
     },
     {
       "key": "py_dy",
@@ -226,7 +229,8 @@
       "changeable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "playerType": 2
+      "playerType": 2,
+      "ext": "publish@https://hddj.tv;hosts@https://lzlukvca.cc,https://tideember.cc,https://xqjzvcvt.top"
     },
     {
       "key": "py_shewo",

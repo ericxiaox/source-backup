@@ -3,17 +3,21 @@
 # \u7ad9\u70b9\u6027\u8d28\uff1a\u77ed\u5267 App \u52a0\u5bc6 API \u540e\u7aef\uff08AES-CBC + gzip + sign\uff09\uff0c\u975e\u82f9\u679cCMS\u3001\u65e0 HTML \u9875\u9762
 # \u57df\u540d\u6c60\uff082026-09-09 \u5b9e\u6d4b\u4e09\u57df\u540c\u5e93\uff09\uff1alzlukvca.cc / tideember.cc / xqjzvcvt.top
 #   \u8bf7\u6c42\u5931\u8d25\u81ea\u52a8\u5207\u4e0b\u4e00\u57df\uff1b\u6c60\u5168\u6302\u65f6\u5bfc\u822a\u7ad9\u63a2\u7d22\uff08explorer\uff0cgitee \u5f62\u6001\u7f3a\u5931\u5219\u8df3\u8fc7\uff09
-# \u672c\u6b21\u6539\u9020\uff082026-09-12\uff09\uff1a
-#   1. ext \u6807\u51c6\u89e3\u6790\uff08host@ \u9501\u5b9a / hosts@ \u5019\u9009 / publish@ \u5907\u5fd8 / \u517c\u5bb9\u65e7 site \u952e\uff09
+# \u672c\u6b21\u6539\u9020\uff082026-09-13\uff09\uff1a
+#   1. ext \u6807\u51c6\u89e3\u6790\uff08host@ \u9501\u5b9a / hosts@ \u5019\u9009 / publish@ \u53d1\u5e03\u9875\uff0c\u517c\u5bb9\u65e7 site \u952e\uff09
 #   2. init \u5e76\u884c\u63a2\u6d4b\u57df\u540d\u6c60\uff0c\u6d3b\u57df\u6392\u524d\uff08\u7701\u6bcf\u6b21\u8bf7\u6c42\u5168\u6c60\u8f6e\u6362\uff09
-#   3. hostresolver \u63a5\u5165 + \u5185\u8054\u5e76\u884c\u515c\u5e95\uff08gitee \u8fdc\u7a0b\u5bfc\u5165\u5f62\u6001 explorer/hostresolver \u90fd\u7f3a\uff09
-#   4. \u26a0\u8bca\u65ad\u680f\u76ee\uff08\u4e34\u65f6\u8bbe\u65bd\uff0c\u771f\u673a\u9a8c\u8bc1\u901a\u8fc7\u540e\u79fb\u9664\uff09
-# \u5b98\u65b9\u6e20\u9053\u5907\u5fd8\uff1ahddj.tv\uff08\u672c\u673a DNS \u88ab\u6c61\u67d3\uff09/ github.com/hddj636 / www.hdmgdju.cn
+#   3. publish@ \u771f\u63a5\u5165\uff1a\u6293\u5b98\u65b9\u5165\u53e3\u9875\u62bd\u5019\u9009\u57df\u5e76\u5165\u6c60\uff08\u539f\u5148\u53ea\u5b58\u8fdb _ext \u4e0d\u6293 = \u6446\u8bbe\uff09
+#   4. hostresolver \u63a5\u5165 + \u5185\u8054\u5e76\u884c\u515c\u5e95\uff08gitee \u8fdc\u7a0b\u5bfc\u5165\u5f62\u6001 explorer/hostresolver \u90fd\u7f3a\uff09
+# \u5b98\u65b9\u6e20\u9053\uff1ahddj.tv\uff08\u5b98\u7f51\u5165\u53e3\uff0cPC \u672c\u673a DNS \u6c61\u67d3\uff0c\u771f\u673a\u53ef\u89e3\u6790\uff09
+#   github.com/hddj636 = \u5185\u5bb9\u955c\u50cf\u8d26\u53f7\uff08\u6bcf\u4ed3 desc \u5747\u6307\u5411 hddj.tv\uff0c\u975e\u7ebf\u8def\u53d1\u5e03\u9875\uff09
+#   www.hdmgdju.cn = \u5b98\u7f51\u5ba3\u4f20\u9875\uff08\u7ea6 15KB\uff0c\u4e0d\u542b\u7ebf\u8def\u57df\u540d\uff09
+#   \u4e09\u57df\u540c\u5e93\u975e\u6cdb\u89e3\u6790\uff08\u968f\u673a\u5b50\u57df NXDOMAIN\uff0c2026-09-13 \u5b9e\u6d4b\uff09\u2192 \u4e0d\u9002\u7528\u6269\u8bcd\u65b9\u6848
 import gzip
 import hashlib
 import hmac
 import json
 import os
+import re
 import sys
 import time
 import uuid
@@ -78,6 +82,10 @@ class _AESCBC:
 
 
 class Spider(BaseSpider):
+
+    # \u5b98\u65b9\u5165\u53e3/\u53d1\u5e03\u9875\uff082026-09-13\uff09\uff1aext publish@ \u4f18\u5148\uff0c\u7f3a\u7701\u7528\u5b83\u3002\u6293\u9875\u9762\u62bd\u5019\u9009\u57df\u5e76\u5165\u6c60\uff1b
+    # PC \u672c\u673a DNS \u6c61\u67d3\u53d6\u4e0d\u5230 \u2192 \u9759\u9ed8\u9000\u56de\u5185\u7f6e\u4e09\u57df\uff0c\u96f6\u526f\u4f5c\u7528\u3002
+    PUBLISH_PAGE = "https://hddj.tv"
 
     def __init__(self):
         self.hosts = list(HOSTS)
@@ -163,18 +171,62 @@ class Spider(BaseSpider):
             except Exception:
                 pass
 
+    def _publish_candidates(self, publish):
+        """\u6293\u53d1\u5e03\u9875/\u5b98\u65b9\u5165\u53e3\u9875\uff0c\u62bd\u51fa\u5176\u4e2d\u51fa\u73b0\u7684\u5019\u9009\u57df\u540d\uff08\u672c\u57df + \u9875\u9762\u5185 http(s) \u57df\u540d\uff09\u3002
+        \u9ec4\u8c46\u4e09\u57df\u975e\u6cdb\u89e3\u6790\uff08\u968f\u673a\u5b50\u57df NXDOMAIN\uff09\uff0c\u4e0d\u505a\u6269\u8bcd\uff1b\u9875\u9762\u4e3a JS \u5355\u9875\u6216\u53d6\u4e0d\u5230\u65f6
+        \u9759\u9ed8\u8fd4\u56de []\uff0c\u9000\u56de\u5185\u7f6e\u6c60\uff0c\u96f6\u526f\u4f5c\u7528\u3002"""
+        if not publish:
+            return []
+        out = []
+        m = re.match(r'^https?://([^/]+)', str(publish), re.I)
+        if m:
+            out.append('https://' + m.group(1).lower())
+        try:
+            r = self.session.get(publish, headers={'User-Agent': _UA},
+                                 timeout=8, verify=False, allow_redirects=True)
+            t = r.text or ''
+            cands = [getattr(r, 'url', '')] + re.findall(
+                r'https?://[a-z0-9.-]+\.[a-z]{2,15}', t, re.I)
+            for u in cands:
+                mm = re.match(r'^https?://([a-z0-9.-]+\.[a-z]{2,15})', str(u), re.I)
+                if not mm:
+                    continue
+                d = mm.group(1).lower()
+                # \u5254\u7b2c\u4e09\u65b9\u7edf\u8ba1/\u5b57\u4f53/\u5ba2\u670d/\u4ed3\u5e93\u57df\uff0c\u53ea\u7559\u7591\u4f3c\u7ad9\u70b9\u57df
+                if re.search(r'(google|gstatic|baidu|schema\.org|w3\.org|fonts\.|'
+                             r'kf\.|weibo|jquery|bootstrap|github|cloudflare|'
+                             r'jsdelivr|unpkg)', d):
+                    continue
+                out.append('https://' + d)
+        except Exception:
+            pass
+        seen, res = set(), []
+        for u in out:
+            if u not in seen:
+                seen.add(u)
+                res.append(u)
+        return res
+
     def init(self, extend=""):
         self._parse_ext(extend)
-        # \u9501\u5b9a\u57df\u6700\u4f18\u5148
-        if self._ext.get('host'):
+        locked = bool(self._ext.get('host'))
+        # \u9501\u5b9a\u57df\u6700\u4f18\u5148\uff08\u88ab\u9501\u57df\u5df2\u5728\u9ed8\u8ba4\u6c60\u4e2d\u65f6 insert \u4f1a\u88ab\u8df3\u8fc7\uff0c\u987b\u663e\u5f0f\u628a _hi \u6307\u8fc7\u53bb\uff09
+        if locked:
             h = self._ext['host'].rstrip('/')
             if h not in self.hosts:
                 self.hosts.insert(0, h)
+            self._hi = self.hosts.index(h)
             self._apply_host(h)
         # ext \u5019\u9009\u63d2\u6c60
         for h in reversed(self._ext.get('hosts') or []):
             if h not in self.hosts:
                 self.hosts.insert(0, h)
+        # \u53d1\u5e03\u9875\u5019\u9009\uff08\u771f\u63a5\u5165\uff1a\u6293\u9875\u9762\u62bd\u57df\uff0c\u6392\u5185\u7f6e\u6c60\u4e4b\u524d\u4e00\u8d77\u5b9e\u6d4b\uff09
+        if not locked:
+            pub = self._ext.get('publish') or self.PUBLISH_PAGE
+            for h in reversed(self._publish_candidates(pub)):
+                if h not in self.hosts:
+                    self.hosts.insert(0, h)
         self._apply_host(self.hosts[self._hi])
         # \u5e76\u884c\u63a2\u6d4b\uff1a\u6d3b\u57df\u6392\u524d\uff08\u6bcf\u57df\u4e00\u6b21\u771f\u5b9e API \u8c03\u7528\uff0c8s \u8d85\u65f6\uff09
         self._probe_pool()

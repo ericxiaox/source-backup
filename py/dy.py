@@ -664,8 +664,7 @@ class Spider(BaseSpider):
                 if not cov.startswith('http'):
                     cov = urljoin(self.host + '/', cov)
                 pic = self._pic(cov)
-        # \u96c6\u540d\u7528\u96f6\u5bbd\u7a7a\u683c\uff1aApp \u5207\u96c6\u63d0\u793a/\u9009\u96c6\u5217\u8868\u663e\u793a\u4e3a\u7a7a\uff0c\u89c6\u89c9\u65e0\u300c\u7b2cN\u6761\u300d\u5b57\u6837
-        eps = '#'.join('\u200b$feed_%d' % i for i in range(1, self.FEED_MAX_EP + 1))
+        eps = '#'.join('\u7b2c%d\u6761$feed_%d' % (i, i) for i in range(1, self.FEED_MAX_EP + 1))
         return {'list': [{
             'vod_id': self.FEED_TID,
             'vod_name': '\U0001f525\u6296\u9634 \u00b7 \u968f\u673a\u5237',

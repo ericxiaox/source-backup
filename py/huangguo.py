@@ -88,6 +88,13 @@ HOSTS = [
     "https://fdu.ediayikma.cc",
     "https://thu.agdkczeyx.cc",
 ]
+# \u5b98\u65b9\u5730\u5740\u53d1\u5e03\u9875\uff082026-09-13 \u5b9e\u6d4b\uff09\uff1ahuangguo5.com / huangguo3.com / huangguoai.ai \u4e09\u9875
+# \u540c\u6e90\uff0846KB\uff0c\u6807\u9898\u300c\u5b98\u65b9\u6700\u65b0\u5730\u5740\u53d1\u5e03\u9875\u00b7\u9ec4\u679c\u77ed\u5267\u300d\uff09\uff0c\u7ebf\u8def\u4ee5 <a href="https://\u8bcd.\u57fa\u57df.cc">
+# \u5f62\u5f0f\u5217\u51fa\u3001**\u6bcf\u6b21\u6253\u5f00\u968f\u673a\u8f6e\u6362**\uff08\u5f53\u524d\u57fa\u57df mvbessfgf.cc\uff0c\u6cdb\u89e3\u6790\uff09\uff0c\u6545\u53ea\u80fd\u9760\u53d1\u5e03\u9875\u73b0\u62bd\u73b0\u7528\u3002
+# \u6ce8\u610f\uff1a\u53d1\u5e03\u9875\u542b <article class="route-card">\uff0c\u4f1a\u88ab hostresolver \u7684\u300c\u5185\u5bb9\u5f62\u6001\u5224\u300d\u8bef\u653e\u884c
+# \u2192 \u5fc5\u987b\u9760 _validate \u7684\u5185\u5bb9\u7ed3\u6784\u8981\u6c42\u628a\u5b83\u6321\u6389\uff0c\u5426\u5219\u4f1a\u88ab\u5f53\u6210 host\uff08\u5168\u5206\u7c7b\u7a7a\uff09\u3002
+# ext \u7684 publish@ \u4f18\u5148\uff0c\u6b64\u5904\u4e3a\u5185\u7f6e\u515c\u5e95\uff08ext \u7f3a\u5931/\u672a\u4e0b\u53d1\u65f6\u4ecd\u80fd\u6362\u57df\uff09\u3002
+PUBLISH_PAGE = "https://huangguo5.com/"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
 TIMEOUT = 18
@@ -261,20 +268,30 @@ class Spider(Spider):
             pass
 
     def _pick_host(self):
-        """\u53d6\u57df v2.3\uff082026-09-11\uff09\uff1aext \u9501\u5b9a \u2192 \u5019\u9009**\u5e76\u884c**\u5b9e\u6d4b\uff08\u5e26\u8eab\u4efd\u6821\u9a8c\uff09
-        \u2192 \u53d1\u5e03\u9875\u62bd\u94fe \u2192 \u5bfc\u822a\u7ad9\u63a2\u7d22\u3002\u539f\u4e3a 6\u00d75s \u4e32\u884c\uff0c\u7ad9\u70b9\u6302\u65f6\u8981\u8f6c\u5708 30 \u79d2\u3002"""
+        """\u53d6\u57df v2.4\uff082026-09-13\uff09\uff1aext \u9501\u5b9a \u2192 \u5019\u9009**\u5e76\u884c**\u5b9e\u6d4b\uff08\u5e26\u8eab\u4efd\u6821\u9a8c\uff09
+        \u2192 \u53d1\u5e03\u9875\u62bd\u94fe \u2192 \u5bfc\u822a\u7ad9\u63a2\u7d22\u3002\u539f\u4e3a 6\u00d75s \u4e32\u884c\uff0c\u7ad9\u70b9\u6302\u65f6\u8981\u8f6c\u5708 30 \u79d2\u3002
+        v2.4 \u53d8\u66f4\uff1a\u63a5\u5165\u5b98\u65b9\u53d1\u5e03\u9875\uff08ext publish@ \u4f18\u5148\uff0cPUBLISH_PAGE \u515c\u5e95\uff09\u2014\u2014
+        \u7ad9\u65b9 2026-09 \u5df2\u6362\u65cf\uff08ediayikma.cc/agdkczeyx.cc \u2192 mvbessfgf.cc\uff09\uff0c
+        \u5185\u7f6e\u6c60\u4f1a\u6ede\u540e\uff1b\u53d1\u5e03\u9875\u6bcf\u6b21\u6253\u5f00\u5373\u7ed9\u51fa\u5f53\u524d\u53ef\u7528\u7ebf\u8def\u3002"""
         ext = getattr(self, '_ext', {}) or {}
         if ext.get('host'):
             return str(ext['host']).rstrip('/')
 
+        pub = (ext.get('publish') or '').strip() or PUBLISH_PAGE
+
         def _validate(host, text):
+            # v2.4 \u6536\u7d27\uff1a\u5fc5\u987b\u300c\u7ad9\u540d + \u7ad9\u5185\u5185\u5bb9\u7ed3\u6784\u300d\u53cc\u6ee1\u8db3\u3002
+            # \u539f\u5224\u636e\u53ea\u8ba4\u7ad9\u540d\uff0c\u800c\u5b98\u65b9\u53d1\u5e03\u9875\uff0846KB\uff0c\u542b <article class="route-card">\uff09
+            # \u540c\u6837\u542b\u300c\u9ec4\u679c\u300d\u4e8c\u5b57\uff0c\u4f1a\u88ab\u9009\u4e2d\u5f53 host \u2192 \u5206\u7c7b\u5168\u7a7a\u3002
             t = text or ''
-            return ('\u9ec4\u679c' in t) or ('huangguo' in t.lower())
+            if not (('\u9ec4\u679c' in t) or ('huangguo' in t.lower())):
+                return False
+            return ('hg-drama-card' in t) or ('videoInitialData' in t)
 
         cands = list(ext.get('hosts') or []) + HOSTS
         if resolve_host:
             try:
-                h = resolve_host(publish_page=ext.get('publish') or '',
+                h = resolve_host(publish_page=pub,
                                  candidate_hosts=cands,
                                  headers={'User-Agent': UA},
                                  proxies=getattr(self, 'proxies', {}) or {},
@@ -304,7 +321,7 @@ class Spider(Spider):
             except Exception:
                 pass
         # \u5168\u8d25\uff1a\u663e\u5f0f\u8fd4\u56de\u7a7a
-        return self._resolve_inline(ext.get('publish') or '', HOSTS, _validate)
+        return self._resolve_inline(pub, HOSTS, _validate)
 
     def _resolve_inline(self, publish, builtin, validate):
         """hostresolver \u672a\u52a0\u8f7d\u65f6\u7684\u5185\u8054\u5e76\u884c\u63a2\u6d4b\uff1a\u907f\u514d\u4e32\u884c\u8d85\u65f6\u5bfc\u81f4 App \u7aef\u7a7a\u8f6c\u51e0\u5341\u79d2\u3002
