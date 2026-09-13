@@ -11,22 +11,8 @@ from urllib.parse import urljoin
 sys.path.append('..')
 from base.spider import Spider
 from urllib.parse import urljoin
-try:
-    from hostresolver import ext_of
-except ImportError:
-    ext_of = None
-except Exception:
-    try:
-        import os as _os
-        sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
-        try:
-            from hostresolver import ext_of
-        except ImportError:
-            ext_of = None
-    except Exception:
-        ext_of = None
 
-
+from hostresolver import ext_of
 class Spider(Spider):
     CANDIDATE_DOMAINS = [
         "https://mdcmai4.xyz",

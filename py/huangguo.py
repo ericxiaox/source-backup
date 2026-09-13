@@ -47,19 +47,8 @@ except Exception:
     except Exception:
         explore_hosts = None
 # hostresolver.py\uff08source \u6839\uff09\uff1a\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe + \u5019\u9009\u5e76\u884c\u5b9e\u6d4b\uff08\u4e0e explorer \u540c\u76ee\u5f55\uff09
-try:
-    from hostresolver import resolve_host, probe_first, ext_of
-except ImportError:
-    resolve_host = probe_first = ext_of = None
-except Exception:
-    try:
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from hostresolver import resolve_host, probe_first, ext_of
-    except Exception:
-        resolve_host = None
-        probe_first = None
-        ext_of = None
 
+from hostresolver import resolve_host, probe_first, ext_of
 try:
     import requests as rq
     rq.packages.urllib3.disable_warnings()

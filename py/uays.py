@@ -30,16 +30,8 @@ BUILTIN_HOSTS = [
     'https://uaa001.com',        # \u65e7\u57df\uff08\u672c\u673a TLS \u63e1\u624b\u5931\u8d25\uff0c\u4fdd\u7559\u4f5c\u771f\u673a\u515c\u5e95\uff09
 ]
 
-try:
-    from hostresolver import ext_of
-except Exception:
-    try:
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from hostresolver import ext_of
-    except Exception:
-        ext_of = None
 
-
+from hostresolver import ext_of
 class Spider(Spider):
     def getName(self):
         return "UAA\u97f3\u753b"

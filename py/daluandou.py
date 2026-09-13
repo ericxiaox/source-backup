@@ -20,12 +20,8 @@ except Exception:
         from imgfetch import fetch_img as _shared_fetch_img
     except Exception:
         _shared_fetch_img = None
-try:
-    from hostresolver import resolve_host, parse_ext, probe_first
-except Exception:
-    resolve_host = None
-    probe_first = None
-    parse_ext = None
+
+from hostresolver import resolve_host, parse_ext, probe_first
 # explorer.py\uff08source \u6839\uff09\uff1a\u6c60\u5168\u6302\u65f6\u4ece\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\u6d3b\u57df\uff08\u4e0e hostresolver \u540c\u76ee\u5f55\uff09
 try:
     from explorer import explore_hosts

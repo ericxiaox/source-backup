@@ -57,15 +57,7 @@ class Spider(Spider):
         return "\u9999\u8549\u89c6\u9891"
 
     def init(self, extend=""):
-        try:
-            from hostresolver import ext_of
-        except Exception:
-            try:
-                import os as _os, sys as _sys
-                _sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
-                from hostresolver import ext_of
-            except Exception:
-                ext_of = None
+        from hostresolver import ext_of
         self.proxies = {}
         self._ext = {}
         if ext_of:

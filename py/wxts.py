@@ -15,17 +15,8 @@ import requests
 sys.path.append('..')
 from base.spider import Spider as BaseSpider
 
-try:
-    from hostresolver import resolve_host, parse_ext
-except Exception:
-    # hostresolver.py \u5728 source/ \u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\uff0c\u6309\u811a\u672c\u81ea\u8eab\u4f4d\u7f6e\u5b9a\u4f4d\uff0c\u4e0d\u4f9d\u8d56 cwd
-    try:
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from hostresolver import resolve_host, parse_ext
-    except Exception:
-        resolve_host = None
-        parse_ext = None
 
+from hostresolver import resolve_host, parse_ext
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 # \u5217\u8868\u6761\u76ee: <a class="thumbnail" href="..."><img src=\u5c01\u9762 alt=\u6807\u9898>

@@ -27,17 +27,8 @@ except ImportError:
     class BaseSpider(object):
         pass
 
-try:
-    from hostresolver import resolve_host, parse_ext, probe_first
-except Exception:
-    try:
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from hostresolver import resolve_host, parse_ext, probe_first
-    except Exception:
-        resolve_host = None
-        probe_first = None
-        parse_ext = None
 
+from hostresolver import resolve_host, parse_ext, probe_first
 _UA = ('Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 '
        '(KHTML, like Gecko) Chrome/143.0.7499.192 Mobile Safari/537.36')
 

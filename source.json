@@ -201,7 +201,7 @@
       "name": "\ud83d\udcf1\u6296\u9634\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/dy.py",
-      "ext": "publish@https://github.com/kissav12/douyin;mail@yeqi451@gmail.com",
+      "ext": "publish@https://github.com/kissav12/douyin;hosts@https://2c1.ngyoebkg.com,https://zz.douyin18.com;mail@yeqi451@gmail.com",
       "style": {
         "type": "rect",
         "ratio": 1

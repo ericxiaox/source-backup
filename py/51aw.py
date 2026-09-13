@@ -22,18 +22,8 @@ import requests
 sys.path.append('..')
 from base.spider import Spider as BaseSpider
 
-try:
-    from hostresolver import resolve_host, parse_ext, probe_first
-except Exception:
-    # hostresolver.py \u5728 source/ \u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\uff0c\u6309\u811a\u672c\u81ea\u8eab\u4f4d\u7f6e\u5b9a\u4f4d\uff0c\u4e0d\u4f9d\u8d56 cwd
-    try:
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from hostresolver import resolve_host, parse_ext, probe_first
-    except Exception:
-        resolve_host = None
-        probe_first = None
-        parse_ext = None
 
+from hostresolver import resolve_host, parse_ext, probe_first
 # imgfetch.py\uff08source \u6839\uff09\uff1a\u5c01\u9762\u4ee3\u7406\u5171\u4eab\u901a\u9053\uff08Session \u590d\u7528 + LRU + magic \u9884\u68c0 + \u89e3\u5bc6\u515c\u5e95\uff09
 try:
     from imgfetch import fetch_img as _shared_fetch_img

@@ -12,18 +12,8 @@ from Crypto.Util.Padding import unpad
 from pyquery import PyQuery as pq
 sys.path.append('..')
 from base.spider import Spider as BaseSpider
-try:
-    from hostresolver import resolve_host, parse_ext, probe_first
-except Exception:
-    # hostresolver.py \u4e0e py/ \u540c\u7ea7\u7684\u4e0a\u7ea7\u76ee\u5f55\uff08source/ \u6839\uff09\uff0c\u6309\u811a\u672c\u81ea\u8eab\u4f4d\u7f6e\u5b9a\u4f4d\uff0c\u4e0d\u4f9d\u8d56 cwd
-    try:
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        from hostresolver import resolve_host, parse_ext, probe_first
-    except Exception:
-        resolve_host = None
-        probe_first = None
-        parse_ext = None
 
+from hostresolver import resolve_host, parse_ext, probe_first
 # explorer.py\uff08source \u6839\uff09\uff1a\u6c60\u5168\u6302\u65f6\u4ece\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\u6d3b\u57df\uff08\u4e0e hostresolver \u540c\u76ee\u5f55\uff09
 try:
     from explorer import explore_hosts

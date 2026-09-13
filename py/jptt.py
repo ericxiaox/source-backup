@@ -16,17 +16,8 @@ from urllib.parse import quote
 
 sys.path.append('..')
 from base.spider import Spider
-try:
-    from hostresolver import resolve_host, parse_ext
-except Exception:
-    try:
-        import os as _os
-        sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
-        from hostresolver import resolve_host, parse_ext
-    except Exception:
-        resolve_host = None
-        parse_ext = None
 
+from hostresolver import resolve_host, parse_ext
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
 
 
