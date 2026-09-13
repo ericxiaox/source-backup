@@ -48,7 +48,19 @@ except Exception:
         explore_hosts = None
 # hostresolver.py\uff08source \u6839\uff09\uff1a\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe + \u5019\u9009\u5e76\u884c\u5b9e\u6d4b\uff08\u4e0e explorer \u540c\u76ee\u5f55\uff09
 
-from hostresolver import resolve_host, probe_first, ext_of
+try:
+    from hostresolver import resolve_host, probe_first, ext_of
+except Exception:
+    # hostresolver.py \u5728\u5305\u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\u3002App \u7aef\uff08gitee \u52a0\u8f7d\uff09\u5b83\u4e0d\u5728\u73b0\u573a\uff0c
+    # \u5bfc\u5165\u5fc5\u987b\u53ef\u964d\u7ea7\u4e3a None \u2192 \u8fd0\u884c\u65f6\u8d70 self._resolve_inline \u5185\u8054\u515c\u5e95\u3002\u6a21\u5757\u7ea7\u7981\u88f8\u5bfc\u5165\u3002
+    try:
+        import os as _os
+        sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+        from hostresolver import resolve_host, probe_first, ext_of
+    except Exception:
+        resolve_host = None
+        probe_first = None
+        ext_of = None
 try:
     import requests as rq
     rq.packages.urllib3.disable_warnings()

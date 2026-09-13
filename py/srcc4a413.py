@@ -28,7 +28,19 @@ except ImportError:
         pass
 
 
-from hostresolver import resolve_host, parse_ext, probe_first
+try:
+    from hostresolver import resolve_host, parse_ext, probe_first
+except Exception:
+    # hostresolver.py \u5728\u5305\u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\u3002App \u7aef\uff08gitee \u52a0\u8f7d\uff09\u5b83\u4e0d\u5728\u73b0\u573a\uff0c
+    # \u5bfc\u5165\u5fc5\u987b\u53ef\u964d\u7ea7\u4e3a None \u2192 \u8fd0\u884c\u65f6\u8d70 self._resolve_inline \u5185\u8054\u515c\u5e95\u3002\u6a21\u5757\u7ea7\u7981\u88f8\u5bfc\u5165\u3002
+    try:
+        import os as _os
+        sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+        from hostresolver import resolve_host, parse_ext, probe_first
+    except Exception:
+        resolve_host = None
+        parse_ext = None
+        probe_first = None
 _UA = ('Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 '
        '(KHTML, like Gecko) Chrome/143.0.7499.192 Mobile Safari/537.36')
 

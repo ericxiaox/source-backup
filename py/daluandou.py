@@ -21,7 +21,19 @@ except Exception:
     except Exception:
         _shared_fetch_img = None
 
-from hostresolver import resolve_host, parse_ext, probe_first
+try:
+    from hostresolver import resolve_host, parse_ext, probe_first
+except Exception:
+    # hostresolver.py \u5728\u5305\u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\u3002App \u7aef\uff08gitee \u52a0\u8f7d\uff09\u5b83\u4e0d\u5728\u73b0\u573a\uff0c
+    # \u5bfc\u5165\u5fc5\u987b\u53ef\u964d\u7ea7\u4e3a None \u2192 \u8fd0\u884c\u65f6\u8d70 self._resolve_inline \u5185\u8054\u515c\u5e95\u3002\u6a21\u5757\u7ea7\u7981\u88f8\u5bfc\u5165\u3002
+    try:
+        import os as _os
+        sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+        from hostresolver import resolve_host, parse_ext, probe_first
+    except Exception:
+        resolve_host = None
+        parse_ext = None
+        probe_first = None
 # explorer.py\uff08source \u6839\uff09\uff1a\u6c60\u5168\u6302\u65f6\u4ece\u5bfc\u822a\u7ad9\u81ea\u52a8\u63a2\u7d22\u6d3b\u57df\uff08\u4e0e hostresolver \u540c\u76ee\u5f55\uff09
 try:
     from explorer import explore_hosts

@@ -23,7 +23,19 @@ sys.path.append('..')
 from base.spider import Spider as BaseSpider
 
 
-from hostresolver import resolve_host, parse_ext, probe_first
+try:
+    from hostresolver import resolve_host, parse_ext, probe_first
+except Exception:
+    # hostresolver.py \u5728\u5305\u6839\uff08py/ \u7684\u4e0a\u7ea7\uff09\u3002App \u7aef\uff08gitee \u52a0\u8f7d\uff09\u5b83\u4e0d\u5728\u73b0\u573a\uff0c
+    # \u5bfc\u5165\u5fc5\u987b\u53ef\u964d\u7ea7\u4e3a None \u2192 \u8fd0\u884c\u65f6\u8d70 self._resolve_inline \u5185\u8054\u515c\u5e95\u3002\u6a21\u5757\u7ea7\u7981\u88f8\u5bfc\u5165\u3002
+    try:
+        import os as _os
+        sys.path.append(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+        from hostresolver import resolve_host, parse_ext, probe_first
+    except Exception:
+        resolve_host = None
+        parse_ext = None
+        probe_first = None
 # imgfetch.py\uff08source \u6839\uff09\uff1a\u5c01\u9762\u4ee3\u7406\u5171\u4eab\u901a\u9053\uff08Session \u590d\u7528 + LRU + magic \u9884\u68c0 + \u89e3\u5bc6\u515c\u5e95\uff09
 try:
     from imgfetch import fetch_img as _shared_fetch_img
