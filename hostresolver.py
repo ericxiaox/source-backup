@@ -46,6 +46,39 @@ v2.4 \u76f8\u5bf9 v2.3 \u7684\u6839\u56e0\u7ea7\u5347\u7ea7\uff082026-09-13\uff0
      \uff08`urls[randomNum(0,urls.length-1)]` \u8fd9\u79cd**\u53d8\u91cf\u5f15\u7528**\u5f62\u6001\u65e0\u9700\u5355\u72ec\u89e3\u6790\u2014\u2014\u6570\u7ec4\u672c\u4f53
       \u5df2\u88ab\u62bd\u51fa\uff0c\u57fa\u57df\u5373\u6570\u7ec4\u503c\u3002\uff09
 
+v2.6 \u76f8\u5bf9 v2.4 \u7684\u6839\u56e0\u7ea7\u5347\u7ea7\uff082026-09-14\uff0c\u56e0\u300c\u9ed1\u6599\u5bb6\u65cf\u8df3\u8f6c\u578b\u53d1\u5e03\u9875\u300d\u590d\u76d8\uff09\uff1a
+ 14.\u3010\u8df3\u8f6c\u58f3\u8ddf\u968f\u3011\u65b0\u589e `_shell_target()` / `_follow_shell()`\uff1a\u53d1\u5e03\u9875\u53ef\u80fd\u662f **\u2248300B \u7684
+     \u300c\u52a0\u8f7d\u4e2d\u300d\u4e2d\u8f6c\u58f3**\uff0c\u5f62\u6001\u662f
+       `<a id=\u968f\u673a href=\"https://\u76ee\u6807/\" target=\"_self\">\u52a0\u8f7d\u4e2d...</a>`
+       + `<script>(function(\u53d8\u91cf){... window.location.replace(\u53d8\u91cf.href)})
+          (document.getElementById(\"\u968f\u673a\"))</script>`
+     \u2014\u2014 **\u76ee\u6807\u5199\u5728 `<a href>` \u91cc\u3001JS \u53ea\u5f15\u7528\u53d8\u91cf**\u3002\u65e7\u7248\u53ea\u8ba4\u5b57\u9762\u91cf
+     `location.replace('...')` \u2192 \u6574\u9875\u62bd 0 \u6761 \u2192 \u53ea\u80fd\u5403\u5185\u7f6e\u6c60\uff0c\u6c60\u4e00\u88ab\u6c61\u67d3\u6574\u6e90\u5373\u6302\u3002
+     `extract_publish_domains` \u73b0\u5728\u4f1a\u5148\u8ddf\u968f\uff08\u22643 \u8df3\u3001\u5e26\u73af\u68c0\u6d4b\uff09\uff0c\u628a\u5404\u8df3\u6587\u672c\u4e00\u5e76
+     \u5c55\u5f00 b64 \u58f3\u540e\u62bd\u94fe\uff1b\u8df3\u8f6c\u843d\u70b9\u672c\u8eab\u4e5f\u4f5c\u4e3a\u5019\u9009\u3002
+ 15.\u3010b64 \u8865 padding\u3011`_b64_try()`\uff1a\u7ad9\u65b9 blob \u5e38\u7701\u5c3e\u90e8 `=`\uff0c\u65e7\u7248\u6b7b\u62a0
+     `len % 4 == 0` / \u76f4\u63a5 `b64decode` \u4f1a\u6574\u6279\u6f0f\u6389\u771f\u5b9e\u58f3\u3002\u73b0\u8865 `=` \u518d\u89e3\uff0c
+     \u5e76\u52a0\u901a\u7528\u957f blob \u515c\u5e95\uff08`Base64.decode(x)` \u53d8\u91cf\u5f62\u6001\uff09\u3002
+ 16.\u3010_probe \u89e3\u58f3\u3011`_probe` \u5c0f\u9875\u5206\u652f\u6539\u7528 `_shell_target`\uff08\u8986\u76d6\u4e0a\u8ff0 <a href> \u5f62\u6001\uff09\uff0c
+     \u5e76\u65b0\u589e\u300c\u6574\u9875 b64 \u58f3 \u2192 \u89e3\u7801\u9875\u8fc7\u5f62\u6001\u5224+\u6821\u9a8c\u5373\u8ba4\u5f53\u524d\u57df\u300d\u3002
+ 17.\u3010\u5b9e\u6d4b\u8986\u76d6\u301151\u6697\u7f51 51awn5.com\u2192yemskjuse.cc(b64)\u2192\u57fa\u57df 6 \u4e2a\uff1b\u6bcf\u65e5\u5927\u8d5b
+     mrdsm4.com\u2192mzujxcre.cc(b64)\u2192tbzzoscom/fbtmlsiu\uff1b\u9ed1\u6599\u4e0d\u6253\u70ca/\u9ed1\u6599\u7f51/\u6bcf\u65e5\u5927\u4e71\u6597/
+     91\u7206\u6599/51\u5403\u74dc \u5168\u65cf\u540c\u65e5\u590d\u6d4b\u901a\u8fc7\u3002
+ \u26a0 \u4ecd\u7f3a\u4e00\u5c42\uff08\u5df2\u77e5\uff0c\u672a\u5b9e\u73b0\uff09\uff1a51\u5403\u74dc \u4e2d\u8f6c\u843d\u5730\u9875 `www.zakgympuu.cc` \u7528
+   `window.appConfig={data:\"<b64>\",key:\"0726001\"}` + crypto-js AES \u518d\u5305\u4e00\u5c42\uff0c
+   \u7ebf\u8def\u987b\u5148 AES \u89e3\u5bc6\u624d\u89c1\u3002\u8be5\u7ad9\u53e6\u6709\u6d3b\u955c\u50cf advise.ajtnqsla.cc \u515c\u5e95\uff0c\u6682\u4e0d\u5b9e\u73b0\u3002
+
+v2.7 \u76f8\u5bf9 v2.6 \u7684\u6839\u56e0\u7ea7\u5347\u7ea7\uff082026-09-14\uff0c\u56e0\u300c\u7389\u7f9e\u56ed\u53d1\u5e03\u9875\u57df\u4e0d\u5165\u6587\u672c\u300d\u590d\u76d8\uff09\uff1a
+ 18.\u3010\u5c5e\u6027\u85cf\u57df\u3011\u65b0\u589e `_attr_bases()`\uff1a\u7ad9\u65b9\u628a\u57df\u540d\u62c6\u8fdb HTML **\u5c5e\u6027**\u3001\u7531 JS \u73b0\u573a\u62fc\uff0c
+     \u6587\u672c\u91cc\u770b\u4e0d\u5230\u5b8c\u6574\u57df\u3002\u73b0\u7f51\u5f62\u6001\uff08\u7389\u7f9e\u56ed `dizhi8.cc/yxy/`\uff0c`<title>` \u4f2a\u88c5\u6210\u300c\u5510\u8bd7\u5b8b\u8bcd\u300d\uff0c
+     \u6b63\u6587\u5c3e\u6ce8\u300c\u63d0\u4f9b\u6700\u7a33\u5b9a\u3001\u6700\u7eaf\u51c0\u7684\u76f4\u8fbe\u53d1\u5e03\u9875\u300d\uff09\uff1a
+       `<a class=\"goto-btn dynamic-link\" data-base=\"yxy999p\" houzui=\"icu\">\u83b7\u53d6\u9ad8\u901f\u901a\u9053...</a>`
+       + finalUrl = `https://${prefix}.${baseName}.${houzuiname}`\uff08prefix = 3 \u4f4d\u968f\u673a\u5b57\u6bcd\uff09
+     \u62bd `data-base`\u00d7`houzui`\uff08**\u540c\u6807\u7b7e\u5185**\u5339\u914d\uff0c\u9632\u8de8\u6807\u7b7e\u8bef\u914d\uff09\u62fc\u51fa\u57fa\u57df `yxy999p.icu`\uff0c
+     \u6e90\u4fa7\u518d\u62fc\u968f\u673a\u524d\u7f00\u3002**\u300c\u62bd\u94fe 0 \u6761\u300d\u2260\u300c\u53d1\u5e03\u9875\u5931\u6548\u300d**\u2014\u2014\u8fd9\u662f\u540c\u4e00\u5751\u7684\u7b2c 4 \u79cd\u8868\u73b0
+     \uff08\u524d 3 \u79cd\uff1a\u8df3\u8f6c\u58f3 / b64 \u58f3 / \u660e\u6587\u5916\u94fe\uff09\u3002**\u5224\u6d3b\u5fc5\u987b\u505a\u6e90\u7ea7 homeContent+searchContent
+     \u5b9e\u8dd1\uff0c\u4e0d\u5f97\u53ea\u770b\u62bd\u94fe\u6570\u6216\u9875\u9762\u5927\u5c0f**\uff08\u540c\u65e5\u300c\u4e09\u7ad9\u5df2\u5e9f\u300d\u7684\u4e09\u5904\u8bef\u5224\u5373\u6b64\u5751\u6240\u5bb3\uff09\u3002
+
 \u8c03\u7528\u65b9\uff08\u5404 py \u6e90\uff09\u53ea\u9700\u58f0\u660e\uff1a
   PUBLISH_PAGE = 'https://xxx.xxx/'          # \u7a33\u5b9a\u53d1\u5e03\u9875\uff08\u53ef\u7a7a\uff09
   CANDIDATE_HOSTS = ['https://a/', ...]      # \u5df2\u77e5\u955c\u50cf\uff0c\u6309\u5b58\u6d3b\u6392\u5e8f
@@ -252,6 +285,16 @@ _JUNK_HOST_PAT = re.compile(
     r'browsehappy|schema\.org|w3\.org|qq\.com|apple\.com|bing\.com|baidu\.com|'
     r'magsrv\.|adsrv|ad-provider|chnsrv|stripchat|jsdelivr|unpkg|npmjs|shields\.io|'
     r'699pic|meituan|fontawesome|jquery|bootstrap)', re.I)
+# v2.7 \u5c5e\u6027\u85cf\u57df\uff08\u7389\u7f9e\u56ed\u5f62\u6001\uff09\uff1a\u57df\u540d\u62c6\u8fdb HTML \u5c5e\u6027\u3001\u7531 JS \u73b0\u573a\u62fc `${\u968f\u673a\u524d\u7f00}.${base}.${houzui}`\u3002
+# \u5fc5\u987b**\u540c\u6807\u7b7e\u5185**\u5339\u914d\uff08`[^>]` \u9650\u5236\uff09\u2014\u2014\u8de8\u6807\u7b7e\u4f1a\u628a\u4e0d\u76f8\u5e72\u7684\u5c5e\u6027\u914d\u6210\u5047\u57df\u3002
+_ATTR_BASES_PAT = (
+    re.compile(r'data-(?:base|host|domain|sub|prefix)\s*=\s*["\']([A-Za-z0-9][A-Za-z0-9.\-]{1,40})["\']'
+               r'[^>]{0,160}?(?:houzui|houzhui|suffix|tld)\s*=\s*["\']([A-Za-z0-9][A-Za-z0-9.\-]{0,20})["\']',
+               re.I),
+    re.compile(r'(?:houzui|houzhui|suffix|tld)\s*=\s*["\']([A-Za-z0-9][A-Za-z0-9.\-]{0,20})["\']'
+               r'[^>]{0,160}?data-(?:base|host|domain|sub|prefix)\s*=\s*["\']([A-Za-z0-9][A-Za-z0-9.\-]{1,40})["\']',
+               re.I),
+)
 
 
 def _host_of(url):
@@ -289,15 +332,88 @@ def _looks_like_content(text):
     return len(t) > 80000
 
 
+def _b64_try(blob):
+    """base64 blob \u2192 \u6587\u672c\uff08\u987b\u542b HTML \u6807\u7b7e\u624d\u7b97\u89e3\u51fa\uff09\uff1b\u5bb9\u9519\u65e0 padding / \u542b\u7a7a\u767d\u3002
+    \u5931\u8d25\u8fd4\u56de ''\u3002"""
+    try:
+        s = re.sub(r'\s+', '', blob or '')
+        if len(s) < 100:
+            return ''
+        s += '=' * (-len(s) % 4)          # v2.6 \u8865 padding\uff1a\u7ad9\u65b9 blob \u5e38\u7701\u5c3e\u90e8 `=`
+        d = base64.b64decode(s, validate=False).decode('utf-8', 'ignore')
+        return d if ('<' in d and '>' in d) else ''
+    except Exception:
+        return ''
+
+
 def _expand_b64_shells(text):
-    """\u5c55\u5f00\u53d1\u5e03\u9875\u91cc\u7684 Base64 \u58f3\uff0c\u8fd4\u56de [\u539f\u6587, \u89e3\u7801\u98751, \u89e3\u7801\u98752...]"""
+    """\u5c55\u5f00\u53d1\u5e03\u9875\u91cc\u7684 Base64 \u58f3\uff0c\u8fd4\u56de [\u539f\u6587, \u89e3\u7801\u98751, \u89e3\u7801\u98752...]
+
+    v2.6\uff1a\u2460 \u8865 padding \u4fee\u590d\u2014\u2014\u7ad9\u65b9 blob \u5e38\u7701\u5c3e\u90e8 `=`\uff0c\u65e7\u7248\u76f4\u63a5 `b64decode` \u629b\u9519 \u2192
+    \u6574\u9875\u58f3\u89e3\u4e0d\u5f00\uff08\u90a3\u4e00\u6b65\u6b63\u662f\u9ed1\u6599\u5bb6\u65cf\u6362\u57df\u94fe\u7684\u7b2c\u4e8c\u8df3\uff09\uff1b\u2461 \u627e\u4e0d\u5230 `Base64.decode('...')`
+    \u5b57\u9762\u5f62\u6001\u65f6\uff0c\u9000\u5230\u901a\u7528\u957f blob \u626b\u63cf\uff08\u8986\u76d6 `Base64.decode(x)` \u53d8\u91cf\u5f62\u6001\uff09\u3002"""
     texts = [text]
-    for m in _B64_SHELL_PAT.finditer(text):
-        try:
-            texts.append(base64.b64decode(m.group(1)).decode('utf-8', 'ignore'))
-        except Exception:
-            continue
+    blobs = [m.group(1) for m in _B64_SHELL_PAT.finditer(text or '')]
+    if not blobs:
+        blobs = re.findall(r'[A-Za-z0-9+/=]{400,}', text or '')
+    for b in blobs[:3]:
+        d = _b64_try(b)
+        if d:
+            texts.append(d)
     return texts
+
+
+def _shell_target(text):
+    """\u4ece\u300c\u8df3\u8f6c\u58f3\u300d\u9875\u62bd\u4e0b\u4e00\u8df3\u7edd\u5bf9 URL\uff1b\u8fd4\u56de '' \u8868\u793a\u4e0d\u662f\u8df3\u8f6c\u58f3\u3002
+
+    \u9ed1\u6599\u5bb6\u65cf 2026-09 \u73b0\u7f51\u5f62\u6001\uff08\u6bcf\u65e5\u5927\u8d5b / 51\u5403\u74dc / 51\u6697\u7f51 \u540c\u6b3e\uff0c\u2248300B\uff09\uff1a
+      <a id=\"\u968f\u673aID\" href=\"https://\u76ee\u6807\u57df/\" target=\"_self\">\u52a0\u8f7d\u4e2d...</a>
+      <script>(function(\u968f\u673a\u53d8\u91cf){if(...){\u968f\u673a\u53d8\u91cf.click()}else{
+              window.location.replace(\u968f\u673a\u53d8\u91cf.href)}})(document.getElementById(\"\u968f\u673aID\"))</script>
+
+    \u26a0\u8df3\u8f6c\u76ee\u6807\u5728 `<a href>` \u91cc\uff0cJS \u53ea\u662f `\u53d8\u91cf.href` \u2014\u2014 \u65e7 `_js_redirect` \u53ea\u8ba4**\u5b57\u9762\u91cf**
+      `location.replace('...')` \u2192 \u8fd9\u7c7b\u9875\u9762\u6574\u9875\u62bd 0 \u6761\u30022026-09-14 \u5b9e\u6d4b\uff1a
+      \u6bcf\u65e5\u5927\u8d5b(mrdsm4.com) / 51\u5403\u74dc(51cgf15.com) / 51\u6697\u7f51(51awn5.com) \u4e09\u5bb6\u7684\u53d1\u5e03\u9875
+      \u5168\u662f\u8fd9\u4e00\u5f62\u6001\u3001\u5168\u90e8\u62bd\u94fe\u4e3a\u7a7a \u2192 \u53ea\u5269\u5185\u7f6e\u6c60\u53ef\u5403\uff0c\u5185\u7f6e\u6c60\u4e00\u88ab\u6c61\u67d3\u6574\u6e90\u5373\u6302\u3002
+    \u540c\u65f6\u517c\u5bb9 meta refresh \u4e0e\u5b57\u9762\u91cf JS \u8df3\u8f6c\u3002"""
+    t = text or ''
+    if len(t) > 4000:                 # \u5927\u9875\u9762\u4e0d\u662f\u58f3\uff0c\u522b\u8bef\u62bd\u6b63\u6587\u91cc\u7684\u9996\u4e2a\u5916\u94fe
+        return ''
+    for _pat in ('<a[^>]+href\\s*=\\s*["\\\'](https?://[^"\\\']+)["\\\'][^>]*>\\s*\u52a0\u8f7d\u4e2d',
+                 '<a[^>]+href\\s*=\\s*["\\\'](https?://[^"\\\']+)["\\\'][^>]*>\\s*(?:\u6b63\u5728)?\u8df3\u8f6c',
+                 '<a[^>]+href\\s*=\\s*["\\\'](https?://[^"\\\']+)["\\\'][^>]*>\\s*\u8bf7\u7a0d\u5019'):
+        m = re.search(_pat, t, re.I)
+        if m:
+            u = m.group(1).strip().rstrip('/')
+            return u if re.match(r'^https?://', u) else ''
+    # \u6781\u5c0f\u9875 + \u552f\u4e00\u7edd\u5bf9\u5916\u94fe \u2192 \u4e5f\u5f53\u58f3\uff08\u7ad9\u65b9\u6362\u6587\u6848\u65f6\u515c\u5e95\uff09
+    if len(t) < 900:
+        hrefs = re.findall(r'<a[^>]+href\s*=\s*["\'](https?://[^"\']+)["\']', t, re.I)
+        if len(hrefs) == 1:
+            return hrefs[0].strip().rstrip('/')
+    return _js_redirect(t) or ''
+
+
+def _follow_shell(url, text, headers, proxies, timeout, max_hop=3, _sink=None):
+    """\u4ee5**\u5df2\u6293\u5230\u7684** text \u4e3a\u8d77\u70b9\uff0c\u8fde\u7eed\u8ddf\u968f\u8df3\u8f6c\u58f3\uff08\u2264max_hop \u8df3\uff0c\u9632\u73af\uff09\u3002
+
+    \u8fd4\u56de (\u6700\u7ec8URL, \u5404\u8df3\u6587\u672c\u5217\u8868)\u2014\u2014\u5217\u8868**\u4e0d\u542b**\u8c03\u7528\u65b9\u5df2\u6301\u6709\u7684\u9996\u8df3 text\u3002
+    \u7528\u9014\uff1a\u53d1\u5e03\u9875\u505a\u6210\u300c\u52a0\u8f7d\u4e2d\u4e2d\u8f6c\u58f3\u300d\u65f6\uff0c\u771f\u5b9e\u843d\u70b9\uff08b64 \u58f3 / \u660e\u6587\u7ebf\u8def\u8868\uff09\u5728\u4e0b\u4e00\u8df3\uff1b
+    \u4e0d\u8ddf\u968f \u2192 \u62bd\u94fe 0 \u6761 \u2192 \u53ea\u80fd\u5403\u5185\u7f6e\u6c60\uff0c\u5185\u7f6e\u6c60\u4e00\u8f6e\u6362\u6574\u6e90\u5373\u6302\u3002"""
+    log = _sink.append if _sink is not None else _tr
+    cur_u, cur_t, hops = url, text, []
+    for _ in range(max_hop):
+        nxt = _shell_target(cur_t)
+        if not nxt or nxt.rstrip('/') == cur_u.rstrip('/'):
+            break
+        nt = _fetch_text(nxt, headers, proxies, timeout)
+        if not nt:
+            log('    \u2717 \u8df3\u8f6c\u58f3\u7b2c%d\u8df3 %s \u53d6\u4e0d\u5230' % (len(hops) + 1, _host_of(nxt) or nxt))
+            break
+        log('    \u8df3\u8f6c\u58f3\u7b2c%d\u8df3 \u2192 %s (%dB)' % (len(hops) + 1, _host_of(nxt) or nxt, len(nt)))
+        hops.append(nt)
+        cur_u, cur_t = nxt, nt
+    return cur_u, hops
 
 
 def _domlines(body):
@@ -347,6 +463,26 @@ def extract_line_bases(text):
             if not _JUNK_HOST_PAT.search(b) and b.rsplit('.', 1)[-1].lower() in _TLD_OK]
 
 
+def _attr_bases(t):
+    """\u4ece HTML \u5c5e\u6027\u62bd\u300c\u88ab\u62c6\u5f00\u7684\u57df\u540d\u300d\uff08v2.7\uff0c\u7389\u7f9e\u56ed\u5f62\u6001\uff09\u3002
+    `<a data-base=\"yxy999p\" houzui=\"icu\">` + JS \u62fc `${3\u4f4d\u968f\u673a\u5b57\u6bcd}.${base}.${houzui}`
+    \u2192 \u8fd4\u56de\u57fa\u57df `yxy999p.icu`\uff08\u6e90\u4fa7\u518d\u62fc\u968f\u673a\u524d\u7f00\uff09\u3002\u540c\u6807\u7b7e\u5185\u5339\u914d\uff1b\u540e\u7f00\u987b\u8fc7 _TLD_OK\u3002"""
+    out = []
+    for i, pat in enumerate(_ATTR_BASES_PAT):
+        for m in pat.finditer(t or ''):
+            _a, _b = m.group(1), m.group(2)
+            base, suf = (_a, _b) if i == 0 else (_b, _a)
+            base = (base or '').strip().strip('.').lower()
+            suf = (suf or '').strip().strip('.').lower()
+            if not base or suf not in _TLD_OK:
+                continue
+            dom = base + '.' + suf
+            if dom.count('.') > 3 or _is_junk(dom):
+                continue
+            out.append(dom)
+    return out
+
+
 def _scan_text(t, static, wilds):
     """\u4ece\u4e00\u6bb5\u6587\u672c\u62bd\u5019\u9009\uff08\u9759\u6001\u955c\u50cf\u94fe\u63a5\u8fdb static\u3001\u57fa\u57df\u8fdb wilds\uff09\u3002
     HTML \u672c\u4f53 / b64 \u89e3\u7801\u9875 / \u5916\u94fe JS \u4e09\u79cd\u6765\u6e90\u5171\u7528\u540c\u4e00\u5957\u5224\u636e\u3002"""
@@ -357,6 +493,8 @@ def _scan_text(t, static, wilds):
             static.append('https://' + m.group(1))
     for m in _WILD_PAT.finditer(t):
         wilds.add(m.group(1))
+    for b in _attr_bases(t):                    # v2.7 \u5c5e\u6027\u85cf\u57df\uff08data-base\u00d7houzui\uff09
+        wilds.add(b)
     for b in extract_line_bases(t):
         wilds.add(b)
 
@@ -419,15 +557,26 @@ def extract_publish_domains(publish_page, headers, proxies, timeout, _sink=None)
         return [], []
     html = r.text or ''
     static, wilds = [], set()
-    # \u2460 HTML \u672c\u4f53\uff08\u542b b64 \u58f3\u89e3\u7801\u9875\uff09
-    texts = _expand_b64_shells(html)
+    # \u24ea \u8df3\u8f6c\u58f3\u8ddf\u968f\uff08v2.6\uff0c2026-09-14\uff09\uff1a\u53d1\u5e03\u9875\u53ef\u80fd\u662f \u2248300B \u7684\u300c\u52a0\u8f7d\u4e2d\u300d\u4e2d\u8f6c\u58f3
+    #    \uff08\u9ed1\u6599\u5bb6\u65cf\u73b0\u7f51\u540c\u6b3e\uff1a<a href>\u52a0\u8f7d\u4e2d</a> + location.replace(\u53d8\u91cf.href)\uff09\u3002
+    #    \u771f\u5b9e\u843d\u70b9\uff08b64 \u58f3 / \u660e\u6587\u7ebf\u8def\u8868\uff09\u5728\u4e0b\u4e00\u8df3 \u2014\u2014 \u4e0d\u8ddf\u968f\u5219\u62bd\u94fe 0 \u6761\u3001\u53ea\u80fd\u5403\u5185\u7f6e\u6c60\uff0c
+    #    \u5185\u7f6e\u6c60\u4e00\u65e6\u88ab DNS \u6c61\u67d3/\u8f6e\u6362\u6574\u6e90\u5373\u6302\uff0851\u6697\u7f51 \u590d\u76d8\uff09\u3002
+    fin_u, hops = _follow_shell(publish_page, html, headers, proxies, timeout, 3, _sink)
+    texts = []
+    for _t in [html] + hops:
+        texts += _expand_b64_shells(_t)
     if len(texts) > 1:
         log('  \u5c55\u5f00 b64 \u58f3 %d \u4e2a' % (len(texts) - 1))
     for t in texts:
         _scan_text(t, static, wilds)
+    if hops and fin_u and fin_u.rstrip('/') != (publish_page or '').rstrip('/'):
+        static.append(fin_u)          # \u8df3\u8f6c\u843d\u70b9\u672c\u8eab\u4e5f\u662f\u5019\u9009\uff08\u7ad9\u65b9\u5e38\u628a\u843d\u70b9\u505a\u6210\u6d3b\u955c\u50cf\uff09
     # \u2461 JS \u58f3\u8ddf\u968f\uff1aHTML \u62bd\u4e0d\u5230\u57fa\u57df \u2192 \u7ebf\u8def\u5728 <script src="publish.js"> \u91cc\uff08\u9ec4\u679c\u540c\u6b3e\u5f62\u6001\uff09
+    #    v2.6\uff1a\u82e5\u5df2\u8ddf\u968f\u8df3\u8f6c\u58f3\uff0c\u5219\u4ee5**\u843d\u70b9\u9875**\u4e3a\u57fa\u51c6\u8ddf\u968f\uff08\u843d\u70b9\u624d\u662f\u771f\u53d1\u5e03\u9875\uff09\u3002
     if not wilds:
-        js_urls = _js_candidates(html, publish_page)
+        _base_html = (hops[-1] if hops else html)
+        _base_url = fin_u or publish_page
+        js_urls = _js_candidates(_base_html, _base_url)
         if js_urls:
             log('  JS \u58f3\u8ddf\u968f %d \u4e2a: %s'
                 % (len(js_urls), ', '.join(u.split('//', 1)[-1] for u in js_urls)))
@@ -550,7 +699,8 @@ def _js_redirect(t):
 
 
 def _probe(url, headers, proxies, timeout, depth=0, validate=None):
-    """\u6d4b\u8bd5\u5355\u57df\u540d\uff1a\u8df3\u8f6c\u58f3\u5219\u8ddf\u968f <a href>\uff08\u6700\u591a2\u5c42\uff09\uff1b\u771f\u5185\u5bb9\u8fd4\u56de\u6700\u7ec8 host\uff1b\u5931\u8d25 None\u3002
+    """\u6d4b\u8bd5\u5355\u57df\u540d\uff1a\u8df3\u8f6c\u58f3\u5219\u8ddf\u968f\uff08\u22643 \u5c42\uff0c`_shell_target` \u7edf\u4e00\u5224 <a href>\u52a0\u8f7d\u4e2d / \u5b57\u9762\u91cf JS /
+    meta refresh\uff09\uff1b\u6574\u9875 b64 \u58f3\u5219\u89e3\u7801\u540e\u6309\u5f62\u6001\u5224+\u6821\u9a8c\u8ba4\u5f53\u524d\u57df\u3002\u771f\u5185\u5bb9\u8fd4\u56de\u6700\u7ec8 host\uff1b\u5931\u8d25 None\u3002
     validate(final_host, text) -> bool\uff1a\u5185\u5bb9\u8eab\u4efd\u6821\u9a8c\uff08\u9632\u5e7f\u544a\u95e8\u7ad9/\u7b2c\u4e09\u65b9\u9875\u5192\u5145\uff09\u3002
     \u672a\u4f20 validate \u65f6\u9000\u5230\u300c\u5185\u5bb9\u5f62\u6001\u5224\u300d\uff1a\u5916\u94fe\u5f88\u591a\u53c8\u65e0\u5185\u5bb9\u7ed3\u6784 = \u5bfc\u822a\u9875 \u2192 \u62d2\u7edd\u3002"""
     if requests is None:
@@ -562,16 +712,26 @@ def _probe(url, headers, proxies, timeout, depth=0, validate=None):
             return None
         t = r.text or ''
         final = (r.url or url).rstrip('/')
-        if len(t) < 3000 and depth < 2:
-            m = re.search(r'href=["\'](https?://[^"\']+)["\']', t, re.I)
-            if m:
-                target = m.group(1).rstrip('/')
-                if target and target != final:
-                    return _probe(target, headers, proxies, timeout, depth + 1, validate)
-            # \u2461 \u7eaf JS / meta \u8df3\u8f6c\u58f3\uff08\u65e0 <a href> \u65f6\uff09\uff1a\u8ddf\u968f window.location / location.replace / meta refresh
-            js = _js_redirect(t)
-            if js and js != final:
-                return _probe(js, headers, proxies, timeout, depth + 1, validate)
+        if len(t) < 4000 and depth < 3:
+            # \u2460 \u8df3\u8f6c\u58f3\u8ddf\u968f\uff1a<a href>\u52a0\u8f7d\u4e2d / \u53d8\u91cf.href / \u5b57\u9762\u91cf JS / meta refresh \u7edf\u4e00\u5224
+            #    \uff08v2.6\uff1a\u65e7\u7248\u53ea\u8ba4\u300c\u7b2c\u4e00\u4e2a href\u300d+\u300c\u5b57\u9762\u91cf location.replace\u300d\uff0c\u5bf9\u9ed1\u6599\u5bb6\u65cf
+            #     \u300c\u76ee\u6807\u5728 <a href>\u3001JS \u53ea\u5f15\u7528\u53d8\u91cf\u300d\u7684\u5f62\u6001\u6f0f\u62bd \u2192 \u8ddf\u4e0d\u4e0b\u53bb\uff09
+            tgt = _shell_target(t)
+            if tgt and tgt.rstrip('/') != final:
+                return _probe(tgt, headers, proxies, timeout, depth + 1, validate)
+        # \u2460' \u6574\u9875 b64 \u58f3\uff08\u53d1\u5e03\u94fe\u7b2c\u4e8c\u8df3\uff09\uff1a\u89e3\u7801\u9875\u82e5\u300c\u50cf\u5185\u5bb9\u7ad9\u300d\u4e14\u8fc7\u8eab\u4efd\u6821\u9a8c \u2192 \u8ba4\u5f53\u524d\u57df
+        #    \uff082026-09-14\uff1a\u8df3\u8f6c\u58f3\u2192b64\u58f3\u2192\u771f\u7ad9 \u662f\u9ed1\u6599\u5bb6\u65cf\u73b0\u7f51\u4e3b\u94fe\uff0c\u65e7\u7248\u5230\u7b2c\u4e8c\u8df3\u5373\u65ad\uff09
+        if len(t) < 60000:
+            for _d in _expand_b64_shells(t)[1:]:
+                if not _looks_like_content(_d):
+                    continue
+                if validate is not None:
+                    try:
+                        if not validate(final, _d):
+                            continue
+                    except Exception:
+                        continue
+                return final
         if len(t) > 5000 or ('article' in t and 'category' in t):
             if not _looks_like_content(t):
                 return None                     # \u5047\u95e8\u7ad9\uff1a\u516c\u544a\u9875/\u5bfc\u822a\u9875\uff0c\u4e0d\u542b\u5185\u5bb9\u7ed3\u6784

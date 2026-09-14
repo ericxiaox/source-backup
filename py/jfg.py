@@ -52,13 +52,22 @@ class Spider(BaseSpider):
     # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b 200\uff1bpunycode = \u8bf7\u8bb0\u4f4f-jifangge\u70b9com.\u4e91\u641c\u798f\u5229.com\uff09
     BUILTIN_HOSTS = [
         'https://xn---jifanggecom-ud8sv658aesydp6a.xn--9kq80g37uthu.com',
-        'https://xn--u2uy07cd3d2mxd2a.com',
+        # 2026-09-14 \u8865\uff1a\u5b98\u65b9\u300c\u6613\u8bb0\u6c38\u4e45\u57df\u540d\u300d\u4e4b\u4e00\uff0c**\u4f1a 302 \u81ea\u52a8\u5206\u53d1\u5230\u73b0\u5f79\u7ad9**
+        # \uff08\u5b9e\u6d4b \u2192 xn--25a-idutao-com-zz4y408c.www-jfgsou-com.com \uff1d
+        #  \u56de\u5bb625a-idutao-com.www-jfgsou-com.com\uff09\u2192 \u4e00\u6b21\u8bf7\u6c42\u5373\u6362\u57df\uff0c\u6700\u7701\u4e8b\u7684\u515c\u5e95\u3002
+        'https://jifangge.club',
         # 2026-09-13 \u8865\uff1a\u9605\u8bfb\u6e90\u5907\u6ce8\u8bb0\u7684\u300c\u6c38\u4e45\u5730\u5740\u300d\uff08\u6b64\u524d\u53ea\u5199\u5728\u5907\u6ce8\u91cc\u3001\u672a\u8fdb\u5019\u9009\u6c60\uff09
         'https://jfgso.xyz',
     ]
-    # \u65e0\u72ec\u7acb\u53d1\u5e03\u9875\uff1a\u5165\u53e3\u57df\u540d\u5373\u82b1\u5f0f\u57df\u540d\uff08\u7ad9\u65b9\u8bbe\u8ba1\u4e3a\u597d\u8bb0\u4e0d\u6613\u5c01\uff09\uff1b
-    # \u9605\u8bfb\u6e90\u5907\u6ce8\u53e6\u8bb0\u6c38\u4e45\u5730\u5740 https://jfgso.xyz\uff08\u5df2\u5e76\u5165\u5019\u9009\u6c60\uff09\u3002
-    PUBLISH_PAGE = ''
+    # \u5b98\u65b9\u5730\u5740\u53d1\u5e03\u9875\uff082026-09-14 \u67e5\u5b9e\uff09\uff1a\u6b64\u524d\u5224\u300c\u65e0\u72ec\u7acb\u53d1\u5e03\u9875\u300d\u662f**\u8bef\u5224**\u2014\u2014
+    # \u6c60\u91cc\u7b2c\u4e8c\u6761 `xn--u2uy07cd3d2mxd2a.com` \u5c31\u662f\u5b83\uff08punycode \u89e3\u7801\uff1d**\u96c6\u82b3\u9601\u641c\u7d22.com**\uff09\uff0c
+    # \u6807\u9898\u300c\u96c6\u82b3\u9601\u4e91\u641c - \u5b98\u65b9\u5730\u5740\u53d1\u5e03\u300d\uff0c\u660e\u5217\u300c\u6613\u8bb0\u6c38\u4e45\u57df\u540d \u96c6\u82b3\u9601.com / jifangge.club /
+    # jfgsou.com\u300d\uff0b\u300c\u5bfc\u822a\u627e\u56de c4.n66e.com\uff0ctfone3~5.com\uff0ccom.f69e.com\u2026\u300d\uff0b\u7535\u62a5\u7fa4
+    # t.me/jifanggecom\u3001t.me/jifanggehot\uff1b\u53e6\u6709**\u6309\u65e5\u811a\u672c**
+    # `https://jsd.load-faster.com/jfg.js?{\u6708}-{\u65e5}` \u2192 `var domains=[20 \u6761]`\uff08\u6df7\u6dc6\u6e05\u5355\uff09\u3002
+    # \u26a0 \u8be5\u53d1\u5e03\u9875**\u540c\u6837\u542b\u7ad9\u540d**\u300c\u96c6\u82b3\u9601\u300d\u2192 `_validate` \u5fc5\u987b\u52a0\u6392\u4ed6\u5224\uff08\u89c1 get_working_host\uff09\uff0c
+    #   \u5426\u5219\u4f1a\u88ab\u5f53\u6d3b\u7ad9\u70b9\uff0chost \u843d\u5230\u53d1\u5e03\u9875\u57df \u2192 /newlist.php 404 \u2192 \u6709\u5206\u7c7b\u65e0\u89c6\u9891\u3002
+    PUBLISH_PAGE = 'https://xn--u2uy07cd3d2mxd2a.com/'
 
     def init(self, extend=""):
         self.proxies = {}
@@ -125,9 +134,31 @@ class Spider(BaseSpider):
                 u = 'https://' + u
             if u not in seen:
                 seen.add(u); deduped.append(u)
+        # \u7b2c\u4e09\u65b9\u5e73\u53f0/\u7edf\u8ba1\u57df\u4e0d\u5f97\u5f53\u76f4\u63a2\u5019\u9009\uff1aGitHub \u4ed3\u5e93\u9875 100KB+ \u81ea\u5e26 <article> \u4e14\u6b63\u6587\u542b
+        # \u7ad9\u540d \u2192 validate \u5047\u901a\u8fc7\uff08\u6296\u9634 \u5b9e\u6d4b\u628a github.com/kissav12/douyin \u5f53\u6210\u7ad9\u70b9 host\uff09\u3002
+        # \u53e3\u5f84\u5bf9\u9f50 hostresolver._JUNK_HOST_PAT\uff1b**\u53ea\u5254\u76f4\u63a2\u5019\u9009**\uff0c_pages \u4ecd\u539f\u6837\u8fdb\u6df1\u62bd\u94fe
+        # \uff08GitHub README \u91cc\u7684\u73b0\u5f79\u7ebf\u8def\u7167\u62bd\u4e0d\u8bef\uff09\u3002
+        deduped = [u for u in deduped if not re.search(
+            r'(github\.|gitlab\.|gstatic|google\.|jquery|bootstrap|jsdelivr|unpkg|'
+            r'fontawesome|baidu\.|bing\.|schema\.org|w3\.org)', u, re.I)]
         if not deduped:
             return ''
         result = [None]
+        # \u5757\u7ea7\u5b89\u5168\u522b\u540d\uff082026-09-14\uff09\uff1a\u672c\u51fd\u6570\u5185**\u4e0d\u5f97**\u88f8\u7528 _hd / _px
+        # \u2014\u2014 \u90e8\u5206\u6e90\uff082048\u77ed\u5267/\u9ec4\u679c\u77ed\u5267/\u9ed1\u6599\u4e0d\u6253\u70ca\uff09\u7684 init \u4ece\u672a\u5b9a\u4e49 _hd\uff0c
+        # \u88f8\u7528\u5373 AttributeError \u88ab except \u541e\u6389 \u2192 \u5185\u8054\u515c\u5e95\u6574\u4f53\u9759\u9ed8\u5931\u6548\uff08\u5b9e\u6d4b 0.01s \u7a7a\u8fd4\uff09\u3002
+        # \u26a0\u5fc5\u987b isinstance \u5224\u5b9a\uff1aApp \u7aef BaseSpider \u53ef\u80fd\u7ed9\u4efb\u610f\u7f3a\u5931\u5c5e\u6027\u8fd4\u56de\u53ef\u8c03\u7528\u5bf9\u8c61
+        # \uff08\u58f3\u7ea7 __getattr__\uff09\uff0c\u53ea\u5224\u771f\u503c\u4f1a\u62ff\u5230 bound function \u2192
+        # requests prepare_headers \u62a5 'function' object has no attribute 'items'
+        # \u2192 \u5168\u90e8\u63a2\u6d4b\u77ac\u95f4\u70b8\u6389\u3001\u5185\u8054\u515c\u5e95\u9759\u9ed8\u7a7a\u8fd4\uff082026-09-14 \u5b9e\u6d4b\u63ea\u51fa\uff09\u3002
+        _hd = getattr(self, 'headers', None)
+        if not isinstance(_hd, dict):
+            _hd = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                                 'AppleWebKit/537.36 (KHTML, like Gecko) '
+                                 'Chrome/120.0.0.0 Safari/537.36'}
+        _px = getattr(self, 'proxies', None)
+        if not isinstance(_px, dict):
+            _px = {}
         content_marks = ('<article', 'post-card', 'entry-title', 'post-title',
                          'video-item', 'oneVideo', 'playlist', 'class="video')
         content_link_pat = re.compile(
@@ -136,20 +167,84 @@ class Spider(BaseSpider):
         def _looks_like_content(t):
             return bool(t and (len(t) > 80000 or any(k in t for k in content_marks)
                                or len(content_link_pat.findall(t)) >= 5))
+        def _unmask_page(_u, _t):
+            """\u89e3\u58f3\uff1a\u8ddf\u8df3\u8f6c\u58f3\uff08<a href>\u52a0\u8f7d\u4e2d / location.replace\uff09\u2192 \u6574\u9875 b64 \u89e3\u7801\u3002
+
+            \u26a0\u9ed1\u6599\u5bb6\u65cf 2026-09 \u73b0\u7f51\u53d1\u5e03\u94fe\u662f**\u4e24\u5c42\u58f3**\uff1a
+              \u2460 \u8df3\u8f6c\u58f3 \u2248300B\uff1a`<a id=\u968f\u673a href=\u76ee\u6807\u57df>\u52a0\u8f7d\u4e2d...</a>` +
+                 `<script>(function(v){... window.location.replace(v.href)})
+                  (document.getElementById(\"\u968f\u673a\"))</script>`
+                 \u2014\u2014 \u76ee\u6807\u5199\u5728 `<a href>` \u91cc\uff0cJS \u53ea\u5f15\u7528**\u53d8\u91cf**\u3002\u65e7\u7248\u53ea\u8ba4\u5b57\u9762\u91cf
+                 `location.replace('...')` \u2192 \u8fd9\u7c7b\u9875\u9762\u6574\u9875\u62bd 0 \u6761\u3002
+              \u2461 b64 \u58f3\uff1a`<script>document.write(Base64.decode(\"...\"))</script>`
+                 \uff08\u7ad9\u65b9\u81ea\u5e26 Base64 polyfill\uff09\u2192 \u89e3\u7801\u540e\u662f**\u4e2d\u8f6c\u843d\u5730\u9875**\uff0c\u7ebf\u8def\u5199\u5728
+                 `lineAry` / `backupLine`\uff08`words.random()+'.\u57fa\u57df'` \u6216\u57df\u540d\u6570\u7ec4\uff09\u3002
+            \u4e0d\u8ddf\u7b2c\u4e00\u8df3 \u2192 \u62ff\u5230 300B \u7a7a\u58f3\uff1b\u4e0d\u89e3\u7b2c\u4e8c\u8df3 \u2192 \u89e3\u7801\u9875\u91cc\u7684 lineAry \u770b\u4e0d\u89c1\uff1b
+            \u4efb\u4e00\u73af\u65ad\u62bd\u94fe\u90fd\u662f 0 \u6761 \u2192 \u53ea\u80fd\u5403\u5185\u7f6e\u6c60\uff0c\u6c60\u4e00\u8f6e\u6362/\u88ab DNS \u6c61\u67d3\u6574\u6e90\u5373\u6302
+            \uff0851\u6697\u7f51 2026-09-14 \u5168\u6302\u590d\u76d8\uff09\u3002
+            \u8fd4\u56de (\u6700\u7ec8URL, \u300c\u539f\u6587\uff0b\u5404\u8df3\u6587\u672c\uff0b\u89e3\u7801\u6587\u672c\u300d\u5408\u5e76\u4e32)\uff1b\u4efb\u4f55\u5f02\u5e38\u539f\u6837\u8fd4\u56de\u3002"""
+            _acc = [_t or '']
+            _cur = _u
+            try:
+                import base64 as _b64
+                for _ in range(3):                       # \u6700\u591a 3 \u8df3\uff0c\u9632\u73af
+                    _txt = _acc[-1]
+                    if len(_txt) > 4000:                 # \u5927\u9875\u9762\u4e0d\u662f\u58f3
+                        break
+                    _m = re.search(r'<a[^>]+href\s*=\s*["\'](https?://[^"\']+)["\']',
+                                   _txt, re.I)
+                    if not _m:
+                        _m = re.search(r'(?:window\.)?location\.(?:replace|href)\s*[=(]\s*'
+                                       r'[\'"](https?://[^\'"]+)', _txt, re.I)
+                    if not _m:
+                        break
+                    _nx = _m.group(1).rstrip('/')
+                    if _nx == _cur.rstrip('/'):
+                        break
+                    _http = globals().get('requests') or globals().get('rq')
+                    if _http is None:
+                        break
+                    _r2 = _http.get(_nx + '/', headers=_hd,
+                                    proxies=_px, timeout=5,
+                                    verify=False, allow_redirects=True)
+                    if _r2.status_code != 200 or not _r2.text:
+                        break
+                    _cur = (_r2.url or _nx).rstrip('/')
+                    _acc.append(_r2.text)
+                for _b in re.findall(r'[A-Za-z0-9+/=]{400,}', _acc[-1]):
+                    _b = _b + '=' * (-len(_b) % 4)
+                    try:
+                        _d = _b64.b64decode(_b).decode('utf-8')
+                    except Exception:
+                        continue
+                    if '<' in _d and '>' in _d:
+                        _acc.append(_d)
+                        break
+            except Exception:
+                pass
+            return _cur, '\n'.join(_acc)
+
         def _probe_one(u):
             if result[0]:
                 return
             try:
-                r = requests.get(u + '/', headers=self.headers, proxies=self.proxies,
+                r = requests.get(u + '/', headers=_hd, proxies=_px,
                                  timeout=5, verify=False, allow_redirects=True)
                 # 2026-09-11\uff1a\u7ad9\u65b9\u628a\u9996\u9875\u6362\u6210\u4e86\u300c\u96c6\u82b3\u9601\u4e91\u641c\u300d\u95e8\u6237\u58f3\uff08\u65e0 article/<li> \u7b49\u5185\u5bb9
                 # \u7ed3\u6784\u6807\u8bb0\uff09\uff0c\u6807\u51c6\u5185\u5bb9\u5f62\u6001\u5224\u4f1a\u628a\u5b83\u8bef\u6740 \u2192 host \u89e3\u6790\u4e3a\u7a7a \u2192 \u6709\u5206\u7c7b\u65e0\u89c6\u9891\u3002
                 # \u672c\u6e90\u5217\u8868\u8d70 /newlist.php \u7b49\u56fa\u5b9a\u8def\u7531\uff08\u5b9e\u6d4b 94KB/24 \u6761\uff09\uff0c\u4e0e\u9996\u9875\u5f62\u6001\u65e0\u5173\uff0c
                 # \u4e14 validate \u5df2\u542b\u7ad9\u540d\uff08'\u96c6\u82b3\u9601'/'h_d_key'\uff09\uff0c\u6545**\u4ee5 validate \u4e3a\u51c6**\uff0c
                 # \u4e0d\u518d\u505a\u5185\u5bb9\u5f62\u6001\u5224\uff08\u5404\u6e90 _resolve_inline \u4e3a\u72ec\u7acb\u526f\u672c\uff0c\u53ef\u6309\u7ad9\u5b9a\u5236\uff09\u3002
-                if r.status_code == 200 and validate(r.url, r.text):
-                    if not result[0]:
-                        result[0] = r.url.rstrip('/')
+                if r.status_code != 200:
+                    return
+                # \u89e3\u58f3\uff1a\u8df3\u8f6c\u58f3/b64 \u58f3\u5019\u9009\u5148\u89e3\u5f00\u518d\u5224\uff08\u672c\u6e90\u7ad9\u540d\u6821\u9a8c\u5df2\u8db3\u591f\u4e25\u683c\uff0c
+                # \u6309\u672c\u6e90\u65e2\u6709\u7ea6\u5b9a**\u4e0d\u52a0\u5185\u5bb9\u5f62\u6001\u5224**\uff0c\u89c1\u4e0a\u65b9 2026-09-11 \u6ce8\u91ca\uff09\u3002
+                _fin, _mk = _unmask_page((r.url or u).rstrip('/'), r.text or '')
+                for _ct in (r.text or '', _mk):
+                    if validate(_fin, _ct):
+                        if not result[0]:
+                            result[0] = _fin
+                        break
             except Exception:
                 pass
         threads = [threading.Thread(target=_probe_one, args=(u,)) for u in deduped]
@@ -172,13 +267,13 @@ class Spider(BaseSpider):
 
             def _grab(_u):
                 try:
-                    _r = _http.get(_u, headers=self.headers, proxies=self.proxies,
+                    _r = _http.get(_u, headers=_hd, proxies=_px,
                                       timeout=6, verify=False, allow_redirects=True)
                 except Exception:
                     return
                 if _r.status_code != 200 or not _r.text:
                     return
-                _texts.append(_r.text)
+                _texts.append(_unmask_page(_u, _r.text)[1])
                 for _s in re.findall(r'<script[^>]+src=["\']([^"\']+)["\']',
                                      _r.text, re.I)[:2]:
                     _s = _s.strip()
@@ -190,8 +285,8 @@ class Spider(BaseSpider):
                                  r'github|gitlab|baidu|cloudflare|fontawesome)', _s, re.I):
                         continue
                     try:
-                        _jr = _http.get(_s, headers=self.headers,
-                                           proxies=self.proxies, timeout=6,
+                        _jr = _http.get(_s, headers=_hd,
+                                           proxies=_px, timeout=6,
                                            verify=False, allow_redirects=True)
                         if _jr.status_code == 200 and _jr.text:
                             _texts.append(_jr.text)
@@ -221,6 +316,18 @@ class Spider(BaseSpider):
                             _bases.append(_m)
                 # \u5254\u7b2c\u4e09\u65b9\u57df\uff08gitlab/github/\u7edf\u8ba1/\u5b57\u4f53\u7b49\u6df7\u5728\u9875\u9762 script src \u91cc\uff0c
                 # \u4f1a\u88ab\u62bd\u51fa\u5f53\u57fa\u57df \u2192 \u751f\u6210 viewport.gitlab.com \u8fd9\u7c7b\u65e0\u6548\u5019\u9009\u767d\u8017\u63a2\u6d4b\uff09
+                _bases = [b for b in _bases if not re.search(
+                    r'(google|gstatic|baidu|jquery|bootstrap|jsdelivr|unpkg|'
+                    r'github|gitlab|cloudflare|fontawesome|w3\.org|schema\.org|'
+                    r'twitter|youtube|apple|microsoft|bing)', b, re.I)]
+                # \u8865\u9f50\u300c\u660e\u6587\u5916\u94fe\u7ebf\u8def\u300d\u5f62\u6001\uff082026-09-14\uff09\uff1a\u9ed1\u6599\u7f51 hlwf6.com / \u6bcf\u65e5\u5927\u4e71\u6597
+                # idld66.com \u8fd9\u7c7b**\u5bfc\u822a\u578b\u53d1\u5e03\u9875**\u628a\u73b0\u5f79\u7ebf\u8def\u5199\u6210 <a href="https://\u8bcd.\u57fa\u57df">
+                # \u660e\u6587\uff0c\u6ca1\u6709\u4efb\u4f55\u5f15\u53f7\u5305\u88f9 \u2192 \u4e0a\u9762\u4e24\u6761\u6b63\u5219\u62bd 0 \u6761 \u2192 \u6df1\u62bd\u94fe\u7a7a\u8f6c\u3002
+                # hostresolver \u4fa7\u7531 _scan_text \u6536 href \u8fdb static \u8986\u76d6\uff0c\u5185\u8054\u4fa7\u9700\u8865\u8fd9\u4e00\u73af\u3002
+                for _h in re.findall(r'https?://([a-z0-9.-]+\.[a-z]{2,15})', _pt, re.I):
+                    _h = _h.lower()
+                    if _h not in _bases and _h.count('.') <= 2:
+                        _bases.append(_h)
                 _bases = [b for b in _bases if not re.search(
                     r'(google|gstatic|baidu|jquery|bootstrap|jsdelivr|unpkg|'
                     r'github|gitlab|cloudflare|fontawesome|w3\.org|schema\.org|'
@@ -255,12 +362,22 @@ class Spider(BaseSpider):
         return result[0] or ''
 
     def get_working_host(self):
-        builtin = self.BUILTIN_HOSTS
-        publish = self._ext.get('publish') or self.PUBLISH_PAGE or builtin[0]
+        builtin = list(self.BUILTIN_HOSTS or [])
+        # builtin[0] \u88f8\u7d22\u5f15\uff0b\u6c60\u7a7a\u5373 IndexError\uff082026-09-14 \u4fee\uff0c\u6d4b\u8bd5\u6e05\u6c60\u573a\u666f\u66fe\u89e6\u53d1\uff09
+        publish = (self._ext.get('publish') or self.PUBLISH_PAGE
+                   or (builtin[0] if builtin else ''))
 
         def _validate(host, text):
             t = text or ''
-            return '\u96c6\u82b3\u9601' in t or 'h_d_key' in t
+            if '\u96c6\u82b3\u9601' not in t and 'h_d_key' not in t:
+                return False
+            # \u53d1\u5e03\u9875\u6392\u4ed6\uff082026-09-14\uff09\uff1a\u5b98\u65b9\u5730\u5740\u53d1\u5e03\u9875\u6807\u9898\u540c\u6837\u542b\u300c\u96c6\u82b3\u9601\u300d\uff0c
+            # \u4e0d\u52a0\u8fd9\u4e00\u5224\u4f1a\u88ab\u5f53\u6d3b\u7ad9\u70b9 \u2192 host \u843d\u5230\u53d1\u5e03\u9875\u57df \u2192 /newlist.php 404 \u2192
+            # \u6709\u5206\u7c7b\u65e0\u89c6\u9891\u3002\u7ad9\u70b9\u4fa7\u5fc5\u542b\u5217\u8868\u8def\u7531\u6216\u64ad\u653e\u7279\u5f81\uff1b\u53d1\u5e03\u9875\u53ea\u6709\u516c\u544a\u8bdd\u672f\u3002
+            if re.search('(\u6613\u8bb0\u6c38\u4e45\u57df\u540d|\u5bfc\u822a\u627e\u56de|\u90ae\u7bb1\u83b7\u53d6|\u5b98\u65b9\u5730\u5740\u53d1\u5e03|\u6c38\u4e45\u5730\u5740)', t) \
+                    and not re.search(r'(newlist|toplist|playdata|m3u8)', t):
+                return False
+            return True
 
         if resolve_host:
             try:
