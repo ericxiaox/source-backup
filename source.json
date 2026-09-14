@@ -8,7 +8,7 @@
   "sites": [
     {
       "key": "py_\u76f4\u64ad",
-      "name": "\ud83d\udcf1\u76f4\u64ad\u1d56\u02b8\uff5c\u76f4\u64ad",
+      "name": "\ud83d\udcfa\u76f4\u64ad\u1d56\u02b8\uff5c\u76f4\u64ad",
       "type": 3,
       "api": "./xbpq/zhibo.py",
       "searchable": 1,
@@ -19,7 +19,7 @@
     },
     {
       "key": "py_mrds",
-      "name": "\ud83d\udcf1\u6bcf\u65e5\u5927\u8d5b\uff5c\u9ed1\u6599",
+      "name": "\ud83c\udf49\u6bcf\u65e5\u5927\u8d5b\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/mrds.py",
       "style": {
@@ -31,7 +31,7 @@
     },
     {
       "key": "py_heiliao",
-      "name": "\ud83d\udcf1\u9ed1\u6599\u4e0d\u6253\u70ca\uff5c\u9ed1\u6599",
+      "name": "\ud83c\udf49\u9ed1\u6599\u4e0d\u6253\u70ca\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/heiliao.py",
       "style": {
@@ -43,7 +43,7 @@
     },
     {
       "key": "py_huangguo",
-      "name": "\ud83d\udcf1\u9ec4\u679c\u77ed\u5267\uff5c\u77ed\u5267",
+      "name": "\ud83c\udfac\u9ec4\u679c\u77ed\u5267\u1d56\u02b8\uff5c\u77ed\u5267",
       "type": 3,
       "api": "./py/huangguo.py",
       "style": {
@@ -55,7 +55,7 @@
     },
     {
       "key": "py_51xigua",
-      "name": "\ud83d\udcf151\u5403\u74dc\uff5c\u9ed1\u6599",
+      "name": "\ud83c\udf4951\u5403\u74dc\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/51xigua.py",
       "ext": "publish@https://51cgf15.com,https://gitlab.com/51chiguawang/51cg/-/raw/main/README.md;mail@51cgfun@gmail.com,51cgfun@pm.me,chigua.com@pm.me;hosts@https://advise.ajtnqsla.cc",
@@ -67,7 +67,7 @@
     },
     {
       "key": "py_daluandou",
-      "name": "\ud83d\udcf1\u6bcf\u65e5\u5927\u4e71\u6597\uff5c\u9ed1\u6599",
+      "name": "\ud83c\udf49\u6bcf\u65e5\u5927\u4e71\u6597\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/daluandou.py",
       "ext": "publish@https://idld66.com,https://idld65.com,https://border.loewkgyyv.cc,https://capture.loewkgyyv.cc,https://fe7.loewkgyyv.cc,https://gitlab.com/group305134/mrdld/-/raw/main/README.md;mail@mrdldfun666@gmail.com",
@@ -79,7 +79,7 @@
     },
     {
       "key": "py_vhub",
-      "name": "\ud83d\udcf1VHUB\u00b7\u0058\u0076\u0069\u0064\u0065\u006f\u0073\u514d\u5899\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19VHUB\u00b7\u0058\u0076\u0069\u0064\u0065\u006f\u0073\u514d\u5899\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/vhub.py",
       "style": {
@@ -90,7 +90,7 @@
     },
     {
       "key": "py_jptt",
-      "name": "\ud83d\udcf1\u7981\u7247\u5929\u5802\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19\u7981\u7247\u5929\u5802\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/jptt.py",
       "ext": "publish@https://jptt.tv,https://2026ajptttv.work,https://jptttv2026a.work,https://jpttnewstv.cc;hosts@https://jpttnewstv.cc",
@@ -102,7 +102,7 @@
     },
     {
       "key": "py_airen",
-      "name": "\ud83d\udcf12048\u77ed\u5267\uff5c\u77ed\u5267",
+      "name": "\ud83c\udfac2048\u77ed\u5267\u1d56\u02b8\uff5c\u77ed\u5267",
       "type": 3,
       "api": "./py/airen.py",
       "ext": "hosts@https://mdcmai4.xyz,https://mdcmai5.xyz,https://mdcmai3.xyz,https://mdcmai2.xyz",
@@ -114,7 +114,7 @@
     },
     {
       "key": "py_xjiao",
-      "name": "\ud83d\udcf1\u9999\u8549\u89c6\u9891\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19\u9999\u8549\u89c6\u9891\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/xjsp.py",
       "ext": "publish@https://www.xjxjx35.org/static/js/config.js,https://www.xjxjxj.co/static/js/config.js;hosts@https://h5.xxoox35.org,https://h5.xxoo168.org;mail@bb0522517@gmail.com",
@@ -126,7 +126,7 @@
     },
     {
       "key": "py_uaa\u97f3\u753b",
-      "name": "\ud83d\udcf1UAA\u97f3\u753b\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19UAA\u97f3\u753b\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/uays.py",
       "style": {
@@ -138,7 +138,7 @@
     },
     {
       "key": "py_wxts",
-      "name": "\ud83d\udcf1\u65e0\u9650\u81c0\u5c71\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19\u65e0\u9650\u81c0\u5c71\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/wxts.py",
       "ext": "publish@https://wuxiants.github.io/;hosts@https://wxts.wuxiants966.com;mail@wuxiants@gmail.com",
@@ -150,7 +150,7 @@
     },
     {
       "key": "py_hlw",
-      "name": "\ud83d\udcf1\u9ed1\u6599\u7f51\uff5c\u9ed1\u6599",
+      "name": "\ud83c\udf49\u9ed1\u6599\u7f51\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/hlw.py",
       "ext": "publish@https://hlwf6.com/,https://vgxnasoa.cc;mail@18hlw@pm.me,155dizhi@gmail.com",
@@ -162,7 +162,7 @@
     },
     {
       "key": "py_51aw",
-      "name": "\ud83d\udcf151\u6697\u7f51\uff5c\u9ed1\u6599",
+      "name": "\ud83c\udf4951\u6697\u7f51\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/51aw.py",
       "ext": "publish@https://51aw34.com,https://51awn5.com;mail@anwangchigua@gmail.com",
@@ -174,7 +174,7 @@
     },
     {
       "key": "py_yxy",
-      "name": "\ud83d\udcf1\u7389\u7f9e\u56ed\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19\u7389\u7f9e\u56ed\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/yxy.py",
       "ext": "publish@https://dizhi8.cc/yxy/,https://penzu.com/public/42071993",
@@ -186,7 +186,7 @@
     },
     {
       "key": "py_jfg",
-      "name": "\ud83d\udcf1\u96c6\u82b3\u9601\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19\u96c6\u82b3\u9601\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/jfg.py",
       "style": {
@@ -198,7 +198,7 @@
     },
     {
       "key": "py_dy",
-      "name": "\ud83d\udcf1\u6296\u9634\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19\u6296\u9634\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/dy.py",
       "ext": "publish@https://github.com/kissav12/douyin;hosts@https://2c1.ngyoebkg.com,https://zz.douyin18.com,https://9dww8.9p87c.cc;mail@yeqi451@gmail.com,huijiadelu109@gmail.com",
@@ -210,7 +210,7 @@
     },
     {
       "key": "py_91bl",
-      "name": "\ud83d\udcf191\u7206\u6599\uff5c\u9ed1\u6599",
+      "name": "\ud83c\udf4991\u7206\u6599\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/91bl.py",
       "ext": "publish@https://t91bl.com,https://91blv.com/tbml.html,https://jybl10.com,https://jybl9.com,https://address.cekzqgmk.cc/tbml.html,https://github.com/91blw03;hosts@https://access.iaxbuvmk.cc;mail@chiguatiantang@gmail.com,admin@91blv.com",
@@ -222,7 +222,7 @@
     },
     {
       "key": "py_huangdou",
-      "name": "\ud83d\udcf1\u9ec4\u8c46\u77ed\u5267\uff5c\u77ed\u5267",
+      "name": "\ud83c\udfac\u9ec4\u8c46\u77ed\u5267\u1d56\u02b8\uff5c\u77ed\u5267",
       "type": 3,
       "api": "./py/huangdou.py",
       "searchable": 1,
@@ -234,7 +234,7 @@
     },
     {
       "key": "py_shewo",
-      "name": "\ud83d\udcf1\u5c04\u7a9d\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19\u5c04\u7a9d\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/shewo.py",
       "style": {
@@ -246,7 +246,7 @@
     },
     {
       "key": "\u6781\u4e50\u7981\u533a",
-      "name": "\ud83d\udcf1\u6781\u4e50\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19\u6781\u4e50\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/srcc4a413.py",
       "searchable": 1,
@@ -722,7 +722,7 @@
   "sites_off": [
     {
       "key": "py_xvideo",
-      "name": "\ud83d\udcf1\u0058\u0076\u0069\u0064\u0065\u006f\u0073\ud83e\ude9c",
+      "name": "\ud83d\udcf1\u0058\u0076\u0069\u0064\u0065\u006f\u0073",
       "type": 3,
       "api": "./py/\u0058\u0076\u0069\u0064\u0065\u006f\u0073.py",
       "style": {
@@ -842,7 +842,7 @@
     },
     {
       "key": "JAVDAY",
-      "name": "\ud83d\udcf1Javday\ud83e\ude9c\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
+      "name": "\ud83d\udcf1Javday\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
       "type": 3,
       "api": "csp_XBPQ",
       "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
@@ -1010,7 +1010,7 @@
     },
     {
       "key": "py_\u65b0\u571f\u8c46",
-      "name": "\ud83d\udcf1\u65b0\u8c46\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
+      "name": "\ud83d\udcf1\u65b0\u8c46\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./xbpq/xintudou.py",
       "searchable": 1,
@@ -1022,7 +1022,7 @@
     },
     {
       "key": "py_stripchat",
-      "name": "\ud83d\udcf1Strip\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
+      "name": "\ud83d\udcf1Strip\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./xbpq/stripchat.py",
       "searchable": 1,
@@ -1034,7 +1034,7 @@
     },
     {
       "key": "py_\u64b8\u4e00\u64b8",
-      "name": "\ud83d\udcf1\u64b8\u4e00\u64b8\ud83e\ude9c\u1d56\u02b8\uff5c\u591c\u665a",
+      "name": "\ud83d\udcf1\u64b8\u4e00\u64b8\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./xbpq/luyilu.py",
       "searchable": 1,
