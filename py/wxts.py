@@ -2,6 +2,7 @@
 # WXTS \u7ad9\u6e90\uff08MacCMS \u6a21\u677f \u00b7 HTML \u76f4\u6293\u7248\uff09
 # \u53d1\u5e03\u9875: \u7ad9\u65b9 github.io\uff08\u9759\u6001\u5217\u51fa 966~969 \u56db\u955c\u50cf\uff0c2026-09-08 \u5b9e\u6d4b\u5168\u6d3b\uff09
 # \u7ed3\u6784: \u5206\u7c7b /index.php/vod/type/id/{tid}/page/{pg}.html\uff08\u5217\u8868\u76f4\u94fe\u64ad\u653e\u9875\uff09
+#       \u9875\u9762\u5185\u94fe\u63a5 2026-09-14 \u8d77\u4e3a /vod/.../ \u65b0\u5f62\u6001\uff0c\u670d\u52a1\u7aef\u4ecd\u53ea\u8ba4 /index.php/vod/...\u2192 \u89e3\u6790\u53cc\u5f62\u6001\u517c\u5bb9
 #       \u64ad\u653e\u9875 var player_aaaa = {...} \u5185\u542b url(m3u8)/poster/link
 # \u5206\u7c7b\u540d\u4e0d\u843d\u76d8\uff0chomeContent \u4ece\u9996\u9875\u5b9e\u65f6\u83b7\u53d6\uff08\u8bcd\u8868 b64 \u4e5f\u4e0d\u9700\u8981\uff09
 import json
@@ -31,11 +32,13 @@ except Exception:
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 # \u5217\u8868\u6761\u76ee: <a class="thumbnail" href="..."><img src=\u5c01\u9762 alt=\u6807\u9898>
-# \u5206\u7c7b\u9875 href=\u64ad\u653e\u9875(/vod/play/id/N/sid/N/nid/N.html)\uff1b\u641c\u7d22\u9875 href=\u8be6\u60c5\u9875(/vod/detail/id/N.html)
+# \u5206\u7c7b\u9875 href=\u64ad\u653e\u9875\uff1b\u641c\u7d22\u9875 href=\u8be6\u60c5\u9875\u3002
+# \u26a0 URL \u53cc\u5f62\u6001\uff082026-09-14 \u7ad9\u65b9\u6539\u7248\uff09\uff1a\u9875\u9762\u5185\u94fe\u63a5\u5df2\u6362\u6210 /vod/.../\uff08\u65e0 index.php\u3001\u5c3e\u659c\u6760\uff09\uff0c
+#   \u4f46\u670d\u52a1\u7aef\u53ea\u8ba4\u8001\u5f62\u6001 /index.php/vod/....html\uff08\u65b0\u5f62\u6001 404\uff09\u2192 \u6b63\u5219\u53cc\u5f62\u6001\u517c\u5bb9\u3001\u8bf7\u6c42\u4ecd\u7528\u8001\u5f62\u6001\u3002
 _RE_ITEM = re.compile(
-    r'<a[^>]*class="[^"]*thumbnail[^"]*"[^>]*href="(/index\.php/vod/(?:play/id/(\d+)/sid/(\d+)/nid/(\d+)|detail/id/(\d+))\.html)"[^>]*>\s*<img([^>]*)>')
+    r'<a[^>]*class="[^"]*thumbnail[^"]*"[^>]*href="((?:/index\.php)?/vod/(?:play/id/(\d+)/sid/(\d+)/nid/(\d+)|detail/id/(\d+))(?:\.html|/))"[^>]*>\s*<img([^>]*)>')
 _RE_ATTR = re.compile(r'(src|alt)\s*=\s*"([^"]*)"')
-_RE_PLAY_HREF = re.compile(r'/index\.php/vod/play/id/(\d+)/sid/(\d+)/nid/(\d+)\.html')
+_RE_PLAY_HREF = re.compile(r'(?:/index\.php)?/vod/play/id/(\d+)/sid/(\d+)/nid/(\d+)(?:\.html|/)')
 
 
 class Spider(BaseSpider):
@@ -302,8 +305,8 @@ class Spider(BaseSpider):
             return result
         seen = set()
         for m in re.finditer(
-                r'href="(/index\.php/vod/type/id/(\d+)\.html)"[^>]*>([^<]+)<', body):
-            tid, name = m.group(2), _html.unescape(m.group(3)).strip()
+                r'href="(?:/index\.php)?/vod/type/id/(\d+)(?:\.html|/)"[^>]*>([^<]+)<', body):
+            tid, name = m.group(1), _html.unescape(m.group(2)).strip()
             if tid in seen or not name or name == '\u66f4\u591a':
                 continue
             seen.add(tid)

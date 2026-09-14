@@ -127,16 +127,15 @@ class Spider(BaseSpider):
 
     # \u7ad9\u65b9\u4e2d\u8f6c\u53d1\u5e03\u9875\uff08b64 \u58f3\uff0c\u89e3\u7801\u540e JS zz_line \u5217\u7ebf\u8def\u57fa\u57df\uff09
     PUBLISH_PAGE = 'https://t91bl.com/'
-    # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b 200/204KB\uff0c\u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5b50\u57df\u53ef\u7528\uff1b
-    # 2026-09-11 \u8ffd\u52a0 dgebtuip.cc \u5f53\u524d\u56fa\u5b9a\u7ebf\u8def\uff0c\u9632 hostresolver \u672a\u52a0\u8f7d\u65f6\u88f8\u5954\uff09
+    # \u5185\u7f6e\u5019\u9009\uff082026-09-14 \u5b9e\u6d4b 200/195KB\u3001\u542b <article> \u5b8c\u6574\u7ad9\uff09\uff1a
+    #   dgebtuip.cc / gdubugsu.cc / cekzqgmk.cc \u5747\u4e3a**\u6cdb\u89e3\u6790\u57fa\u57df**\uff0c\u4efb\u610f\u82f1\u6587\u8bcd\u524d\u7f00\u53ef\u7528\uff1b
+    #   \u7ad9\u65b9\u6362\u57fa\u57df\u65f6\u53ea\u9700\u6539\u8fd9\u91cc\u4e00\u5904\uff0c\u6df1\u62bd\u94fe\u7684 zz_line \u4f1a\u81ea\u52a8\u8ddf\u8fdb\uff08\u4e0d\u5fc5\u9010\u6761\u6362\u57df\u540d\uff09\u3002
+    # 2026-09-14 \u6e05\u7406\uff1aquibepqh.cc / matutgbj.cc \u4e0e\u65e7 cloudfront \u7ebf\u8def\u5df2\u5168\u706d\uff08\u8fde\u63a5\u8d85\u65f6\uff09\uff0c\u79fb\u9664\u3002
     BUILTIN_HOSTS = [
         'https://borrow.dgebtuip.cc',
         'https://bank.dgebtuip.cc',
-        'https://main.quibepqh.cc',
-        'https://apple.quibepqh.cc',
-        'https://main.matutgbj.cc',
-        'https://apple.matutgbj.cc',
-        'https://dle7ftqaeg81q.cloudfront.net',
+        'https://apple.gdubugsu.cc',
+        'https://berry.cekzqgmk.cc',
     ]
 
     def init(self, extend=""):
@@ -314,6 +313,39 @@ class Spider(BaseSpider):
             for _gt in _gts:
                 _gt.join(timeout=8)
             _pt = '\n'.join(_texts)
+            # \u6574\u9875 b64 \u58f3\u89e3\u7801\uff08\u672c\u578b\u5165\u53e3\u9875\u7279\u5f81\uff1a\u6b63\u6587\u662f Base64.decode \u7684\u6574\u9875 HTML\uff09\uff1a
+            # \u73b0\u5f79\u7ebf\u8def\u57df\u540d\u85cf\u5728 b64 blob \u5185\u3001\u660e\u6587\u6b63\u5219\u4e0d\u53ef\u89c1 \u2192 \u89e3\u7801\u540e\u5e76\u5165\u62bd\u53d6\u8bed\u6599\uff0c
+            # \u5426\u5219\u6df1\u62bd\u94fe\u9759\u9ed8\u5931\u6548\uff082026-09-14 t91bl.com \u5b9e\u6d4b\uff1a\u89e3\u5f00\u4e86 b64 \u624d\u770b\u5f97\u89c1 zz_line\uff09\u3002
+            if _pt:
+                _blobs = re.findall(r'[A-Za-z0-9+/=]{400,}', _pt)
+                if not _blobs:
+                    _blobs = [re.sub(r'\s+', '', _c) for _c in
+                              re.findall(r'[A-Za-z0-9+/=\s]{400,}', _pt)]
+                _dec = []
+                for _blob in _blobs:
+                    if len(_blob) % 4:
+                        continue
+                    try:
+                        _d = base64.b64decode(_blob, validate=True).decode('utf-8')
+                    except Exception:
+                        continue
+                    if '<' in _d and '>' in _d:
+                        _dec.append(_d)
+                if _dec:
+                    _pt = _pt + '\n' + '\n'.join(_dec)
+            # \u7ebf\u8def\u8868\u7b2c\u4e09\u5f62\u6001\uff08zz_line \u5f15\u53f7\u4e32 + \u6362\u884c\uff0c2026-09-14\uff09\uff1a
+            #   var zz_line = "gdubugsu.cc\ncekzqgmk.cc\nd3f9.cloudfront.net";
+            # \u57df\u540d\u6574\u4e32\u585e\u8fdb**\u4e00\u4e2a**\u5f15\u53f7\u91cc\u3001\u5f7c\u6b64\u53ea\u9694 \n \u2014\u2014 \u4e0b\u9762\u300c\u57df\u540d\u81ea\u5e26\u5f15\u53f7\u300d\u7684\u6b63\u5219
+            # \u6c38\u8fdc\u547d\u4e2d\u4e0d\u4e86\uff0c\u5fc5\u987b\u663e\u5f0f\u5207\u884c\u3002\u951a\u5b9a\u5199\u6cd5\uff08\u57df\u540d+\u6362\u884c+\u57df\u540d\uff09\uff0c\u4e0d\u7528\u901a\u7528\u5f15\u53f7
+            # \u914d\u5bf9\uff1a\u5b9e\u6d4b\u8be5\u9875\u6709 400+ \u5f15\u53f7\u4e32\uff0c\u901a\u7528\u914d\u5bf9\u4f1a\u6574\u4f53\u9519\u4f4d\u3001\u771f\u6b63\u7684 zz_line \u8f6e\u4e0d\u5230\u3002
+            _linetbl = []
+            for _m in re.findall(
+                    r'''['"`]([a-z0-9][a-z0-9.-]*\.[a-z]{2,15}(?:(?:\\n|\r?\n)'''
+                    r'''[a-z0-9][a-z0-9.-]*\.[a-z]{2,15})+)['"`]''', _pt, re.I):
+                for _l in _m.replace('\\n', '\n').split('\n'):
+                    _l = _l.strip().strip(',').strip('"\'').rstrip('/').strip()
+                    if _l and _l not in _linetbl:
+                        _linetbl.append(_l)
             if _pt:
                 # \u4f18\u5148\u4ece\u542b random() \u7684 <script> \u6bb5\u62bd\uff08\u90a3\u91cc\u624d\u662f\u6cdb\u89e3\u6790\u8bcd\u8868+\u57fa\u57df\uff09\uff0c\u515c\u5e95\u5168\u9875
                 _chunks = [c for c in re.findall(r'<script[^>]*>(.*?)</script>', _pt, re.S | re.I)
@@ -329,6 +361,9 @@ class Spider(BaseSpider):
                         _m = _m.lower().strip('.').strip()
                         if _m and _m not in _bases and _m.count('.') <= 2:
                             _bases.append(_m)
+                for _b in _linetbl:                     # \u7ebf\u8def\u8868\u5207\u884c\u7ed3\u679c\u5e76\u5165\u57fa\u57df\u6c60
+                    if _b and _b not in _bases:
+                        _bases.append(_b)
                 # \u5254\u7b2c\u4e09\u65b9\u57df\uff08gitlab/github/\u7edf\u8ba1/\u5b57\u4f53\u7b49\u6df7\u5728\u9875\u9762 script src \u91cc\uff0c
                 # \u4f1a\u88ab\u62bd\u51fa\u5f53\u57fa\u57df \u2192 \u751f\u6210 viewport.gitlab.com \u8fd9\u7c7b\u65e0\u6548\u5019\u9009\u767d\u8017\u63a2\u6d4b\uff09
                 _bases = [b for b in _bases if not re.search(

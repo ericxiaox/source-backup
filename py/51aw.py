@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # 51AW \u7ad9\u6e90\uff08WordPress \u578b pbody \u58f3 \u00b7 HTML \u76f4\u6293\u7248\uff09
 # \u53d1\u5e03\u94fe: 51aw34.com \u7b49\u5165\u53e3\u57df\u4e3a b64 \u58f3\u843d\u5730\u9875\uff08Base64.decode \u6574\u9875\uff09\uff0c\u89e3\u7801\u540e
-#         footer \u76f4\u94fe\u73b0\u5f79\u5185\u5bb9\u7ad9\uff082026-09-08 \u5b9e\u6d4b = awcg48.com\uff0cCloudflare\uff09
+#         JS \u5185 lineAry/backupLine \u5217\u73b0\u5f79\u6cdb\u89e3\u6790\u7ebf\u8def\uff082026-09-14 \u5b9e\u6d4b =
+#         {word}.wrupcjpri.cc / {word}.dqfqyakmx.cc\uff0cCloudFront\uff1b\u65e7\u6c60 haqwhuwn.cc \u5df2 DNS \u6c61\u67d3\u5e9f\u5f03\uff09
 # \u7ed3\u6784: \u5206\u7c7b /category/{slug}/\uff08\u7ffb\u9875 page/{n}/ \u6216 /{n}/ \u53cc\u5f62\u6001\u81ea\u9002\u5e94\uff09
 #       \u5217\u8868 <article><a href><h2>\u6807\u9898</h2>\uff1b\u641c\u7d22 /search/{kw}/
 #       \u8be6\u60c5 dplayer config JSON\uff08\/ \u8f6c\u4e49\u8fd8\u539f\uff09\uff0c\u517c\u5bb9\u88f8 m3u8 \u515c\u5e95
@@ -116,15 +117,16 @@ _RE_NEXT = re.compile('class="page-navigator".*?href="([^"]+)"[^>]*>[^<]*\u4e0b\
 
 class Spider(BaseSpider):
 
-    # \u5165\u53e3\u843d\u5730\u9875\uff08b64 \u58f3\uff0c\u89e3\u7801\u540e\u542b\u73b0\u5f79\u5185\u5bb9\u7ad9\u76f4\u94fe\uff1b\u968f\u54c1\u724c\u6362\u57df\u5373\u66f4\u65b0\uff09
+    # \u5165\u53e3\u843d\u5730\u9875\uff08b64 \u58f3\uff0c\u89e3\u7801\u540e\u542b\u73b0\u5f79\u7ebf\u8def\u76f4\u94fe\uff1b\u968f\u54c1\u724c\u6362\u57df\u5373\u66f4\u65b0\uff09
     PUBLISH_PAGE = 'https://51aw34.com/'
-    # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b\uff09\uff1a\u58f3\u9875 JS \u6cdb\u89e3\u6790\u5907\u7ebf {word}.haqwhuwn.cc \u4efb\u610f\u8bcd\u53ef\u7528\uff0c
-    # awcg48.com \u4e3b\u7ebf\u65f6\u6d3b\u65f6\u6b7b\uff08App \u7aef\u66fe\u5168\u6302=\u96f6\u6570\u636e\uff09\uff0c\u6545\u6cdb\u89e3\u6790\u7ebf\u6392\u524d
+    # \u5185\u7f6e\u5019\u9009\uff082026-09-14 \u5b9e\u6d4b\uff0c\u58f3\u9875\u89e3\u7801\u51fa\u7684 lineAry/backupLine \u73b0\u5f79\u7ebf\u8def\uff09\uff1a
+    # \u65e7\u6c60 haqwhuwn.cc / djvvxecgc.cc \u5df2\u88ab DNS \u6c61\u67d3\uff08\u89e3\u6790\u5230 Twitter/Facebook \u6bb5\uff09\u3001
+    # awcg48.com \u8fde\u63a5\u91cd\u7f6e \u2192 \u6574\u6279\u5e9f\u5f03\uff0c\u6362 wrupcjpri.cc / dqfqyakmx.cc \u4e24\u57fa\u57df\u3002
     BUILTIN_HOSTS = [
-        'https://main.haqwhuwn.cc',
-        'https://apple.haqwhuwn.cc',
-        'https://being.djvvxecgc.cc',
-        'https://awcg48.com',
+        'https://adapt.wrupcjpri.cc',
+        'https://base.wrupcjpri.cc',
+        'https://camp.dqfqyakmx.cc',
+        'https://capable.dqfqyakmx.cc',
     ]
 
     def init(self, extend=""):
@@ -266,6 +268,26 @@ class Spider(BaseSpider):
             for _gt in _gts:
                 _gt.join(timeout=8)
             _pt = '\n'.join(_texts)
+            # \u6574\u9875 b64 \u58f3\u89e3\u7801\uff08\u672c\u578b\u5165\u53e3\u9875\u7279\u5f81\uff1a\u6b63\u6587\u662f Base64.decode \u7684\u6574\u9875 HTML\uff09\uff1a
+            # \u73b0\u5f79\u7ebf\u8def\u57df\u540d\u85cf\u5728 b64 blob \u5185\u3001\u660e\u6587\u6b63\u5219\u4e0d\u53ef\u89c1 \u2192 \u89e3\u7801\u540e\u5e76\u5165\u62bd\u53d6\u8bed\u6599\uff0c
+            # \u5426\u5219\u6df1\u62bd\u94fe\u9759\u9ed8\u5931\u6548\uff082026-09-14\uff1a\u5185\u7f6e\u6c60\u6574\u6279\u5e9f\u5f03\u65f6\uff0c\u9760\u8fd9\u4e00\u6b65\u81ea\u52a8\u6362\u57df\uff09\u3002
+            if _pt:
+                _cands = re.findall(r'[A-Za-z0-9+/=]{400,}', _pt)
+                if not _cands:
+                    _cands = [re.sub(r'\s+', '', _c) for _c in
+                              re.findall(r'[A-Za-z0-9+/=\s]{400,}', _pt)]
+                _dec = []
+                for _blob in _cands:
+                    if len(_blob) % 4:
+                        continue
+                    try:
+                        _d = base64.b64decode(_blob, validate=True).decode('utf-8')
+                    except Exception:
+                        continue
+                    if '<' in _d and '>' in _d:
+                        _dec.append(_d)
+                if _dec:
+                    _pt = _pt + '\n' + '\n'.join(_dec)
             if _pt:
                 # \u4f18\u5148\u4ece\u542b random() \u7684 <script> \u6bb5\u62bd\uff08\u90a3\u91cc\u624d\u662f\u6cdb\u89e3\u6790\u8bcd\u8868+\u57fa\u57df\uff09\uff0c\u515c\u5e95\u5168\u9875
                 _chunks = [c for c in re.findall(r'<script[^>]*>(.*?)</script>', _pt, re.S | re.I)

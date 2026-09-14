@@ -165,7 +165,7 @@
       "name": "\ud83d\udcf151\u6697\u7f51\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/51aw.py",
-      "ext": "publish@https://51aw34.com/;mail@anwangchigua@gmail.com",
+      "ext": "publish@https://51aw34.com,https://51awn5.com;mail@anwangchigua@gmail.com",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -213,7 +213,7 @@
       "name": "\ud83d\udcf191\u7206\u6599\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/91bl.py",
-      "ext": "publish@https://91blv.com/tbml.html;mail@chiguatiantang@gmail.com",
+      "ext": "publish@https://t91bl.com/,https://91blv.com/tbml.html;mail@chiguatiantang@gmail.com",
       "style": {
         "type": "rect",
         "ratio": 1
