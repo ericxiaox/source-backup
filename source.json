@@ -242,7 +242,7 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://shewo1.cc;hosts@https://shewo1.cc"
+      "ext": "publish@https://shewo1.cc"
     },
     {
       "key": "\u6781\u4e50\u7981\u533a",
@@ -251,7 +251,8 @@
       "api": "./py/srcc4a413.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "publish@https://nf198.hscwang7y5m.link/jm6s8/;mail@hscwang99@gmail.com"
     }
   ],
   "parses": [],

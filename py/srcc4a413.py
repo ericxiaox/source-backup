@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 # \u6781\u4e50\u7981\u533a \u7ad9\u6e90\uff08\u82f9\u679cCMS \u578b \u00b7 \u6cdb\u89e3\u6790\u6362\u57df\u7248\uff0c2026-09-12 \u7531 xbpq/\u6781\u4e50\u7981\u533a.json py \u5316\uff09
-# \u53d6\u57df\u673a\u5236\uff082026-09-12 \u5b9e\u6d4b\uff09\uff1a
-#   \u6cdb\u89e3\u6790\u65cf\uff1a*.hscwang26y2m.xyz\uff08\u53e6\u89c1 maccms \u914d\u7f6e\u57df\u65cf *.hscwang7y9m1.cc\uff09
-#     - \u4efb\u610f\u968f\u673a\u5b50\u57df\u5747\u89e3\u6790\u4e14\u5404\u56de\u5404 IP\uff08CDN \u8f6e\u6362\u6c60\uff09\uff0c\u4efb\u4e00\u53ef\u7528\u5373\u53ef
-#     - \u6839\u57df\u65e0 A \u8bb0\u5f55\uff0c\u7eaf\u6cdb\u89e3\u6790
-#     - \u6ce8\u610f\uff1a\u672c\u5730/PC DNS \u53ef\u80fd\u89e3\u6790\u4e0d\u4e86\uff08\u6c61\u67d3/\u4ee3\u7406\u62e6\u622a\uff09\uff0c\u771f\u673a\u7f51\u7edc\u6b63\u5e38\uff1b
+# \u53d6\u57df\u673a\u5236\uff082026-09-14 \u590d\u6838\u66f4\u65b0\uff09\uff1a
+#   \u53d1\u5e03\u9875\uff1ahttps://nf198.hscwang7y5m.link/jm6s8/\uff08\u6807\u9898\u300c\u6700\u65b0\u7f51\u5740\u53d1\u5e03-\u53d1\u5e03\u4fe1\u606f\u7f51\u7ad9-\u6700\u65b0\u5730\u5740
+#     \u5165\u53e3\u300d\uff0c\u53ef\u76f4\u8fde\uff09\u2014\u2014 \u57df\u540d\u4e3a **JS \u53d8\u91cf\u62fc\u63a5**\uff08var sub_str/tdn_str + \u9010\u6bb5 `+=` \u62fc\u56de\uff09\uff0c
+#     \u987b hostresolver **v2.9** \u7684 `_js_concat_strs()` \u624d\u62bd\u5f97\u5230\uff08\u65e7\u7248\u62bd 0 \u6761 \u2192 \u6362\u57df\u4e0d\u81ea\u6108\uff09\u3002
+#   \u6cdb\u89e3\u6790\u65cf\uff08\u4efb\u610f\u968f\u673a\u5b50\u57df\u5747\u89e3\u6790\u3001\u5404\u56de\u5404 IP \u7684 CDN \u8f6e\u6362\u6c60\uff1b\u6839\u57df\u65e0 A \u8bb0\u5f55\uff09\uff1a
+#     A `hscwang26y2m.xyz`  \u2014\u2014 2026-09-14 \u5b9e\u6d4b\u968f\u673a\u8bcd 5/5 \u53ef\u7528\uff08175KB / 20 \u6761\uff09
+#     C `hscwang8s8m1.cc`   \u2014\u2014 \u53d1\u5e03\u9875\u5f53\u524d\u6307\u5411\uff0c\u5b9e\u6d4b\u968f\u673a\u8bcd 3/3 \u53ef\u7528\uff08175KB / 20 \u6761\uff09
+#     B `hscwang7y9m1.cc`   \u2014\u2014 \ud83d\udeab \u5df2\u5e9f\uff1a\u88f8\u57df\u4e0e\u5b50\u57df\u5747\u8fd4\u56de 4830B\u300cRedirecting...\u300d\u5e7f\u544a\u62e6\u622a
+#        \u68c0\u6d4b\u58f3\u9875\uff08\u65e0 video-info\uff09\u2192 \u5df2\u4ece\u5019\u9009\u79fb\u9664\uff0c\u7559\u7740\u53ea\u4f1a\u767d\u8017\u63a2\u6d3b\u540d\u989d
+#     - \u6ce8\u610f\uff1a\u672c\u5730/PC DNS \u53ef\u80fd\u89e3\u6790\u4e0d\u4e86\uff08\u6c61\u67d3/\u4ee3\u7406\u62e6\u622a\uff09\u2014\u2014**\u6c99\u7bb1\u5b9e\u6d4b requests \u8d70\u4ee3\u7406\u4f1a
+#       `Tunnel connection failed`\uff0c\u540c\u6837\u8868\u73b0\u6210"\u7ad9\u70b9\u5df2\u6b7b"**\uff1b\u771f\u673a\u7f51\u7edc\u6b63\u5e38\u3002
 #       \u63a2\u6d3b\u5fc5\u987b\u63a2\u6df1\u94fe /vodtype/45-1/\uff08\u542b video-info\uff09\uff0clabel \u9875\u662f\u7a7a\u58f3\u522b\u7528
 #   \u539f\u7248 4 \u4e2a\u7279\u6b8a\u5206\u7c7b\uff08\u767e\u5927\u5973\u4f18/\u756a\u53f7\u4ed3\u5e93/\u56fd\u4ea7\u4f20\u5a92/91\u63a2\u82b1 \u2192 /label/sortxx/\uff09
 #   \u5b9e\u6d4b 0 \u6761\u89c6\u9891\u6570\u636e\uff0c\u5df2\u780d\u6389\uff1b\u53ea\u4fdd\u7559\u4e09\u4e2a\u5e38\u89c4\u5927\u533a\uff0845/46/47+\u5b50\u5206\u7c7b\uff09\u3002
@@ -61,13 +67,13 @@ _CATS = [
 _PROBE_PATH = '/vodtype/45-1/'
 _MARK = 'video-info'
 
-# \u5185\u7f6e\u5019\u9009\uff08iegeewiet-4mag=xbpq \u539f\u57df\uff1b7y9m1.cc \u65cf\u6765\u81ea maccms \u914d\u7f6e\uff1b\u5176\u4f59\u6cdb\u89e3\u6790\u968f\u673a\u8bcd\u515c\u5e95\uff09
+# \u5185\u7f6e\u5019\u9009\uff082026-09-14 \u9010\u6761\u5b9e\u6d4b\u590d\u6838\uff1b\u53d1\u5e03\u9875\u6302\u6389\u65f6\u9760\u5b83\u4eec\u515c\u5e95\uff09
 _BUILTIN_HOSTS = [
-    'https://iegeewiet-4mag.hscwang26y2m.xyz',
-    'https://www.hscwang26y2m.xyz',
-    'https://aesonged-onu5a.hscwang7y9m1.cc',
+    'https://bjo-eh1buu5li9.hscwang8s8m1.cc',   # \u53d1\u5e03\u9875\u5f53\u524d\u7ed9\u51fa\u7684\u5165\u53e3\uff08\u65cf C\uff09
+    'https://iegeewiet-4mag.hscwang26y2m.xyz',  # xbpq \u539f\u57df \u2192 \u65cf A
+    'https://www.hscwang26y2m.xyz',             # \u65cf A
 ]
-_WILDCARD_BASES = ['hscwang26y2m.xyz', 'hscwang7y9m1.cc']
+_WILDCARD_BASES = ['hscwang8s8m1.cc', 'hscwang26y2m.xyz']
 
 _RE_ITEM = re.compile(r'<li><a class="thumbnail" href="/voddetail/(\d+)/">(.*?)</li>', re.S)
 _RE_IMG = re.compile(r'(?:data-original|src)="(https?://[^"]+)"')
@@ -235,8 +241,11 @@ class Spider(BaseSpider):
             return self._ext['host'].rstrip('/')
         if resolve_host:
             try:
+                # \u53d1\u5e03\u9875\u63a5\u5165\uff082026-09-14\uff09\uff1aext \u7684 publish@ \u8d70 hostresolver \u62bd\u94fe\u3002
+                # \u26a0 \u6b64\u524d publish_page='' \u4e14 hostresolver \u65e0 probe_path \u53c2\u6570
+                #   \u2192 TypeError \u88ab\u4e0b\u65b9 except \u541e\u6389 \u2192 hostresolver \u901a\u9053\u4ece\u672a\u771f\u6b63\u8dd1\u8fc7\u3002
                 h = resolve_host(
-                    publish_page='',
+                    publish_page=(self._ext.get('publish') or ''),
                     candidate_hosts=self._candidate_hosts(),
                     headers=self.headers,
                     proxies=self.proxies,
@@ -250,9 +259,11 @@ class Spider(BaseSpider):
                 pass
         if probe_first:
             try:
+                # \u515c\u5e95\u4e5f\u5fc5\u987b\u5e26 probe_path\uff1a\u6839\u8def\u5f84\u662f\u58f3\u9875\u3001\u53ea\u6709\u6df1\u94fe\u624d\u662f\u5185\u5bb9
                 h = probe_first(self._candidate_hosts(), headers=self.headers,
                                 proxies=self.proxies, timeout=8,
                                 validate=lambda host, text: _valid_page(text),
+                                probe_path=_PROBE_PATH,
                                 tag='\u6781\u4e50\u7981\u533a\u515c\u5e95')
                 if h:
                     return h.rstrip('/')

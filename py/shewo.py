@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 # \u5c04\u7a9d \u7ad9\u6e90\uff08\u82f9\u679cCMS \u578b \u00b7 \u6cdb\u89e3\u6790\u6362\u57df\u7248\uff0c2026-09-12 \u7531 xbpq/\u5c04\u7a9d.json py \u5316\uff09
-# \u53d6\u57df\u673a\u5236\uff082026-09-12 \u5b9e\u6d4b\uff09\uff1a
-#   \u4efb\u610f {\u8bcd}.shewo22.cc \u90fd\u89e3\u6790\uff08\u6cdb\u89e3\u6790=\u53d1\u5e03\u673a\u5236\uff0c\u65e0\u4f20\u7edf\u53d1\u5e03\u9875\uff09\uff1a
-#     - \u6839\u8def\u5f84 /            = \u843d\u5730\u58f3\uff083214B\uff0cJS \u70b9\u51fb\u8df3 /{\u4e2d\u6587\u8bcd}/\uff09
+# \u53d6\u57df\u673a\u5236\uff1a
+#   \u5185\u5bb9\u65cf\uff1d\u300c\u6570\u5b57\u7f16\u53f7\u57fa\u57df\u300d\u6cdb\u89e3\u6790\uff08\u4efb\u610f {\u8bcd}.shewoNN.cc\u3001\u4ee5\u53ca**\u88f8\u4e3b\u57df**\u5747\u53ef\u51fa\u5185\u5bb9\uff09\uff1a
+#     - \u6839\u8def\u5f84 /            = \u843d\u5730\u58f3\uff08\u22483.4KB\uff0cJS \u70b9\u51fb\u8df3 /{\u4e2d\u6587\u8bcd}/\uff09
 #     - /vodtype|vodsearch|voddetail|vodplay/... \u6df1\u94fe = \u4efb\u610f\u6d3b\u8282\u70b9\u76f4\u63a5\u51fa\u5185\u5bb9
 #     - /{\u4e2d\u6587\u8bcd}/          = \u5185\u5bb9\u9996\u9875\uff08\u529b\u4e89\u4e0a\u6e38/\u594b\u53d1\u56fe\u5f3a/\u6301\u4e4b\u4ee5\u6052\uff09
 #   \u2192 \u63a2\u6d3b\u5fc5\u987b\u63a2\u6df1\u94fe\uff08/vodtype/55-1.html \u542b pornkvideos\uff09\uff0c\u4e0d\u80fd\u63a2\u6839\u3002
 #   \u4e0d\u540c\u5b50\u57df\u662f\u4e0d\u540c\u5185\u5bb9\u8282\u70b9\uff08md5 \u4e0d\u540c\uff09\uff0c\u4efb\u4e00\u53ef\u7528\u5373\u53ef\u3002
+#   \u26a0 \u57fa\u57df\u968f\u7ad9\u65b9\u6362\u53f7\u6f14\u8fdb\uff08\u89c1 _BASE_DOMAINS\uff09\uff1a2026-09-12 \u53ea\u6709 shewo22.cc\uff1b
+#     2026-09-14 \u5b98\u65b9\u6c38\u4e45\u53d1\u5e03\u9875 shewo1.cc\uff08**\u72ec\u7acb\u90e8\u7f72\u7684\u58f3**\uff1a/vodtype 404\u3001\u4e0d\u5c5e\u6cdb\u89e3\u6790\u65cf\uff09
+#     \u5176\u8df3\u8f6c\u58f3\u5df2\u6539\u6307 shewo43/44/45.cc \u2014\u2014 \u5b9e\u6d4b\u4e09\u8005\u88f8\u4e3b\u57df\u4e0e\u4efb\u610f\u8bcd\u5b50\u57df\u5168\u90e8\u51fa\u5185\u5bb9\uff1b
+#     shewo22.cc \u5b9e\u6d4b\u4ecd\u6d3b\uff0c\u4fdd\u7559\u515c\u5e95\u3002
 # \u7ed3\u6784: \u5206\u7c7b /vodtype/{tid}-{pg}.html\uff1b\u641c\u7d22 /vodsearch/{wd}----------{pg}---.html
 #       \u8be6\u60c5 /voddetail/{id}.html\uff1b\u64ad\u653e /vodplay/{id}-{sid}-{nid}.html
 #       \u64ad\u653e\u9875 var player_aaaa={...url:m3u8}\uff08encrypt=0\uff09
@@ -65,6 +69,10 @@ _CATS = [
 # \u63a2\u6d3b\u6df1\u94fe\uff1a\u5206\u7c7b 55 \u7b2c\u4e00\u9875\uff08\u4efb\u4f55\u6d3b\u8282\u70b9\u90fd 200+pornkvideos\uff09
 _PROBE_PATH = '/vodtype/55-1.html'
 _MARK = 'pornkvideos'
+
+# \u57fa\u57df\u6c60\uff082026-09-14 \u5b9e\u6d4b\uff1a\u5b98\u65b9\u53d1\u5e03\u9875 shewo1.cc \u7684\u8df3\u8f6c\u58f3\u5df2\u6307\u5411 shewo43/44/45.cc\uff1b
+# shewo22.cc \u4e3a\u65e7\u57fa\u57df\u3001\u5b9e\u6d4b\u4ecd\u6d3b\u6545\u4fdd\u7559\u515c\u5e95\u3002**\u88f8\u4e3b\u57df\u672c\u8eab\u5373\u53ef\u51fa\u5185\u5bb9**\uff0c\u6545\u4f18\u5148\u63a2\u5b83\u3002\uff09
+_BASE_DOMAINS = ['shewo43.cc', 'shewo44.cc', 'shewo45.cc', 'shewo22.cc']
 
 # \u5185\u7f6e\u5019\u9009\u8bcd\uff08yjewvzfn=2026-09-12 \u5b9e\u6d4b\u8282\u70b9\uff1b\u5176\u4f59\u4e3a\u5e38\u7528\u5b50\u57df\u8bcd\uff0c\u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5747\u89e3\u6790\uff09
 _BUILTIN_WORDS = ['yjewvzfn', 'www', 'm', 'wap', 'app', 'tv', 'h5', 'vip']
@@ -176,26 +184,35 @@ class Spider(BaseSpider):
             self.trace.append('%s -> FAIL %s' % (host_base, str(e)[:40]))
 
     def _candidate_hosts(self):
-        """hostresolver \u7528\u7684\u5019\u9009\uff1aext + \u5185\u7f6e\u8bcd\uff08\u4e0d\u542b\u968f\u673a\u8bcd\uff0c\u63a7\u5236\u6700\u574f\u8017\u65f6\uff09\u3002"""
+        """hostresolver \u7528\u7684\u5019\u9009\uff1aext + \u88f8\u57fa\u57df + \u5185\u7f6e\u8bcd\uff08\u4e0d\u542b\u968f\u673a\u8bcd\uff0c\u63a7\u5236\u6700\u574f\u8017\u65f6\uff09\u3002
+
+        \u88f8\u57fa\u57df\u6392\u5728\u8bcd\u5b50\u57df\u4e4b\u524d\uff082026-09-14\uff09\uff1a\u5b9e\u6d4b\u4efb\u4e00\u57fa\u57df\u7684\u88f8\u4e3b\u57df `/vodtype/55-1.html`
+        \u5373 200+pornkvideos \u2014\u2014 \u547d\u4e2d\u7387\u6700\u9ad8\u3001\u4e14\u4e0d\u4f1a\u56e0\u8bcd\u8282\u70b9\u6362\u8840\u800c\u5931\u6548\u3002
+        \u6bcf\u8f6e `_probe_round` \u53ea\u53d6\u524d 16 \u4e2a\uff0c\u6545\u987a\u5e8f\uff1dext \u2192 4 \u88f8\u57fa\u57df \u2192 \u8bcd\u5b50\u57df\u3002"""
         cands = []
         if self._ext.get('host'):
             cands.append(self._ext['host'])
         cands += list(self._ext.get('hosts') or [])
-        for w in _BUILTIN_WORDS:
-            u = 'https://%s.shewo22.cc' % w
+        for d in _BASE_DOMAINS:
+            u = 'https://%s' % d
             if u not in cands:
                 cands.append(u)
+        for d in _BASE_DOMAINS:
+            for w in _BUILTIN_WORDS:
+                u = 'https://%s.%s' % (w, d)
+                if u not in cands:
+                    cands.append(u)
         return cands
 
     def _cands_random(self, n=8):
-        """\u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5747\u89e3\u6790\uff1a\u968f\u673a\u8bcd\u6269\u6c60\uff08\u4e0d\u540c\u8bcd=\u4e0d\u540c\u5185\u5bb9\u8282\u70b9\uff09\u3002"""
+        """\u6cdb\u89e3\u6790\u4efb\u610f\u8bcd\u5747\u89e3\u6790\uff1a\u968f\u673a\u8bcd\u6269\u6c60\uff08\u4e0d\u540c\u8bcd=\u4e0d\u540c\u5185\u5bb9\u8282\u70b9\uff0c\u57fa\u57df\u540c\u6b65\u8f6e\u6362\uff09\u3002"""
         out, seen = [], set()
         while len(out) < n:
             w = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(6))
             if w in seen:
                 continue
             seen.add(w)
-            out.append('https://%s.shewo22.cc' % w)
+            out.append('https://%s.%s' % (w, random.choice(_BASE_DOMAINS)))
         return out
 
     def _probe_round(self, cands, wait):
@@ -228,8 +245,13 @@ class Spider(BaseSpider):
             return self._ext['host'].rstrip('/')
         if resolve_host:
             try:
+                # \u53d1\u5e03\u9875\u63a5\u5165\uff082026-09-14\uff09\uff1aext \u7684 publish@ \u6307\u5411\u5b98\u65b9\u6c38\u4e45\u53d1\u5e03\u9875 shewo1.cc\uff0c
+                # hostresolver v2.8 \u8d77\u80fd\u300c\u8ddf\u76f8\u5bf9\u76ee\u5f55 \u2192 \u8fd8\u539f\u5360\u4f4d\u7b26 \u2192 \u62bd\u57fa\u57df\u300d\uff0c
+                # \u7ad9\u65b9\u518d\u6362\u53f7\uff08\u5982 shewo43/44/45 \u2192 46/47\uff09\u53ef\u81ea\u52a8\u8ddf\u4e0a\uff0c\u65e0\u9700\u624b\u6539\u6e90\u3002
+                # \u26a0 \u6b64\u524d\u8fd9\u91cc\u5199\u6b7b publish_page='' \u4e14 hostresolver \u65e0 probe_path \u53c2\u6570
+                #   \u2192 TypeError \u88ab\u4e0b\u65b9 except \u541e\u6389 \u2192 hostresolver \u901a\u9053\u4ece\u672a\u771f\u6b63\u8dd1\u8fc7\u3002
                 h = resolve_host(
-                    publish_page='',
+                    publish_page=(self._ext.get('publish') or ''),
                     candidate_hosts=self._candidate_hosts(),
                     headers=self.headers,
                     proxies=self.proxies,
@@ -243,9 +265,11 @@ class Spider(BaseSpider):
                 pass
         if probe_first:
             try:
+                # \u515c\u5e95\u4e5f\u5fc5\u987b\u5e26 probe_path\uff1a\u6839\u8def\u5f84\u662f\u9009\u62e9\u58f3\u3001\u53ea\u6709\u6df1\u94fe\u624d\u662f\u5185\u5bb9
                 h = probe_first(self._candidate_hosts(), headers=self.headers,
                                 proxies=self.proxies, timeout=8,
                                 validate=lambda host, text: _MARK in (text or ''),
+                                probe_path=_PROBE_PATH,
                                 tag='\u5c04\u7a9d\u515c\u5e95')
                 if h:
                     return h.rstrip('/')
