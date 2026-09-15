@@ -877,18 +877,6 @@
       "off_reason": "\u975epy\u6e90 py \u5316\u6539\u9020(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85\u9010\u4e2a\u6539\u9020\u56de\u4e0a\u7ebf"
     },
     {
-      "key": "\u641c\u7d22\u4ed3\u5e93",
-      "name": "\ud83d\udcf1\u641c\u7d22\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "csp_XBPQ",
-      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "./xbpq/sousuo.json",
-      "off_reason": "\u975epy\u6e90 py \u5316\u6539\u9020(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85\u9010\u4e2a\u6539\u9020\u56de\u4e0a\u7ebf"
-    },
-    {
       "key": "\u5c0f\u4e11",
       "name": "\ud83d\udcf1\u5c0f\u4e11\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
       "type": 3,
@@ -911,18 +899,6 @@
       "filterable": 1,
       "ext": "./xbpq/cabian.json",
       "off_reason": "\u9a8c\u6d3b(2026-09-12)\uff1a\u7ad9\u8fd8\u901a\u4f46\u5df2\u65e0\u89c6\u9891\u5185\u5bb9\uff0c\u6b7b\u7ad9\u4e0d\u6539\u9020"
-    },
-    {
-      "key": "\u732b\u5a18\u52a8\u6f2b",
-      "name": "\ud83d\udcf1\u732b\u6f2b\u5267\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "csp_XBPQ",
-      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "./xbpq/maoniang.json",
-      "off_reason": "\u975epy\u6e90 py \u5316\u6539\u9020(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85\u9010\u4e2a\u6539\u9020\u56de\u4e0a\u7ebf"
     },
     {
       "key": "local_404b",
