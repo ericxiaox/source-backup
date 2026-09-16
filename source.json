@@ -1,5 +1,5 @@
 {
-  "sites_count": 28,
+  "sites_count": 29,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -325,6 +325,20 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
+    },
+    {
+      "key": "py_yase",
+      "name": "\ud83c\udf19\u4e9a\u8272\u5f71\u5e93\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/ysyk.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "ext": "publish@https://ys.ggyase.shop/;mail@12345@yasefb.xyz"
     }
   ],
   "parses": [],
@@ -792,18 +806,6 @@
     "https://lf1-cdn-tos.bytegoofy.com/obj/tos-cn-i-dy/455ccf9e8ae744378118e4bd289288dd"
   ],
   "sites_off": [
-    {
-      "key": "py_yase",
-      "name": "\ud83d\udcf1\u4e9a\u8272\u5f71\u5e93",
-      "type": 3,
-      "api": "./py/ysyk.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "off_reason": "\u88ab\u5899;\u53d1\u5e03\u9875yasefb.xyz\u2192ys.ggyase.shop\u53ef\u8fbe\u4f46\u7ad9\u6539\u7248,\u65e7\u6e90\u4f5c\u5e9f"
-    },
     {
       "key": "\u805a\u5408",
       "name": "\ud83d\udcf1\u805a\u5408\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
