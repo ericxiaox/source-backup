@@ -3,11 +3,13 @@
 #
 # \u7ad9\u578b\uff1aTypecho + DPlayer\uff1b\u5206\u7c7b /category/{slug}/{pg}/\uff0c\u8be6\u60c5 /archives/{id}/\u3002
 # \u5217\u8868\u9879\uff1a<article itemscope> + itemprop="headline"(\u6807\u9898) + itemprop="url mainEntityOfPage"(\u94fe\u63a5)
-#         + loadBannerDirect('\u52a0\u5bc6\u56feURL')\uff08\u6d77\u62a5\u662f AES-128-CBC \u52a0\u5bc6\u56fe\uff0c\u9700\u89e3\u5bc6\u540e data URI \u8fd4\u56de\uff09
+#         + loadBannerDirect('\u52a0\u5bc6\u56feURL')\uff08\u6d77\u62a5\u662f\u300c\u9ed1\u6599\u7cfb\u300dAES-128-CBC \u52a0\u5bc6\u56fe\uff1a\u88f8 URL \u7ed9 App
+#           \u4f1a\u89e3\u7801\u5931\u8d25\u663e\u793a\u7a7a\u56fe \u2192 \u5fc5\u987b\u8d70 localProxy \u89e3\u5bc6\u540e\u518d\u56de\u7ed9 App\uff0c\u89c1 _pic/_img_fetch\uff09
 # \u64ad\u653e\uff1a\u8be6\u60c5\u9875\u5185\u5d4c DPlayer\uff0c\u89c6\u9891\u5730\u5740\u660e\u6587\u8eba\u5728 `"video":{"url":"...m3u8?auth_key=..."}`\uff08\u65e0\u9700\u89e3\u5bc6\uff09
 #
 # \ud83d\udea9 \u6d77\u62a5 AES \u89e3\u5bc6\uff1akey=b'f5d965df75336270' iv=b'97b60394abc2fbe1'\uff08\u5747\u4e3a ASCII \u5b57\u9762\u91cf 16 \u5b57\u8282\uff09
 #    AES-128-CBC / PKCS7\uff1b\u5b9e\u6d4b magic 73f90a47 \u2192 \u89e3\u5bc6\u540e ffd8ffe1\uff08\u771f JPEG\uff09\u3002
+import base64
 import json
 import re
 import sys
@@ -56,10 +58,26 @@ _BUILTIN_HOSTS = [
 _IMG_KEY = b'f5d965df75336270'
 _IMG_IV = b'97b60394abc2fbe1'
 
+# \u56fe\u5e8a\uff08\u300c\u9ed1\u6599\u7cfb\u300d\u5171\u7528 key \u7684 AES-CBC \u52a0\u5bc6\u56fe\uff0c\u4e0e 51\u6697\u7f51/91\u7206\u6599/51\u5403\u74dc \u540c\u65cf\uff09\uff1a
+# \u88f8 URL \u4ea4\u7ed9 App \u4f1a\u89e3\u7801\u5931\u8d25\u663e\u793a\u7a7a\u56fe \u2192 \u5c01\u9762\u5fc5\u987b\u8d70 localProxy \u89e3\u5bc6\u540e\u518d\u56de\u7ed9 App\u3002
+_PIC_BED = 'https://pic.hdhwqx.cn'
+_BED_PATHS = ('/upload_01/', '/hc237/')
+
+
+def _aesimg(raw):
+    """\u52a0\u5bc6\u56fe \u2192 \u660e\u6587\u56fe\uff1b\u5931\u8d25\u539f\u6837\u8fd4\u56de\uff08\u7531\u8c03\u7528\u65b9\u6309 magic \u5224\u5b9a\uff09\u3002"""
+    try:
+        from Crypto.Cipher import AES
+        return AES.new(_IMG_KEY, AES.MODE_CBC, _IMG_IV).decrypt(raw)
+    except Exception:
+        return raw
+
+
 _RE_ART = re.compile(r'<article[^>]*itemscope[^>]*>(.*?)</article>', re.S)
 _RE_HREF = re.compile(r'itemprop="url mainEntityOfPage" content="([^"]+)"')
 _RE_TITLE = re.compile(r'itemprop="headline">([^<]*)<')
 _RE_BANNER = re.compile(r"loadBannerDirect\('([^']+)'")
+_RE_ITEM_IMG = re.compile(r'itemprop="image"[^>]*content="([^"]+)"')
 _RE_ARCH = re.compile(r'archives/(\d+)')
 _RE_VIDEO = re.compile(r'"video"\s*:\s*\{\s*"url"\s*:\s*"([^"]+)"')
 _RE_OGIMG = re.compile(r'<meta property="og:image" content="([^"]+)"')
@@ -98,27 +116,6 @@ def _valid_page(text):
 def _looks_shell(text):
     t = text or ''
     return (not t) or len(t) < 3000 or 'Redirecting' in t
-
-
-def _dec_img(url):
-    """\u62c9\u52a0\u5bc6\u6d77\u62a5 \u2192 AES-128-CBC \u89e3\u5bc6 \u2192 data:image/jpeg;base64\u3002\u5931\u8d25\u8fd4 ''\u3002"""
-    if not url:
-        return ''
-    try:
-        import base64
-        from Crypto.Cipher import AES
-        r = requests.get(url, headers={'User-Agent': _UA}, timeout=10, verify=False)
-        b = r.content
-        if not b:
-            return ''
-        if b[:3] == b'\xff\xd8\xff':
-            return 'data:image/jpeg;base64,' + base64.b64encode(b).decode()
-        dec = AES.new(_IMG_KEY, AES.MODE_CBC, _IMG_IV).decrypt(b)
-        if 1 <= dec[-1] <= 16 and dec[-dec[-1]:] == bytes([dec[-1]]) * dec[-1]:
-            dec = dec[:-dec[-1]]
-        return 'data:image/jpeg;base64,' + base64.b64encode(dec).decode()
-    except Exception:
-        return ''
 
 
 class Spider(BaseSpider):
@@ -172,8 +169,79 @@ class Spider(BaseSpider):
     def destroy(self):
         pass
 
-    def localProxy(self, params):
-        return [200, "video/MP2T", ""]
+    # \u2500\u2500 \u5c01\u9762\u4ee3\u7406\uff08\u56fe\u5e8a\u4e3a AES \u52a0\u5bc6\u56fe\uff0c\u987b\u89e3\u5bc6\u540e\u518d\u56de\u7ed9 App\uff09\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+    def e64(self, s):
+        try:
+            return base64.b64encode((s or '').encode('utf-8')).decode('utf-8')
+        except Exception:
+            return ''
+
+    def d64(self, s):
+        s = (s or '').replace(' ', '+')
+        try:
+            return base64.b64decode(s + '=' * (-len(s) % 4)).decode('utf-8')
+        except Exception:
+            return ''
+
+    @staticmethod
+    def _to_bed(u):
+        """\u56fe\u7247 URL \u5f52\u4e00\u5230\u56fe\u5e8a\uff1a\u7ad9\u65b9\u9875\u9762\u91cc\u7684 host \u5e38\u5199\u9519/\u5df2\u6b7b\uff0c\u53ea\u8981 path \u843d\u5728
+        \u5df2\u77e5\u56fe\u5e8a\u76ee\u5f55\uff08/upload_01/\u3001/hc237/\uff09\u5c31\u6362\u6210 _PIC_BED \u7684 host\u3002"""
+        if not u:
+            return ''
+        if u.startswith('//'):
+            u = 'https:' + u
+        if u.startswith('/'):
+            return _PIC_BED + u if any(p in u for p in _BED_PATHS) else u
+        mm = re.match(r'^https?://[^/]+(/.*)$', u)
+        if mm and _PIC_BED not in u and any(p in mm.group(1) for p in _BED_PATHS):
+            return _PIC_BED + mm.group(1)
+        return u
+
+    def _fetch_once(self, url):
+        """\u53d6\u56fe + \u6309\u9700\u89e3\u5bc6 \u2192 (mime, bytes)\u3002\u660e\u6587\u56fe\u76f4\u63a5\u653e\u884c\uff0c\u975e\u660e\u6587\u6309\u9ed1\u6599\u7cfb key \u89e3\u5bc6\u3002"""
+        try:
+            r = requests.get(url, headers={'User-Agent': _UA}, proxies=self.proxies or None,
+                             timeout=12, verify=False)
+            raw = r.content if r.status_code == 200 else b''
+        except Exception:
+            raw = b''
+        if not raw:
+            return None, b''
+        for b in (raw, _aesimg(raw)):
+            if b[:3] == b'\xff\xd8\xff':
+                return 'image/jpeg', b
+            if b[:8] == b'\x89PNG\r\n\x1a\n':
+                return 'image/png', b
+            if b[:4] == b'GIF8':
+                return 'image/gif', b
+            if b[:4] == b'RIFF' and b[8:12] == b'WEBP':
+                return 'image/webp', b
+        return None, b''
+
+    def _img_fetch(self, url):
+        """\u53d6\u56fe\uff1b\u7ad9\u65b9 host \u5199\u9519/\u5df2\u6b7b\u65f6\u6309 path \u6362\u56fe\u5e8a\u518d\u8bd5\u4e00\u6b21\u3002"""
+        mime, data = self._fetch_once(url)
+        if not data:
+            mm = re.match(r'^https?://[^/]+(/.*)$', url)
+            if mm and _PIC_BED not in url:
+                mime, data = self._fetch_once(_PIC_BED + mm.group(1))
+        return mime, data
+
+    def localProxy(self, param):
+        try:
+            if param.get('type') == '\u0039\u0031\u0063\u0067img':
+                url = self._to_bed(self.d64(param.get('url')))
+                if url.startswith('//'):
+                    url = 'https:' + url
+                if url.startswith('/'):
+                    url = (self.host or '') + url
+                mime, data = self._img_fetch(url)
+                if data:
+                    return [200, mime or 'image/jpeg', data]
+        except Exception:
+            pass
+        return [404, 'text/plain', b'']
 
     def _http(self, url, headers=None, timeout=8):
         try:
@@ -277,8 +345,6 @@ class Spider(BaseSpider):
                 return {'list': []}
             html = self._get_page(self.host + '/')
             items = self._parse_articles(html)
-            for it in items:
-                it.pop('_imgurl', None)
             return {'list': items[:12]}
         except Exception:
             return {'list': []}
@@ -299,26 +365,29 @@ class Spider(BaseSpider):
             imgurl = bm.group(1) if bm else ''
             if vid and name:
                 out.append({
-                    'vod_id': vid, 'vod_name': name, 'vod_pic': '',
-                    'vod_remarks': '', '_imgurl': imgurl,
+                    'vod_id': vid, 'vod_name': name,
+                    'vod_pic': self._pic(imgurl),
+                    'vod_remarks': '',
                     'vod_play_from': '91\u5403\u74dc', 'vod_play_url': '\u539f\u753b$%s' % vid,
                 })
         return out
 
-    def _fill_pics(self, items):
-        import threading
-        todos = [it for it in items if it.get('_imgurl')]
-        if not todos:
-            return
-
-        def work(it):
-            it['vod_pic'] = _dec_img(it['_imgurl'])
-
-        ts = [threading.Thread(target=work, args=(it,)) for it in todos]
-        for t in ts:
-            t.start()
-        for t in ts:
-            t.join(timeout=15)
+    def _pic(self, u):
+        """\u5c01\u9762\u7edf\u4e00\u5305\u6210\u4ee3\u7406 URL\uff08\u4ee3\u7406\u5185\u505a magic \u9884\u68c0 + \u89e3\u5bc6\uff1bApp \u7aef\u6e32\u67d3\u672c\u5730 URL\uff09\u3002"""
+        u = self._to_bed(u)
+        if not u:
+            return ''
+        if u.startswith('//'):
+            u = 'https:' + u
+        if u.startswith('/'):
+            u = (self.host or '') + u
+        try:
+            base = self.getProxyUrl()
+        except Exception:
+            base = ''
+        if not base:
+            return u
+        return '%s&url=%s&type=\u0039\u0031\u0063\u0067img' % (base, self.e64(u))
 
     def _get_page(self, url):
         res = None
@@ -345,9 +414,6 @@ class Spider(BaseSpider):
         url = '%s/category/%s/%d/' % (self.host, quote(str(tid)), pg)
         html = self._get_page(url)
         items = self._parse_articles(html)
-        self._fill_pics(items)
-        for it in items:
-            it.pop('_imgurl', None)
         return {'list': items, 'page': pg, 'pagecount': 999, 'total': 999,
                 'limit': 999, 'extend': 0}
 
@@ -359,9 +425,6 @@ class Spider(BaseSpider):
         url = '%s/search/%s/%d/' % (self.host, quote(str(key)), pg)
         html = self._get_page(url)
         items = self._parse_articles(html)
-        self._fill_pics(items)
-        for it in items:
-            it.pop('_imgurl', None)
         return {'list': items, 'page': pg}
 
     def detailContent(self, ids):
@@ -378,10 +441,18 @@ class Spider(BaseSpider):
         pm = _RE_PC.search(html)
         if pm:
             intro = _clean(pm.group(1))[:300]
+        pic = ''
+        im = _RE_ITEM_IMG.search(html)          # \u8be6\u60c5\u9875\u771f\u5c01\u9762\uff08itemprop="image" \u2192 pic \u56fe\u5e8a\uff09
+        if im:
+            pic = self._pic(im.group(1))
+        else:
+            bm = _RE_BANNER.search(html)        # \u56de\u9000\uff1a\u90e8\u5206\u9875\u4ecd\u6709 loadBannerDirect
+            if bm:
+                pic = self._pic(bm.group(1))
         vod = {
             'vod_id': str(vid),
             'vod_name': name,
-            'vod_pic': '',
+            'vod_pic': pic,
             'vod_content': intro or '\u8d44\u6e90\u6765\u81ea\u4e8e\u7f51\u7edc\uff0c\u8bf7\u52ff\u76f8\u4fe1\u4efb\u4f55\u5e7f\u544a',
             'vod_play_from': '91\u5403\u74dc',
             'vod_play_url': '\u539f\u753b$%s' % str(vid),
