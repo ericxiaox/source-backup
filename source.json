@@ -1,5 +1,5 @@
 {
-  "sites_count": 29,
+  "sites_count": 30,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -339,6 +339,20 @@
       },
       "changeable": 1,
       "ext": "publish@https://ys.ggyase.shop/;mail@12345@yasefb.xyz"
+    },
+    {
+      "key": "py_tanhua",
+      "name": "\ud83c\udf19\u63a2\u82b1AV\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/tanhua.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "ext": "mail@tanhuamod01@gmail.com"
     }
   ],
   "parses": [],
