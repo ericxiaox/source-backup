@@ -1,5 +1,5 @@
 {
-  "sites_count": 25,
+  "sites_count": 26,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -287,6 +287,15 @@
       "name": "\ud83c\udf1991\u60c5\u62a5\u5c40\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/\u0039\u0031\u0071\u006a\u006a.py",
+      "searchable": 1,
+      "quickSearch": 1,
+      "filterable": 1
+    },
+    {
+      "key": "91\u63a2\u82b1",
+      "name": "\ud83c\udf1991\u63a2\u82b1\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/\u0039\u0031\u0074\u0068.py",
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1
@@ -815,18 +824,6 @@
       "quickSearch": 1,
       "filterable": 1,
       "ext": "./xbpq/juhe.json",
-      "off_reason": "\u975epy\u6e90 py \u5316\u6539\u9020(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85\u9010\u4e2a\u6539\u9020\u56de\u4e0a\u7ebf"
-    },
-    {
-      "key": "91\u63a2\u82b1",
-      "name": "\ud83d\udcf191\u63a2\u82b1\u02b2\u02e2\u1d52\u207f\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "csp_XBPQ",
-      "jar": "https://gitee.com/xianluyuan/jar/raw/master/xyqxbpq.jar",
-      "searchable": 1,
-      "quickSearch": 1,
-      "filterable": 1,
-      "ext": "./xbpq/91tanhua.json",
       "off_reason": "\u975epy\u6e90 py \u5316\u6539\u9020(2026-09-12)\uff1a\u4e0b\u7ebf\u5f85\u9010\u4e2a\u6539\u9020\u56de\u4e0a\u7ebf"
     },
     {
