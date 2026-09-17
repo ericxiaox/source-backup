@@ -282,7 +282,7 @@
     },
     {
       "key": "555\u7535\u5f71",
-      "name": "\ud83d\udce6555\u7535\u5f71\u1d56\u02b8\uff5c\u5f71\u89c6",
+      "name": "\ud83c\udf19555\u7535\u5f71\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/555.py",
       "searchable": 1,
@@ -292,7 +292,7 @@
     },
     {
       "key": "91\u5403\u74dc",
-      "name": "\ud83c\udf4991\u5403\u74dc\u1d56\u02b8\uff5c\u9ed1\u6599",
+      "name": "\ud83c\udf1991\u5403\u74dc\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/\u0039\u0031\u0063\u0067.py",
       "searchable": 1,
@@ -301,7 +301,7 @@
     },
     {
       "key": "404",
-      "name": "\ud83d\udcf1\u56db\u96f6\u56db\u1d56\u02b8\uff5c\u591c\u665a",
+      "name": "\ud83c\udf19\u56db\u96f6\u56db\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/404.py",
       "searchable": 1,
