@@ -25,9 +25,7 @@ _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like
 #   publish@https://uaadizhi.com/  \u5730\u5740\u53d1\u5e03\u9875\uff08\u72ec\u7acb\u57df\uff0c\u8bb0\u5f55\u7528\uff09
 #   {"host":...,"hosts":[...]}     JSON \u5199\u6cd5\u4ea6\u53ef
 BUILTIN_HOSTS = [
-    'https://www.uaa2601.com',   # 2026-09-08 \u5b9e\u6d4b\u97f3\u9891/\u89c6\u9891/\u6f2b\u753b/\u5c0f\u8bf4\u56db\u677f\u5757 API \u5168\u901a
-    'https://uaa2601.com',
-    'https://uaa001.com',        # \u65e7\u57df\uff08\u672c\u673a TLS \u63e1\u624b\u5931\u8d25\uff0c\u4fdd\u7559\u4f5c\u771f\u673a\u515c\u5e95\uff09
+    "https://uaadizhi.com"
 ]
 
 

@@ -47,7 +47,10 @@ class Spider(Spider):
         'https://www.xjxj459.org/static/js/config.js',
     ]
     # \u5185\u7f6e\u5019\u9009 H5 \u57df\uff08\u65b0\u2192\u65e7\uff09\uff1bext \u7684 hosts@ \u4f1a\u6392\u5230\u5b83\u4eec\u524d\u9762
-    CANDIDATE_HOSTS = ['https://h5.xxoox35.org', 'https://h5.xxoo168.org']
+    CANDIDATE_HOSTS = [
+    "https://www.xjxjxj.co",
+    "https://www.xjxj459.org"
+]
     # \u5206\u7c7b\u515c\u5e95\u8868\uff08/init \u53d6\u4e0d\u5230\u65f6\u7528\uff1bb64 \u5b58\u653e\uff0c\u9632\u6258\u7ba1\u5e73\u53f0\u5173\u952e\u8bcd\u626b\u63cf\uff09
     CLASS_FALLBACK_B64 = 'W3sidHlwZV9pZCI6IjAtMC0wLTAtMC0wLTItMC0wIiwidHlwZV9uYW1lIjoi5peg56CB6KeG6aKRIn0seyJ0eXBlX2lkIjoiNC0wLTAtMC0wLTAtMi0wLTAiLCJ0eXBlX25hbWUiOiLlgbfmi43oh6rmi40ifSx7InR5cGVfaWQiOiI1LTAtMC0wLTAtMC0wLTAtMCIsInR5cGVfbmFtZSI6IuWItuacjeivseaDkSJ9LHsidHlwZV9pZCI6IjktMC0wLTAtMC0wLTAtMC0wIiwidHlwZV9uYW1lIjoi57Sg5Lq65Ye65ryUIn0seyJ0eXBlX2lkIjoiMTQtMC0wLTAtMC0wLTAtMC0wIiwidHlwZV9uYW1lIjoi57uP5YW45LiJ57qnIn0seyJ0eXBlX2lkIjoiMC0zLTAtMC0wLTAtMC0xLTAiLCJ0eXBlX25hbWUiOiLkuK3mloflrZfluZUifSx7InR5cGVfaWQiOiI3LTMtMC0wLTAtMC0wLTAtMCIsInR5cGVfbmFtZSI6IuaXpeacrOi+o+WmuSJ9LHsidHlwZV9pZCI6IjExLTAtMC0wLTAtMC0wLTAtMCIsInR5cGVfbmFtZSI6IuaIkOS6uuWKqOa8qyJ9LHsidHlwZV9pZCI6IjAtNi0wLTAtMC0wLTAtMC0wIiwidHlwZV9uYW1lIjoi5qyn576O5r+A5oOFIn0seyJ0eXBlX2lkIjoiMC01LTAtMC0wLTAtMC0wLTIiLCJ0eXBlX25hbWUiOiLpn6nlm73ng63mkq0ifSx7InR5cGVfaWQiOiIwLTAtMy0wLTAtMC0wLTAtMiIsInR5cGVfbmFtZSI6IjIwMjLmlrDniYcifSx7InR5cGVfaWQiOiIxMy0wLTAtMC0wLTAtMC0wLTAiLCJ0eXBlX25hbWUiOiLlj5jmgIHlj6bnsbsifV0='
     # \u63a2\u9488\uff1areqplay/1 \u53ea\u6709\u51e0\u767e\u5b57\u8282\uff0c\u9a8c\u6d3b\u6700\u5feb

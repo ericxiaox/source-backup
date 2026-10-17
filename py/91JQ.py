@@ -89,11 +89,10 @@ _SITE_KEY = '91JQ'
 _PUBLISH = 'https://91fby.com/index_fby.html'
 # \u5185\u7f6e\u515c\u5e95\uff1a\u53d1\u5e03\u9875\u5b9e\u6d4b\u7ed9\u51fa\u7684 5 \u6761\u9632\u52ab\u6301\u901a\u9053\uff08\u5e26\u7aef\u53e3\uff0c\u6545\u4e0d\u8d70 hostresolver\uff09
 _BUILTIN_HOSTS = [
-    'https://198.200.45.72:7018',
-    'https://198.200.45.74:7019',
-    'https://198.200.45.75:7020',
-    'https://198.200.45.77:7021',
-    'https://198.200.45.83:7022',
+    "https://91jqdizhi21.com",
+    "https://91jqdizhi88.com",
+    "https://91jqdizhi92.com",
+    "https://91jqdizhi50.com"
 ]
 
 # \u63a2\u6d3b\u6df1\u94fe\uff08\u9996\u9875\u660e\u6587\u7248\uff1b\u5b9e\u6d4b 28KB \u6863\uff0c\u542b movie2_list \u4e0e >10 \u6761\u76ee\uff09

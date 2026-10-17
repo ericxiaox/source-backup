@@ -105,10 +105,10 @@ class Spider(BaseSpider):
     # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u53d1\u5e03\u9875\u5b9e\u6d4b\uff1a\u53d1\u5e03\u9875 5 \u6761\u7ebf\u8def\u4e2d\u4ec5 3 \u6761\u662f\u771f\u7ad9\u955c\u50cf\uff0c
     # rkrnimmm=18se\u5bfc\u822a\u5e7f\u544a\u7ad9\u3001bxouulcs=68\u5b57\u8282\u7a7a\u58f3\uff0c\u5df2\u5254\u9664\uff1b\u4ee5"\u6807\u9898\u542b\u9ed1\u6599\u7f51"\u9a8c\u8eab\uff09
     BUILTIN_HOSTS = [
-        'https://fzyxd.vhksymsv.cc',
-        'https://d3oyu.zbzrembr.cc',
-        'https://ds6r63epm75a1.cloudfront.net',
-    ]
+    "https://hlwf6.com",
+    "https://vgxnasoa.cc",
+    "https://hlwf9.com"
+]
 
     def init(self, extend=""):
         self.proxies = {}

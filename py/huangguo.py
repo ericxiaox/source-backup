@@ -82,12 +82,12 @@ except ImportError:
 
 # ---------- \u5e38\u91cf ----------
 HOSTS = [
-    "https://huangguoai.com",
-    "https://ttvoij.ediayikma.cc",
-    "https://thu.ediayikma.cc",
-    "https://pku.ediayikma.cc",
-    "https://fdu.ediayikma.cc",
-    "https://thu.agdkczeyx.cc",
+    # 2026-10-17\uff1a\u65e7 ediayikma.cc / agdkczeyx.cc \u7ebf\u57df\u5168\u6b7b\uff08\u76f4\u8fde\u8d85\u65f6\uff09\u3002
+    # \u6b64\u5904\u4ec5\u4f5c App \u7aef\u515c\u5e95\u2014\u2014\u771f\u6b63\u8f6e\u6362\u9760 _resolve_inline \u7684\u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe\uff08huangguo5.com\uff09\u3002
+    "https://p7oama.xb96o08n.cc",
+    "https://b59fm.xb96o08n.cc",
+    "https://d0mm.xb96o08n.cc",
+    "https://hgai5.com",
 ]
 # \u5b98\u65b9\u5730\u5740\u53d1\u5e03\u9875\uff082026-09-13 \u5b9e\u6d4b\uff09\uff1ahuangguo5.com / huangguo3.com / huangguoai.ai \u4e09\u9875
 # \u540c\u6e90\uff0846KB\uff0c\u6807\u9898\u300c\u5b98\u65b9\u6700\u65b0\u5730\u5740\u53d1\u5e03\u9875\u00b7\u9ec4\u679c\u77ed\u5267\u300d\uff09\uff0c\u7ebf\u8def\u4ee5 <a href="https://\u8bcd.\u57fa\u57df.cc">

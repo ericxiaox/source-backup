@@ -69,9 +69,7 @@ _MARK = 'video-info'
 
 # \u5185\u7f6e\u5019\u9009\uff082026-09-14 \u9010\u6761\u5b9e\u6d4b\u590d\u6838\uff1b\u53d1\u5e03\u9875\u6302\u6389\u65f6\u9760\u5b83\u4eec\u515c\u5e95\uff09
 _BUILTIN_HOSTS = [
-    'https://bjo-eh1buu5li9.hscwang8s8m1.cc',   # \u53d1\u5e03\u9875\u5f53\u524d\u7ed9\u51fa\u7684\u5165\u53e3\uff08\u65cf C\uff09
-    'https://iegeewiet-4mag.hscwang26y2m.xyz',  # xbpq \u539f\u57df \u2192 \u65cf A
-    'https://www.hscwang26y2m.xyz',             # \u65cf A
+    "https://nf198.hscwang7y5m.link/jm6s8/"
 ]
 _WILDCARD_BASES = ['hscwang8s8m1.cc', 'hscwang26y2m.xyz']
 

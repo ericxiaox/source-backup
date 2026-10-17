@@ -122,12 +122,7 @@ class Spider(BaseSpider):
     # \u5185\u7f6e\u5019\u9009\uff082026-09-14 \u5b9e\u6d4b\uff0c\u58f3\u9875\u89e3\u7801\u51fa\u7684 lineAry/backupLine \u73b0\u5f79\u7ebf\u8def\uff09\uff1a
     # \u65e7\u6c60 haqwhuwn.cc / djvvxecgc.cc \u5df2\u88ab DNS \u6c61\u67d3\uff08\u89e3\u6790\u5230 Twitter/Facebook \u6bb5\uff09\u3001
     # awcg48.com \u8fde\u63a5\u91cd\u7f6e \u2192 \u6574\u6279\u5e9f\u5f03\uff0c\u6362 wrupcjpri.cc / dqfqyakmx.cc \u4e24\u57fa\u57df\u3002
-    BUILTIN_HOSTS = [
-        'https://adapt.wrupcjpri.cc',
-        'https://base.wrupcjpri.cc',
-        'https://camp.dqfqyakmx.cc',
-        'https://capable.dqfqyakmx.cc',
-    ]
+    BUILTIN_HOSTS = [ "https://51aw34.com" ]
 
     def init(self, extend=""):
         self.proxies = {}

@@ -43,7 +43,9 @@ except Exception:
         resolve_host = None
         parse_ext = None
         probe_first = None
-HOSTS = ["https://lzlukvca.cc", "https://tideember.cc", "https://xqjzvcvt.top"]
+HOSTS = [
+    "https://hddj.tv"
+]
 ALIAS = "huangdou"          # explorer \u63a2\u7d22\u522b\u540d\uff08\u5bfc\u822a\u7ad9\u7ad9\u540d/\u57df\u540d\u5339\u914d\uff09
 _UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
        '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')

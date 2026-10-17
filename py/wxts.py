@@ -46,12 +46,7 @@ class Spider(BaseSpider):
     # \u7ad9\u65b9\u53d1\u5e03\u9875\uff08github.io \u9759\u6001\u9875\uff0c\u5217\u6700\u65b0\u955c\u50cf\u57df\u540d\uff09
     PUBLISH_PAGE = 'https://wuxiants.github.io/'
     # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b\uff0c\u53d1\u5e03\u9875\u5217\u51fa\u7684\u56db\u4e2a\u955c\u50cf\uff09
-    BUILTIN_HOSTS = [
-        'https://wxts.wuxiants966.com',
-        'https://wxts.wuxiants967.com',
-        'https://wxts.wuxiants968.com',
-        'https://wxts.wuxiants969.com',
-    ]
+    BUILTIN_HOSTS = [ "https://wuxiants966.com" ]
 
     def init(self, extend=""):
         self.proxies = {}
