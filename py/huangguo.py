@@ -1287,7 +1287,7 @@ class Spider(Spider):
                 if not a:
                     continue
                 href = a.get("href", "")
-                m = re.search(r"/detail/(\d+)", href)
+                m = re.search(r"/(?:detail|video)/(\d+)", href)
                 if not m:
                     continue
                 vid = m.group(1)
@@ -1323,8 +1323,8 @@ class Spider(Spider):
 
             # search \u8865\u5145
             if mode == "search" and not videos:
-                for a in doc.find_all("a", href=re.compile(r"/detail/\d+")):
-                    m = re.search(r"/detail/(\d+)", a.get("href", ""))
+                for a in doc.find_all("a", href=re.compile(r"/(?:detail|video)/\d+")):
+                    m = re.search(r"/(?:detail|video)/(\d+)", a.get("href", ""))
                     if not m or m.group(1) in seen:
                         continue
                     seen.add(m.group(1))
@@ -1356,7 +1356,7 @@ class Spider(Spider):
                 if not a:
                     continue
                 href = a.get("href", "")
-                m = re.search(r"/detail/(\d+)", href)
+                m = re.search(r"/(?:detail|video)/(\d+)", href)
                 vid = m.group(1) if m else href
                 if vid in seen:
                     continue
@@ -1421,7 +1421,7 @@ class Spider(Spider):
         """\u65e0 BS4 \u65f6\u7684\u6b63\u5219\u515c\u5e95\uff08\u4e0e\u7b2c\u4e00\u7248\u517c\u5bb9\uff09"""
         result, seen = [], set()
         for block in re.split(r'<div class="hg-drama-card"', html)[1:]:
-            m = re.search(r'href="(/detail/(\d+)/)"', block)
+            m = re.search(r'href="(/(?:detail|video)/(\d+)/)"', block)
             if not m:
                 continue
             vid = m.group(2)
