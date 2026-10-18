@@ -822,9 +822,11 @@ class Spider(Spider):
     def _searchContent(self, key, quick, page='1'):
         page = int(page) if page else 1
         size = 20
-        params = {'page': page, 'size': size, 'keyword': key}
+        # \u771f\u641c\u7d22\u7aef\u70b9 = /videos/search?q=\uff082026-10-18 \u4fee\uff09\uff1a/videos?keyword= \u4e0d\u88ab\u7ad9\u70b9\u652f\u6301\uff0c
+        # \u5ffd\u7565\u8be5\u53c2\u6570\u76f4\u63a5\u8fd4\u56de\u5168\u91cf\uff08total 19804\uff09\u2192 \u8868\u73b0\u4e3a"\u641c\u4ec0\u4e48\u90fd\u662f\u65e0\u5173\u5185\u5bb9"
+        params = {'page': page, 'size': size, 'q': key}
         try:
-            data = self._fetch_api('/videos', params=params)
+            data = self._fetch_api('/videos/search', params=params)
             d = data.get('data', {})
             items = d.get('items', [])
             total = d.get('total', 0)

@@ -723,7 +723,11 @@ class Spider(BaseSpider):
             path = f'/search/{quote(key)}/'
             if str(pg) not in ('1', ''):
                 path = f'/search/{quote(key)}/page/{pg}/'
-            result['list'] = self._parse_list(self._get(path).text or '')
+            txt = self._get(path).text or ''
+            # \u7ad9\u70b9\u65e0\u7ed3\u679c\u65f6\u6807\u9898"\u672a\u627e\u5230XX\u7684\u76f8\u5173\u5185\u5bb9"\u4e14\u6302\u63a8\u8350\u5757\uff0c\u8bc6\u522b\u540e\u8fd4\u56de\u7a7a\uff082026-10-18 \u4fee\uff09
+            if re.search('<title>[^<]*(?:\u672a\u627e\u5230|\u6ca1\u6709\u627e\u5230)', txt):
+                return {'list': []}
+            result['list'] = self._parse_list(txt)
         except Exception:
             pass
         return result

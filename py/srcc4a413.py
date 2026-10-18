@@ -344,7 +344,13 @@ class Spider(BaseSpider):
         self._ensure_host()
         url = '%s/vodsearch/%s----------%d---/' % (self.host, key, pg)
         html = self._get_page(url)
-        return {'list': self._parse_list(html), 'page': pg}
+        lst = self._parse_list(html)
+        # macCMS \u65e0\u7ed3\u679c\u4e5f\u539f\u6837\u8fd4\u56de\u63a8\u8350\u5361\u7247\uff08\u9875\u9762\u65e0\u4efb\u4f55\u7a7a\u7ed3\u679c\u6587\u6848/\u533a\u5757\u6807\u8bb0\uff09\uff0c
+        # \u6309\u6807\u9898\u542b\u5173\u952e\u8bcd\u8fc7\u6ee4\uff0c\u5b81\u7a7a\u52ff\u9519\uff082026-10-18 \u4fee\uff09
+        if key:
+            kw = str(key).lower()
+            lst = [x for x in lst if kw in str(x.get('vod_name', '')).lower()]
+        return {'list': lst, 'page': pg}
 
     def detailContent(self, ids):
         vid = ids[0]

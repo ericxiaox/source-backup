@@ -558,6 +558,10 @@ class Spider(Spider):
         self._ensure_host()
         rsp=self.fetch(f'{self.HOST}/search/{quote(key)}/'if int(pg)==1 else f'{self.HOST}/search/{quote(key)}/{pg}/')
         if not rsp:return{'list':[]}
+        # \u7ad9\u70b9\u65e0\u7ed3\u679c\u65f6\u6807\u9898\u4e3a"\u672a\u627e\u5230XX\u7684\u76f8\u5173\u5185\u5bb9"\u4e14\u9875\u9762\u6302\u63a8\u8350\u5757\uff0c
+        # \u89e3\u6790\u524d\u5148\u8bc6\u522b\u7a7a\u7ed3\u679c\uff0c\u5426\u5219\u63a8\u8350\u5757\u88ab\u5f53\u641c\u7d22\u7ed3\u679c\u8fd4\u56de\uff082026-10-18 \u4fee\uff09
+        if re.search('<title>[^<]*(?:\u672a\u627e\u5230|\u6ca1\u6709\u627e\u5230)', rsp.text or ''):
+            return {'list': []}
         return{'list':self._parse_items(pq(rsp.text))}
     def playerContent(self,flag,id,vipFlags):
         # Check if this is a danmaku-enabled video

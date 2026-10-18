@@ -896,6 +896,10 @@ class Spider(Spider):
             pg = 1
         html = self._get(f"/search/video/{kw}/{pg}/")
         videos = self._parse_list(html, mode="search")
+        # \u7ad9\u70b9\u65e0\u7ed3\u679c\u65f6\u4e5f\u5f80\u7ed3\u679c\u533a\u586b\u63a8\u8350\u5361\u7247\uff08\u65e0\u4efb\u4f55\u7a7a\u7ed3\u679c\u6587\u6848\uff09\u2192 \u6309\u6807\u9898\u542b\u5173\u952e\u8bcd\u8fc7\u6ee4\uff0c\u5b81\u7a7a\u52ff\u9519\uff082026-10-18 \u4fee\uff09
+        if key:
+            _kw = str(key).strip().lower()
+            videos = [v for v in videos if _kw and _kw in str(v.get("vod_name", "")).lower()]
         has_more = len(videos) >= 18
         return {
             "page": pg,
@@ -1282,7 +1286,10 @@ class Spider(Spider):
 
         if mode == "drama" or mode == "search":
             # \u901a\u7528\u5361\u7247
-            for card in doc.select("div.hg-drama-card"):
+            # search \u6a21\u5f0f\u9650\u5b9a .hg-search-results \u7ed3\u679c\u5bb9\u5668\uff0c\u6392\u9664"\u731c\u4f60\u559c\u6b22"\u63a8\u8350\u533a\uff082026-10-18 \u4fee\uff1a
+            # \u65e0\u7ed3\u679c\u65f6\u7ad9\u70b9\u4e5f\u5f80\u7ed3\u679c\u533a\u586b\u63a8\u8350\u5361\u7247\uff0c\u4e14\u65e0\u4efb\u4f55\u7a7a\u7ed3\u679c\u6587\u6848\uff0c\u9700\u5bb9\u5668\u9650\u5b9a+\u5173\u952e\u8bcd\u8fc7\u6ee4\u53cc\u4fdd\u9669\uff09
+            _scope = doc.select_one(".hg-search-results") if mode == "search" else doc
+            for card in (_scope.select("div.hg-drama-card") if _scope is not None else []):
                 a = card.find("a", href=True)
                 if not a:
                     continue
