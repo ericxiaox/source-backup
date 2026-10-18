@@ -431,17 +431,16 @@ class Spider(BaseSpider):
         if ext.get('host'):
             return ext['host'].rstrip('/')
         publish = ext.get('publish') or 'https://gitlab.com/mrds/mrds/-/raw/main/README.md'
-        # \u53d1\u5e03\u9875\u4f1a\u81ea\u52a8\u6df1\u5ea6\u62bd\u94fe\u751f\u6210 iljzezhab \u6cdb\u89e3\u6790\u5019\u9009\uff1b\u5185\u7f6e\u5217\u8868\u4ec5\u4f5c\u53d1\u5e03\u9875\u5931\u8054\u65f6\u7684\u5907\u4efd
+        # \u5185\u7f6e\u5217\u8868\u4ec5\u4f5c\u53d1\u5e03\u9875\u5931\u8054\u65f6\u7684\u5907\u4efd\uff082026-10-18 \u665a\u5b9e\u6d4b\u5168\u6362\uff1a
+        # \u65e7\u6c60 iljzezhab.cc \u56db\u7ebf\u88ab DNS \u6c61\u67d3\uff08\u89e3\u6790\u5230 Facebook \u6bb5 108.160.166.137/69.63.184.142\uff09\u5df2\u5e9f\u5f03\uff1b
+        # ktgchwz.xyz \u56db\u7ebf 301 \u2192 ctowezdm.cc \u4ecd\u6d3b\u4f46\u591a\u8df3\u4e00\u5c42\uff0c\u76f4\u63a5\u8bb0\u76ee\u6807\u57df\uff1b
+        # \u65e7\u8bcd\u57df ryiipqwur.cc / cnfhzmnnc.cc \u6574\u7ec4 301 \u6c47\u5165\u5f53\u524d\u4e3b\u57df\uff1d\u81ea\u6108\uff0c\u7559\u5e95\uff09
         builtin_hosts = [
-            'https://big.iljzezhab.cc/',      # 2026-09-08 \u5b9e\u6d4b\u6d3b\u955c\u50cf(254KB\u5b8c\u6574\u7ad9,20\u5206\u7c7b)
-            'https://adjust.iljzezhab.cc/',
-            'https://borrow.iljzezhab.cc/',
-            'https://black.iljzezhab.cc/',
-            'https://big.ktgchwz.xyz/',       # \u8df3\u8f6c -> iljzezhab.cc
-            'https://adjust.ktgchwz.xyz/',
-            'https://borrow.ktgchwz.xyz/',
-            'https://black.ktgchwz.xyz/',
-            'https://mrds72.com/',            # \u8df3\u8f6c\u58f3
+            'https://www.ufzwrzoo.cc/',      # 2026-10-18 \u5b9e\u6d4b\u5f53\u524d\u4e3b\u57df(30\u6587,\u6807\u9898\u300c\u6bcf\u65e5\u5927\u8d5b\u300d)
+            'https://big.ctowezdm.cc/',      # 2026-10-18 \u5b9e\u6d4b\u6d3b\u7ad9(30\u6587)\uff0cktgchwz.xyz 301 \u76ee\u6807
+            'https://ryiipqwur.cc/',         # \u65e7\u8bcd\u57df\uff0c301 \u6c47\u5165\u5f53\u524d\u4e3b\u57df(\u81ea\u6108)
+            'https://cnfhzmnnc.cc/',         # \u65e7\u8bcd\u57df\uff0c301 \u6c47\u5165\u5f53\u524d\u4e3b\u57df(\u81ea\u6108)
+            'https://mrds72.com/',           # \u8df3\u8f6c\u58f3(310B, \u5e26\u5f53\u524d\u57df)
             'https://mrdsx5.com/',
         ]
 

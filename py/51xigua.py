@@ -707,13 +707,18 @@ class Spider(Spider):
         ext = getattr(self, '_ext', {}) or {}
         if ext.get('host'):
             return ext['host'].rstrip('/')
+        # 2026-10-18 \u665a\uff1a51cgf15.com \u7b49\u5165\u53e3\u5747\u4e3a 307B JS stub \u2192 mbmpqrcz.cc \u517b\u751f\u8bf1\u9975
+        # \u7740\u9646\u9875\uff08Vue SPA \u96f6\u6587\u7ae0\uff09\u2192 \u53d1\u5e03\u9875\u94fe\u8def\u5df2\u6b7b\uff0c\u6539\u4ee5\u5f53\u524d\u771f\u7ad9\u4e3a\u5185\u7f6e\u5019\u9009\uff1b
+        # actual.aqioswbe.cc \u65e7\u8bcd\u57df\u6574\u7ec4 301 \u6c47\u5165\u5f53\u524d\u7ebf actual.ljprljyl.cc\uff08CloudFront
+        # \u6cdb\u89e3\u6790\u3001\u8def\u5f84\u4fdd\u7559\uff09\uff1d\u81ea\u6108\uff1b\u65e7\u5019\u9009 advise.nlwkmsv.cc \u5df2 000 \u4e0d\u53ef\u8fbe\u5e9f\u5f03\u3002
         publish = ext.get('publish') or 'https://51cgf15.com/'
         builtin_hosts = [
-            'https://advise.nlwkmsv.cc/',     # \u65e7\u57fa\u57df\uff0c302 -> ucorfqmp.cc\uff082026-09-08 \u8f6e\u6362\u5feb\u7167\uff1bucorfqmp.cc \u5df2\u5931\u6548\u5df2\u5220\uff0c\u672c\u57df 302 \u53ef\u80fd\u4ecd\u8df3\u5f53\u524d\u6d3b\u57df\uff0c\u7559\u4f5c\u515c\u5e95\uff09
+            'https://actual.aqioswbe.cc/',    # 2026-10-18 \u5b9e\u6d4b\u771f\u7ad9(30\u6587)\uff0c301 \u2192 actual.ljprljyl.cc \u81ea\u6108
         ]
 
         def _validate(host, text):
-            return '51\u5403\u74dc' in (text or '')
+            # \u771f\u7ad9\u6807\u9898\u4e3a\u300c\u5403\u74dc\u7f51\uff5c\u2026\u300d\uff0c\u4e0d\u542b\u300c51\u5403\u74dc\u300d\u5b57\u6837 \u2192 \u9a8c\u8eab\u8bcd\u653e\u5bbd\u4e3a\u300c\u5403\u74dc\u300d
+            return '\u5403\u74dc' in (text or '')
 
         if resolve_host:
             h = resolve_host(
@@ -747,7 +752,7 @@ class Spider(Spider):
                 def _probe(u):
                     r = requests.get(u.rstrip('/') + '/', headers=self.headers,
                                      proxies=self.proxies, timeout=5, verify=False)
-                    return r.status_code == 200 and '51\u5403\u74dc' in (r.text or '')
+                    return r.status_code == 200 and '\u5403\u74dc' in (r.text or '')
                 hs = explore_hosts(['51cg', '51\u5403\u74dc'], probe=_probe)
                 if hs:
                     return hs[0]
