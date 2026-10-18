@@ -104,10 +104,17 @@ class Spider(BaseSpider):
     PUBLISH_PAGE = 'https://hlwf6.com/'
     # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u53d1\u5e03\u9875\u5b9e\u6d4b\uff1a\u53d1\u5e03\u9875 5 \u6761\u7ebf\u8def\u4e2d\u4ec5 3 \u6761\u662f\u771f\u7ad9\u955c\u50cf\uff0c
     # rkrnimmm=18se\u5bfc\u822a\u5e7f\u544a\u7ad9\u3001bxouulcs=68\u5b57\u8282\u7a7a\u58f3\uff0c\u5df2\u5254\u9664\uff1b\u4ee5"\u6807\u9898\u542b\u9ed1\u6599\u7f51"\u9a8c\u8eab\uff09
+    # 2026-10-18 \u665a\uff1ahlwf6/vgxnasoa/hlwf9 \u4e09\u58f3\u4ecd\u6d3b\u7740\uff087KB \u5165\u53e3\u5bfc\u822a\u58f3\uff0chostresolver
+    #   \u6df1\u62bd\u94fe\u53ef\u7528\uff09\uff0c\u4f46\u58f3\u5185\u4e3b\u63a8 www.heiliao88.com / heiliao.com \u5747\u5df2\u4e0d\u53ef\u8fbe\uff1b
+    #   \u58f3\u5185\u5176\u4f59\u968f\u673a\u8bcd\u57df\u7ecf\u5b9e\u6d4b qreab/xp0sg/v62x0 \u4e09\u8bcd\u57df 200/233KB \u5b8c\u6574\u7ad9
+    #   \uff08\u6807\u9898\u300c\u9ed1\u6599\u7f51 - \u6bcf\u65e5\u66f4\u65b0\u2026\u300d\u8fc7\u9a8c\u8eab\uff09\uff0c\u76f4\u63a5\u5165 builtin \u63d0\u901f\u3002
     BUILTIN_HOSTS = [
     "https://hlwf6.com",
     "https://vgxnasoa.cc",
-    "https://hlwf9.com"
+    "https://hlwf9.com",
+    "https://qreab.kfpitfet.cc",
+    "https://xp0sg.kkzzhzfq.cc",
+    "https://v62x0.kdgfrubod.cc"
 ]
 
     def init(self, extend=""):
