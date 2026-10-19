@@ -124,7 +124,7 @@ class Spider(BaseSpider):
     # \u6807\u9898\u300c51\u6697\u7f51\uff5c\u2026\u300d\uff09\uff0c\u65e7\u8bcd\u57df\u6574\u7ec4 301 \u6c47\u5165\u8be5\u7ebf\uff1d\u81ea\u6108\u3002\u5386\u53f2\u65e7\u6c60
     # haqwhuwn.cc / djvvxecgc.cc \u88ab DNS \u6c61\u67d3\uff08Twitter/Facebook \u6bb5\uff09\u5df2\u5e9f\u5f03\u3002
     BUILTIN_HOSTS = [
-        "https://arrive.btdycozh.cc",  # 2026-10-18 \u5b9e\u6d4b\u5f53\u524d\u771f\u7ad9\uff08\u5f53\u665a\u5df2 301 \u8f6e\u6362\u5230 arrive.mvduoggxj.cc\uff0c\u8ddf\u968f\u5373\u81ea\u6108\uff09
+        "https://arrive.ymcovaei.cc",  # 2026-10-18 \u5b9e\u6d4b\u5f53\u524d\u771f\u7ad9\uff08\u5f53\u665a\u5df2 301 \u8f6e\u6362\u5230 arrive.mvduoggxj.cc\uff0c\u8ddf\u968f\u5373\u81ea\u6108\uff09
     ]
 
     def init(self, extend=""):

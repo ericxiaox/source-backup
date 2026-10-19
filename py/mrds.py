@@ -436,7 +436,7 @@ class Spider(BaseSpider):
         # ktgchwz.xyz \u56db\u7ebf 301 \u2192 ctowezdm.cc \u4ecd\u6d3b\u4f46\u591a\u8df3\u4e00\u5c42\uff0c\u76f4\u63a5\u8bb0\u76ee\u6807\u57df\uff1b
         # \u65e7\u8bcd\u57df ryiipqwur.cc / cnfhzmnnc.cc \u6574\u7ec4 301 \u6c47\u5165\u5f53\u524d\u4e3b\u57df\uff1d\u81ea\u6108\uff0c\u7559\u5e95\uff09
         builtin_hosts = [
-            'https://www.ufzwrzoo.cc/',      # 2026-10-18 \u5b9e\u6d4b\u5f53\u524d\u4e3b\u57df(30\u6587,\u6807\u9898\u300c\u6bcf\u65e5\u5927\u8d5b\u300d)
+            'https://www.wudzedswi.cc/',      # 2026-10-18 \u5b9e\u6d4b\u5f53\u524d\u4e3b\u57df(30\u6587,\u6807\u9898\u300c\u6bcf\u65e5\u5927\u8d5b\u300d)
             'https://big.ctowezdm.cc/',      # 2026-10-18 \u5b9e\u6d4b\u6d3b\u7ad9(30\u6587)\uff0cktgchwz.xyz 301 \u76ee\u6807
             'https://ryiipqwur.cc/',         # \u65e7\u8bcd\u57df\uff0c301 \u6c47\u5165\u5f53\u524d\u4e3b\u57df(\u81ea\u6108)
             'https://cnfhzmnnc.cc/',         # \u65e7\u8bcd\u57df\uff0c301 \u6c47\u5165\u5f53\u524d\u4e3b\u57df(\u81ea\u6108)

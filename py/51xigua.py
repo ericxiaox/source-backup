@@ -713,7 +713,7 @@ class Spider(Spider):
         # \u6cdb\u89e3\u6790\u3001\u8def\u5f84\u4fdd\u7559\uff09\uff1d\u81ea\u6108\uff1b\u65e7\u5019\u9009 advise.nlwkmsv.cc \u5df2 000 \u4e0d\u53ef\u8fbe\u5e9f\u5f03\u3002
         publish = ext.get('publish') or 'https://51cgf15.com/'
         builtin_hosts = [
-            'https://actual.aqioswbe.cc/',    # 2026-10-18 \u5b9e\u6d4b\u771f\u7ad9(30\u6587)\uff0c301 \u2192 actual.ljprljyl.cc \u81ea\u6108
+            'https://actual.yaysbeug.cc/',    # 2026-10-18 \u5b9e\u6d4b\u771f\u7ad9(30\u6587)\uff0c301 \u2192 actual.ljprljyl.cc \u81ea\u6108
         ]
 
         def _validate(host, text):
