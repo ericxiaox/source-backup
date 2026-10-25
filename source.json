@@ -1,5 +1,5 @@
 {
-  "sites_count": 37,
+  "sites_count": 35,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -383,17 +383,6 @@
       "changeable": 1
     },
     {
-      "key": "py_xzg",
-      "name": "\ud83c\udf19\u5199\u771f\u9986\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/xzg.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
       "key": "py_szn",
       "name": "\ud83c\udf19\u53d4\u4f84\u5973\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
@@ -420,17 +409,6 @@
       "name": "\ud83c\udf192048\u6838\u57fa\u5730\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/2048.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_jrkdl",
-      "name": "\ud83c\udf49\u4eca\u65e5\u770b\u6599\u1d56\u02b8\uff5c\u9ed1\u6599",
-      "type": 3,
-      "api": "./py/jrkdl.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -957,6 +935,18 @@
       "name": "\ud83c\udf19\u56db\u864e\u89c6\u9891\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/shsp.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "off_reason": "\u9875\u9762\u624b\u52a8\u79fb\u5165\u79bb\u7ebf\u533a"
+    },
+    {
+      "key": "py_jrkdl",
+      "name": "\ud83c\udf49\u4eca\u65e5\u770b\u6599\u1d56\u02b8\uff5c\u9ed1\u6599",
+      "type": 3,
+      "api": "./py/jrkdl.py",
       "style": {
         "type": "rect",
         "ratio": 1
