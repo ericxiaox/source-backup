@@ -1,5 +1,5 @@
 {
-  "sites_count": 41,
+  "sites_count": 36,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -131,17 +131,6 @@
       "type": 3,
       "api": "./py/daluandou.py",
       "ext": "publish@https://idld66.com,https://idld65.com,https://border.loewkgyyv.cc,https://capture.loewkgyyv.cc,https://fe7.loewkgyyv.cc,https://gitlab.com/group305134/mrdld/-/raw/main/README.md;mail@mrdldfun666@gmail.com",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_jrkdl",
-      "name": "\ud83c\udf49\u4eca\u65e5\u770b\u6599\u1d56\u02b8\uff5c\u9ed1\u6599",
-      "type": 3,
-      "api": "./py/jrkdl.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -431,50 +420,6 @@
       "name": "\ud83c\udf192048\u6838\u57fa\u5730\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/2048.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_shys",
-      "name": "\ud83c\udf19\u9a9a\u706b\u5f71\u89c6\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/shys.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_shsp",
-      "name": "\ud83c\udf19\u56db\u864e\u89c6\u9891\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/shsp.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_lyt",
-      "name": "\ud83c\udf19\u64b8\u4e00\u5929\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/lyt.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_javday",
-      "name": "\ud83c\udf19javday\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/javday.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -971,6 +916,54 @@
       "changeable": 1,
       "vpn": "https://new\u0078\u0076\u0069\u0064\u0065\u006f\u0073.pages.dev",
       "off_reason": "\u9875\u9762\u624b\u52a8\u79fb\u5165\u79bb\u7ebf\u533a"
+    },
+    {
+      "key": "py_javday",
+      "name": "\ud83c\udf19javday\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/javday.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "off_reason": "\u9875\u9762\u624b\u52a8\u79fb\u5165\u79bb\u7ebf\u533a"
+    },
+    {
+      "key": "py_lyt",
+      "name": "\ud83c\udf19\u64b8\u4e00\u5929\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/lyt.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "off_reason": "\u9875\u9762\u624b\u52a8\u79fb\u5165\u79bb\u7ebf\u533a"
+    },
+    {
+      "key": "py_shsp",
+      "name": "\ud83c\udf19\u56db\u864e\u89c6\u9891\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/shsp.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "off_reason": "\u9875\u9762\u624b\u52a8\u79fb\u5165\u79bb\u7ebf\u533a"
+    },
+    {
+      "key": "py_jrkdl",
+      "name": "\ud83c\udf49\u4eca\u65e5\u770b\u6599\u1d56\u02b8\uff5c\u9ed1\u6599",
+      "type": 3,
+      "api": "./py/jrkdl.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "off_reason": "\u771f\u673a\u9a8c\u8bc1\u4e0d\u53ef\u8fbe(2026-10-25)\uff1akanliao2.one \u4e0e\u56db\u864e/\u64b8\u4e00\u5929/javday \u540c\u6279\u4e0b\u7ebf"
     }
   ]
 }
