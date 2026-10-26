@@ -1,5 +1,5 @@
 {
-  "sites_count": 81,
+  "sites_count": 76,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -27,14 +27,14 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://huangguo5.com,https://huangguo3.com,https://huangguoai.pages.dev,https://huangguoai.github.io,https://gitlab.com/huangguo/huangguo/-/raw/main/README.md,https://huangguo4.com,https://huangguoai.ai;hosts@https://thu.huxrzdjnv.cc;mail@huangguoaiai@gmail.com"
+      "ext": "publish@https://huangguo5.com,https://huangguo3.com,https://huangguoai.pages.dev,https://huangguoai.github.io,https://gitlab.com/huangguo/huangguo/-/raw/main/README.md,https://huangguo4.com,https://huangguoai.ai;hosts@https://thu.huxrzdjnv.cc,https://hgai5.com;mail@huangguoaiai@gmail.com"
     },
     {
       "key": "py_airen",
       "name": "\ud83c\udfac2048\u77ed\u5267\u1d56\u02b8\uff5c\u77ed\u5267",
       "type": 3,
       "api": "./py/airen.py",
-      "ext": "hosts@https://mdcmai4.xyz,https://mdcmai5.xyz,https://mdcmai3.xyz,https://mdcmai2.xyz",
+      "ext": "hosts@https://mdcmai2.xyz,https://mdcmai3.xyz,https://mdcmai4.xyz,https://mdcmai5.xyz,https://madouai.xyz",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -309,7 +309,8 @@
       "api": "./py/404.py",
       "searchable": 1,
       "quickSearch": 1,
-      "filterable": 1
+      "filterable": 1,
+      "ext": "publish@https://4042607.one;hosts@https://4042607.pro"
     },
     {
       "key": "91\u60c5\u62a5\u5c40",
@@ -427,17 +428,6 @@
       "changeable": 1
     },
     {
-      "key": "py_mtsp",
-      "name": "\ud83c\udf19\u6697\u591c\u871c\u6843\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/mitao.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
       "key": "py_ahmt",
       "name": "\ud83c\udf19\u6697\u9ed1\u871c\u6843\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
@@ -479,24 +469,14 @@
         "type": "rect",
         "ratio": 1
       },
-      "changeable": 1
+      "changeable": 1,
+      "ext": "hosts@https://jinguoduanju.app"
     },
     {
       "key": "py_hamg",
       "name": "\ud83c\udf19\u54c8\u5bc6\u74dc\u52a8\u6f2b\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/hamg.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_74p",
-      "name": "\ud83c\udf1974P\u798f\u5229\u56fe\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/74p.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -545,24 +525,14 @@
         "type": "rect",
         "ratio": 1
       },
-      "changeable": 1
+      "changeable": 1,
+      "ext": "hosts@https://aicrss4.sbs"
     },
     {
       "key": "py_avsj",
       "name": "\ud83c\udf19AV\u8272\u754c\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/avsj.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_aidj",
-      "name": "\ud83c\udf19Ai\u9876\u7ea7\u6da9\u56fe\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/aidj.py",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -801,28 +771,6 @@
       "changeable": 1
     },
     {
-      "key": "py_mdai",
-      "name": "\ud83c\udf19\u9ebb\u8c46AI\u4f20\u5a92\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/mdai.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_51dj",
-      "name": "\ud83c\udf1951\u77ed\u5267\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/51dj.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
       "key": "py_javkok",
       "name": "\ud83c\udf19JavKok\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
@@ -919,7 +867,8 @@
         "type": "rect",
         "ratio": 1
       },
-      "changeable": 1
+      "changeable": 1,
+      "ext": "publish@https://51dj20.com;hosts@https://ceiling.sysrycady.com,https://api.51dj1.com;mail@51duanjuju@gmail.com"
     }
   ],
   "parses": [],
@@ -1453,6 +1402,31 @@
       "name": "\ud83c\udf49\u4eca\u65e5\u770b\u6599\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/jrkdl.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "off_reason": "\u9875\u9762\u624b\u52a8\u79fb\u5165\u79bb\u7ebf\u533a"
+    },
+    {
+      "key": "py_aidj",
+      "name": "\ud83c\udf19Ai\u9876\u7ea7\u6da9\u56fe\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/aidj.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "ext": "hosts@https://aidjst.cc",
+      "off_reason": "\u9875\u9762\u624b\u52a8\u79fb\u5165\u79bb\u7ebf\u533a"
+    },
+    {
+      "key": "py_74p",
+      "name": "\ud83c\udf1974P\u798f\u5229\u56fe\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/74p.py",
       "style": {
         "type": "rect",
         "ratio": 1
