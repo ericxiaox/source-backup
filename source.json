@@ -571,17 +571,6 @@
       "changeable": 1
     },
     {
-      "key": "py_javxtu",
-      "name": "\ud83c\udf19JAVxtu\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/JAVxtu.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
       "key": "py_lpfl",
       "name": "\ud83c\udf19\u4e50\u556a\u798f\u5229\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
@@ -855,6 +844,18 @@
         "ratio": 1
       },
       "changeable": 1
+    },
+    {
+      "key": "py_jwfm",
+      "name": "\ud83c\udf19\u793e\u533a\u89c6\u9891\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/jwfm.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "ext": "hosts@https://www.65jwfm.com,https://65jwfm.com"
     }
   ],
   "parses": [],
@@ -1434,6 +1435,18 @@
       "changeable": 1,
       "ext": "publish@https://98t.la/;mail@sehuatang@gmail.com",
       "vpn": "https://www.sehuatang.net,https://www.sehuatang.org,https://98tang.com",
+      "off_reason": "\u9875\u9762\u624b\u52a8\u79fb\u5165\u79bb\u7ebf\u533a"
+    },
+    {
+      "key": "py_javxtu",
+      "name": "\ud83c\udf19JAVxtu\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/JAVxtu.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
       "off_reason": "\u9875\u9762\u624b\u52a8\u79fb\u5165\u79bb\u7ebf\u533a"
     }
   ]
