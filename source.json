@@ -1,5 +1,5 @@
 {
-  "sites_count": 35,
+  "sites_count": 81,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -409,6 +409,512 @@
       "name": "\ud83c\udf192048\u6838\u57fa\u5730\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/2048.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_cjjc",
+      "name": "\ud83c\udf19\u91c7\u96c6\u805a\u5408\u6210\u4eba\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/cjjc.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_mtsp",
+      "name": "\ud83c\udf19\u6697\u591c\u871c\u6843\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/mitao.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_ahmt",
+      "name": "\ud83c\udf19\u6697\u9ed1\u871c\u6843\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/ahmt.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_sydy",
+      "name": "\ud83c\udf19\u6df1\u591c\u7535\u5f71\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/sydy.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_wyys",
+      "name": "\ud83c\udf19\u5348\u591c\u5f71\u89c6\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/wyys.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_jgdj",
+      "name": "\ud83c\udf19\u7981\u679c\u77ed\u5267\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/jgdj.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_hamg",
+      "name": "\ud83c\udf19\u54c8\u5bc6\u74dc\u52a8\u6f2b\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/hamg.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_74p",
+      "name": "\ud83c\udf1974P\u798f\u5229\u56fe\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/74p.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_\u0039\u0031\u0061\u0076",
+      "name": "\ud83c\udf19\u0039\u0031\u0041\u0056\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/\u0039\u0031\u0041\u0056.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_91rb",
+      "name": "\ud83c\udf1991\u70ed\u7206\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/91rb.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_18jl",
+      "name": "\ud83c\udf1918\u7981\u4e50\u56ed\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/18jl.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_aicr",
+      "name": "\ud83c\udf19AI\u6210\u4eba\u77ed\u5267\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/aicr.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_avsj",
+      "name": "\ud83c\udf19AV\u8272\u754c\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/avsj.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_aidj",
+      "name": "\ud83c\udf19Ai\u9876\u7ea7\u6da9\u56fe\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/aidj.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_gg51",
+      "name": "\ud83c\udf19GG51\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/GG51.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_superporn",
+      "name": "\ud83c\udf19SuperPorn\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/SuperPorn.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_cartoon",
+      "name": "\ud83c\udf19CartoonPorno\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/CartoonPorno.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_javxtu",
+      "name": "\ud83c\udf19JAVxtu\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/JAVxtu.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_lpfl",
+      "name": "\ud83c\udf19\u4e50\u556a\u798f\u5229\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/lpfl.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_payx",
+      "name": "\ud83c\udf19\u556a\u4e00\u4e0b\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/payx.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_wwjp",
+      "name": "\ud83c\udf19\u5916\u56f4\u7cbe\u54c1\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/wwjp.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_ddjr",
+      "name": "\ud83c\udf19\u5927\u5c4cv\u5de8\u4e73\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/ddjr.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_tmav",
+      "name": "\ud83c\udf19\u5929\u7f8eAV\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/tmav.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_xxyy",
+      "name": "\ud83c\udf19\u5c0f\u5fc3\u5fa1\u6b32\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/xxyy.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_ywhs",
+      "name": "\ud83c\udf19\u5c24\u7269\u4f1a\u6240\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/ywhs.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_qgav",
+      "name": "\ud83c\udf19\u5f3a\u56fdAV\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/qgav.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_hsav",
+      "name": "\ud83c\udf19\u62a4\u58ebAV\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/hsav.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_thq",
+      "name": "\ud83c\udf19\u63a2\u82b1\u7fa4\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/thq.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_tmkj",
+      "name": "\ud83c\udf19\u63a2\u871c\u7a7a\u95f4\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/tmkj.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_ttss",
+      "name": "\ud83c\udf19\u63a8\u7279\u6da9\u6da9\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/ttss.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_zxav",
+      "name": "\ud83c\udf19\u6700\u65b0AV\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/zxav.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_flbb",
+      "name": "\ud83c\udf19\u798f\u5229\u5b9d\u5b9d\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/flbb.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_syg",
+      "name": "\ud83c\udf19\u79c1\u6b32\u9601\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/syg.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_dyav",
+      "name": "\ud83c\udf19\u7b2c\u4e00AV\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/dyav.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_mtav",
+      "name": "\ud83c\udf19\u871c\u6843AV\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/mtav.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_mdai",
+      "name": "\ud83c\udf19\u9ebb\u8c46AI\u4f20\u5a92\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/mdai.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_51dj",
+      "name": "\ud83c\udf1951\u77ed\u5267\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/51dj.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_javkok",
+      "name": "\ud83c\udf19JavKok\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/JavKok.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_91kdw",
+      "name": "\ud83c\udf1991\u874c\u86aa\u7a9d\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/91kdw.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_mmav",
+      "name": "\ud83c\udf19\u732b\u54aaAV\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/mmav.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_hsbk",
+      "name": "\ud83c\udf19\u9ec4\u8272\u5b9d\u5e93\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/hsbk.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_baose",
+      "name": "\ud83c\udf19\u7206\u8272\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/baose.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_smsp",
+      "name": "\ud83c\udf19\u8272\u732b\u89c6\u9891\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/smsp.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_51xtv",
+      "name": "\ud83c\udf1951XTV\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/51XTV.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_365hl",
+      "name": "\ud83c\udf19365\u9ed1\u6599\u5f71\u9662\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/365hl.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1
+    },
+    {
+      "key": "py_51djai",
+      "name": "\ud83c\udf1951\u77ed\u5267AI\u7248\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/51djai.py",
       "style": {
         "type": "rect",
         "ratio": 1
