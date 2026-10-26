@@ -54,6 +54,18 @@
       "ext": "hosts@https://lzlukvca.cc,https://tideember.cc,https://xqjzvcvt.top"
     },
     {
+      "key": "py_51djai",
+      "name": "\ud83c\udf1951\u77ed\u5267AI\u7248\u1d56\u02b8\uff5c\u591c\u665a",
+      "type": 3,
+      "api": "./py/51djai.py",
+      "style": {
+        "type": "rect",
+        "ratio": 1
+      },
+      "changeable": 1,
+      "ext": "publish@https://51dj20.com;hosts@https://ceiling.sysrycady.com,https://api.51dj1.com;mail@51duanjuju@gmail.com"
+    },
+    {
       "key": "py_mrds",
       "name": "\ud83c\udf49\u6bcf\u65e5\u5927\u8d5b\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
@@ -310,7 +322,7 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "publish@https://4042607.one;hosts@https://4042607.pro"
+      "ext": "publish@https://404xav.github.io/url8/;mail@404xav@gmail.com"
     },
     {
       "key": "91\u60c5\u62a5\u5c40",
@@ -857,18 +869,6 @@
         "ratio": 1
       },
       "changeable": 1
-    },
-    {
-      "key": "py_51djai",
-      "name": "\ud83c\udf1951\u77ed\u5267AI\u7248\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/51djai.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1,
-      "ext": "publish@https://51dj20.com;hosts@https://ceiling.sysrycady.com,https://api.51dj1.com;mail@51duanjuju@gmail.com"
     }
   ],
   "parses": [],

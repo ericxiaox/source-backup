@@ -614,7 +614,7 @@ class Spider(BaseSpider):
 #     python tools/gen_inline_resolvers.py --write
 # \u5b58\u5728\u7406\u7531\uff1ahostresolver.py \u4e0d\u662f\u4efb\u4f55\u7ad9\u7684 api\uff0cApp\uff08gitee \u5f62\u6001\uff09\u4e0d\u4f1a\u4e0b\u8f7d\u5b83
 # \u2192 \u771f\u673a\u4e0a\u6e90\u5185\u5fc5\u987b\u81ea\u5e26\u6574\u5957\u53d6\u57df\u7b97\u6cd5\uff0c\u5426\u5219\u53ea\u80fd\u5403 v2.6 \u65f6\u4ee3\u7684\u624b\u6284\u7f29\u6c34\u7248\u3002
-# FINGERPRINT: cca5f23da886\uff08\u672c\u5757\u5185\u5bb9\u6458\u8981\uff1b\u4e0e\u672c\u4f53\u91cd\u7b97\u4e0d\u7b26\uff1d\u5df2\u8fc7\u671f\uff09
+# FINGERPRINT: f1db813b1c71\uff08\u672c\u5757\u5185\u5bb9\u6458\u8981\uff1b\u4e0e\u672c\u4f53\u91cd\u7b97\u4e0d\u7b26\uff1d\u5df2\u8fc7\u671f\uff09
 import re
 import time
 import random
@@ -895,6 +895,28 @@ _gen_JS_APPEND_PAT = re.compile(
 _gen_JS_CONCAT_MAX_TEXT = 4000            # \u53ea\u5728\u53d1\u5e03\u9875/\u58f3\u9875\u91cf\u7ea7\u542f\u7528\uff08\u6b63\u6587\u5927\u9875\u4e0d\u505a\uff0c\u9632\u8bef\u62bd\uff09
 
 
+# v3.0 \u6a21\u677f\u5b57\u7b26\u4e32\u5f62\u6001\uff08\u53d1\u5e03\u9875\u7b2c 4 \u4ee3\uff0c2026-10-26 \u56db\u96f6\u56db `404xav.github.io/url8/`\uff09\uff1a
+#   const PROTOCOL_TYPE = 'ht' + 'tps';      \u2190 \u5b57\u9762\u91cf\u76f8\u90bb\u62fc\u63a5
+#   const DOMAIN_BODY1  = '4042612';
+#   const TLD_2 = 'pr' + 'o';
+#   const urls = [`${PROTOCOL_TYPE}${SECURE_SLASH}${DOMAIN_BODY1}.${TLD_2}`];   \u2190 \u6a21\u677f\u63d2\u503c + \u8de8\u5757\u5f15\u7528
+# \u26a0 \u9875\u9762 14KB\uff0c\u8fdc\u8d85\u4e0a\u9762 4000 \u7684\u9650\u6d41 \u2192 v2.9 \u901a\u8def\u76f4\u63a5\u8df3\u8fc7\uff0c\u5fc5\u987b\u5355\u5f00\u4e00\u6761\u3002
+#   \u9650\u6d41\u653e\u5bbd\u5230 20KB\uff08\u53d1\u5e03\u9875\u91cf\u7ea7\uff09\uff0c\u4f46\u4ec5\u5728**\u540c\u65f6\u542b\u53cd\u5f15\u53f7\u4e0e `${`** \u65f6\u624d\u8fdb\u5165\u3002
+_gen_JS_TMPL_MAX_TEXT = 20000
+
+_gen_JS_TPL_PAT = re.compile(r'`([^`\n]{1,400})`')                # \u6a21\u677f\u5b57\u7b26\u4e32\u4f53
+
+_gen_JS_TPL_VAR = re.compile(r'\$\{\s*([A-Za-z_$][\w$]*)\s*\}')     # ${NAME}\uff08\u53ea\u8ba4\u7eaf\u53d8\u91cf\uff0c\u4e0d\u8ba4\u8868\u8fbe\u5f0f\uff09
+
+_gen_JS_ASSIGN_PAT = re.compile(
+    r"""\b(?:var|let|const)\s+([A-Za-z_$][\w$]*)\s*=\s*([^;\n`]{1,200})""")
+
+_gen_JS_LIT_ONLY_PAT = re.compile(r"""^\s*['"]([^'"]*)['"]\s*$""")
+
+_gen_JS_NAME_ONLY_PAT = re.compile(r'^\s*([A-Za-z_$][\w$]*)\s*$')
+
+
+
 
 def _gen_host_of(url):
     """\u53d6 URL \u7684 host\uff08\u5c0f\u5199\u3001\u65e0\u7aef\u53e3\u534f\u8bae\uff09\uff0c\u5931\u8d25\u8fd4\u56de ''"""
@@ -1053,6 +1075,129 @@ def _gen_js_concat_strs(text):
             continue
         acc[tgt] = acc.get(tgt, vals.get(tgt, '')) + seg
         out.append(acc[tgt])
+    return out
+
+
+
+def _gen_js_split_plus(expr):
+    """\u6309**\u5f15\u53f7\u5916**\u7684 `+` \u5207\u6bb5\uff08`'a+b'` \u91cc\u7684\u52a0\u53f7\u4e0d\u80fd\u88ab\u5207\u5f00\uff09\u3002"""
+    parts, buf, q = [], [], ''
+    for ch in (expr or ''):
+        if q:
+            buf.append(ch)
+            if ch == q:
+                q = ''
+            continue
+        if ch in ('"', "'"):
+            q = ch
+            buf.append(ch)
+            continue
+        if ch == '+':
+            parts.append(''.join(buf))
+            buf = []
+            continue
+        buf.append(ch)
+    parts.append(''.join(buf))
+    return parts
+
+
+
+def _gen_js_eval_expr(expr, env, depth=0):
+    """\u628a `'a' + 'b'` / `'\u5b57\u9762\u91cf'` / `NAME` \u6c42\u6210\u4e00\u4e2a\u4e32\uff1b\u4e0d\u53ef\u89e3\u6790\u8fd4\u56de None\u3002
+
+    **\u53ea\u8ba4\u5b57\u9762\u91cf\u4e0e\u53d8\u91cf\u540d**\uff0c\u4e0d\u8ba4\u8fd0\u7b97/\u51fd\u6570\u8c03\u7528/\u6570\u5b57\u2014\u2014\u5b81\u53ef\u653e\u5f03\u4e5f\u4e0d\u731c\u3002"""
+    if depth > 6:
+        return None
+    e = (expr or '').strip()
+    if not e:
+        return None
+    m = _gen_JS_LIT_ONLY_PAT.match(e)
+    if m:
+        return m.group(1)
+    segs = _gen_js_split_plus(e)
+    if len(segs) > 1:
+        out = []
+        for s in segs:
+            v = _gen_js_eval_expr(s, env, depth + 1)
+            if v is None:
+                return None
+            out.append(v)
+        return ''.join(out)
+    m = _gen_JS_NAME_ONLY_PAT.match(e)
+    if m:
+        return env.get(m.group(1))
+    return None
+
+
+
+def _gen_js_tpl_strs(text):
+    """\u8fd8\u539f\u300c\u6a21\u677f\u5b57\u7b26\u4e32 \uff0b \u8de8\u5757\u53d8\u91cf\u56de\u586b\u300d\u62fc\u51fa\u7684 URL\uff08v3.0\uff0c\u53d1\u5e03\u9875\u7b2c 4 \u4ee3 2026-10-26\uff09\u3002
+
+    \u73b0\u7f51\u5199\u6cd5\uff08\u56db\u96f6\u56db\u53d1\u5e03\u9875 `404xav.github.io/url8/`\uff0c14103B\uff09\uff1a
+        // script #0
+        const PROTOCOL_TYPE = 'ht' + 'tps';
+        const SECURE_SLASH  = ':/' + '/';
+        const DOMAIN_BODY1  = '4042612';
+        const TLD_1 = 'ar' + 't';   const TLD_2 = 'pr' + 'o';
+        // script #1  \u2190 \u53e6\u8d77\u4e00\u5757\u624d\u7528
+        const urls = [`${PROTOCOL_TYPE}${SECURE_SLASH}${DOMAIN_BODY1}.${TLD_1}`,
+                      `${PROTOCOL_TYPE}${SECURE_SLASH}${DOMAIN_BODY2}.${TLD_2}`];
+        \u2192 https://4042612.art / https://4042612.pro
+
+    \u4e09\u91cd\u96be\u70b9\uff0cv2.9 \u5168\u4e0d\u5728\u5c04\u7a0b\uff1a\u2460**\u5b57\u9762\u91cf\u76f8\u90bb\u62fc\u63a5**\uff08`'ar' + 't'`\uff0c\u975e var \u5230 var\uff09\uff1b
+    \u2461**\u6a21\u677f\u63d2\u503c** `${NAME}`\uff1b\u2462**\u8de8 `<script>` \u5757**\u5f15\u7528\uff08\u503c\u4e0e\u524d\u7f00\u5206\u5904\u4e24\u5757\uff09\u3002
+    \u4e14\u9875\u9762 14KB > `_JS_CONCAT_MAX_TEXT`(4000) \u2192 \u8fde v2.9 \u7684\u5165\u53e3\u90fd\u8fdb\u4e0d\u53bb\u3002
+
+    \u8fd4\u56de**\u6bcf\u4e2a\u53ef\u5b8c\u6574\u6c42\u503c\u7684\u6a21\u677f\u4e32**\uff08\u4f9b `_scan_one` \u7edf\u4e00\u505a TLD/\u5783\u573e\u57df\u540e\u5904\u7406\uff09\u3002
+    \u9650\u6d41\uff1a\u2460 \u6574\u9875 \u2264 `_JS_TMPL_MAX_TEXT`\uff1b\u2461 \u5fc5\u987b**\u540c\u65f6**\u542b\u53cd\u5f15\u53f7\u4e0e `${`\uff1b
+    \u2462 \u4efb\u4e00\u63d2\u503c\u53d8\u91cf\u6c42\u4e0d\u51fa\u503c \u2192 **\u6574\u6761\u4e22\u5f03**\uff08\u7edd\u4e0d\u7528\u7a7a\u4e32\u51d1\u534a\u4e2a\u57df\uff09\u3002
+    \u26a0 \u53ea\u505a\u300c\u7eaf\u53d8\u91cf\u63d2\u503c\u300d\uff0c\u4e0d\u505a\u8868\u8fbe\u5f0f\u6c42\u503c\uff08`${A+B}`/`${A.slice()}` \u4e00\u5f8b\u653e\u5f03\uff09\u2014\u2014\u51c6\u5219\u540c\u4e0a\uff1a
+    **\u5b81\u53ef\u5c11\u62bd\u4e0d\u53ef\u8bef\u62bd**\u3002"""
+    t = text or ''
+    if not t or len(t) > _gen_JS_TMPL_MAX_TEXT or '`' not in t or '${' not in t:
+        return []
+    assigns = {}
+    for m in _gen_JS_ASSIGN_PAT.finditer(t):
+        assigns.setdefault(m.group(1), []).append(m.group(2))
+    if not assigns:
+        return []
+    env = {}
+    for _ in range(4):                       # \u8fed\u4ee3\u8ba9 `B = A` \u8fd9\u7c7b\u94fe\u5f0f\u5f15\u7528\u6536\u655b
+        grew = False
+        for name, exprs in assigns.items():
+            if name in env:
+                continue
+            for e in exprs:
+                v = _gen_js_eval_expr(e, env)
+                if v is not None:
+                    env[name] = v
+                    grew = True
+                    break
+        if not grew:
+            break
+    if not env:
+        return []
+    out = []
+    for m in _gen_JS_TPL_PAT.finditer(t):
+        body = m.group(1)
+        if '${' not in body:
+            continue
+        miss = []
+
+        def _rep(mm, _env=env, _miss=miss):
+            v = _env.get(mm.group(1))
+            if v is None:
+                _miss.append(mm.group(1))
+                return ''
+            return v
+
+        s = _gen_JS_TPL_VAR.sub(_rep, body)
+        # `'${' in s` \uff1d \u8fd8\u6709\u6ca1\u88ab\u66ff\u6362\u7684\u63d2\u503c\uff1a`${A+B}` / `${A.slice()}` / `${A||B}`
+        # \u8fd9\u7c7b**\u8868\u8fbe\u5f0f\u63d2\u503c**\u4e00\u5f8b\u4e0d\u8981\uff08\u53ea\u8ba4\u7eaf\u53d8\u91cf\u540d\uff09\u2014\u2014\u5426\u5219\u4f1a\u628a `${A+B}.com` \u5f53\u57df\u540d\u53bb\u63a2\u6d3b\u3002
+        if miss or not s or '${' in s:
+            continue
+        if s not in out:
+            out.append(s)
     return out
 
 
@@ -1285,7 +1430,8 @@ def _gen_scan_one(t, static, wilds, frag=False):
     if frag:
         for b in _gen_frag_bases(t):                # v2.8 \u5360\u4f4d\u7b26\u8fd8\u539f\u540e\u7684\u7247\u6bb5\u62fc\u63a5\u57df
             wilds.add(b)
-    for s in _gen_js_concat_strs(t):                # v2.9 \u53d8\u91cf\u62fc\u63a5\u8fd8\u539f\uff08\u53d1\u5e03\u9875\u5f62\u6001\uff09
+    _tpl = _gen_js_tpl_strs(t)                   # v3.0 \u6a21\u677f\u63d2\u503c\uff08\u5355\u72ec\u7559\u5b58\uff0c\u7528\u4e8e\u5224\u300c\u662f\u5426\u57fa\u57df\u300d\uff09
+    for s in _gen_js_concat_strs(t) + _tpl:      # v2.9 \u7d2f\u52a0\u62fc\u63a5 / v3.0 \u6a21\u677f\u63d2\u503c\u8fd8\u539f
         m = re.match(r'https?://([a-z0-9][a-z0-9.\-]*)', s, re.I)
         if not m:
             continue
@@ -1295,14 +1441,23 @@ def _gen_scan_one(t, static, wilds, frag=False):
         if (len(h) > 80 or h.count('.') > 4 or h.rsplit('.', 1)[-1] not in _gen_TLD_OK
                 or _gen_is_junk(h) or _gen_FRAG_JUNK_PAT.search(h)):
             continue
-        if ('https://' + h) not in static:
-            static.append('https://' + h)
         parts = h.split('.')
+        # v3.0\uff1a\u6a21\u677f\u4e32\u91cc\u7684 **2 \u6bb5\u57df\u672c\u8eab\u5c31\u662f\u57fa\u57df**\u2014\u2014\u53d1\u5e03\u9875\u7ed9\u7684\u662f\u57fa\u57df\uff0c\u771f\u7ad9\u6302\u5728\u300c\u4efb\u610f\u524d\u7f00
+        #   \u5b50\u57df\u300d\u4e0a\uff08\u56db\u96f6\u56db `4042612.art` \u2192 \u771f\u7ad9 `261026.4042612.art` / `abc.4042612.art`\uff0c
+        #   \u800c\u88f8\u57df\u5fc5 302 \u5230\u542b\u4e2d\u6587\u3001DNS \u4e0d\u53ef\u89e3\u6790\u7684\u8df3\u677f\uff09\u3002\u6545\u8fd9\u7c7b**\u53ea\u8fdb wilds\u3001\u4e0d\u8fdb static**\uff0c
+        #   \u907f\u514d\u62ff\u88f8\u57df\u53bb\u63a2\u6d3b\u767d\u8017\u540d\u989d\u3002\u4ec5\u5bf9\u6a21\u677f\u6765\u6e90\u653e\u5bbd\uff0c\u5426\u5219\u6240\u6709 2 \u6bb5\u9759\u6001\u57df\u90fd\u4f1a\u88ab\u5f53\u57fa\u57df\uff08\u5019\u9009\u7206\u70b8\uff09\u3002
+        is_tpl_base = (s in _tpl) and len(parts) == 2
+        if not is_tpl_base and ('https://' + h) not in static:
+            static.append('https://' + h)
         if len(parts) >= 3:                     # \u6cdb\u89e3\u6790\u65cf\uff1a\u5265\u6700\u5de6\u6807\u7b7e\u5f97\u57fa\u57df
             base = '.'.join(parts[1:])
-            if (base.rsplit('.', 1)[-1] in _gen_TLD_OK and not _gen_is_junk(base)
-                    and not _gen_FRAG_JUNK_PAT.search(base)):
-                wilds.add(base)
+        elif is_tpl_base:
+            base = h
+        else:
+            base = ''
+        if base and (base.rsplit('.', 1)[-1] in _gen_TLD_OK and not _gen_is_junk(base)
+                     and not _gen_FRAG_JUNK_PAT.search(base)):
+            wilds.add(base)
 
 
 
