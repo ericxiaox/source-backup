@@ -193,7 +193,9 @@ class Spider(Spider):
             remark=("\u4f5c\u54c1"+works if works else "\u6f14\u5458\u4f5c\u54c1") + ((" \u00b7 \u7c89\u4e1d"+fans) if fans else "") + ((" \u00b7 \u64ad\u653e"+plays) if plays else "")
             return {"vod_id":"actor_detail_"+aid,"vod_name":title,"vod_pic":pic,"vod_remarks":remark,"vod_tag":"folder","vod_play_from":"","vod_play_url":""}
         eid = x.get("episode_id") or ""
-        play_id = self.host + "drama-play?id=" + str(vid) + ("&episode_id=" + str(eid) if eid else "")
+        # \u8be6\u60c5\u9875\u7528\u7ad9\u70b9\u771f\u5b9e\u8def\u5f84 drama-detail/{video_id}/\uff08\u65e7\u5199\u6cd5 drama-play?id=..&episode_id=.. 
+        # \u670d\u52a1\u7aef\u4e0d\u8ba4\uff0c\u9875\u5185 payload \u4f1a\u9000\u5316\u6210\u522b\u90e8\u5267 \u2014\u2014 \u8fd9\u6b63\u662f"\u70b9\u4efb\u4f55\u4e00\u96c6\u90fd\u662f\u7b2c\u4e00\u96c6"\u7684\u6839\u56e0\uff09
+        play_id = self.host + "drama-detail/" + str(vid) + "/"
         pic=self.image_id_map.get(str(vid)) or self.image_map.get(title) or self._pic(x.get("cover") or x.get("cover_img") or x.get("cover_image") or x.get("image") or x.get("poster") or x.get("thumb"))
         plays=str(x.get("play_count_text") or "") or self._num(x.get("play_count")); chase=self._num(x.get("chase_count")); status=str(x.get("serialize_status_text") or ("\u64ad\u653e" if eid else ""))
         remark=(("\u64ad\u653e"+plays) if plays else "") + ((" \u00b7 \u8ffd\u5267"+chase) if chase else "")
@@ -266,20 +268,70 @@ class Spider(Spider):
         if url.startswith("http"): return url
         return self.host.rstrip("/") + "/" + url.lstrip("/")
 
+    def _sid(self, vid):
+        """\u4ece\u5404\u79cd\u5f62\u6001\u7684 id \u91cc\u53d6\u51fa\u5267\u7684 video_id\uff08\u7eaf\u6570\u5b57\uff09\u3002
+        \u517c\u5bb9\uff1a12878 / drama-detail/12878/ / play/12878/2/ / drama-play?id=12878&episode_id=811467"""
+        s = str(vid or "").strip()
+        m = re.search(r"[?&](?:id|video_id)=(\d+)", s)
+        if m: return m.group(1)
+        m = re.search(r"/(?:drama-detail|drama-play|drama|play|video)/(\d+)", s)
+        if m: return m.group(1)
+        m = re.search(r"(\d+)", s)
+        return m.group(1) if m else s
+
+    def _cget(self, sid, field):
+        c=self.__dict__.setdefault("_cache", {}).get(str(sid)) or {}
+        if c.get(field) is not None and time.time()-c.get("t", 0) < 300: return c[field]
+        return None
+
+    def _cput(self, sid, field, val):
+        c=self.__dict__.setdefault("_cache", {}).setdefault(str(sid), {})
+        c["t"]=time.time(); c[field]=val
+
     def _episode_rows(self, vid):
+        """\u5267\u96c6\u6743\u5a01\u987a\u5e8f\uff1adrama-detail \u9875\u7684 episodes\uff08id \u5373 episode_id\uff0c\u5e26 sort / \u89e3\u9501\u6807\u8bb0\uff09\u3002"""
+        sid=self._sid(vid)
+        hit=self._cget(sid, "eps")
+        if hit is not None: return hit
+        eps=[]
         try:
-            m=re.search(r"id=(\d+)", str(vid)); sid=m.group(1) if m else str(vid)
             data=self._payload(self._req(self.host+"drama-detail/"+sid+"/"))
             candidates=self._walk(data,["video_id","title"]) or self._walk(data,["video_id","video_title"])
             for row in candidates:
-                if str(row.get("video_id")) == str(sid) and isinstance(row.get("episodes"), list):
-                    eps=[]
+                if str(row.get("video_id")) == sid and isinstance(row.get("episodes"), list):
                     for e in row.get("episodes"):
                         if isinstance(e, dict) and e.get("id") is not None:
-                            eps.append({"id":e.get("id"),"sort":e.get("sort") or 0,"title":e.get("title") or (str(row.get("title"))+"-\u7b2c"+str(e.get("sort"))+"\u96c6")})
-                    return sorted(eps, key=lambda x:int(x.get("sort") or 0))
+                            eps.append({"id":e.get("id"),"sort":e.get("sort") or 0,
+                                        "title":e.get("title") or (str(row.get("title"))+"-\u7b2c"+str(e.get("sort"))+"\u96c6"),
+                                        "locked": not bool(e.get("web_unlocked", True)),
+                                        "duration":e.get("duration") or 0})
+                    break
+            eps=sorted(eps, key=lambda x:int(x.get("sort") or 0))
         except Exception as e: print(f"[51短剧] 剧集列表失败: {e}")
-        return []
+        if eps: self._cput(sid, "eps", eps)
+        return eps
+
+    def _url_map(self, sid):
+        """\u64ad\u653e\u9875 /play/{sid}/1/ \u7684 payload \u4e00\u6b21\u5e26\u5168\u5267\u96c6\u8282\u70b9\uff1a
+        \u5df2\u89e3\u9501\u96c6\u6709 video_url\uff0c\u672a\u89e3\u9501\u96c6\uff08web_unlocked=false\uff09\u6ca1\u6709\u3002\u8fd4\u56de {episode_id: \u76f4\u94fe}\u3002"""
+        sid=str(sid or "").strip()
+        hit=self._cget(sid, "umap")
+        if hit is not None: return hit
+        out={}
+        try:
+            data=self._payload(self._req(self.host+"play/"+sid+"/1/"))
+            def go(x):
+                if isinstance(x, dict):
+                    if x.get("episode_title") is not None and x.get("id") is not None:
+                        u=self._media(x.get("video_url"))
+                        if u: out.setdefault(str(x.get("id")), u)
+                    for v in x.values(): go(v)
+                elif isinstance(x, list):
+                    for v in x: go(v)
+            go(data)
+        except Exception as e: print(f"[51短剧] 播放页直链失败: {e}")
+        if out: self._cput(sid, "umap", out)
+        return out
 
     def _url(self, cid, pg, ext=None):
         pg=max(1,int(pg)); e=ext if isinstance(ext,dict) else {}
@@ -363,31 +415,40 @@ class Spider(Spider):
                     if v and v["vod_id"] not in seen: seen.add(v["vod_id"]); arr.append(v)
                 print(f"[51短剧] 演员 {aid} 作品: {len(arr)} 条")
                 return {"list":[{"vod_id":x["vod_id"],"vod_name":x["vod_name"],"vod_pic":x.get("vod_pic",""),"vod_remarks":"\u53c2\u6f14\u5267\u96c6","vod_tag":"video","vod_play_id":x.get("vod_play_id","")} for x in arr]}
-            html=self._req(vid if vid.startswith("http") else self.host+"drama/"+vid+"/"); data=self._payload(html)
-            items=self._walk(data,["episode_title","video_url"]); pics=self._walk(data,["video_id","title"]); roots=self._walk(data,["video_title","cover_img"]); pics= pics or roots
-            detail_rows=[]
-            if vid.startswith("http") and "drama-play" in vid: detail_rows=self._episode_rows(vid)
-            if detail_rows:
-                pics = pics or detail_rows
+            sid=self._sid(vid)
+            html=self._req(self.host+"drama-detail/"+sid+"/"); data=self._payload(html)
+            # \u8be6\u60c5\u9875\u91cc\u540c\u65f6\u6df7\u7740 related_list\uff08\u522b\u7684\u5267\uff09\u2014\u2014 \u5fc5\u987b\u6309 video_id \u7cbe\u786e\u6311\u672c\u5267\uff0c\u5426\u5219\u6807\u9898/\u5c01\u9762\u4f1a\u4e32
+            pics=[r for r in (self._walk(data,["video_id","title"]) or self._walk(data,["video_id","video_title"])) if str(r.get("video_id"))==sid]
+            if not pics: pics=self._walk(data,["video_title","cover_img"])
             info=pics[0] if pics else {}
-            title=str(info.get("title") or info.get("video_title") or info.get("drama_name") or vid)
+            title=str(info.get("title") or info.get("video_title") or info.get("drama_name") or sid)
             pic=self.image_map.get(title) or self._pic(info.get("cover") or info.get("cover_img") or info.get("cover_image") or info.get("image") or info.get("poster") or info.get("thumb")) if info else self.image_map.get(title, "")
             desc=str(info.get("description") or info.get("video_desc") or info.get("content") or "")
             tags=info.get("tags") or info.get("tag") or []
             vod_class=",".join([str(t) for t in tags]) if isinstance(tags,list) else str(tags or "")
             plays=str(info.get("play_count_text") or "") or self._num(info.get("play_count")); chase=self._num(info.get("chase_count")); remarks=(("\u64ad\u653e"+plays) if plays else "") + ((" \u00b7 \u8ffd\u5267"+chase) if chase else "")
+            eps=self._episode_rows(sid)
+            umap=self._url_map(sid)
             urls=[]; seen=set()
-            if detail_rows:
-                m=re.search(r"id=(\d+)", vid); sid=m.group(1) if m else ""
-                for x in detail_rows:
-                    eid=x.get("id") or x.get("episode_id") or x.get("video_id")
-                    u=self.host+"drama-play?id="+str(sid)+("&episode_id="+str(eid) if eid else "")
-                    n=str(x.get("title") or x.get("episode_title") or x.get("video_title") or ("\u7b2c"+str(x.get("sort"))+"\u96c6" if x.get("sort") else "\u64ad\u653e"))
-                    if u and u not in seen: seen.add(u); urls.append((n,u))
+            if eps:
+                for x in eps:
+                    eid=str(x.get("id")); sort=int(x.get("sort") or 0)
+                    n=str(x.get("title") or ("\u7b2c"+str(sort)+"\u96c6" if sort else "\u64ad\u653e"))
+                    if not umap.get(eid): n=n+"[\u672a\u89e3\u9501]"
+                    # \u7528\u7ad9\u70b9\u81ea\u5df1\u7684\u96c6\u9875\u5730\u5740\uff08/play/{sid}/{\u96c6\u5e8f\u53f7}/\uff09\uff1a\u70b9\u64ad\u65f6\u6309\u65f6\u5e8f\u53f7\u5b9a\u4f4d\uff0c
+                    # \u4ece\u6839\u4e0a\u675c\u7edd"\u4efb\u4f55\u4e00\u96c6\u90fd\u64ad\u7b2c\u4e00\u96c6"\u3002\u76f4\u94fe\u5728\u64ad\u653e\u9636\u6bb5\u7531\u7f13\u5b58/\u73b0\u6293\u7ed9\u51fa\u3002
+                    u=self.host+"play/"+sid+"/"+str(sort)+"/"
+                    if u not in seen: seen.add(u); urls.append((n,u))
+                if len(umap)<len(eps): remarks+=(" \u00b7 \u53ef\u770b%d/%d\u96c6" % (min(len(umap),len(eps)), len(eps)))
+            elif umap:
+                urls=[(("\u7b2c"+k+"\u96c6"),v) for k,v in sorted(umap.items(), key=lambda z:z[0])]
             else:
-                for x in items:
+                for x in (self._walk(data,["episode_title","video_url"]) or []):
                     u=self._media(x.get("video_url"))
                     if u and u not in seen: seen.add(u); urls.append((str(x.get("episode_title") or "\u6b63\u7247"),u))
+                if not urls:
+                    pu=self._media(info.get("play_url"))
+                    if pu: urls.append(("\u6b63\u7247",pu))
             return {"list":[{"vod_id":vid,"vod_name":title,"vod_pic":pic,"vod_remarks":remarks,"vod_class":vod_class,"vod_content":desc,"vod_play_from":"51\u77ed\u5267" if urls else "","vod_play_url":"#".join(n+"$"+u for n,u in urls)}]}
         except Exception as e: print(f"[51短剧] 详情失败: {e}"); return {"list":[]}
 
@@ -405,34 +466,57 @@ class Spider(Spider):
     def playerContent(self, flag, id, vipFlags):
         try:
             url=str(id).replace("\\u002F","/").replace("\\/","/")
-            dm_url=self._danmaku_url(url) if "drama-play" in url else ""
-            if "drama-play" in url and not self.isVideoFormat(url):
-                html=self._req(url); data=self._payload(html)
-                em=re.search(r"episode_id=(\d+)", url); target=em.group(1) if em else ""
+            sid=""; target=""; want_sort=0
+            if not self.isVideoFormat(url):
+                # \u76ee\u6807\u96c6\u5b9a\u4f4d\uff1a/play/{sid}/{n}/ \u7528\u96c6\u5e8f\u53f7\uff0c\u65e7 drama-play?id=..&episode_id=.. \u7528 episode_id
+                sid=self._sid(url) if ("/play/" in url or "drama-play" in url) else ""
+                mn=re.search(r"/play/\d+/(\d+)", url); me=re.search(r"episode_id=(\d+)", url)
+                if mn: want_sort=int(mn.group(1))
+                elif me: target=me.group(1)
                 best=""
-                def go(x):
-                    nonlocal best
-                    if best: return
-                    if isinstance(x, dict):
-                        if str(x.get("id") or x.get("episode_id") or "") == target:
-                            u=x.get("video_url") or x.get("play_url") or ""
-                            if u: best=self._media(u); return
-                        for v in x.values(): go(v)
-                    elif isinstance(x, list):
-                        for v in x: go(v)
-                if target: go(data)
-                if not best:
-                    for x in self._walk(data,["episode_title","video_url"]):
-                        u=self._media(x.get("video_url"))
-                        if u: best=u; break
-                if not best:
-                    for x in self._walk(data,["video_title","video_url"]):
-                        u=self._media(x.get("video_url"))
-                        if u: best=u; break
+                if sid:
+                    umap=self._url_map(sid)
+                    if not target and want_sort:
+                        eps=self._episode_rows(sid)
+                        hit=[str(e.get("id")) for e in eps if int(e.get("sort") or 0)==want_sort]
+                        target=hit[0] if hit else ""
+                    best=umap.get(target) or ""
+                    if not best and want_sort:
+                        # \u7f13\u5b58\u6ca1\u7ed9 \u2192 \u73b0\u6293\u8be5\u96c6\u9875\u9762\u515c\u5e95\uff08\u6309\u96c6\u5e8f\u53f7\u5339\u914d\uff0c\u7edd\u4e0d\u56de\u5230\u7b2c\u4e00\u96c6\uff09
+                        d2=self._payload(self._req(self.host+"play/"+sid+"/"+str(want_sort)+"/"))
+                        def go2(x):
+                            nonlocal best, target
+                            if best: return
+                            if isinstance(x, dict):
+                                if int(x.get("sort") or 0)==want_sort and x.get("video_url"):
+                                    best=self._media(x.get("video_url"))
+                                    target=str(x.get("id") or target); return
+                                for v in x.values(): go2(v)
+                            elif isinstance(x, list):
+                                for v in x: go2(v)
+                        go2(d2)
+                    if not best:
+                        print(f"[51短剧] 第{target or want_sort}集无可用直链（多半未解锁），不做兜底串集")
+                elif "drama-play" in url:
+                    html=self._req(url); data=self._payload(html)
+                    def go(x):
+                        nonlocal best
+                        if best: return
+                        if isinstance(x, dict):
+                            if str(x.get("id") or x.get("episode_id") or "") == target:
+                                u=x.get("video_url") or x.get("play_url") or ""
+                                if u: best=self._media(u); return
+                            for v in x.values(): go(v)
+                        elif isinstance(x, list):
+                            for v in x: go(v)
+                    if target: go(data)
+                    if not best:
+                        m=re.search(r"https?:[^\"'<>\s]+\.(?:m3u8|mp4)[^\"'<>\s]*", html)
+                        if m: best=m.group(0).replace("\\u002F","/").replace("\\/","/")
                 if best: url=best
-                if not self.isVideoFormat(url):
-                    m=re.search(r"https?:[^\"'<>\s]+\.(?:m3u8|mp4)[^\"'<>\s]*", html)
-                    if m: url=m.group(0).replace("\\u002F","/").replace("\\/","/")
+            dm_url=""
+            if sid and target:   # \u62ff\u5230\u51c6\u786e\u7684\u5267/\u96c6 id \u624d\u6302\u5f39\u5e55\uff0c\u907f\u514d\u8bef\u7528\u7b2c\u4e00\u96c6\u7684\u5f39\u5e55
+                dm_url=self.getProxyUrl()+"&type=danmu&vid="+urllib.parse.quote(str(sid))+"&eid="+urllib.parse.quote(str(target))
             ret={"parse":0,"url":url,"header":json.dumps(self.headers,ensure_ascii=False)}
             if dm_url: ret["danmaku"]=[{"name":"51\u77ed\u5267\u5f39\u5e55","url":dm_url}]
             return ret
