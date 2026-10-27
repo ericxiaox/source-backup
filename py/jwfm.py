@@ -44,6 +44,7 @@ import base64
 import json
 import re
 import time
+from urllib.parse import unquote
 
 import requests
 
@@ -65,8 +66,11 @@ _UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
        '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
 
 # \u5165\u53e3\u57df\u6c60\u3002\u9996\u53d1\u57df\u4e4b\u5916\u7559\u4f4d\uff0c\u6362\u57df\u65f6\u7ba1\u7406\u53f0 ext \u52a0\u4e00\u6761 hosts@ \u5373\u53ef\uff0c\u4e0d\u5fc5\u6539\u6587\u4ef6\u3002
-# \u88f8\u57df\u4e0e www \u5b9e\u6d4b\u540c\u4e00\u540e\u7aef\uff08\u8fd4\u56de\u540c\u4e00\u4e2a __fw_session\uff09\uff0c\u4e92\u4e3a\u5907\u7528\u3002
-_SITE_HOSTS = ('www.65jwfm.com', '65jwfm.com')
+# \u88f8\u57df\u4e0e www \u5b9e\u6d4b\u540c\u4e00\u540e\u7aef\uff08302 \u2192 /index.htm\uff09\uff0c\u4e92\u4e3a\u5907\u7528\u3002
+# \ud83d\udea9 2026-10-27 \u6362\u57df\uff1a65jwfm.com / eett33.com \u5168\u7ad9\u5df2\u964d\u7ea7\u4e3a JS \u8df3\u677f\uff08url2.push \u2192 www.83xvzr.com\uff09\uff0c
+#    \u771f\u7ad9\u8fc1\u5230 83xvzr.com \u2014\u2014 sitename \u4ecd\u662f\u300c\u793e\u533a\u89c6\u9891\u300d\u3001project=sq\u3001API \u524d\u7f00/\u5b57\u6bb5/\u5bc6\u94a5\u5168\u672a\u53d8\u3002
+#    eett33.com \u73b0\u4e3a\u8df3\u677f\uff0c\u6302\u6c60\u5c3e\u53ea\u5f53\u5907\u80ce\uff08\u63a2\u6d3b\u62ff\u4e0d\u5230 JSON \u4f1a\u81ea\u52a8\u8df3\u8fc7\uff0c\u82e5\u54ea\u5929\u8f6c\u6b63\u53ef\u81ea\u6108\u63a5\u56de\uff09\u3002
+_SITE_HOSTS = ('www.83xvzr.com', '83xvzr.com', 'www.eett33.com')
 
 _API = '/api'
 _PAGE_SIZE = 24
@@ -79,6 +83,22 @@ _MP4_HOSTS = ('https://down.mm7878.com',)
 # \u5217\u8868\u5c01\u9762\u57df \u2192 \u8be6\u60c5\u63a5\u53e3\u91cc\u540c\u56fe\u7684\u771f\u5b9e\u57df\uff08\u8def\u5f84\u53ea\u5dee /data \u524d\u7f00\uff09
 _PIC_FIX = re.compile(r'^https?://sq\.2277ww\.com/cover/(.+)$', re.I)
 _PIC_ALT = 'https://ddd.aisheji8.com/data/cover/'
+
+# JS \u8df3\u677f\u9875\uff08\u7ad9\u7fa4\u901a\u7528 Jump3url \u6a21\u677f\uff09\uff1aurl2.push("\u65b0\u57df")\u3002\u771f\u5b9e\u9875\u9762\u5e38\u628a\u6574\u53e5\u585e\u8fdb
+# eval(decodeURIComponent('url2%2Epush%28%2283xvzr%2Ecom%22%29\u2026'))\uff0c\u8fde\u57df\u540d\u7684\u70b9\u90fd\u7f16\u7801\u6210
+# %2E\uff0c\u6545\u5148\u89e3\u4e00\u6b21\u767e\u5206\u53f7\u518d\u8dd1\u540c\u4e00\u5957\u660e\u6587\u6b63\u5219\u3002
+_JUMP_RE = re.compile(r'url2\s*\.\s*push\s*\(\s*["\']([a-z0-9][a-z0-9.\-]{2,60})["\']', re.I)
+
+
+def _jump_targets(text):
+    """\u4ece JS \u8df3\u677f\u9875\u63d0\u53d6\u76ee\u6807\u57df\uff1b\u8fd4\u56de\u5c0f\u5199\u53bb\u91cd\u5217\u8868\uff08\u987a\u5e8f\uff1d\u9875\u9762\u51fa\u73b0\u987a\u5e8f\uff09\u3002"""
+    out = []
+    for src in (text or '', unquote(text or '')):
+        for m in _JUMP_RE.finditer(src):
+            h = m.group(1).lower().strip('.')
+            if h and h not in out:
+                out.append(h)
+    return out
 
 # \u7ad9\u65b9 tagid \u2192 \u5206\u7c7b\u540d\uff08\u987a\u5e8f\uff1d\u7ad9\u65b9\u5206\u7ec4\u987a\u5e8f\uff1a\u957f\u7247 7\uff5c\u89c6\u9891 8\uff5c\u89c6\u9891 8\uff09
 _CATS = (
@@ -210,9 +230,17 @@ class Spider(BaseSpider):
                 self._hosts.insert(0, u)
 
     def _ensure_host(self):
-        """\u5165\u53e3\u81ea\u6108\uff1a\u4f9d\u6b21\u63a2\u5019\u9009\u57df\uff0c\u80fd\u89e3\u51fa\u5206\u7c7b\u5c31\u5b9a\u4e3a\u5f53\u524d\u57df\u3002"""
+        """\u5165\u53e3\u81ea\u6108\uff1a\u4f9d\u6b21\u63a2\u5019\u9009\u57df\uff0c\u80fd\u89e3\u51fa\u5206\u7c7b\u5c31\u5b9a\u4e3a\u5f53\u524d\u57df\u3002
+
+        \U0001f6a9 \u8f6e\u6362\u7ad9\u7fa4\u5e38\u6001\u662f\u300c\u65e7\u57df\u53ea\u7559 JS \u8df3\u677f\u300d\uff082026-10-27\uff1a65jwfm/eett33 \u2192 83xvzr \u5373\u6b64\u5f62\u6001\uff09\uff1a
+        \u63a2\u6d3b\u62ff\u5230 HTML \u800c\u975e JSON \u65f6\uff0c\u89e3\u6790 url2.push \u7684\u76ee\u6807\u57df\u8ffd\u52a0\u5165\u6c60\u7ee7\u7eed\u63a2\uff0c
+        \u8fd9\u6837\u8fd0\u8425\u65b9\u4e0b\u6b21\u518d\u6362\u57df\uff0c\u6e90\u81ea\u5df1\u8ddf\u8fc7\u53bb\uff0c\u4e0d\u5fc5\u6539\u6587\u4ef6\u3002
+        """
         cur = str(getattr(self, 'host', '') or '')
-        for h in list(self._hosts):
+        i, guard = 0, 12          # guard\uff1a\u9632\u8df3\u677f\u4e92\u76f8\u6307\u5411\u9020\u6210\u6b7b\u5faa\u73af
+        while i < len(self._hosts) and i < guard:
+            h = self._hosts[i]
+            i += 1
             base = h if h.startswith('http') else 'https://' + h
             try:
                 r = requests.get(base + _API + '/movie/tags', headers={
@@ -220,9 +248,23 @@ class Spider(BaseSpider):
                     'Accept': 'application/json, text/plain, */*'}, timeout=8)
                 if r.status_code != 200:
                     continue
-                d = self._unseal_auto(r.json())
+                try:
+                    obj = r.json()
+                except Exception:
+                    # \u4e0d\u662f JSON \u2192 \u591a\u534a\u662f\u8df3\u677f\u9875\uff0c\u628a\u65b0\u57df\u8ffd\u52a0\u8fdb\u6c60\u7ee7\u7eed\u63a2
+                    for t in _jump_targets(getattr(r, 'text', '') or ''):
+                        if t not in self._hosts:
+                            self._hosts.append(t)
+                    continue
+                d = self._unseal_auto(obj)
                 if d.get('code') == 0 and d.get('data'):
                     self.host = base
+                    if i > 1:                    # \u547d\u4e2d\u7684\u57df\u63d0\u5230\u961f\u9996\uff0c\u4e0b\u6b21\u5c11\u8d70\u5f2f\u8def
+                        try:
+                            self._hosts.remove(h)
+                            self._hosts.insert(0, h)
+                        except Exception:
+                            pass
                     return True
             except Exception:
                 continue
