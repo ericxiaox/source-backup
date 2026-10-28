@@ -1,5 +1,5 @@
 {
-  "sites_count": 75,
+  "sites_count": 74,
   "wallpaper": "https://bingw.jasonzeng.dev/?index=random",
   "logo": "./img/logo.gif",
   "homeLogo": "./img/logo.gif",
@@ -806,17 +806,6 @@
       "name": "\ud83c\udf19\u7206\u8272\u1d56\u02b8\uff5c\u591c\u665a",
       "type": 3,
       "api": "./py/baose.py",
-      "style": {
-        "type": "rect",
-        "ratio": 1
-      },
-      "changeable": 1
-    },
-    {
-      "key": "py_smsp",
-      "name": "\ud83c\udf19\u8272\u732b\u89c6\u9891\u1d56\u02b8\uff5c\u591c\u665a",
-      "type": 3,
-      "api": "./py/smsp.py",
       "style": {
         "type": "rect",
         "ratio": 1
