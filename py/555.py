@@ -78,8 +78,13 @@ _PROBE_PATH = '/vodtype/126.html'
 _MARK = 'module-poster-item'
 
 # \u5185\u7f6e\u5019\u9009\uff082026-09-15 \u5b9e\u6d4b\uff1b\u53d1\u5e03\u9875\u4e0d\u7ed9\u7ad9\u57df\uff0c\u9760\u8fd9\u91cc\u515c\u5e95\uff09
+# 2026-10-30 \u590d\u67e5\uff1a55dy5.top \u53ea\u662f\u300c555\u7535\u5f71APP\u4e0b\u8f7d\u300d\u6c38\u4e45\u53d1\u5e03\u9875\uff0c`/vodtype/126.html` \u6052 0 \u6761\uff0c
+#   \u4ece\u6765\u4e0d\u8be5\u653e\u8fdb\u5019\u9009\u3002\u5b9e\u6d4b\u73b0\u5f79\u5185\u5bb9\u7ad9 **555k7.com / 555dy1.com**\uff08\u5747 /vodtype/126.html 200 +
+#   294 \u4e2a module-poster-item\uff0c113KB\uff09\u3002\u53d1\u5e03\u9875\u4ecd\u7559\u5728\u672b\u4f4d\uff08\u4e07\u4e00\u54ea\u5929\u5b83\u5f00\u59cb\u7ed9\u7ad9\u57df\uff09\u3002
 _BUILTIN_HOSTS = [
-    "https://55dy5.top"
+    "https://555k7.com",
+    "https://555dy1.com",
+    "https://55dy5.top",
 ]
 
 # \u64ad\u653e\u5730\u5740\u89e3\u5bc6\u5e38\u91cf\uff08encrypt=3\uff09

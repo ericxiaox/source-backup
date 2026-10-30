@@ -73,7 +73,10 @@ _BUILTIN_HOSTS = [
 ]
 _WILDCARD_BASES = ['hscwang8s8m1.cc', 'hscwang26y2m.xyz']
 
-_RE_ITEM = re.compile(r'<li><a class="thumbnail" href="/voddetail/(\d+)/">(.*?)</li>', re.S)
+# \ud83d\udea9 2026-10-30\uff1a\u7ad9\u65b9\u5728 <a class="thumbnail" href="..."> \u91cc\u63d2\u4e86 style="--bg:url(...)" \u548c
+#   title="..." \u4e24\u4e2a\u5c5e\u6027 \u2192 \u65e7\u7684\u300chref \u540e\u7d27\u8ddf >\u300d\u5199\u6cd5\u5168\u90e8\u5931\u914d \u2192 \u5206\u7c7b\u6709\u3001\u5217\u8868\u6052 0 \u6761\u3002
+#   \u6539\u6210 href \u4e4b\u540e\u5141\u8bb8\u4efb\u610f\u5c5e\u6027\uff08[^>]*\uff09\u3002\u5b9e\u6d4b /vodtype/45-1/ \u547d\u4e2d 20 \u6761\uff08\u9875\u5185 40 \u4e2a voddetail\uff09\u3002
+_RE_ITEM = re.compile(r'<li><a class="thumbnail"\s+href="/voddetail/(\d+)/"[^>]*>(.*?)</li>', re.S)
 _RE_IMG = re.compile(r'(?:data-original|src)="(https?://[^"]+)"')
 _RE_TITLE = re.compile(r'<h5><a[^>]*>(.*?)</a></h5>', re.S)
 _RE_MARK = re.compile(r'<p>(.*?)</p>', re.S)

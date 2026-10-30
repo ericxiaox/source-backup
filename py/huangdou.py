@@ -247,17 +247,22 @@ class Spider(BaseSpider):
             if h not in self.hosts:
                 self.hosts.insert(0, h)
         # \u53d1\u5e03\u9875\u5019\u9009\uff08\u771f\u63a5\u5165\uff1a\u6293\u9875\u9762\u62bd\u57df\uff0c\u6392\u5185\u7f6e\u6c60\u4e4b\u524d\u4e00\u8d77\u5b9e\u6d4b\uff09
-        if not locked:
+        self._apply_host(self.hosts[self._hi])
+        # 2026-10-30 \u63d0\u901f\uff1a**\u5148\u63a2\u5df2\u77e5\u6c60\uff0c\u547d\u4e2d\u5c31\u4e0d\u518d\u6293\u53d1\u5e03\u9875**\u2014\u2014\u53d1\u5e03\u9875 timeout=8\uff0c
+        #   \u6c60\u91cc\u672c\u6765\u5c31\u6709\u6d3b\u57df\u65f6\u767d\u7b49 8s\uff08\u5b9e\u6d4b init 10.2s \u2192 2s \u5185\uff09\u3002\u53ea\u6709\u6c60\u5168\u6302\u624d\u53bb\u6293\u3002
+        hit = self._probe_pool()
+        if not hit and not locked:
             # \u591a\u53d1\u5e03\u9875\uff082026-09-13\uff09\uff1aext publish@ \u53ef\u80fd\u662f\u9017\u53f7\u4e32 \u2192 \u62c6\u5f00\u4e00\u8d77\u5e76\u884c\u6293
             _pubs = [x for x in re.split(
                 r'[,\s;]+', str(self._ext.get('publish') or self.PUBLISH_PAGE or ''))
                 if x.startswith('http')]
+            _added = False
             for h in reversed(self._publish_candidates(_pubs)):
                 if h not in self.hosts:
                     self.hosts.insert(0, h)
-        self._apply_host(self.hosts[self._hi])
-        # \u5e76\u884c\u63a2\u6d4b\uff1a\u6d3b\u57df\u6392\u524d\uff08\u6bcf\u57df\u4e00\u6b21\u771f\u5b9e API \u8c03\u7528\uff0c8s \u8d85\u65f6\uff09
-        self._probe_pool()
+                    _added = True
+            if _added:
+                self._probe_pool()
         self._init_done = True
 
     def _probe_api(self, host, result):
@@ -281,21 +286,31 @@ class Spider(BaseSpider):
             self.trace.append('%s -> FAIL %s' % (host, str(e)[:40]))
 
     def _probe_pool(self):
-        """\u5e76\u884c\u63a2\u6d4b\u57df\u540d\u6c60\uff0c\u6d3b\u57df\u6392\u5230\u6700\u524d\uff08\u9501\u5b9a\u57df\u4e0d\u91cd\u63a2\uff09\u3002
+        """\u5e76\u884c\u63a2\u6d4b\u57df\u540d\u6c60\uff0c\u6d3b\u57df\u6392\u5230\u6700\u524d\uff08\u9501\u5b9a\u57df\u4e0d\u91cd\u63a2\uff09\u3002\u8fd4\u56de\u662f\u5426\u547d\u4e2d\u3002
         \u52a0\u5bc6 API \u7ad9\u4e0d\u80fd\u7528 hostresolver \u7684 GET \u63a2\u6d3b\uff08\u5224\u65ad\u4e0d\u4e86 JSON \u6570\u636e\uff09\uff0c
         \u76f4\u63a5\u7528 _probe_api \u771f\u5b9e\u8c03\u7528\u9a8c\u8bc1\u3002"""
         import threading
         if self._ext.get('host'):
-            return
+            return True
         result = [None]
-        threads = [threading.Thread(target=self._probe_api, args=(h, result))
+        threads = [threading.Thread(target=self._probe_api, args=(h, result),
+                                    daemon=True)
                    for h in self.hosts[:8]]
         for t in threads:
             t.start()
+        # \ud83d\udea9 2026-10-30\uff1a\u539f\u5199\u6cd5 `for t: t.join(0.05)` \u53ea\u7ed9\u6bcf\u4e2a\u7ebf\u7a0b 50ms \u5c31\u8f6e\u5230\u4e0b\u4e00\u6761\uff0c
+        #   \u4e09\u57df\u65f6\u603b\u8ba1 0.15s \u5c31\u9000\u51fa\u5faa\u73af \u2192 result \u4ecd\u4e3a\u7a7a \u2192 \u8bef\u5224"\u6c60\u5168\u6302"\u2192 \u53c8\u53bb\u6293\u53d1\u5e03\u9875
+        #   \u7a7a\u7b49 8s\uff08\u5b9e\u6d4b init 10.2s\uff09\u3002\u6539\u6210\u300c\u7b49\u5230\u547d\u4e2d\u6216\u8d85\u65f6\u300d\u7684\u8f6e\u8be2\u3002
+        _end = time.time() + 12
         for t in threads:
-            t.join()
+            while t.is_alive() and not result[0] and time.time() < _end:
+                t.join(0.05)
+            if result[0]:
+                break
         if result[0]:
             self._promote(result[0])
+            return True
+        return False
 
     def _promote(self, host):
         host = host.rstrip('/')

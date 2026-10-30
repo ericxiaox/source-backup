@@ -92,8 +92,14 @@ _RE_CARD = re.compile(
 _RE_SEARCH = re.compile(r'<a[^>]*href="(/archives/(\d+)/)"[^>]*>([^<]{2,80})</a>')
 # \u64ad\u653e config JSON\uff08\u5355\u5f15\u53f7\u5305\u88f9\uff09
 _RE_CONFIG = re.compile(r"config='(\{.*?\})'", re.S)
-# \u5206\u7c7b\u5bfc\u822a: <a class="slider-item ..." href="/{slug}/"><div class="span">\u540d\u79f0</div>
+# \u5206\u7c7b\u5bfc\u822a\uff08\u4e24\u4ee3\u5199\u6cd5\u5e76\u5b58\uff0c2026-10-30 \u5b9e\u6d4b\u65b0\u6a21\u677f\u7528\u4e86\u540e\u8005\uff09\uff1a
+#   \u65e7: <a class="slider-item" href="/{slug}/"><div class="span">\u540d\u79f0</div>
+#   \u65b0: <a href="/{slug}/" class="category-nav__link"><span class="category-nav__label">\u540d\u79f0</span></a>
+# \ud83d\udea9 \u53ea\u8ba4\u65e7\u5199\u6cd5 \u2192 \u5206\u7c7b\u6052 0 \u4e2a\uff08\u771f\u673a\u75c7\u72b6\u300c\u6709\u5206\u7c7b\u65e0\u89c6\u9891\u300d\u7684\u53cd\u9762\uff1a\u5206\u7c7b\u5168\u7a7a\u4f46\u5217\u8868\u6b63\u5e38\uff09\u3002
 _RE_NAV = re.compile(r'href="(/[a-z0-9\-]{2,10}/)"[^>]*>\s*<div class="span">([^<]{2,12})</div>')
+_RE_NAV2 = re.compile(
+    r'href="(/[a-z0-9\-]{1,20}/)"[^>]*class="category-nav__link"[^>]*>\s*'
+    r'<span class="category-nav__label"[^>]*>([^<]{1,12})</span>')
 
 
 
@@ -511,12 +517,13 @@ class Spider(BaseSpider):
         except Exception:
             return result
         seen = set()
-        for m in _RE_NAV.finditer(body):
-            slug, name = m.group(1).strip('/'), _html.unescape(m.group(2)).strip()
-            if slug in seen or not name:
-                continue
-            seen.add(slug)
-            result['class'].append({'type_id': slug, 'type_name': name})
+        for rx in (_RE_NAV, _RE_NAV2):
+            for m in rx.finditer(body):
+                slug, name = m.group(1).strip('/'), _html.unescape(m.group(2)).strip()
+                if not slug or slug in seen or not name:
+                    continue
+                seen.add(slug)
+                result['class'].append({'type_id': slug, 'type_name': name})
         result['list'] = self._parse_cards(body)
         return result
 

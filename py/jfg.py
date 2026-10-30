@@ -50,7 +50,16 @@ _RE_PLAY = re.compile(r'<a[^>]*playdata="([^"]+\.m3u8[^"]*)"')
 class Spider(BaseSpider):
 
     # \u5185\u7f6e\u5019\u9009\uff082026-09-08 \u5b9e\u6d4b 200\uff1bpunycode = \u8bf7\u8bb0\u4f4f-jifangge\u70b9com.\u4e91\u641c\u798f\u5229.com\uff09
-    BUILTIN_HOSTS = [ "https://jfgsou.com" ]
+    # 2026-10-30 \u590d\u67e5\uff1ajfgsou.com / jfgso.xyz \u5747 ConnectTimeout\uff0812s \u7a7a\u7b49\uff0c\u662f init 26s \u7684\u4e3b\u56e0\uff09\uff1b
+    #   \u771f\u6b63\u6d3b\u7740\u7684\u662f punycode \u57df `xn---jifanggecom-\u2026`\uff08"\u8bf7\u8bb0\u4f4f-jifangge\u70b9com\u2026"\uff09\u2014\u2014
+    #   **\u6839\u8def\u5f84\u662f\u53d1\u5e03\u9875\u6837\u5185\u5bb9\uff0c\u53ea\u6709 /toplist.php?p=N \u624d\u662f\u771f\u5185\u5bb9**\uff08200 / 94KB / 20 \u6761
+    #   content/{md5}.html\uff09\u21d2 \u5fc5\u987b\u914d probe_path\uff0c\u5426\u5219\u88ab _validate \u7684\u53d1\u5e03\u9875\u6392\u4ed6\u5224\u8bef\u6740\u3002
+    BUILTIN_HOSTS = [
+        "https://xn---jifanggecom-ud8sv658aesydp6a.xn--9kq80g37uthu.com",
+        "https://jfgsou.com",
+    ]
+    # \u6df1\u94fe\u63a2\u6d3b\uff1a\u5217\u8868\u9875\u624d\u662f\u771f\u5185\u5bb9\uff08\u6839\u8def\u5f84\u4e3a\u5730\u5740\u53d1\u5e03\u9875\uff09
+    _PROBE_PATH = '/toplist.php?p=1'
     # \u5b98\u65b9\u5730\u5740\u53d1\u5e03\u9875\uff082026-09-14 \u67e5\u5b9e\uff09\uff1a\u6b64\u524d\u5224\u300c\u65e0\u72ec\u7acb\u53d1\u5e03\u9875\u300d\u662f**\u8bef\u5224**\u2014\u2014
     # \u6c60\u91cc\u7b2c\u4e8c\u6761 `xn--u2uy07cd3d2mxd2a.com` \u5c31\u662f\u5b83\uff08punycode \u89e3\u7801\uff1d**\u96c6\u82b3\u9601\u641c\u7d22.com**\uff09\uff0c
     # \u6807\u9898\u300c\u96c6\u82b3\u9601\u4e91\u641c - \u5b98\u65b9\u5730\u5740\u53d1\u5e03\u300d\uff0c\u660e\u5217\u300c\u6613\u8bb0\u6c38\u4e45\u57df\u540d \u96c6\u82b3\u9601.com / jifangge.club /
@@ -361,6 +370,9 @@ class Spider(BaseSpider):
 
         def _validate(host, text):
             t = text or ''
+            # 2026-10-30\uff1a\u63a2\u6d3b\u8d70 /toplist.php\uff0c\u547d\u4e2d\u5373\u5217\u8868\u9875 \u2192 \u6709 content/{md5}.html \u5c31\u662f\u771f\u7ad9
+            if re.search(r'content/[a-f0-9]{6,}\.html', t):
+                return True
             if '\u96c6\u82b3\u9601' not in t and 'h_d_key' not in t:
                 return False
             # \u53d1\u5e03\u9875\u6392\u4ed6\uff082026-09-14\uff09\uff1a\u5b98\u65b9\u5730\u5740\u53d1\u5e03\u9875\u6807\u9898\u540c\u6837\u542b\u300c\u96c6\u82b3\u9601\u300d\uff0c
@@ -380,6 +392,7 @@ class Spider(BaseSpider):
                     proxies=self.proxies,
                     timeout=8,
                     validate=_validate,
+                    probe_path=self._PROBE_PATH,
                 )
                 if h:
                     return h
