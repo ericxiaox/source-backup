@@ -19,6 +19,7 @@ from collections import OrderedDict
 from urllib.parse import quote, urljoin
 
 import requests
+from concurrent.futures import ThreadPoolExecutor
 sys.path.append('..')
 from base.spider import Spider as BaseSpider
 
@@ -100,6 +101,11 @@ _UA = 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like 
 # \u671f\u95f4\u76f4\u63a5\u8d70\u53d1\u5e03\u9875\u6df1\u62bd\u94fe\uff0c\u4e0d\u518d\u6bcf\u6b21 init \u767d\u7b49\u4e00\u8f6e\u63a2\u6d4b\u8d85\u65f6\u3002
 _FAST_DEAD_UNTIL = [0.0]
 _FAST_DEAD_TTL = 600
+
+# \u53d6\u57df\u300c\u547d\u4e2d\u8bb0\u5fc6\u300d\uff082026-10-30 \u63d0\u901f\uff09\uff1a\u6210\u529f\u53d6\u5230\u7684\u57df\u8bb0 10 \u5206\u949f\u3002\u539f\u5148\u53ea\u8bb0\u300c\u5168\u6b7b\u300d\uff0c
+# \u6210\u529f\u7ed3\u679c\u4e0d\u5199\u56de \u2192 \u6bcf\u6b21 init \u90fd\u5f97\u91cd\u63a2\u4e00\u904d\uff08\u5b9e\u6d4b 2~6s/\u6b21\uff0c\u7eaf\u767d\u63a2\uff09\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 600
 _CH36 = '0123456789abcdefghijklmnopqrstuvwxyz'
 
 # \u5217\u8868\u6761\u76ee\u4e24\u79cd\u5f62\u6001\uff08\u5206\u7c7b/\u7cbe\u9009\u9875 href=/video/detail/{id}\uff1b\u641c\u7d22\u9875 href=/av/detail/{id}\uff0c
@@ -192,7 +198,7 @@ class Spider(BaseSpider):
             'Accept-Language': 'zh-CN,zh;q=0.9',
             'Connection': 'keep-alive',
         }
-        self.host = self.get_working_host()
+        self.host = self._take_host()
         self.headers.update({'Origin': self.host, 'Referer': self.host + '/'})
         # \u6c89\u6d78\u6d41\u7f13\u5b58\uff1aitems=\u5df2\u62c9\u6761\u76ee\uff1bnext=\u4e0b\u4e00\u9875\u7801\uff1bdone=\u5230\u5e95\uff1berr=\u8fde\u7eed\u5931\u8d25\u8ba1\u6570
         self._feed_items = []
@@ -489,6 +495,27 @@ class Spider(BaseSpider):
                     t.join(timeout=10)
         return result[0] or ''
 
+    def _take_host(self):
+        """\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a\u6210\u529f\u53d6\u5230\u7684\u57df\u8bb0 10 \u5206\u949f\uff0c\u70ed\u542f\u76f4\u63a5\u590d\u7528\u3002
+
+        ext \u91cc\u624b\u586b\u4e86 host\uff08\u7ba1\u7406\u53f0\u9501\u5b9a\uff09\u65f6\u6309\u539f\u903b\u8f91\u8d70\uff0c\u4e0d\u8bfb\u5199\u8bb0\u5fc6\u2014\u2014
+        \u5426\u5219\u8bb0\u5fc6\u4f1a\u628a\u4eba\u5de5\u6307\u5b9a\u7684\u57df\u76d6\u6389\u3002
+        """
+        _lock = ''
+        try:
+            _lock = (self._ext or {}).get('host') or ''
+        except Exception:
+            _lock = ''
+        if _lock:
+            return self.get_working_host()
+        if _LAST_GOOD[0] and time.time() < _LAST_GOOD[1]:
+            return _LAST_GOOD[0]
+        h = self.get_working_host()
+        if h:
+            _LAST_GOOD[0] = h.rstrip('/')
+            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
+        return h
+
     def get_working_host(self):
         publish = self._ext.get('publish') or self.PUBLISH_PAGE
         builtin = self.BUILTIN_HOSTS
@@ -590,9 +617,24 @@ class Spider(BaseSpider):
     def homeContent(self, flag):
 
         result = {'class': [], 'list': []}
+        # 2026-10-30 \u63d0\u901f\uff1a\u5206\u7c7b\u5bfc\u822a\u9875\uff0882KB\uff09\u4e0e\u7cbe\u9009\u9875\uff08400KB\uff09\u4e92\u4e0d\u4f9d\u8d56\uff0c\u539f\u6765\u4e32\u884c\u6293 ~2.5s\uff0c
+        # \u5e76\u53d1\u540e\u53ea\u7b49\u6162\u7684\u90a3\u4e2a\u3002\u4e24\u9875\u4efb\u4e00\u5931\u8d25\u90fd\u4e0d\u5f71\u54cd\u53e6\u4e00\u4e2a\u3002
+        body, feat = '', ''
         try:
-            body = self._get('/').text or ''
+            with ThreadPoolExecutor(max_workers=2) as ex:
+                f_nav = ex.submit(lambda: (self._get('/').text or ''))
+                f_feat = ex.submit(lambda: (self._get('/featured').text or ''))
+                try:
+                    body = f_nav.result(timeout=15) or ''
+                except Exception:
+                    body = ''
+                try:
+                    feat = f_feat.result(timeout=15) or ''
+                except Exception:
+                    feat = ''
         except Exception:
+            body, feat = '', ''
+        if not body and not feat:
             return result
         seen = set()
         for m in _RE_NAV.finditer(body):
@@ -606,7 +648,7 @@ class Spider(BaseSpider):
         result['class'].insert(0, {'type_id': self.FEED_TID, 'type_name': '\U0001f525\u5237\u89c6\u9891'})
         # \u9996\u9875\u5217\u8868\u4e3a JS \u6a21\u677f\u6e32\u67d3\uff0c\u6539\u7528\u7cbe\u9009\u9875\uff08\u670d\u52a1\u7aef\u6e32\u67d3\u3001\u6761\u76ee\u5e26\u7b7e\u540d data-url\uff09
         try:
-            result['list'] = self._parse_list(self._get('/featured').text or '')
+            result['list'] = self._parse_list(feat)
         except Exception:
             pass
         return result

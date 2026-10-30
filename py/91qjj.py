@@ -50,6 +50,11 @@ _UA = ('Mozilla/5.0 (Linux; Android 16; 2407FRK8EC Build/BP2A.250605.031.A3) '
 _FAST_DEAD_UNTIL = [0.0]
 _FAST_DEAD_TTL = 600
 
+# \u53d6\u57df\u300c\u547d\u4e2d\u8bb0\u5fc6\u300d\uff082026-10-30 \u63d0\u901f\uff09\uff1a\u6210\u529f\u53d6\u5230\u7684\u57df\u8bb0 10 \u5206\u949f\u3002\u539f\u5148\u53ea\u8bb0\u300c\u5168\u6b7b\u300d\uff0c
+# \u6210\u529f\u7ed3\u679c\u4e0d\u5199\u56de \u2192 \u6bcf\u6b21 init \u90fd\u5f97\u91cd\u63a2\u4e00\u904d\uff08\u5b9e\u6d4b 2~6s/\u6b21\uff0c\u7eaf\u767d\u63a2\uff09\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 600
+
 # \u5206\u7c7b\uff08\u5b9e\u6d4b\u81ea\u7ad9\u70b9\u5bfc\u822a\uff1btype_id \u5373\u7ad9\u5185\u8def\u5f84\u524d\u7f00\uff0ccategoryContent \u76f4\u63a5\u62fc\u63a5 /{tid}/{pg}.html\uff09
 # \u5df2\u6392\u9664\uff1avideo/type/1115\u300e\u5b66\u751f\u6821\u56ed\u300f\u3001video/type/1288\u300e\u6e05\u7eaf\u5b66\u751f\u300f\uff08\u5b9e\u6d4b\u542b\u672a\u6210\u5e74\u6307\u5411\u5185\u5bb9\uff09
 _CATS = [
@@ -163,7 +168,7 @@ class Spider(BaseSpider):
         }
         self.trace = []
         try:
-            self.host = self.get_working_host()
+            self.host = self._take_host()
         except Exception as e:
             self.host = ''
             self.trace.append('init\u53d6\u57df\u5f02\u5e38: %s' % str(e)[:60])
@@ -231,6 +236,27 @@ class Spider(BaseSpider):
 
     def _resolve_inline(self, validate_probe):
         return self._probe_round(self._candidate_hosts(), 8)
+
+    def _take_host(self):
+        """\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a\u6210\u529f\u53d6\u5230\u7684\u57df\u8bb0 10 \u5206\u949f\uff0c\u70ed\u542f\u76f4\u63a5\u590d\u7528\u3002
+
+        ext \u91cc\u624b\u586b\u4e86 host\uff08\u7ba1\u7406\u53f0\u9501\u5b9a\uff09\u65f6\u6309\u539f\u903b\u8f91\u8d70\uff0c\u4e0d\u8bfb\u5199\u8bb0\u5fc6\u2014\u2014
+        \u5426\u5219\u8bb0\u5fc6\u4f1a\u628a\u4eba\u5de5\u6307\u5b9a\u7684\u57df\u76d6\u6389\u3002
+        """
+        _lock = ''
+        try:
+            _lock = (self._ext or {}).get('host') or ''
+        except Exception:
+            _lock = ''
+        if _lock:
+            return self.get_working_host()
+        if _LAST_GOOD[0] and time.time() < _LAST_GOOD[1]:
+            return _LAST_GOOD[0]
+        h = self.get_working_host()
+        if h:
+            _LAST_GOOD[0] = h.rstrip('/')
+            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
+        return h
 
     def get_working_host(self):
         if self._ext.get('host'):

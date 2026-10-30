@@ -16,7 +16,14 @@ import requests
 import urllib3
 import time
 import random
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import quote, urljoin, unquote, urlparse
+
+# \u53d6\u57df\u300c\u547d\u4e2d\u8bb0\u5fc6\u300d\uff082026-10-30 \u63d0\u901f\uff09\uff1a\u6210\u529f\u53d6\u5230\u7684\u57df\u8bb0 10 \u5206\u949f\uff0c\u70ed\u542f\u76f4\u63a5\u590d\u7528\u3002
+# \u539f\u5148\u6bcf\u6b21 init \u90fd\u91cd\u8dd1\u300c\u53d1\u5e03\u9875 \u2192 data.php \u2192 \u9010\u4e2a\u63a2\u5019\u9009\u300d\u4e32\u884c\u4e09\u8df3\uff0c
+# \u5b9e\u6d4b\u70ed\u542f\u4ecd\u8981 3.8~6.8s\uff0c\u7eaf\u5c5e\u767d\u63a2\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 600
 
 urllib3.disable_warnings()
 sys.path.append('..')
@@ -25,7 +32,11 @@ from base.spider import Spider as BaseSpider
 
 class Spider(BaseSpider):
     # ========== \u591a\u57df\u540d\u914d\u7f6e ==========
-    hosts = ['https://s7t8u9v0.luanlunba15.cc']
+    # 2026-10-30 \u590d\u67e5\uff1a15.cc \u5df2\u6b7b\uff08\u6839\u8def\u5f84\u7ed9 6KB\u300c\u767e\u5ea6\u65b0\u95fb\u300d\u4f2a\u88c5\u9875\u3001\u6df1\u94fe\u76f4\u63a5\u62d2\u7edd\u8fde\u63a5\uff09\uff1b
+    # 13/14.cc \u6d3b\u7740\uff0c\u4f46**\u6839\u8def\u5f84\u540c\u6837\u662f\u4f2a\u88c5\u9875**\uff0c\u53ea\u6709 /vodtype/*.html \u624d\u662f\u771f\u5185\u5bb9\u3002
+    # \u6240\u4ee5\u63a2\u6d3b\u4e00\u5f8b\u6253\u6df1\u94fe\uff0c\u4e0d\u770b\u6839\u8def\u5f84\u2014\u2014\u65e7\u903b\u8f91\u67e5\u6839\u8def\u5f84\u542b\u4e0d\u542b vodtype\uff0c\u628a\u4e24\u4e2a\u6d3b\u57df\u5168\u5224\u6b7b\uff0c
+    # \u4e8e\u662f\u6bcf\u6b21 init \u90fd\u9000\u53bb\u53d1\u5e03\u9875\u94fe\u767d\u8dd1 8s\uff0c\u6700\u540e\u8fd8\u662f\u505c\u5728\u6b7b\u57df 15.cc \u4e0a\u3002
+    hosts = ['https://s7t8u9v0.luanlunba14.cc', 'https://s7t8u9v0.luanlunba13.cc']
     host = hosts[0]
 
     PUBLISH_PAGES = [
@@ -79,7 +90,66 @@ class Spider(BaseSpider):
         return ''
 
     # ===================== \u57df\u540d\u81ea\u52a8\u66f4\u65b0 =====================
+    # \u63a2\u6d3b\u6df1\u94fe\uff1a/vodtype/1.html \u662f\u771f\u5217\u8868\u9875\uff0840 \u6761 /voddetail/ \u94fe\u63a5\uff09\u3002
+    # \u6839\u8def\u5f84\u4e0d\u80fd\u7528\u2014\u2014\u6d3b\u57df\u6839\u8def\u5f84\u4e5f\u8fd4\u56de\u4f2a\u88c5\u9875\uff0c\u4f1a\u628a\u6d3b\u57df\u5224\u6b7b\u3002
+    _PROBE_PATH = '/vodtype/1.html'
+
+    def _alive(self, u):
+        u = u.rstrip('/')
+        try:
+            r = self.session.get(u + self._PROBE_PATH, headers=self._headers(u + '/'),
+                                 timeout=6, verify=False)
+            if r.status_code != 200:
+                return False
+            return len(re.findall(r'/voddetail/\d+\.html', r.text)) >= 5
+        except Exception:
+            return False
+
+    def _probe_pool(self):
+        """\u5e76\u884c\u63a2 self.hosts\uff0c\u547d\u4e2d\u5373\u5199\u547d\u4e2d\u8bb0\u5fc6\u3002\u6bd4\u539f\u6765\u9010\u4e2a\u4e32\u884c\uff08\u5404 8s\uff09\u5feb\u6570\u500d\u3002"""
+        cands = [h for h in (self.hosts or []) if h]
+        if not cands:
+            return False
+
+        ex = ThreadPoolExecutor(max_workers=min(8, len(cands)))
+        try:
+            futs = {ex.submit(self._alive, u): u for u in cands}
+            for f in as_completed(futs, timeout=8):
+                try:
+                    if not f.result():
+                        continue
+                except Exception:
+                    continue
+                hit = futs.get(f, '')
+                if not hit:
+                    continue
+                self.host = hit
+                self.hosts = [hit] + [h for h in self.hosts if h != hit]
+                _LAST_GOOD[0] = hit
+                _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
+                return True
+        except Exception:
+            pass
+        finally:
+            try:
+                ex.shutdown(wait=False, cancel_futures=True)
+            except TypeError:
+                ex.shutdown(wait=False)
+        return False
+
     def _update_host(self):
+        # \u547d\u4e2d\u8bb0\u5fc6\uff1a\u70ed\u542f\u76f4\u63a5\u590d\u7528\u4e0a\u6b21\u6210\u529f\u7684\u57df\uff0c0 \u6b21\u7f51\u7edc\u8bf7\u6c42
+        if _LAST_GOOD[0] and time.time() < _LAST_GOOD[1]:
+            if _LAST_GOOD[0] not in self.hosts:
+                self.hosts.insert(0, _LAST_GOOD[0])
+            self.host = _LAST_GOOD[0]
+            return True
+
+        # 1) \u5148\u5e76\u884c\u63a2\u5df2\u77e5\u5019\u9009\uff1a\u6c60\u91cc\u6709\u73b0\u5f79\u57df\u65f6\u4e00\u8f6e\u5c31\u591f\uff0c\u4e0d\u5fc5\u5148\u8d70\u53d1\u5e03\u9875\u4e24\u6b65
+        if self._probe_pool():
+            return True
+
+        # 2) \u5df2\u77e5\u6c60\u5168\u6b7b \u2192 \u8d70\u53d1\u5e03\u9875\u94fe\u62bd\u65b0\u57df\uff08\u4fdd\u7559\u539f\u903b\u8f91\uff1acookie + data.php\uff09
         for pub in self.PUBLISH_PAGES:
             try:
                 r1 = self.session.get(pub + '/', headers=self._headers(), timeout=10, verify=False)
@@ -106,27 +176,17 @@ class Spider(BaseSpider):
                     url = url.strip('/')
                     if not url.startswith('http'):
                         continue
-                    try:
-                        test = self.session.get(url + '/', headers=self._headers(), timeout=8, verify=False)
-                        if test.status_code == 200 and len(test.text) > 1000:
-                            if 'vodtype' in test.text or 'voddetail' in test.text:
-                                self.host = url
-                                self.hosts = [url] + [h for h in self.hosts if h != url]
-                                return True
-                    except:
-                        continue
+                    if self._alive(url):
+                        self.host = url
+                        self.hosts = [url] + [h for h in self.hosts if h != url]
+                        _LAST_GOOD[0] = url
+                        _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
+                        return True
             except:
                 continue
 
-        for h in self.hosts:
-            try:
-                test = self.session.get(h + '/', headers=self._headers(), timeout=8, verify=False)
-                if test.status_code == 200 and len(test.text) > 1000:
-                    self.host = h
-                    return True
-            except:
-                continue
-        return False
+        # 3) \u62bd\u5230\u4e86\u4f46\u6ca1\u63a2\u901a \u2192 \u5019\u9009\u6c60\u53ef\u80fd\u5df2\u88ab data.php \u8865\u5145\u8fc7\uff0c\u518d\u5e76\u884c\u63a2\u4e00\u8f6e
+        return self._probe_pool()
 
     # ===================== \u5206\u7c7b\u4f53\u7cfb\uff08\u7cbe\u7b80\uff1a\u89c6\u9891+\u56fe\u7247+\u5c0f\u8bf4 \u51718\u4e2a\u4e00\u7ea7\uff09 =====================
     # \u4e00\u7ea7\u5206\u7c7b\u5c3d\u91cf\u5c11\uff1a\u89c6\u9891\u533a\u6309\u7f51\u7ad9\u5bfc\u822a6\u7ec4 + \u56fe\u7247\u533a1 + \u5c0f\u8bf4\u533a1 = 8\u4e2a
@@ -274,7 +334,9 @@ class Spider(BaseSpider):
 
     # ===================== \u89c6\u9891\u5217\u8868\u89e3\u6790 =====================
     def _fetch_video_list(self):
-        html_content = self._fetch(self.host + '/')
+        # 2026-10-30\uff1a\u6839\u8def\u5f84\u662f\u4f2a\u88c5\u9875\uff086KB\u300c\u767e\u5ea6\u65b0\u95fb\u300d\u58f3\uff09\uff0c\u62ff\u4e0d\u5230\u5361\u7247 \u2192 \u9996\u9875\u6052 0 \u6761\u3002
+        # \u6539\u6293\u771f\u5217\u8868\u9875 /vodtype/1.html\uff08\u540c\u89e3\u6790\u5668\u5b9e\u6d4b\u51fa 20 \u6761\uff09\u3002
+        html_content = self._fetch(self.host + self._PROBE_PATH)
         return self._parse_video_list(html_content) if html_content else []
 
     def _parse_video_list(self, html_content):
