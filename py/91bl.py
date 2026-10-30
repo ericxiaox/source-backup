@@ -44,6 +44,11 @@ except Exception:
 
 _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
+# \u53d6\u57df\u300c\u5185\u7f6e\u5019\u9009\u62a2\u8dd1\u300d\u5931\u8d25\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a\u5185\u7f6e\u5019\u9009\u5168\u6b7b\u65f6\u8bb0\u5230\u6b64\u523b+N\u79d2\uff0c
+# \u671f\u95f4\u76f4\u63a5\u8d70\u53d1\u5e03\u9875\u6df1\u62bd\u94fe\uff0c\u4e0d\u518d\u6bcf\u6b21 init \u767d\u7b49\u4e00\u8f6e\u63a2\u6d4b\u8d85\u65f6\u3002
+_FAST_DEAD_UNTIL = [0.0]
+_FAST_DEAD_TTL = 600
+
 # ---- \u5c01\u9762\u4ee3\u7406\uff08imgfetch \u7eaa\u5f8b\uff1aSession keep-alive + LRU + magic \u9884\u68c0 + \u89e3\u5bc6\u515c\u5e95\uff09----
 _img_session = requests.Session()
 _img_session.verify = False
@@ -525,6 +530,26 @@ class Spider(BaseSpider):
             if re.match(r'^https?://[^/]+/\S', host or ''):
                 return False
             return True
+
+        # \u2500\u2500 \u5feb\u8def\u5f84\uff1a\u5185\u7f6e\u5019\u9009\u62a2\u8dd1\uff082026-10-30 \u63d0\u901f\uff09\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+        # \u7ad9\u65b9\u8f6e\u6362\u65f6\u300c\u5f53\u524d\u7ebf\u300d\u901a\u5e38\u5df2\u5199\u8fdb BUILTIN_HOSTS\uff0c\u5e76\u884c\u63a2 4 \u4e2a\u57df \u22481.4s \u5c31\u80fd
+        # \u547d\u4e2d\u5b8c\u6574\u7ad9\uff1b\u65e7\u6d41\u7a0b\u5fc5\u987b\u5148\u628a\u53d1\u5e03\u9875\u6df1\u62bd\u94fe\uff08\u22483.8s\uff09\u8dd1\u5b8c\u624d\u8f6e\u5f97\u5230\u63a2\u6d4b\uff0c
+        # \u5b9e\u6d4b 91\u7206\u6599 14.6s \u2192 1.4s\u3002\u6821\u9a8c\u7528\u540c\u4e00\u5957 _validate\uff0c\u5b89\u5168\u6027\u4e0d\u53d8\u3002
+        # \u5185\u7f6e\u5168\u6b7b\u65f6\u8bb0 10 \u5206\u949f\uff0c\u907f\u514d\u6bcf\u4e2a\u6e90\u6bcf\u6b21 init \u90fd\u767d\u7b49\u4e00\u8f6e\u8d85\u65f6\u3002
+        _fast_cands = list(self._ext.get('hosts') or []) + list(builtin)
+        if _fast_cands and time.time() >= _FAST_DEAD_UNTIL[0]:
+            _fp = probe_first
+            try:
+                if _fp:
+                    _fh = _fp(_fast_cands, headers=self.headers, proxies=self.proxies,
+                              timeout=4, validate=_validate, tag='\u62a2\u8dd1')
+                else:
+                    _fh = self._resolve_inline('', _fast_cands, _validate)
+            except Exception:
+                _fh = ''
+            if _fh:
+                return _fh
+            _FAST_DEAD_UNTIL[0] = time.time() + _FAST_DEAD_TTL
 
         if resolve_host:
             try:
