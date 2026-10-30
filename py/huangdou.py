@@ -376,9 +376,38 @@ class Spider(BaseSpider):
         return [200, "video/MP2T", ""]
 
     # ---------- \u63a5\u53e3 ----------
+    # navFilter \u7684 code \u53d6\u81ea navList\uff0c\u800c navList \u8981 0.5s \u624d\u56de\u6765 \u2014\u2014 \u7b49\u5b83\u56de\u6765\u518d\u53d1 7 \u4e2a
+    # navFilter \u5c31\u6210\u4e86\u300c\u4e24\u9636\u6bb5\u300d\uff08\u5b9e\u6d4b 3.3~4.4s\uff09\u3002\u8fd9\u91cc\u7528\u5df2\u77e5 code \u6e05\u5355**\u62a2\u8dd1**\uff1a
+    # \u4e0e list/navList \u540c\u65f6\u53d1\u51fa\uff0cnavList \u56de\u6765\u65f6\u7a97\u53e3\u591a\u534a\u5df2\u586b\u597d\u3002
+    # \u6e05\u5355\u53ea\u7528\u6765\u62a2\u8dd1\uff0c\u771f\u5b9e\u5206\u7c7b\u4e00\u5f8b\u4ee5 navList \u4e3a\u51c6\uff1b\u7ad9\u65b9\u6539 code \u65f6\u8fd9\u91cc\u62c9\u5230\u7a7a\uff0c_filters \u4f1a\u8865\u62c9\u3002
+    _FAST_TIDS = ("mod", "caibian", "zhenren", "erciyuan", "aiman", "zongyi", "heiliao")
+
     def homeContent(self, filter):
-        data = self._api("/drama/list", {"page": "1", "page_size": "18"})
-        classes = self._classes()
+        # 2026-10-30 \u63d0\u901f\uff1a\u9996\u5c4f 5.4s \u5168\u662f\u4e32\u884c\u5f80\u8fd4\uff08\u7ad9\u65b9\u6bcf\u6b21\u52a0\u5bc6 POST \u7ea6 0.5s\uff09\uff1a
+        #   list 1 \u6b21 + navList 1 \u6b21 + 7 \u4e2a\u5206\u7c7b\u5404 1 \u6b21 navFilter = 9 \u6b21\u3002
+        # \u73b0\u5728 9 \u4e2a\u8bf7\u6c42\u540c\u6279\u53d1\u51fa\uff0c\u53ea\u82b1\u300c\u6700\u6162\u4e00\u4e2a\u300d\u7684\u65f6\u95f4\u3002
+        if not ThreadPoolExecutor:
+            data = self._api("/drama/list", {"page": "1", "page_size": "18"})
+            classes = self._classes()
+            return {"class": classes, "filters": self._filters(classes), "list": [self._vod(x) for x in self._list(data)], "parse": 0, "jx": 0}
+
+        ex = ThreadPoolExecutor(max_workers=16)
+        try:
+            f_list = ex.submit(self._api, "/drama/list", {"page": "1", "page_size": "18"})
+            f_nav = ex.submit(self._api, "/drama/navList", {})
+            warm = [ex.submit(self._nav_filter, t) for t in self._FAST_TIDS]
+            data = f_list.result()
+            classes = self._classes(f_nav.result())
+            for f in warm:
+                try:
+                    f.result()
+                except Exception:
+                    pass
+        finally:
+            try:
+                ex.shutdown(wait=False, cancel_futures=True)
+            except TypeError:
+                ex.shutdown(wait=False)
         return {"class": classes, "filters": self._filters(classes), "list": [self._vod(x) for x in self._list(data)], "parse": 0, "jx": 0}
 
     def homeVideoContent(self):
@@ -496,11 +525,11 @@ class Spider(BaseSpider):
             plain = gzip.decompress(plain)
         return json.loads(plain.decode("utf-8"))
 
-    def _classes(self):
+    def _classes(self, raw=None):
         if self.class_cache:
             return self.class_cache
         arr = [{"type_id": "all", "type_name": "\u5168\u90e8\u77ed\u5267"}]
-        data = self._api("/drama/navList", {})
+        data = raw if raw is not None else self._api("/drama/navList", {})
         for item in self._list(data.get("data", data) if isinstance(data, dict) else data):
             tid = str(item.get("code") or item.get("id") or item.get("cat_id") or "")
             name = item.get("name") or item.get("title") or tid
@@ -511,6 +540,14 @@ class Spider(BaseSpider):
 
     def _filters(self, classes):
         common = [{"key": "order", "name": "\u6392\u5e8f", "value": [{"n": "\u9ed8\u8ba4", "v": ""}, {"n": "\u6700\u65b0", "v": "new"}, {"n": "\u6700\u70ed", "v": "hot"}]}, {"key": "update_status", "name": "\u72b6\u6001", "value": [{"n": "\u5168\u90e8", "v": ""}, {"n": "\u8fde\u8f7d", "v": "0"}, {"n": "\u5b8c\u7ed3", "v": "1"}]}]
+        # \u6bcf\u4e2a\u5206\u7c7b\u8981\u4e00\u6b21 navFilter\uff08\u5355\u6b21\u7ea6 0.5s\uff09\uff0c\u5e76\u53d1\u5148\u704c\u6ee1 filter_cache\uff0c\u4e0b\u9762\u53d6\u503c\u5c31\u5168\u547d\u4e2d
+        tids = [c["type_id"] for c in classes if c["type_id"] not in ("all", "yuandou")]
+        if ThreadPoolExecutor and len(tids) > 1:
+            try:
+                with ThreadPoolExecutor(max_workers=min(8, len(tids))) as ex:
+                    list(ex.map(self._nav_filter, tids))
+            except Exception:
+                pass
         fs = {}
         for c in classes:
             tid = c["type_id"]

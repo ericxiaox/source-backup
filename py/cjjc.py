@@ -23,7 +23,11 @@ _HOME_DEADLINE = 4.0
 
 
 class Spider(Spider):
-    # 2026-10-30\uff1a\u5220 7 \u4e2a\u786e\u8ba4\u5df2\u6b7b\u5b50\u6e90\uff08\u57df\u540d\u8fc7\u671f / \u505c\u653e\u9875 / \u6e90\u7ad9 502\uff0c\u89c1\u4e0b\u65b9\u6ce8\u91ca\uff09
+    # 2026-10-30\uff1a\u5220 7 \u4e2a\u786e\u8ba4\u5df2\u6b7b\u5b50\u6e90\uff08\u57df\u540d\u8fc7\u671f / \u505c\u653e\u9875 / \u6e90\u7ad9 502\uff09
+    # 2026-10-30\uff1a\u518d\u5220 3 \u4e2a\u300c\u540c\u4e00 API \u6302\u4e24\u4e2a\u540d\u5b57\u300d\u7684\u91cd\u590d\u9879\uff0c\u4fdd\u7559\u4e0e\u7ad9\u70b9\u57df\u540d\u4e00\u81f4\u7684\u672c\u540d\uff1a
+    #   s26 \u7ea2\u6843\u89c6\u9891  = s10 \u5927\u5976\u5b50\u8d44\u6e90 (apidanaizi.com)
+    #   s27 \u9e21\u5764\u8d44\u6e90  = s23 jkun\u8d44\u6e90    (jkunzyapi.com)
+    #   s31 \u8001\u8272\u903c\u8d44\u6e90 = s29 lsb\u8d44\u6e90    (apilsbzy1.com)
     sources = {
         's1': {'name': '\u674f\u5427\u8d44\u6e90', 'api': 'https://xingba111.com/api.php/provide/vod/'},
         's2': {'name': '\u6781\u54c1\u8d44\u6e90', 'api': 'https://jipinvip1.com/api.php/provide/vod/'},
@@ -45,10 +49,7 @@ class Spider(Spider):
         's23': {'name': 'jkun\u8d44\u6e90', 'api': 'https://jkunzyapi.com/api.php/provide/vod/'},
         's24': {'name': '\u6e7f\u4e50\u56ed', 'api': 'https://xxavs.com/api.php/provide/vod/'},
         's25': {'name': '\u8d8a\u5357\u8d44\u6e90', 'api': 'https://www.vnzyz.com/api.php/provide/vod/'},
-        's26': {'name': '\u7ea2\u6843\u89c6\u9891', 'api': 'https://apidanaizi.com/api.php/provide/vod/'},
-        's27': {'name': '\u9e21\u5764\u8d44\u6e90', 'api': 'https://jkunzyapi.com/api.php/provide/vod/'},
         's29': {'name': 'lsb\u8d44\u6e90', 'api': 'https://apilsbzy1.com/api.php/provide/vod/'},
-        's31': {'name': '\u8001\u8272\u903c\u8d44\u6e90', 'api': 'https://apilsbzy1.com/api.php/provide/vod/'},
         's32': {'name': '\u706b\u901f\u8bba\u7406\u8d44\u6e90', 'api': 'https://api.huosuapi.cc/api.php/provide/vod/'},
         's33': {'name': '\u563f\u563f\u8d44\u6e90', 'api': 'https://api.heiapi.cc/api.php/provide/vod/'},
     }
