@@ -28,6 +28,12 @@ BUILTIN_HOSTS = [
     "https://uaadizhi.com"
 ]
 
+# \u53d6\u57df\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1aext \u91cc\u6302\u4e86 11 \u4e2a uaaNNNN \u5019\u9009\uff0c\u6bcf\u8f6e init \u90fd\u8981\u5e76\u884c\u63a2\u4e00\u904d
+# \uff08\u5b9e\u6d4b\u7b2c 2 \u6b21\u4ecd 0.87s \uff1d \u6bcf\u6b21\u767d\u63a2\uff09\u3002\u7ad9\u70b9\u6362\u57df\u662f\u51e0\u5c0f\u65f6\u7ea7\u7684\u4e8b\uff0c\u547d\u4e2d\u5c31\u7528\u4e0a\u6b21\u5b9e\u6d4b\u901a\u7684\u90a3\u4e2a\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 600
+
+
 
 try:
     from hostresolver import ext_of
@@ -55,6 +61,9 @@ class Spider(Spider):
         ext = getattr(self, '_ext', {}) or {}
         if ext.get('host'):
             return ext['host'].rstrip('/')
+        # \u547d\u4e2d\u8bb0\u5fc6\uff1a\u7701\u6389\u4e00\u8f6e\u5e76\u884c\u63a2\u6d4b\uff0811 \u4e2a\u5019\u9009\u57df \u2248 0.9s\uff09
+        if _LAST_GOOD[0] and _LAST_GOOD[1] > time.time():
+            return _LAST_GOOD[0]
         cands = [h.rstrip('/') for h in (list(ext.get('hosts') or []) + BUILTIN_HOSTS)]
         seen, ordered = set(), []
         for h in cands:
@@ -62,6 +71,9 @@ class Spider(Spider):
                 seen.add(h)
                 ordered.append(h)
         h = self._pick_parallel(ordered)
+        if h:
+            _LAST_GOOD[0] = h
+            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
         return h or ''
 
     def _pick_parallel(self, cands):
@@ -112,6 +124,10 @@ class Spider(Spider):
                 print('[UAA] fetch \u5f02\u5e38 %s \u2192 %s' % (str(url)[:70], str(e)[:60]))
             except Exception:
                 pass
+            # \u8bb0\u5fc6\u91cc\u7684\u57df\u6253\u4e0d\u901a \u2192 \u7acb\u523b\u5fd8\u6389\uff0c\u4e0b\u6b21 init \u91cd\u63a2\uff08\u5426\u5219\u6362\u57df\u540e\u88ab\u9489\u4f4f\u6574\u4e2a TTL\uff09
+            if _LAST_GOOD[0] and str(url).startswith(_LAST_GOOD[0]):
+                _LAST_GOOD[0] = ''
+                _LAST_GOOD[1] = 0.0
             return None
 
     def _api_ok(self, host):

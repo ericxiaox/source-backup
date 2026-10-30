@@ -5,6 +5,13 @@ import requests
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 
+# \u53d6\u57df\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a_resolve_domain \u6bcf\u8f6e init \u90fd\u8981\u300c\u6293\u53d1\u5e03\u9875 \u2192 \u8ffd\u4e00\u8df3 \u2192 base64 \u89e3\u300d\uff0c
+# \u5b9e\u6d4b\u6bcf\u6b21 1.1s \u4e14\u7b2c 2 \u6b21\u4ecd 1.1s \uff1d \u6bcf\u6b21\u767d\u63a2\u3002\u7ad9\u65b9\u7684 host \u662f\u300c\u968f\u673a\u524d\u7f00+\u56fa\u5b9a\u540e\u7f00\u300d\uff0c
+# \u751f\u6210\u51fa\u6765\u7684\u57df\u90fd\u53ef\u7528\uff0c\u6240\u4ee5\u8bb0\u4f4f\u4e0a\u6b21\u90a3\u4e2a\u5c31\u884c\uff0c10 \u5206\u949f\u540e\u91cd\u89e3\u4e00\u6b21\u515c\u4f4f\u6362\u540e\u7f00\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 600
+
+
 class Spider(Spider):
     def getName(self): return "51\u77ed\u5267"
 
@@ -38,6 +45,11 @@ class Spider(Spider):
         self.filters["actor"][0]["value"] += [{"n":"\u65b0\u4eba\u699c","v":"new"},{"n":"\u70ed\u5ea6\u699c","v":"hot"},{"n":"\u63a8\u8350\u699c","v":"recommend"}]
 
     def _resolve_domain(self):
+        if _LAST_GOOD[0] and _LAST_GOOD[1] > time.time():
+            self.host = _LAST_GOOD[0]
+            self.headers["Referer"] = self.host
+            print(f"[51短剧] 域名(记忆): {self.host}")
+            return
         try:
             h = self.session.get(self.publish, headers=self.headers, timeout=12, verify=False).text
             m = re.search(r'<a[^>]+href=["\'](https?://[^"\']+)', h, re.I)
@@ -53,15 +65,22 @@ class Spider(Spider):
             self.host = "https://" + prefix + suffix.lstrip("/")
             if not self.host.endswith("/"): self.host += "/"
             self.headers["Referer"] = self.host
+            _LAST_GOOD[0] = self.host
+            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
             print(f"[51短剧] 域名: {self.host}")
         except Exception as e: print(f"[51短剧] 域名解析失败: {e}")
 
     def _req(self, url):
         try:
             r = self.session.get(url, headers=self.headers, timeout=20, verify=False)
+            if r.status_code != 200 and _LAST_GOOD[0] and str(url).startswith(_LAST_GOOD[0]):
+                # \u8bb0\u5fc6\u57df\u6253\u4e0d\u901a \u2192 \u5fd8\u6389\uff0c\u4e0b\u6b21 init \u91cd\u89e3\uff08\u5426\u5219\u6362\u540e\u7f00\u540e\u88ab\u9489\u4f4f\u6574\u4e2a TTL\uff09
+                _LAST_GOOD[0], _LAST_GOOD[1] = '', 0.0
             return r.text if r.status_code == 200 else ""
         except Exception as e:
             print(f"[51短剧] 请求失败: {url} {e}")
+            if _LAST_GOOD[0] and str(url).startswith(_LAST_GOOD[0]):
+                _LAST_GOOD[0], _LAST_GOOD[1] = '', 0.0
             return ""
 
     def _payload(self, html):

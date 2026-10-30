@@ -52,6 +52,12 @@ ALIAS = "huangdou"          # explorer \u63a2\u7d22\u522b\u540d\uff08\u5bfc\u822
 _UA = ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
        '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
 
+# \u53d6\u57df\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a_probe_pool \u6bcf\u8f6e init \u90fd\u8981\u771f\u6253\u4e00\u6b21\u52a0\u5bc6 API \u63a2\u6d3b
+# \uff08\u5b9e\u6d4b\u6bcf\u6b21 1.2s\uff0c\u7b2c 2 \u6b21\u4ecd 1.2s \uff1d \u6bcf\u6b21\u767d\u63a2\uff09\u3002\u7ad9\u70b9\u6362\u57df\u662f\u51e0\u5c0f\u65f6\u7ea7\u7684\u4e8b\uff0c\u547d\u4e2d\u5c31\u7528\u4e0a\u6b21\u90a3\u4e2a\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 600
+
+
 
 class _AESCBC:
     @staticmethod
@@ -292,6 +298,10 @@ class Spider(BaseSpider):
         import threading
         if self._ext.get('host'):
             return True
+        # \u547d\u4e2d\u8bb0\u5fc6\uff1a\u4e0a\u6b21\u5b9e\u6d4b\u901a\u7684\u57df\u8fd8\u5728\u6c60\u91cc\u5c31\u76f4\u63a5\u7528\uff0c\u7701\u6389\u4e00\u8f6e\u771f\u5b9e API \u63a2\u6d3b\uff081.2s\uff09
+        if _LAST_GOOD[0] and _LAST_GOOD[1] > time.time() and _LAST_GOOD[0] in self.hosts:
+            self._promote(_LAST_GOOD[0])
+            return True
         result = [None]
         threads = [threading.Thread(target=self._probe_api, args=(h, result),
                                     daemon=True)
@@ -318,6 +328,8 @@ class Spider(BaseSpider):
             self.hosts.insert(0, host)
         self._hi = self.hosts.index(host)
         self._apply_host(host)
+        _LAST_GOOD[0] = host
+        _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
         print(f'使用站点: {self.host}')
 
     def _check_host(self, host):
@@ -509,6 +521,10 @@ class Spider(BaseSpider):
                     return obj
             except Exception:
                 pass
+        # \u5168\u6c60 + \u63a2\u7d22\u90fd\u6ca1\u6253\u901a \u2192 \u5fd8\u6389\u8bb0\u5fc6\u57df\uff0c\u4e0b\u6b21 init \u91cd\u63a2\uff08\u5426\u5219\u6b7b\u57df\u88ab\u9489\u4f4f\u6574\u4e2a TTL\uff09
+        if _LAST_GOOD[0] and _LAST_GOOD[0] == self.host:
+            _LAST_GOOD[0] = ''
+            _LAST_GOOD[1] = 0.0
         return last
 
     def _key(self, rid):

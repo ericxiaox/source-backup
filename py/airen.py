@@ -23,6 +23,13 @@ except Exception:
         from hostresolver import ext_of
     except Exception:
         ext_of = None
+
+# \u53d6\u57df\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a_detect_domain \u6bcf\u6b21 init \u90fd\u8981\u5e76\u884c\u63a2 5 \u4e2a\u5019\u9009\u57df
+# \uff08\u5404 timeout=3\u3001join 4\uff09\uff0c\u5b9e\u6d4b\u7b2c 2 \u6b21\u4ecd 2.6s \uff1d \u6bcf\u6b21\u767d\u63a2\uff1b\u7ad9\u70b9\u6362\u57df\u662f\u51e0\u5c0f\u65f6\u7ea7\u7684\u4e8b\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 600
+
+
 class Spider(Spider):
     # \u6c60 mdcmai*.xyz \u4e0e madouai.xyz \u8fd4\u540c\u4e00\u9875\u9762\u2014\u2014**Vue SPA \u5916\u58f3**\uff08<div id="app"> +
     # /assets/index-*.js\uff0c\u9875\u9762\u672c\u8eab 2970B \u65e0\u5185\u5bb9\uff0c\u5224\u6d3b\u770b\u540e\u7aef /api/v1/*\uff09\u3002
@@ -315,6 +322,12 @@ class Spider(Spider):
         result = [None]
         UAMOB = 'Mozilla/5.0 (Linux; Android 13; M2102J2SC Build/TKQ1.221114.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.31 Mobile Safari/537.36'
 
+        # \u547d\u4e2d\u8bb0\u5fc6\uff1a\u53ea\u6709\u5728 ext \u6ca1\u624b\u586b host \u65f6\u624d\u5403\u8bb0\u5fc6\uff08\u4eba\u5de5\u9501\u5b9a\u7684\u57df\u4f18\u5148\uff09
+        if not ext.get('host') and _LAST_GOOD[0] and _LAST_GOOD[1] > time.time():
+            self._xurl = _LAST_GOOD[0]
+            self._headers = {'User-Agent': UAMOB, 'Referer': self._xurl}
+            return
+
         def _try(d):
             if result[0]:
                 return
@@ -334,6 +347,8 @@ class Spider(Spider):
             t.join(timeout=4)
         if result[0]:
             self._xurl, self._headers = result[0]
+            _LAST_GOOD[0] = self._xurl
+            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
         else:
             self._xurl = self.CANDIDATE_DOMAINS[0]
             self._headers = {'User-Agent': UAMOB, 'Referer': self._xurl}
@@ -350,9 +365,16 @@ class Spider(Spider):
 
     def _fetch_api(self, path, params=None):
         url = f"{self._domain()}/api/v1{path}"
-        resp = requests.get(url, headers=self._req_headers(), params=params, timeout=15)
-        resp.encoding = resp.apparent_encoding or 'utf-8'
-        return json.loads(resp.text)
+        try:
+            resp = requests.get(url, headers=self._req_headers(), params=params, timeout=15)
+            resp.encoding = resp.apparent_encoding or 'utf-8'
+            return json.loads(resp.text)
+        except Exception:
+            # \u8bb0\u5fc6\u57df\u6253\u4e0d\u901a \u2192 \u7acb\u523b\u5fd8\u6389\uff0c\u4e0b\u6b21 init \u91cd\u63a2\uff08\u5426\u5219\u6362\u57df\u540e\u88ab\u9489\u4f4f\u6574\u4e2a TTL\uff09
+            if _LAST_GOOD[0] and _LAST_GOOD[0] == self._xurl:
+                _LAST_GOOD[0] = ''
+                _LAST_GOOD[1] = 0.0
+            raise
 
     def _get_categories(self):
         """\u83b7\u53d6\u5e76\u7f13\u5b58\u6240\u6709\u5206\u7c7b"""

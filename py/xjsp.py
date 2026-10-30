@@ -6,6 +6,7 @@ from base.spider import Spider
 import json
 import re
 import random
+import time
 import requests
 from base64 import b64decode
 
@@ -14,6 +15,12 @@ try:
     urllib3.disable_warnings()
 except Exception:
     pass
+
+# \u53d6\u57df\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a\u539f\u903b\u8f91\u6bcf\u6b21 init \u90fd\u8981\u300c\u6293\u53d1\u5e03\u9875 \u2192 \u5e76\u884c\u63a2\u6c60\u300d\uff0c
+# \u5b9e\u6d4b\u4e09\u8f6e 3.02 / 2.45 / 1.69s\uff0c\u4e09\u8f6e\u90fd\u4e0d\u4e3a 0 \uff1d \u6bcf\u6b21\u90fd\u767d\u63a2\uff1b\u800c\u7ad9\u70b9\u6362\u57df\u662f\u51e0\u5c0f\u65f6\u7ea7\u522b\u7684\u4e8b\u3002
+# \u8bb0\u5fc6\u547d\u4e2d\u76f4\u63a5\u8fd4\u56de\uff080 \u6b21\u7f51\u7edc\u8bf7\u6c42\uff09\uff0cTTL 10 \u5206\u949f\u540e\u91cd\u63a2\u4e00\u6b21\u515c\u4f4f\u6362\u57df\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 600
 
 
 class Spider(Spider):
@@ -86,10 +93,14 @@ class Spider(Spider):
     # ========== \u53d6\u57df ==========
 
     def get_working_host(self):
-        """\u53d6\u5f53\u524d\u53ef\u7528 API \u57df\uff1aext host@ \u9501 > \u53d1\u5e03\u9875 h5_url > hosts@ + \u5185\u7f6e\u5019\u9009\u5b9e\u6d4b > \u5185\u7f6e\u9996\u4e2a\u515c\u5e95\u3002"""
+        """\u53d6\u5f53\u524d\u53ef\u7528 API \u57df\uff1aext host@ \u9501 > \u8bb0\u5fc6 > hosts@+\u5185\u7f6e\u5019\u9009\u5b9e\u6d4b > \u53d1\u5e03\u9875 h5_url > \u518d\u6d4b > \u515c\u5e95\u3002"""
         lock = self._ext.get('host')
         if lock:
             return str(lock).rstrip('/')
+
+        if _LAST_GOOD[0] and _LAST_GOOD[1] > time.time():
+            return _LAST_GOOD[0]
+
         cands = []
         for h in (self._ext.get('hosts') or []):
             h = str(h).strip().rstrip('/')
@@ -98,6 +109,13 @@ class Spider(Spider):
         for h in self.CANDIDATE_HOSTS:
             if h not in cands:
                 cands.append(h)
+
+        # 2026-10-30\uff1a\u987a\u5e8f\u6539\u6210\u300c\u5148\u63a2\u5df2\u77e5\u6c60\uff0c\u518d\u6293\u53d1\u5e03\u9875\u300d\u3002\u6c60\u91cc\u672c\u6765\u5c31\u6709\u6d3b\u57df\u65f6\uff0c
+        # \u539f\u903b\u8f91\u90a3\u8d9f\u53d1\u5e03\u9875\u6293\u53d6\uff083 \u4e2a\u9875\u5e76\u884c\u3001join \u8d85\u65f6 8s\uff09\u7eaf\u5c5e\u767d\u7b49\u3002
+        h = self._probe_hosts(cands)
+        if h:
+            return self._remember(h)
+
         pub = self._ext.get('publish')
         # \u591a\u53d1\u5e03\u9875\uff082026-09-13\uff09\uff1aext \u7684 publish@ \u53ef\u80fd\u662f\u9017\u53f7\u4e32\uff08\u7f51\u5740\u578b + GitHub \u578b\u5e76\u5b58\uff09\uff0c
         # \u5148\u62c6\u5f00\uff0c\u518d\u62fc\u5185\u7f6e\u53d1\u5e03\u9875\u6e05\u5355\uff0c\u4e00\u8d77\u5e76\u884c\u6293\u3002
@@ -107,20 +125,35 @@ class Spider(Spider):
         if h:
             if h in cands:
                 cands.remove(h)
-            cands.insert(0, h)
+            h = self._probe_hosts([h] + cands)
+            if h:
+                return self._remember(h)
+        return cands[0] if cands else ''
+
+    def _probe_hosts(self, cands):
+        """\u5e76\u884c\u9a8c\u6d3b\uff0c\u5148\u547d\u4e2d\u5373\u7528\u3002"""
         import threading
         result = [None]
+
         def _p(c):
             if result[0]:
                 return
             if self._alive(c):
                 result[0] = c
+
         threads = [threading.Thread(target=_p, args=(c,)) for c in cands]
         for t in threads:
             t.start()
         for t in threads:
             t.join(timeout=5)
-        return result[0] or (cands[0] if cands else '')
+        return result[0]
+
+    def _remember(self, host):
+        """\u5b9e\u6d4b\u901a\u8fc7\u7684\u57df\u624d\u5199\u8bb0\u5fc6\u2014\u2014\u515c\u5e95\u731c\u6d4b\u7684\u57df\u4e0d\u5199\uff0c\u5426\u5219\u4f1a\u628a\u6b7b\u57df\u9489\u4f4f 10 \u5206\u949f\u3002"""
+        if host:
+            _LAST_GOOD[0] = host
+            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
+        return host
 
     def _host_from_publish(self, pages):
         """\u4ece\u53d1\u5e03\u9875\u62a0\u5f53\u524d h5_url\uff08config.js \u662f\u7eaf JS \u914d\u7f6e\uff0c\u6b63\u5219\u6700\u7a33\uff09\u3002
@@ -185,6 +218,11 @@ class Spider(Spider):
         r = self._req(url, params=params)
         if not r or r.status_code != 200:
             self.log(f"接口异常 {url} -> {getattr(r, 'status_code', 'None')}")
+            # \u8bb0\u5fc6\u91cc\u7684\u57df\u6253\u4e0d\u901a \u2192 \u7acb\u523b\u5fd8\u6389\uff0c\u4e0b\u6b21 init \u91cd\u65b0\u8d70\u300c\u63a2\u6c60 \u2192 \u53d1\u5e03\u9875\u300d\u81ea\u6108\uff1b
+            # \u5426\u5219\u6362\u57df\u540e\u4f1a\u88ab\u8bb0\u5fc6\u9489\u4f4f\u6574\u6574\u4e00\u4e2a TTL\u3002
+            if _LAST_GOOD[0] == base:
+                _LAST_GOOD[0] = ''
+                _LAST_GOOD[1] = 0.0
             return {}
         try:
             d = r.json()

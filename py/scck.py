@@ -84,6 +84,12 @@ _BUILTIN_GATES = ['5858.space:8899', '2626.space:8899']
 # \u63a2\u6d3b\u6df1\u94fe\uff08\u5206\u7c7b\u9875\uff1b\u542b stui-vodlist \u4e0e >10 \u6761\u771f\u6761\u76ee\uff09
 _PROBE_PATH = '/vodtype/1-1.html'
 
+# \u53d6\u57df\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a\u63a2\u6d3b\u8981\u62c9\u4e00\u6574\u9875\u5206\u7c7b\u9875\uff0c\u5b9e\u6d4b\u6bcf\u8f6e init \u90fd\u8981 1s \u591a\uff0c
+# \u800c\u7ad9\u70b9\u6362\u57df\u662f\u51e0\u5c0f\u65f6\u7ea7\u7684\u4e8b \u2192 \u547d\u4e2d\u5373\u8fd4\u56de\uff0c\u70ed\u542f 0 \u7f51\u7edc\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 600
+
+
 # \u680f\u76ee\u515c\u5e95\u8868\uff082026-09-16 \u4ece\u7ad9\u5185\u5bfc\u822a\u5b9e\u6d4b\u62bd\u53d6\uff1bhomeContent \u4f1a\u5148\u8bd5\u5b9e\u65f6\u89e3\u6790\uff09
 #   \u5c3e\u90e8\u5e26\u8ba1\u6570\u7684\u7c7b\u578b\u680f\u76ee\u4e0e\u9876\u90e8 4 \u5927\u680f\u76ee\u5e76\u5b58\uff0c\u5171 12 \u4e2a
 _CATS = [
@@ -221,6 +227,10 @@ class Spider(BaseSpider):
                 return html
             self.trace.append('\u7591\u4f3c\u7a7a/\u5f02\u5e38(\u7b2c%d\u6b21): %s' % (i + 1, len(html)))
             time.sleep(0.4)
+        # \u8bb0\u5fc6\u91cc\u7684\u57df\u62c9\u4e0d\u51fa\u5185\u5bb9 \u2192 \u7acb\u523b\u5fd8\u6389\uff0c\u4e0b\u6b21 init \u91cd\u63a2\uff08\u5426\u5219\u6362\u57df\u540e\u88ab\u9489\u4f4f\u6574\u4e2a TTL\uff09
+        if _LAST_GOOD[0] and str(url).startswith(_LAST_GOOD[0]):
+            _LAST_GOOD[0] = ''
+            _LAST_GOOD[1] = 0.0
         return html
 
     # ---------- \u53d6\u57df\uff08\u95e8\u9762\u8df3\u8f6c\u94fe\uff1a\u58f3 \u2192 \u95e8\u9762 :8899 \u2192 302 \u843d\u70b9\uff09 ----------
@@ -301,16 +311,26 @@ class Spider(BaseSpider):
         # \u9501\u5b9a\u57df\uff1a\u586b\u4e86 host@ \u5c31\u53ea\u7528\u5b83
         if self._ext.get('host'):
             return self._ext['host'].rstrip('/')
+        # 0) \u547d\u4e2d\u8bb0\u5fc6\uff1a\u7701\u6389\u4e00\u6574\u8f6e\u63a2\u6d4b
+        if _LAST_GOOD[0] and _LAST_GOOD[1] > time.time():
+            return _LAST_GOOD[0]
         # 1) \u5185\u7f6e/ext \u771f\u7ad9
         h = self._probe_round(self._candidate_hosts(), 8)
         if h:
-            return h
+            return self._remember(h)
         # 2) \u73b0\u89e3\u300c\u58f3 \u2192 \u95e8\u9762 \u2192 302\u300d
         self.trace.append('\u5185\u7f6e\u672a\u547d\u4e2d \u2192 \u8d70\u95e8\u9762\u8df3\u8f6c\u94fe')
         h = self._probe_round(self._gate_hosts(), 8)
         if h:
-            return h
+            return self._remember(h)
         return ''
+
+    def _remember(self, host):
+        """\u53ea\u6709\u5b9e\u6d4b\u901a\u8fc7\u7684\u57df\u624d\u5199\u8bb0\u5fc6\u2014\u2014\u515c\u5e95\u731c\u6d4b\u7684\u57df\u4e0d\u5199\uff0c\u5426\u5219\u4f1a\u628a\u6b7b\u57df\u9489\u4f4f 10 \u5206\u949f\u3002"""
+        if host:
+            _LAST_GOOD[0] = host
+            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
+        return host
 
     def _ensure_host(self):
         """init \u53d6\u57df\u5931\u8d25\uff08\u624b\u673a\u7f51\u7edc\u6162\uff09\u2192 \u9996\u6b21\u771f\u6b63\u8bbf\u95ee\u65f6\u518d\u8bd5\u4e00\u6b21\u3002"""

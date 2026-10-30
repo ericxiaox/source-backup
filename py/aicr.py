@@ -14,6 +14,7 @@ import os
 import re
 import sys
 import json
+import time
 import datetime
 import urllib.parse
 from base.spider import Spider as BaseSpider
@@ -34,6 +35,12 @@ _PROBE_PATH = '/'
 _PUBLISH_PAGES = ['https://ai.aicrss.cc/']
 # \u57fa\u57df\u6c60\uff1aaicrss13.sbs \u73b0\u884c\uff1b4/5/2/3 \u5b9e\u6d4b\u5747 200 \u771f\u7ad9\uff08\u88f8\u57fa\u57df\u5373\u53ef\uff0c\u6cdb\u89e3\u6790\u524d\u7f00\u975e\u5fc5\u9700\uff09
 _BASE_HOSTS = ('aicrss13.sbs', 'aicrss4.sbs', 'aicrss5.sbs', 'aicrss2.sbs', 'aicrss3.sbs')
+
+# \u53d6\u57df\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a\u6bcf\u6b21 init \u90fd\u8981\u300c\u6293\u53d1\u5e03\u9875 \u2192 \u7b97\u5019\u9009 \u2192 resolve/probe\u300d\uff0c
+# \u5b9e\u6d4b\u7b2c 2 \u6b21\u4ecd 1.1s \uff1d \u6bcf\u6b21\u767d\u63a2\uff1b\u7ad9\u70b9\u6362\u57df\u662f\u51e0\u5c0f\u65f6\u7ea7\u7684\u4e8b \u2192 \u547d\u4e2d\u5373\u8fd4\u56de\u3002
+# \u26a0\u672c\u6e90\u6ca1\u6709\u7edf\u4e00\u7684\u53d6\u6570\u5165\u53e3\uff08\u8d70 base \u7684 fetch\uff0c\u6302\u4e0d\u4e0a\u300c\u5931\u8d25\u5373\u5fd8\u300d\uff09\uff0c\u6240\u4ee5 TTL \u53d6 5 \u5206\u949f\u515c\u4f4f\u6362\u57df\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 300
 
 # \u2500\u2500 \u590d\u523b\u53d1\u5e03\u9875\u7b97\u6cd5\uff08JS: getIndexByTime / numberToChinese / getTargetUrl\uff09\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
 _DATE_START_NUM = 232
@@ -207,6 +214,15 @@ class Spider(BaseSpider):
         ext = getattr(self, '_ext', {}) or {}
         if ext.get('host'):
             return ext['host'].rstrip('/')         # host@ \u9501\u5b9a\uff0c\u4e0d\u63a2\u6d3b
+        if _LAST_GOOD[0] and _LAST_GOOD[1] > time.time():
+            return _LAST_GOOD[0]
+        h = self._resolve_host_full(ext)
+        if h:
+            _LAST_GOOD[0] = h
+            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
+        return h
+
+    def _resolve_host_full(self, ext):
         page = ext.get('publish') or ','.join(_PUBLISH_PAGES)
         cands = self._harvest_publish_hosts(page) + self._candidate_hosts()
         seen, ded = set(), []

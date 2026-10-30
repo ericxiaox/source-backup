@@ -77,6 +77,11 @@ _BUILTIN_BASES = [
 # \u63a2\u6d3b\u6df1\u94fe\uff08\u5206\u7c7b\u9875\uff1b\u2265 4 \u5f20\u771f\u5361\u7247\uff09
 _PROBE_PATH = '/vodtype/japanese-av/'
 
+# \u53d6\u57df\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a\u63a2\u6d3b\u8981\u62c9\u4e00\u6574\u9875\u5206\u7c7b\u9875\uff0c\u5b9e\u6d4b\u6bcf\u8f6e init \u90fd\u8981 1.5s \u591a\uff0c
+# \u800c\u7ad9\u70b9\u6362\u57df\u662f\u51e0\u5c0f\u65f6\u7ea7\u7684\u4e8b \u2192 \u547d\u4e2d\u5373\u8fd4\u56de\uff0c\u70ed\u542f 0 \u7f51\u7edc\u3002
+_LAST_GOOD = ['', 0.0]
+_LAST_GOOD_TTL = 600
+
 # \u680f\u76ee\u8868\uff082026-09-16 \u5b9e\u6d4b\uff09
 #   type_id \u5f62\u6001 `{\u8def\u7531}|{slug}`\uff1avodtype \u8d70 `/vodtype/{slug}-{\u9875}/`\uff0c
 #   label \u8d70 `/label/{slug}/page/{\u9875}/`
@@ -198,6 +203,10 @@ class Spider(BaseSpider):
                 return html
             self.trace.append('\u7591\u4f3c\u7a7a/\u5f02\u5e38(\u7b2c%d\u6b21): %s' % (i + 1, len(html)))
             time.sleep(0.4)
+        # \u8bb0\u5fc6\u91cc\u7684\u57df\u62c9\u4e0d\u51fa\u5185\u5bb9 \u2192 \u7acb\u523b\u5fd8\u6389\uff0c\u4e0b\u6b21 init \u91cd\u63a2\uff08\u5426\u5219\u6362\u57df\u540e\u88ab\u9489\u4f4f\u6574\u4e2a TTL\uff09
+        if _LAST_GOOD[0] and str(url).startswith(_LAST_GOOD[0]):
+            _LAST_GOOD[0] = ''
+            _LAST_GOOD[1] = 0.0
         return html
 
     # ---------- \u53d6\u57df\uff08\u65e0\u53d1\u5e03\u9875 \u2192 \u5185\u7f6e\u5019\u9009 \uff0b ext \u8986\u76d6\uff09 ----------
@@ -246,7 +255,14 @@ class Spider(BaseSpider):
         # \u9501\u5b9a base\uff1a\u586b\u4e86 host@ \u5c31\u53ea\u7528\u5b83
         if self._ext.get('host'):
             return self._ext['host'].rstrip('/')
-        return self._probe_round(self._candidate_bases(), 8)
+        # \u547d\u4e2d\u8bb0\u5fc6\uff1a\u7701\u6389\u4e00\u6574\u8f6e\u63a2\u6d4b
+        if _LAST_GOOD[0] and _LAST_GOOD[1] > time.time():
+            return _LAST_GOOD[0]
+        h = self._probe_round(self._candidate_bases(), 8)
+        if h:
+            _LAST_GOOD[0] = h
+            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
+        return h
 
     def _ensure_host(self):
         """init \u53d6\u57df\u5931\u8d25\uff08\u624b\u673a\u7f51\u7edc\u6162\uff09\u2192 \u9996\u6b21\u771f\u6b63\u8bbf\u95ee\u65f6\u518d\u8bd5\u4e00\u6b21\u3002"""
