@@ -99,14 +99,14 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://mrdsm4.com,https://mrdsw17.com,https://mrdsm3.com,https://car.pvtlbzgj.cc,https://gitlab.com/mrds/mrds/-/raw/main/README.md;mail@mrds.club@gmail.com"
+      "ext": "publish@https://mrdsm4.com,https://mrdsw17.com,https://mrdsm3.com,https://car.pvtlbzgj.cc,https://gitlab.com/mrds/mrds/-/raw/main/README.md;mail@mrds.club@gmail.com;hosts@https://bike.ggdfdrau.cc"
     },
     {
       "key": "py_51xigua",
       "name": "\ud83c\udf4951\u5403\u74dc\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/51xigua.py",
-      "ext": "publish@https://51cgf15.com,https://gitlab.com/51chiguawang/51cg/-/raw/main/README.md;mail@51cgfun@gmail.com,51cgfun@pm.me,chigua.com@pm.me;hosts@https://advise.ajtnqsla.cc",
+      "ext": "publish@https://51cgf15.com,https://gitlab.com/51chiguawang/51cg/-/raw/main/README.md;mail@51cgfun@gmail.com,51cgfun@pm.me,chigua.com@pm.me;hosts@https://ldxbhihzuqh2p2z2.ehwjneai.cc,https://advise.ajtnqsla.cc",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -123,14 +123,14 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://www.wkcdhiqk.cc;mail@heiliaobdy@gmail.com"
+      "ext": "publish@https://www.wkcdhiqk.cc;mail@heiliaobdy@gmail.com;hosts@https://cast.aclgspik.cc"
     },
     {
       "key": "py_hlw",
       "name": "\ud83c\udf49\u9ed1\u6599\u7f51\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/hlw.py",
-      "ext": "publish@https://hlwf6.com/,https://vgxnasoa.cc;mail@18hlw@pm.me,155dizhi@gmail.com",
+      "ext": "publish@https://hlwf6.com/,https://vgxnasoa.cc;mail@18hlw@pm.me,155dizhi@gmail.com;hosts@https://w8ki2.nptveser.cc",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -142,7 +142,7 @@
       "name": "\ud83c\udf4951\u6697\u7f51\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/51aw.py",
-      "ext": "publish@https://51aw34.com;mail@anwangchigua@gmail.com",
+      "ext": "publish@https://51aw34.com;mail@anwangchigua@gmail.com;hosts@https://bike.bus.atbwghxfm.cc",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -166,7 +166,7 @@
       "name": "\ud83c\udf49\u6bcf\u65e5\u5927\u4e71\u6597\u1d56\u02b8\uff5c\u9ed1\u6599",
       "type": 3,
       "api": "./py/daluandou.py",
-      "ext": "publish@https://idld66.com,https://idld65.com,https://border.loewkgyyv.cc,https://capture.loewkgyyv.cc,https://fe7.loewkgyyv.cc,https://gitlab.com/group305134/mrdld/-/raw/main/README.md;mail@mrdldfun666@gmail.com",
+      "ext": "publish@https://idld66.com,https://idld65.com,https://border.loewkgyyv.cc,https://capture.loewkgyyv.cc,https://fe7.loewkgyyv.cc,https://gitlab.com/group305134/mrdld/-/raw/main/README.md;mail@mrdldfun666@gmail.com;hosts@https://capture.rrzxifxn.cc",
       "style": {
         "type": "rect",
         "ratio": 1
@@ -281,7 +281,7 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://shewo1.cc"
+      "ext": "publish@https://shewo1.cc;hosts@https://shewo50.cc"
     },
     {
       "key": "\u6781\u4e50\u7981\u533a",
@@ -291,7 +291,7 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "publish@https://nf198.hscwang7y5m.link/jm6s8/;mail@hscwang99@gmail.com"
+      "ext": "publish@https://nf198.hscwang7y5m.link/jm6s8/;mail@hscwang99@gmail.com;hosts@https://ycpjib.hscwang26y2m.xyz"
     },
     {
       "key": "91JQ",
@@ -317,7 +317,7 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@http://\u0068\u0073\u0063\u006b.net/"
+      "ext": "publish@http://\u0068\u0073\u0063\u006b.net/;hosts@https://333.9960\u0068\u0073\u0063\u006b.cc"
     },
     {
       "key": "555\u7535\u5f71",
@@ -346,7 +346,7 @@
       "searchable": 1,
       "quickSearch": 1,
       "filterable": 1,
-      "ext": "publish@https://404xav.github.io/url8/;mail@404xav@gmail.com"
+      "ext": "publish@https://404xav.github.io/url8/;mail@404xav@gmail.com;hosts@https://brother.4042612.art"
     },
     {
       "key": "91\u60c5\u62a5\u5c40",
@@ -392,7 +392,7 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "mail@tanhuamod01@gmail.com"
+      "ext": "mail@tanhuamod01@gmail.com;hosts@https://tanhuaav.com"
     },
     {
       "key": "py_prxd",
@@ -1422,7 +1422,7 @@
         "ratio": 1
       },
       "changeable": 1,
-      "ext": "publish@https://98t.la/;mail@sehuatang@gmail.com",
+      "ext": "publish@https://98t.la/;mail@sehuatang@gmail.com;hosts@https://hsnd.ubetl.com",
       "vpn": "https://www.sehuatang.net,https://www.sehuatang.org,https://98tang.com",
       "off_reason": "\u9875\u9762\u624b\u52a8\u79fb\u5165\u79bb\u7ebf\u533a"
     },

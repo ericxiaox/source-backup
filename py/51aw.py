@@ -818,7 +818,7 @@ class Spider(BaseSpider):
 #     python tools/gen_inline_resolvers.py --write
 # \u5b58\u5728\u7406\u7531\uff1ahostresolver.py \u4e0d\u662f\u4efb\u4f55\u7ad9\u7684 api\uff0cApp\uff08gitee \u5f62\u6001\uff09\u4e0d\u4f1a\u4e0b\u8f7d\u5b83
 # \u2192 \u771f\u673a\u4e0a\u6e90\u5185\u5fc5\u987b\u81ea\u5e26\u6574\u5957\u53d6\u57df\u7b97\u6cd5\uff0c\u5426\u5219\u53ea\u80fd\u5403 v2.6 \u65f6\u4ee3\u7684\u624b\u6284\u7f29\u6c34\u7248\u3002
-# FINGERPRINT: f1db813b1c71\uff08\u672c\u5757\u5185\u5bb9\u6458\u8981\uff1b\u4e0e\u672c\u4f53\u91cd\u7b97\u4e0d\u7b26\uff1d\u5df2\u8fc7\u671f\uff09
+# FINGERPRINT: a80033b83656\uff08\u672c\u5757\u5185\u5bb9\u6458\u8981\uff1b\u4e0e\u672c\u4f53\u91cd\u7b97\u4e0d\u7b26\uff1d\u5df2\u8fc7\u671f\uff09
 import re
 import time
 import random
@@ -851,6 +851,11 @@ except Exception:
 _gen_CACHE = {}
 
 _gen_CACHE_TTL = 1800  # \u6210\u529f\u9009\u7ad9\u7f13\u5b58 30 \u5206\u949f
+
+# \u62a2\u8dd1\uff08\u5019\u9009\u6c60\u4f18\u5148\u63a2\u6d4b\uff09\u5931\u8d25\u8bb0\u5fc6\uff1a\u5019\u9009\u6c60\u6307\u7eb9 \u2192 \u8fc7\u671f\u65f6\u523b\uff082026-10-30 \u63d0\u901f\uff09
+_gen_FAST_DEAD = {}
+
+_gen_FAST_DEAD_TTL = 600
 
 
 # \u9009\u7ad9\u8fc7\u7a0b\u8bb0\u5f55\uff08\u4f9b\u6e90\u5185\u300c\u8bca\u65ad\u300d\u680f\u76ee\u5c55\u793a\uff0cApp \u7aef\u65e0\u9700\u65e5\u5fd7\u5de5\u5177\u5373\u53ef\u770b\u5230\u5168\u94fe\u8def\uff09
@@ -1031,6 +1036,14 @@ _gen_JS_SRC_PAT = re.compile(r'<script[^>]+src\s*=\s*["\']([^"\']+)["\']', re.I)
 _gen_MAX_JS_PAGES = 3                     # \u6bcf\u4e2a\u53d1\u5e03\u9875\u6700\u591a\u8ddf\u968f\u51e0\u4e2a\u5916\u94fe JS
 
 _gen_MAX_JS_BYTES = 2 * 1024 * 1024       # \u5355\u4e2a JS \u622a\u65ad\u4e0a\u9650\uff08\u9632\u70b8\u5185\u5b58\uff09
+
+# JS \u58f3\u8ddf\u968f\u300c\u522b\u8ddf\u300d\u6e05\u5355\uff082026-10-30\uff09\uff1a\u8fd9\u4e9b\u662f\u901a\u7528\u524d\u7aef\u5e93\uff0c\u4e0d\u542b\u7ebf\u8def\u6570\u636e\uff1b
+# \u771f\u9047\u5230\u300c\u7ebf\u8def\u85cf\u5728 jQuery \u91cc\u300d\u4e5f\u8f6e\u4e0d\u5230\u5b83\u2014\u2014\u7ebf\u8def\u4e00\u5b9a\u5728\u7ad9\u65b9\u81ea\u5df1\u7684 js \u91cc\u3002
+_gen_JUNK_JS_PAT = re.compile(
+    r'(jquery|jquery-migrate|bootstrap|ckeditor|tinymce|vendor|vendors\.|runtime\.|'
+    r'polyfill|analytics|gtag|googletagmanager|cnzz|busuanzi|51\.la|highlight|'
+    r'fontawesome|swiper|clipboard\.|popper|lazyload|axios|moment|dayjs|vue\.min|'
+    r'react\.|lodash|underscore)', re.I)
 
 # \u53d1\u5e03\u9875\u91cc\u5fc5\u7136\u6df7\u5165\u7684\u7b2c\u4e09\u65b9\u5927\u5e73\u53f0/\u7edf\u8ba1/\u5e7f\u544a\u57df\u2014\u2014\u63a2\u6d4b\u5b83\u4eec\u4f1a\u628a\u5927\u9875\u9762\u8bef\u5224\u6210"\u7ad9\u70b9\u53ef\u7528"
 _gen_JUNK_HOST_PAT = re.compile(
@@ -1707,7 +1720,8 @@ def _gen_fetch_text(url, headers, proxies, timeout, cap=_gen_MAX_JS_BYTES):
 
 def _gen_js_candidates(html, base_url):
     """\u53d1\u5e03\u9875\u91cc\u7684\u5916\u94fe JS\uff08JS \u58f3\u8ddf\u968f\u7528\uff09\u3002\u76f8\u5bf9\u8def\u5f84\u6309\u53d1\u5e03\u9875\u5730\u5740\u8865\u5168\uff1b
-    \u5254\u7b2c\u4e09\u65b9 CDN/\u7edf\u8ba1\u57df\uff0c\u4fdd\u5e8f\u53bb\u91cd\uff0c\u6700\u591a _MAX_JS_PAGES \u4e2a\u3002"""
+    \u5254\u7b2c\u4e09\u65b9 CDN/\u7edf\u8ba1\u57df + \u901a\u7528\u524d\u7aef\u5e93\uff08_JUNK_JS_PAT\uff09\uff0c\u4fdd\u5e8f\u53bb\u91cd\uff0c
+    \u6700\u591a _MAX_JS_PAGES \u4e2a\u3002"""
     out = []
     for m in _gen_JS_SRC_PAT.finditer(html or ''):
         raw = (m.group(1) or '').strip()
@@ -1716,12 +1730,67 @@ def _gen_js_candidates(html, base_url):
         u = urljoin(base_url or '', raw)
         if not re.match(r'^https?://', u):
             continue
-        if _gen_is_junk(u) or u in out:
+        if _gen_is_junk(u) or _gen_JUNK_JS_PAT.search(u.split('?', 1)[0]) or u in out:
             continue
         out.append(u)
         if len(out) >= _gen_MAX_JS_PAGES:
             break
     return out
+
+
+
+def _gen_is_js_shell(text):
+    """\u50cf\u300cJS \u58f3\u9875\u300d\u5417\u2014\u2014\u9875\u9762\u81ea\u8eab\u6ca1\u5185\u5bb9\uff0c\u7ebf\u8def\u7531\u5916\u94fe JS \u73b0\u62fc\uff08\u9ec4\u679c / 51\u5403\u74dc \u5f62\u6001\uff09\u3002
+
+    \u5224\u636e\uff08\u987b**\u5168\u6ee1\u8db3**\uff09\uff1a
+      \u2460 \u6ca1\u6709\u5185\u5bb9\u7ad9\u7ed3\u6784\u6807\u8bb0\uff08_CONTENT_MARKS \u4e00\u6761\u90fd\u6ca1\u547d\u4e2d\uff09
+      \u2461 \u5185\u5bb9\u578b\u5185\u94fe < 3 \u6761
+      \u2462 \u53bb\u6807\u7b7e\u540e\u53ef\u89c1\u6587\u5b57 < 400 \u5b57
+
+    \u6ce8\uff1a\u8fd9\u53ea\u662f\u8f85\u52a9\u5224\u636e\uff0c\u5bf9\u5916\u5c42\u300c\u8981\u4e0d\u8981\u8ddf JS\u300d\u4ee5 static<2 + not _looks_like_content
+    \u4e3a\u51c6\uff08\u89c1 extract_publish_domains\uff09\u300251\u5403\u74dc \u7684 Vite \u58f3\u9875\u53ef\u89c1\u6587\u5b57\u6709 502 \u5b57
+    \uff08\u5168\u662f meta/noscript\uff09\uff0c\u5355\u9760\u5b57\u6570\u4f1a\u8bef\u5224\u3002"""
+    t = text or ''
+    if not t:
+        return False
+    if any(k in t for k in _gen_CONTENT_MARKS):
+        return False
+    if len(_gen_CONTENT_LINK_PAT.findall(t)) >= 3:
+        return False
+    body = re.sub(r'<(script|style)[^>]*>.*?</\1>', ' ', t, flags=re.S | re.I)
+    body = re.sub(r'<[^>]+>', ' ', body)
+    body = re.sub(r'\s+', '', body)
+    return len(body) < 400
+
+
+
+def _gen_fetch_js_parallel(urls, headers, proxies, timeout, cap=_gen_MAX_JS_BYTES, tcap=5):
+    """**\u5e76\u884c**\u6293\u5916\u94fe JS\uff0c\u4fdd\u5e8f\u8fd4\u56de [(url, text)]\uff082026-10-30\uff09\u3002
+
+    \u65e7\u5b9e\u73b0\u4e32\u884c for \u5faa\u73af\uff1a\u4e00\u4e2a\u53d1\u5e03\u9875\u6302 3 \u4e2a\u524d\u7aef\u5e93\u65f6\uff0c\u8017\u65f6\uff1d\u4e09\u8005\u4e4b\u548c\uff08\u7389\u7f9e\u56ed penzu
+    \u9875 23s\uff09\u3002\u5e76\u884c\u540e \u2248 \u6700\u6162\u90a3\u4e00\u4e2a\uff1b\u5355\u4e2a\u8d85\u65f6\u518d\u6536\u7d27\u5230 tcap\u2014\u2014\u58f3\u9875\u7684\u7ebf\u8def JS \u90fd\u5728
+    \u51e0\u767e\u6beb\u79d2\u7ea7\u8fd4\u56de\uff0c5s \u8db3\u591f\uff0c\u8d85\u4e86\u672c\u6765\u5c31\u8be5\u653e\u5f03\u3002"""
+    urls = list(urls or [])
+    if not urls:
+        return []
+    t = min(timeout or 8, tcap)
+    if not (ThreadPoolExecutor and as_completed) or len(urls) == 1:
+        return [(u, _gen_fetch_text(u, headers, proxies, t, cap)) for u in urls]
+    ex = ThreadPoolExecutor(max_workers=min(4, len(urls)))
+    try:
+        futs = {}
+        for i, u in enumerate(urls):
+            futs[ex.submit(_gen_fetch_text, u, headers, proxies, t, cap)] = i
+        res = [''] * len(urls)
+        for f in as_completed(list(futs)):
+            i = futs[f]
+            try:
+                res[i] = f.result() or ''
+            except Exception:
+                res[i] = ''
+    finally:
+        ex.shutdown(wait=False)
+    return [(urls[i], res[i]) for i in range(len(urls))]
 
 
 
@@ -1769,21 +1838,27 @@ def _gen_extract_publish_domains(publish_page, headers, proxies, timeout, _sink=
         static.append(fin_u)          # \u8df3\u8f6c\u843d\u70b9\u672c\u8eab\u4e5f\u662f\u5019\u9009\uff08\u7ad9\u65b9\u5e38\u628a\u843d\u70b9\u505a\u6210\u6d3b\u955c\u50cf\uff09
     # \u2461 JS \u58f3\u8ddf\u968f\uff1aHTML \u62bd\u4e0d\u5230\u57fa\u57df \u2192 \u7ebf\u8def\u5728 <script src="publish.js"> \u91cc\uff08\u9ec4\u679c\u540c\u6b3e\u5f62\u6001\uff09
     #    v2.6\uff1a\u82e5\u5df2\u8ddf\u968f\u8df3\u8f6c\u58f3\uff0c\u5219\u4ee5**\u843d\u70b9\u9875**\u4e3a\u57fa\u51c6\u8ddf\u968f\uff08\u843d\u70b9\u624d\u662f\u771f\u53d1\u5e03\u9875\uff09\u3002
-    if not wilds:
+    #    2026-10-30 \u63d0\u901f\uff1a\u65e7\u5224\u636e\u53ea\u770b\u300c\u57fa\u57df=0\u300d\uff0c\u800c\u771f\u7ad9/\u666e\u901a\u53d1\u5e03\u9875\u5929\u7136\u57fa\u57df=0 \u2192 \u51e0\u4e4e\u6bcf\u6b21
+    #    \u90fd\u767d\u6293\u4e00\u904d\u9875\u9762\u91cc\u7684 jQuery/ckeditor\uff08\u4e9a\u8272\u5f71\u5e93 +13s\u3001\u7389\u7f9e\u56ed penzu \u9875 +22s\uff0c\u4e00\u6761
+    #    \u7ebf\u8def\u90fd\u6ca1\u591a\u62bd\u5230\uff09\u3002\u65b0\u5224\u636e\uff1d**\u9875\u9762\u4ec0\u4e48\u90fd\u6ca1\u62bd\u5230\uff08\u9759\u6001\u94fe\u63a5<2\uff09\u4e14\u4e0d\u50cf\u5185\u5bb9\u7ad9**\u624d\u8ddf\u8fdb\uff1b
+    #    \u5df2\u8ddf\u968f\u8df3\u8f6c\u58f3\uff08hops\uff09\u7684\u7167\u8ddf\u2014\u2014\u90a3\u4e00\u8df3\u672c\u8eab\u5c31\u662f\u58f3\u3002JS \u6539\u5e76\u884c\u6293 + \u8df3\u8fc7\u524d\u7aef\u5e93\u3002
+    _want_js = bool(hops) or (len(static) < 2 and not _gen_looks_like_content(html))
+    if not wilds and _want_js:
         _base_html = (hops[-1] if hops else html)
         _base_url = fin_u or publish_page
         js_urls = _gen_js_candidates(_base_html, _base_url)
         if js_urls:
             log('  JS \u58f3\u8ddf\u968f %d \u4e2a: %s'
                 % (len(js_urls), ', '.join(u.split('//', 1)[-1] for u in js_urls)))
-            for ju in js_urls:
-                jt = _gen_fetch_text(ju, headers, proxies, timeout)
+            for ju, jt in _gen_fetch_js_parallel(js_urls, headers, proxies, timeout):
                 if not jt:
                     log('    \u2717 %s \u53d6\u4e0d\u5230' % _gen_host_of(ju))
                     continue
                 log('    \u2713 %s %dB' % (_gen_host_of(ju), len(jt)))
                 for t in _gen_expand_b64_shells(jt):
                     _gen_scan_text(t, static, wilds)
+    elif not wilds:
+        log('  \u5df2\u6709 %d \u6761\u9759\u6001\u94fe\u63a5 / \u50cf\u5185\u5bb9\u7ad9\uff0c\u8df3\u8fc7 JS \u8ddf\u968f' % len(static))
     log('  \u62bd\u94fe: \u9759\u6001\u94fe\u63a5 %d \u4e2a / \u57fa\u57df %d \u4e2a %s'
         % (len(dict.fromkeys(static)), len(wilds),
            ('\u2192 ' + ', '.join(sorted(wilds)[:6])) if wilds else ''))
@@ -2048,6 +2123,24 @@ def _gen_resolve_host(publish_page=None, candidate_hosts=None, headers=None,
             _gen_tr('  \u547d\u4e2d\u9009\u7ad9\u7f13\u5b58 \u2192 %s\uff08%d \u79d2\u540e\u8fc7\u671f\uff09'
                 % (hit[0], int(hit[1] - time.time())))
             return hit[0]
+
+    # 0) \u5feb\u8def\u5f84\uff1a\u5019\u9009\u6c60\u62a2\u8dd1\uff082026-10-30 \u63d0\u901f\uff09
+    #    ext@hosts / \u5185\u7f6e\u5019\u9009\u91cc\u5f80\u5f80\u5df2\u7ecf\u6709\u7ad9\u65b9\u73b0\u5f79\u7ebf\u8def\uff1b\u65e7\u6d41\u7a0b\u5374\u5fc5\u987b\u5148\u628a\u53d1\u5e03\u9875\u6df1\u62bd\u94fe
+    #    \uff08\u542b\u8ddf\u968f\u5916\u94fe JS\uff0c\u5b9e\u6d4b 5~22s\uff09\u8dd1\u5b8c\uff0c\u624d\u8f6e\u5230\u63a2\u6d4b\u8fd9\u4e00\u5c42\u2014\u2014\u7ebf\u8def\u660e\u660e\u901a\u7740\u4e5f\u8981\u5e72\u7b49\u3002
+    #    \u8fd9\u91cc\u5148\u5e76\u884c\u63a2\u4e00\u8f6e\uff08\u22644s\uff09\uff1a\u547d\u4e2d\u5373\u7528\uff0c\u547d\u4e2d\u6807\u51c6\u4ecd\u7531\u8c03\u7528\u65b9 validate \u628a\u5173\uff0c\u5b89\u5168\u6027
+    #    \u4e0d\u53d8\uff1b\u5168\u6b7b\u65f6\u6309**\u5019\u9009\u6c60\u6307\u7eb9**\u8bb0 10 \u5206\u949f\uff0c\u907f\u514d\u6bcf\u6b21 init \u90fd\u767d\u7b49\u8fd9 4 \u79d2\u3002
+    #    pages \u4e3a\u7a7a\u65f6\u4e0d\u62a2\u8dd1\u2014\u2014\u90a3\u79cd\u60c5\u51b5 tier1 \u672c\u6765\u5c31\u662f\u8fd9\u6279\u5019\u9009\uff0c\u62a2\u8dd1\u53ea\u662f\u91cd\u590d\u63a2\u4e00\u904d\u3002
+    if candidate_hosts and pages:
+        _fp_key = tuple(sorted(set(candidate_hosts)))
+        if time.time() >= _gen_FAST_DEAD.get(_fp_key, 0):
+            _fp = _gen_probe_first(list(candidate_hosts), headers, proxies, 4, validate,
+                              '\u62a2\u8dd1', probe_path)
+            if _fp:
+                _gen_CACHE[key] = (_fp, time.time() + _gen_CACHE_TTL)
+                _gen_tr('  \u2605 \u62a2\u8dd1\u547d\u4e2d %s\uff08\u8df3\u8fc7\u53d1\u5e03\u9875\u6df1\u62bd\u94fe\uff0c\u7f13\u5b58 30 \u5206\u949f\uff09' % _fp)
+                return _fp
+            _gen_FAST_DEAD[_fp_key] = time.time() + 600
+            _gen_tr('  \u62a2\u8dd1\u672a\u547d\u4e2d\uff08%d \u4e2a\u5019\u9009\u5168\u6b7b\uff09\uff0c\u8f6c\u53d1\u5e03\u9875\u6df1\u62bd\u94fe' % len(candidate_hosts))
 
     # 1) \u53d1\u5e03\u9875\u6df1\u5ea6\u62bd\u94fe\uff08\u57fa\u57df\u81ea\u52a8\u751f\u6210\u5019\u9009 + \u9759\u6001\u955c\u50cf\u94fe\u63a5\uff09
     #    \u591a\u4e2a\u53d1\u5e03\u9875\uff08\u7f51\u5740\u578b + GitHub \u578b\u7b49\uff09**\u5e76\u884c**\u6293\u53d6\u3001\u7ed3\u679c\u6309\u586b\u5199\u987a\u5e8f\u5408\u5e76\uff1a
