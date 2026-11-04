@@ -90,11 +90,15 @@ _CATS = json.loads(_b64d(
 # \u5217\u8868\u6761\u76ee: <article ...><a href="...">...<h2>\u6807\u9898</h2>...
 _RE_ARTICLE = re.compile(r'<article[^>]*>.*?<a[^>]*href="([^"]+)"[^>]*>(.*?)</article>', re.S)
 _RE_H2 = re.compile(r'<h2[^>]*>(.*?)</h2>', re.S)
-# \u56fe\u5e8a\uff082026-09-11 \u5b9e\u6d4b\uff09\uff1a\u7ad9\u65b9\u9875\u9762\u4e0a\u7684\u56fe\u7247 URL host \u65f6\u5e38\u5199\u9519
-#   \u2014\u2014 \u5217\u8868 loadBannerDirect \u7528\u7684\u662f\u7edd\u5bf9\u5730\u5740 pic.ndhixj.cn\uff08\u53ef\u7528\uff09\uff1b
-#   \u2014\u2014 \u8be6\u60c5\u9875\u6b63\u6587\u5374\u662f https://www.cgddz.cc//upload_01/...\uff08\u5df2\u6b7b\uff09\u6216 /upload_01/...\uff08\u76f8\u5bf9\uff09\u3002
-# \u5b9e\u6d4b\u540c\u4e00 /upload_01/ \u8def\u5f84\u5728 pic.ndhixj.cn \u4e0a\u90fd\u80fd 200\uff0c\u6545\u7edf\u4e00\u6309 path \u5f52\u4e00\u5230\u56fe\u5e8a\u3002
-_PIC_BED = 'https://pic.ndhixj.cn'
+# \u56fe\u5e8a\uff082026-11-04 \u66f4\u65b0\uff09\uff1a\u7ad9\u65b9\u9875\u9762\u4e0a\u7684\u56fe\u7247 URL host \u65f6\u5e38\u5199\u9519
+#   \u2014\u2014 \u5217\u8868 loadBannerDirect \u7528\u7684\u662f\u7edd\u5bf9\u5730\u5740\uff1b\u8be6\u60c5\u9875\u6b63\u6587\u5374\u662f\u5df2\u6b7b\u57df\u6216\u76f8\u5bf9\u8def\u5f84\u3002
+# \u5b9e\u6d4b\u540c\u4e00 /upload_01/ \u8def\u5f84\u5728\u9ed1\u6599\u7cfb\u5404\u56fe\u5e8a\u4e0a\u4e92\u901a\uff0c\u6545\u7edf\u4e00\u6309 path \u5f52\u4e00\u5230\u56fe\u5e8a\u3002
+# \ud83d\udea9 2026-11-04\uff1apic.ndhixj.cn \u5df2\u5931\u6548\uff08DoH \u67e5 A \u8bb0\u5f55\u8fd4\u56de Status=0 \u65e0 Answer\uff0c\u76f4\u8fde
+#    ConnectionError\uff09\u2192 \u771f\u673a\u75c7\u72b6\u300c\u641c\u7d22\u6709\u7ed3\u679c\u3001\u56fe\u7247\u5168\u90e8\u6216\u90e8\u5206\u4e0d\u663e\u793a\u300d\u3002\u6539\u591a\u56fe\u5e8a\u8f6e\u8bd5\uff1a
+#    \u540c\u4e00\u6761 /upload_01/xiao/20261103/xxx.jpeg \u5728 pic.gyezbp.cn / pic.hdhwqx.cn \u5747 200
+#    \u4e14\u7ecf AES \u89e3\u5bc6\u540e\u662f\u5408\u6cd5 JPEG/PNG\uff08\u5b9e\u6d4b 174KB/235KB JPEG\u3001715KB/1.6MB PNG\uff09\u3002
+_PIC_BEDS = ('https://pic.gyezbp.cn', 'https://pic.hdhwqx.cn', 'https://pic.ndhixj.cn')
+_PIC_BED = _PIC_BEDS[0]          # \u517c\u5bb9\u65e7\u5f15\u7528\uff08\u5f52\u4e00\u5316\u9996\u9009\u56fe\u5e8a\uff09
 _BED_PATHS = ('/upload_01/', '/hc237/')
 
 # \u5c01\u9762\uff08\u6309\u4f18\u5148\u7ea7\uff09\uff1a
@@ -528,13 +532,21 @@ class Spider(BaseSpider):
         return None, b''
 
     def _img_fetch(self, url):
-        """\u53d6\u56fe\uff1b\u7ad9\u65b9 host \u5199\u9519/\u5df2\u6b7b\u65f6\u6309 path \u6362\u56fe\u5e8a\u518d\u8bd5\u4e00\u6b21\u3002"""
+        """\u53d6\u56fe\uff1b\u7ad9\u65b9 host \u5199\u9519/\u56fe\u5e8a\u5df2\u6b7b\u65f6\u6309 path \u9010\u4e2a\u6362\u56fe\u5e8a\u91cd\u8bd5\uff08\u4e0d\u5199\u6b7b\u5355\u4e00\u56fe\u5e8a\uff09\u3002"""
         mime, data = self._fetch_once(url)
-        if not data:
-            mm = re.match(r'^https?://[^/]+(/.*)$', url)
-            if mm and _PIC_BED not in url:
-                mime, data = self._fetch_once(_PIC_BED + mm.group(1))
-        return mime, data
+        if data:
+            return mime, data
+        mm = re.match(r'^https?://[^/]+(/.*)$', url)
+        if not mm:
+            return mime, data
+        path = mm.group(1)
+        for bed in _PIC_BEDS:
+            if bed in url:
+                continue
+            mime, data = self._fetch_once(bed + path)
+            if data:
+                return mime, data
+        return None, b''
 
     def localProxy(self, param):
         try:

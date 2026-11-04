@@ -325,6 +325,13 @@ class Spider(Spider):
             videos.extend(self._audio_items(json.loads(rsp.text)['model']['data']))
         except Exception:
             pass
+        # \ud83d\udea9 2026-11-04\uff1a\u672c\u7ad9\u641c\u7d22\u300c\u65e0\u547d\u4e2d\u300d\u65f6\u4e0d\u8fd4\u56de\u7a7a\uff0c\u800c\u662f**\u56de\u9000\u6210\u5168\u7ad9\u5217\u8868**
+        #   \uff08\u5b9e\u6d4b\u641c zzqqxx9988 \u2192 totalCount=2135\uff09\u3002\u771f\u673a\u75c7\u72b6\uff1d\u300c\u641c\u51fa\u4e0e\u641c\u7d22\u8bcd\u65e0\u5173\u7684\u89c6\u9891\u300d\u3002
+        #   \u6b63\u5e38\u8bcd\u547d\u4e2d\u7684\u6807\u9898\u672c\u8eab\u90fd\u542b\u5173\u952e\u8bcd\uff08\u9ed1\u6599 9/9\u3001\u7f51\u7ea2 20/20\uff09\uff0c\u6545\u672c\u5730\u6309\u6807\u9898\u8fc7\u6ee4\u5373\u53ef\uff1b
+        #   \u8fc7\u6ee4\u540e\u4e3a\u7a7a\u5c31\u662f\u7a7a \u2014\u2014 \u5b81\u53ef\u4e0d\u663e\u793a\uff0c\u4e5f\u4e0d\u62ff\u5168\u7ad9\u5217\u8868\u5145\u6570\u3002
+        kw = str(key or '').strip().lower()
+        if kw:
+            videos = [v for v in videos if kw in str(v.get('vod_name') or '').lower()]
         return {'list': videos, 'page': pg, 'pagecount': 9999}
 
     def playerContent(self, flag, id, vipFlags):

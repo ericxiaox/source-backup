@@ -276,9 +276,10 @@ class Spider(Spider):
             return {'list': []}
     
     def searchContent(self, key, quick, pg=1):
-        """\u641c\u7d22\u529f\u80fd"""
+        """\u641c\u7d22\uff082026-11-04 \u4fee\uff1a\u539f\u5b9e\u73b0\u628a\u53c2\u6570 key \u5199\u6210\u4e86\u672a\u5b9a\u4e49\u7684 keyword\uff0c
+        \u6bcf\u6b21\u641c\u7d22\u90fd NameError \u2192 \u88ab except \u541e\u6389\u540e\u6052\u8fd4\u56de\u7a7a \u2192 \u771f\u673a\u75c7\u72b6\u300c\u8fd9\u4e2a\u6e90\u641c\u4e0d\u51fa\u4e1c\u897f\u300d\uff09"""
         try:
-            search_url = f"{self.host}/node/search?q={urllib.parse.quote(keyword)}"
+            search_url = f"{self.host}/node/search?q={urllib.parse.quote(str(key or ''))}"
             print(f"Search URL: {search_url}")
             rsp = self.fetch(search_url, headers=self.header())
             soup = BeautifulSoup(rsp.text, 'html.parser')

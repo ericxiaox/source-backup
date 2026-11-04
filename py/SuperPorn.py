@@ -370,7 +370,14 @@ class Spider(BaseSpider):
         if not r or r.status_code != 200:
             self.log({"search": "fetch_failed", "url": url})
             return {"list": [], "page": page}
-        return {"list": self._parse_list(r.text, host), "page": page}
+        items = self._parse_list(r.text, host)
+        # \ud83d\udea9 2026-11-04\uff1a\u672c\u7ad9\u641c\u4e0d\u5230\u65f6**\u56de\u9000\u6210\u5168\u7ad9\u5217\u8868**\uff08\u5b9e\u6d4b lesbian 56 \u6761\u4e2d 55 \u6761\u547d\u4e2d\uff0c
+        #   \u800c zzqqxx9988 \u4ecd\u56de 30 \u6761\u4e14\u6807\u9898\u5168\u4e0d\u542b\uff09\u3002\u771f\u673a\u75c7\u72b6\uff1d\u300c\u641c\u51fa\u4e0e\u641c\u7d22\u8bcd\u65e0\u5173\u7684\u89c6\u9891\u300d\u3002
+        #   \u6309\u6807\u9898\u8fc7\u6ee4\uff1b\u8fc7\u6ee4\u540e\u7a7a\u5c31\u662f\u7a7a\u3002
+        kw = str(key or "").strip().lower()
+        if kw:
+            items = [x for x in items if kw in str(x.get("vod_name") or "").lower()]
+        return {"list": items, "page": page}
 
     # ==================== \u64ad\u653e ====================
 

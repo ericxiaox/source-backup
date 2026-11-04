@@ -619,23 +619,53 @@ class Spider(BaseSpider):
         return result
 
     def _searchContent(self, key, quick, pg='1'):
+        """\u641c\u7d22\u8d70\u7ad9\u65b9 JSON \u63a5\u53e3\uff082026-11-04 \u4fee\uff09\u3002
+
+        \U0001f6a9 \u65e7\u5b9e\u73b0\u6293 `/index/search?search_term_string=xxx` \u7684 HTML \u6b63\u5219\uff0c\u4f46\u8be5\u9875\u7684**\u641c\u7d22\u7ed3\u679c
+        \u662f Vue \u5ba2\u6237\u7aef\u6e32\u67d3**\uff08`<a v-for=\"item in searchList\">`\uff09\uff0c\u670d\u52a1\u7aef HTML \u91cc\u6ca1\u6709\u7ed3\u679c\uff1b
+        \u9875\u9762\u91cc\u552f\u4e00\u670d\u52a1\u7aef\u6e32\u67d3\u7684 `/archives/` \u94fe\u63a5\u662f\u9875\u5c3e\u300c\u70ed\u95e8\u641c\u7d22\u300d\u6807\u7b7e\u4e91 \u2192 \u4e09\u4e2a\u4e0d\u540c\u5173\u952e\u8bcd
+        \u8fd4\u56de\u540c\u4e00\u6279 15 \u6761 tag\u3001\u4e14 tag \u6ca1\u5c01\u9762\uff0c\u771f\u673a\u75c7\u72b6\uff1d\u300c\u641c\u51fa\u4e0e\u641c\u7d22\u8bcd\u65e0\u5173\u7684\u89c6\u9891\uff0b\u5168\u90e8\u65e0\u56fe\u300d\u3002
+        \u771f\u63a5\u53e3\u5728 `/static/v4/javascript/home/searchresult.js` \u7684 requestSearchFromApi()\uff1a
+        POST /index/search_article  (word, page) \u2192 {code:0,data:{list:[{id,title,thumb,...}]}}
+        """
         result = {'list': []}
         try:
-            body = self._get(f'/index/search?search_term_string={quote(key)}').text or ''
+            word = str(key or '').strip()
+            if not word:
+                return result
+            try:
+                cur = max(1, int(str(pg or '1')))
+            except Exception:
+                cur = 1
+            h = dict(self.headers)
+            h['X-Requested-With'] = 'XMLHttpRequest'
+            h['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
+            h['Accept'] = 'application/json, text/javascript, */*; q=0.01'
+            h['Referer'] = self.host + '/index/search'
+            r = requests.post(self.host + '/index/search_article',
+                              data={'word': word, 'page': str(cur)},
+                              headers=h, proxies=self.proxies, timeout=15, verify=False)
+            if r.status_code != 200:
+                print('[\u9ed1\u6599\u7f51] \u641c\u7d22\u63a5\u53e3 HTTP %s' % r.status_code)
+                return result
+            body = (r.json() or {}).get('data') or {}
+            # \ud83d\udea9 \u53ea\u8bfb list\uff1b`recommend_list` \u662f\u300c\u65e0\u7ed3\u679c\u65f6\u7684\u63a8\u8350\u300d\uff0c\u62ff\u5b83\u5145\u6570\uff1d\u53c8\u4e00\u6b21\u641c\u51fa\u65e0\u5173\u5185\u5bb9
             seen = set()
-            for m in _RE_SEARCH.finditer(body):
-                vid = m.group(2)
-                if vid in seen:
+            for x in (body.get('list') or []):
+                if not isinstance(x, dict) or x.get('is_ad'):
+                    continue
+                vid = str(x.get('id') or '').strip()
+                if not vid or vid in seen:
                     continue
                 seen.add(vid)
                 result['list'].append({
                     'vod_id': vid,
-                    'vod_name': _html.unescape(m.group(3)).strip(),
-                    'vod_pic': '',
-                    'vod_remarks': '',
+                    'vod_name': _html.unescape(str(x.get('title') or '')).strip() or vid,
+                    'vod_pic': self._pic(str(x.get('thumb') or '')),
+                    'vod_remarks': str(x.get('remark') or ''),
                 })
-        except Exception:
-            pass
+        except Exception as e:
+            print('[\u9ed1\u6599\u7f51] \u641c\u7d22\u5f02\u5e38 %s: %s' % (type(e).__name__, str(e)[:60]))
         return result
 
     def searchContentPage(self, key, quick, pg):

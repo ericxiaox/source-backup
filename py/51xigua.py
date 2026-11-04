@@ -140,7 +140,7 @@ class Spider(Spider):
                 ]
             
             result['class'] = classes
-            result['list'] = self.getlist(data('#index article a'))
+            result['list'] = self.getlist(data('#index article'))
             return result
             
         except Exception as e:
@@ -153,7 +153,7 @@ class Spider(Spider):
             if response.status_code != 200:
                 return {'list': []}
             data = self.getpq(response.text)
-            return {'list': self.getlist(data('#index article a, #archive article a'))}
+            return {'list': self.getlist(data('#index article, #archive article'))}
         except Exception as e:
             print(f"homeVideoContent error: {e}")
             return {'list': []}
@@ -257,7 +257,7 @@ class Spider(Spider):
                     return {'list': [], 'page': pg, 'pagecount': 1, 'limit': 90, 'total': 0}
                     
                 data = self.getpq(response.text)
-                videos = self.getlist(data('#archive article a, #index article a'), tid)
+                videos = self.getlist(data('#archive article, #index article'), tid)
                 
             result = {}
             result['list'] = videos
@@ -361,7 +361,7 @@ class Spider(Spider):
                 return {'list': [], 'page': pg}
                 
             data = self.getpq(response.text)
-            videos = self.getlist(data('#archive article a, #index article a'))
+            videos = self.getlist(data('#archive article, #index article'))
             return {'list': videos, 'page': pg}
             
         except Exception as e:
@@ -765,15 +765,21 @@ class Spider(Spider):
         videos = []
         l = '/mrdg' in tid
         for k in data.items():
+            # \u517c\u5bb9\u4e24\u79cd\u5165\u53c2\uff1a<a> \u5361\u7247\u4e0e <article> \u5361\u7247\u3002
+            # \ud83d\udea9 \u53ea\u4f20 <a> \u65f6\uff0c\u5c01\u9762\u811a\u672c loadBannerDirect \u5728 <a> \u5916\u9762\uff08\u6302\u5728 <article> \u5185\uff09\uff0c
+            #    k('script') \u6052\u4e3a\u7a7a \u2192 vod_pic \u5168\u7a7a\u3002\u771f\u673a\u75c7\u72b6\uff1a\u6709\u641c\u7d22\u7ed3\u679c\u4f46\u4e00\u5f20\u56fe\u90fd\u6ca1\u6709
+            #    \uff082026-11-04 \u5b9a\u4f4d\uff0c\u5206\u7c7b\u9875\u4e0e\u641c\u7d22\u9875\u5171\u7528\u672c\u51fd\u6570\uff0c\u540c\u6b64\u4fee\uff09\u3002
             a = k.attr('href')
-            b = k('h2').text()
+            if not a:
+                a = k('a').eq(0).attr('href')
+            b = k('h2').text() or k('.post-title').text()
             # Some pages might not include datePublished; use a fallback
             c = k('span[itemprop="datePublished"]').text() or k('.post-meta, .entry-meta, time').text()
             if a and b:
                 videos.append({
                     'vod_id': f"{a}{'@folder' if l else ''}",
                     'vod_name': b.replace('\n', ' '),
-                    'vod_pic': self.getimg(k('script').text()),
+                    'vod_pic': self.getimg(k('script').text(), k),
                     'vod_remarks': c or '',
                     'vod_tag': 'folder' if l else '',
                     'style': {"type": "rect", "ratio": 1.33}
@@ -798,13 +804,33 @@ class Spider(Spider):
                 })
         return videos
 
-    def getimg(self, text):
-        match = re.search(r"loadBannerDirect\('([^']+)'", text)
-        if match:
-            url = match.group(1)
-            return f"{self.getProxyUrl()}&url={url}&type=img"
-        else:
+    def getimg(self, text, elem=None):
+        """\u53d6\u5c01\u9762\u88f8 URL \u2192 \u5305\u6210\u4ee3\u7406\u5730\u5740\u3002
+
+        \U0001f6a9 2026-11-04\uff1a\u672c\u7ad9\u5c01\u9762\u6709\u4e24\u4ee3\u5199\u6cd5\uff0c\u53ea\u8ba4\u7b2c\u4e00\u4ee3\u4f1a\u8ba9\u6574\u6e90\u65e0\u56fe\uff1a
+          \u2460 `loadBannerDirect('URL')` \u2014\u2014 \u53ea\u5728 script \u91cc\uff0c\u641c\u7d22\u9875\u5728\u7528\uff1b
+          \u2461 `x-bg-loader-url=\"URL\"` \u2014\u2014 \u9996\u9875/\u5206\u7c7b\u7684 CSS \u80cc\u666f\u56fe\uff08data-no-loading=1\uff09\uff0c
+             \u4e0d\u5728 script \u5185\uff0c`k('script').text()` \u62ff\u4e0d\u5230 \u2192 \u5fc5\u987b\u56de\u770b\u5361\u7247 outer_html\u3002
+        """
+        m = re.search(r"loadBannerDirect\('([^']+)'", text or '')
+        url = m.group(1) if m else ''
+        if not url and elem is not None:
+            html = elem.outer_html() if hasattr(elem, 'outer_html') else str(elem)
+            for pat in (r'x-bg-loader-url="([^"]+)"',
+                        r'data-xkrkllgl="([^"]+)"',
+                        r'<img[^>]+(?:data-src|src)="([^"]+)"'):
+                m2 = re.search(pat, html)
+                if m2 and m2.group(1):
+                    url = m2.group(1)
+                    break
+        url = (url or '').strip()
+        if not url:
             return ''
+        if url.startswith('//'):
+            url = 'https:' + url
+        elif url.startswith('/'):
+            url = self.host + url
+        return f"{self.getProxyUrl()}&url={url}&type=img"
 
     def aesimg(self, word):
         key = b'f5d965df75336270'
