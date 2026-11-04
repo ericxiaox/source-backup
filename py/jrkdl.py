@@ -566,11 +566,14 @@ class Spider(Spider):
 
     def d64(self, encoded_text):
         try:
+            encoded_text = str(encoded_text or '').replace(' ', '+')
+            encoded_text += '=' * (-len(encoded_text) % 4)
             encoded_bytes = encoded_text.encode('utf-8')
-            decoded_bytes = b64decode(encoded_bytes)
+            decoded_bytes = b64decode(encoded_bytes, altchars=b'-_')
             return decoded_bytes.decode('utf-8')
         except Exception as e:
             print(f"Base64解码错误: {str(e)}")
+            return ''
             return ""
 
     def get_working_host(self):

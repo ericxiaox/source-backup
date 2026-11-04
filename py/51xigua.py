@@ -443,11 +443,14 @@ class Spider(Spider):
 
     def d64(self, encoded_text):
         try:
+            encoded_text = str(encoded_text or '').replace(' ', '+')
+            encoded_text += '=' * (-len(encoded_text) % 4)
             encoded_bytes = encoded_text.encode('utf-8')
-            decoded_bytes = b64decode(encoded_bytes)
+            decoded_bytes = b64decode(encoded_bytes, altchars=b'-_')
             return decoded_bytes.decode('utf-8')
         except Exception as e:
             print(f"Base64解码错误: {str(e)}")
+            return ''
             return ""
 
     def _resolve_inline(self, publish, builtin, validate):
@@ -776,10 +779,16 @@ class Spider(Spider):
             # Some pages might not include datePublished; use a fallback
             c = k('span[itemprop="datePublished"]').text() or k('.post-meta, .entry-meta, time').text()
             if a and b:
+                pic = self.getimg(k('script').text(), k)
+                if not pic:
+                    # \u6a21\u677f\u968f\u673a \u2192 DOM \u53d6\u4e0d\u5230\u65f6\u6309 id \u56de\u6574\u9875\u5b9a\u4f4d\uff08\u89c1 _seg_by_id\uff09
+                    seg = self._seg_by_id(a)
+                    if seg:
+                        pic = self.getimg('', None, seg)
                 videos.append({
                     'vod_id': f"{a}{'@folder' if l else ''}",
                     'vod_name': b.replace('\n', ' '),
-                    'vod_pic': self.getimg(k('script').text(), k),
+                    'vod_pic': pic,
                     'vod_remarks': c or '',
                     'vod_tag': 'folder' if l else '',
                     'style': {"type": "rect", "ratio": 1.33}
@@ -804,7 +813,7 @@ class Spider(Spider):
                 })
         return videos
 
-    def getimg(self, text, elem=None):
+    def getimg(self, text, elem=None, html_content=None):
         """\u53d6\u5c01\u9762\u88f8 URL \u2192 \u5305\u6210\u4ee3\u7406\u5730\u5740\u3002
 
         \U0001f6a9 2026-11-04\uff1a\u672c\u7ad9\u5c01\u9762\u6709\u4e24\u4ee3\u5199\u6cd5\uff0c\u53ea\u8ba4\u7b2c\u4e00\u4ee3\u4f1a\u8ba9\u6574\u6e90\u65e0\u56fe\uff1a
@@ -814,16 +823,18 @@ class Spider(Spider):
         """
         m = re.search(r"loadBannerDirect\('([^']+)'", text or '')
         url = m.group(1) if m else ''
-        if not url and elem is not None:
-            html = elem.outer_html() if hasattr(elem, 'outer_html') else str(elem)
+        if not url and html_content is None and elem is not None:
+            html_content = elem.outer_html() if hasattr(elem, 'outer_html') else str(elem)
+        if not url and html_content:
             for pat in (r'x-bg-loader-url="([^"]+)"',
+                        r"loadBannerDirect\('([^']+)'",
                         r'data-xkrkllgl="([^"]+)"',
                         r'<img[^>]+(?:data-src|src)="([^"]+)"'):
-                m2 = re.search(pat, html)
+                m2 = re.search(pat, html_content)
                 if m2 and m2.group(1):
                     url = m2.group(1)
                     break
-        url = (url or '').strip()
+        url = (url or '').strip().replace('&amp;', '&')
         if not url:
             return ''
         if url.startswith('//'):
@@ -831,6 +842,31 @@ class Spider(Spider):
         elif url.startswith('/'):
             url = self.host + url
         return f"{self.getProxyUrl()}&url={url}&type=img"
+
+    def _seg_by_id(self, href):
+        """\u6309 archive id \u56de\u6574\u9875\u539f\u6587\u5207\u51fa\u8be5\u6761\u76ee\u7684\u5361\u7247\u7247\u6bb5\uff082026-11-04\uff09\u3002
+
+        \u4e3a\u4ec0\u4e48\u4e0d\u9760 DOM\uff1a\u672c\u7ad9\u7fa4\u955c\u50cf\u6bcf\u6b21\u8bf7\u6c42\u968f\u673a\u6362\u6a21\u677f\uff0c\u5c01\u9762\u53ef\u80fd\u843d\u5728 <script>\u3001
+        `<div x-bg-loader-url>`\uff0c\u751a\u81f3 article \u5916\u5c42\u5361\u7247\uff1bDOM \u5c42\u7ea7\u4e00\u6362\u5c31\u6574\u6279\u7a7a\u56fe\u3002
+        \u6539\u4e3a\u300c\u7528 /archives/{id}/ \u5b9a\u4f4d\uff0c\u622a\u5230\u4e0b\u4e00\u4e2a\u6761\u76ee\u300d\u2014\u2014\u6a21\u677f\u600e\u4e48\u6362\u90fd\u80fd\u635e\u5230\u3002
+        """
+        m = re.search(r'/archives/(\d+)/', str(href or ''))
+        if not m:
+            return ''
+        aid = m.group(1)
+        page = getattr(self, '_last_html', '') or ''
+        if not page:
+            return ''
+        pos = page.find('post-card-' + aid)
+        if pos < 0:
+            pos = page.find('/archives/' + aid + '/')
+        if pos < 0:
+            return ''
+        seg = page[pos:pos + 3000]
+        nxt = re.search(r'post-card-\d+', seg[12:])
+        if nxt:
+            seg = seg[:12 + nxt.start()]
+        return seg
 
     def aesimg(self, word):
         key = b'f5d965df75336270'
@@ -840,6 +876,15 @@ class Spider(Spider):
         return decrypted
 
     def getpq(self, data):
+        # 2026-11-04\uff1a\u7559\u4e00\u4efd\u6574\u9875\u539f\u6587\u3002\u672c\u7ad9\u7fa4\u955c\u50cf\u4f1a**\u968f\u673a\u8fd4\u56de\u4e0d\u540c\u6a21\u677f**\uff08\u540c\u4e00\u4e2a\u57df\u540d\u4e24\u6b21\u6293\u53d6\uff0c
+        # \u6709\u65f6 article \u5185\u662f <script>loadBannerDirect()\uff0c\u6709\u65f6\u662f <div x-bg-loader-url>\uff0c\u6709\u65f6
+        # \u5c01\u9762\u5e72\u8106\u6302\u5728 article \u5916\u5c42\u7684\u5361\u7247\u4e0a\uff09\u2192 \u5355\u9760 DOM \u5c42\u7ea7\u53d6\u56fe\u5fc5\u7136\u6709\u4e00\u6279\u6761\u76ee\u7a7a\u5c01\u9762\u3002
+        # \u6539\u6cd5\uff1a\u6309 `/archives/{id}/` \u7684 id \u56de\u6574\u9875\u539f\u6587\u5b9a\u4f4d\u5c01\u9762\uff0c\u7ed5\u5f00\u5c42\u7ea7\u5dee\u5f02\u3002
+        try:
+            if isinstance(data, str):
+                self._last_html = data
+        except Exception:
+            pass
         try:
             return pq(data)
         except Exception as e:

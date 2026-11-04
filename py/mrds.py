@@ -868,7 +868,12 @@ class Spider(BaseSpider):
         return b64encode(str(text).encode()).decode()
 
     def d64(self, text):
-        return b64decode(str(text).encode()).decode()
+        try:
+            text = str(text or '').replace(' ', '+')
+            text += '=' * (-len(text) % 4)
+            return b64decode(text.encode(), altchars=b'-_').decode()
+        except Exception:
+            return ''
 
     def aesimg(self, data):
         if len(data) < 16: return data

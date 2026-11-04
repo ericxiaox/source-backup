@@ -410,7 +410,13 @@ class Spider(BaseSpider):
     def searchContent(self, key, quick, pg=1):
         pg = int(pg or 1)
         self._ensure_host()
-        url = '%s/vodsearch/%s----------%d---/.html' % (self.host, quote(str(key)), pg)
+        # \ud83d\udea9 2026-11-04\uff1a\u65e7\u5199\u6cd5\u628a\u5173\u952e\u8bcd\u585e\u8fdb\u8def\u5f84 `/vodsearch/{kw}----------1---/.html`
+        #   \u88ab WAF \u5224\u6210\u653b\u51fb\u4e32 \u2192 \u6052 403\uff08146B \u62e6\u622a\u9875\uff09\u2192 \u771f\u673a\u75c7\u72b6\u300c\u8fd9\u4e2a\u6e90\u641c\u4e0d\u51fa\u4e1c\u897f\u300d\u3002
+        #   \u7ad9\u70b9\u5b9e\u9645\u63a5\u53d7\u67e5\u8be2\u4e32\u5f62\u5f0f `/vodsearch/-------------.html?wd={kw}&page={pg}`
+        #   \u5b9e\u6d4b\uff1a\u6b63\u5e38\u8bcd 200/67116B/18 \u6761\uff1b\u5783\u573e\u8bcd 200/37113B/0 \u6761\uff08\u6309\u8bcd\u8fc7\u6ee4\u6b63\u5e38\uff09\u3002
+        url = '%s/vodsearch/-------------.html?wd=%s' % (self.host, quote(str(key)))
+        if pg > 1:
+            url += '&page=%d' % pg
         html = self._get_page(url)
         return {'list': self._parse_search(html), 'page': pg}
 

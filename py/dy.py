@@ -220,7 +220,9 @@ class Spider(BaseSpider):
 
     def d64(self, s):
         try:
-            return base64.b64decode((s or '').encode('utf-8')).decode('utf-8')
+            s = (s or '').replace(' ', '+')          # \u771f\u673a query \u89e3\u6790\u628a + \u53d8\u7a7a\u683c
+            s += '=' * (-len(s) % 4)                 # padding \u53ef\u80fd\u88ab\u5403
+            return base64.b64decode(s.encode('utf-8'), altchars=b'-_').decode('utf-8')
         except Exception:
             return ''
 

@@ -134,6 +134,11 @@ class Spider(BaseSpider):
         try:
             html = self._post_html(url, data)
             items = self._parse_search_results(html)
+            # \ud83d\udea9 2026-11-04\uff1a\u7ad9\u65b9\u641c\u7d22\u63a5\u53e3\u5df2\u5ffd\u7565 wd\uff0c\u5783\u573e\u8bcd\u4e5f\u56de 24 \u6761\u5168\u7ad9\u5185\u5bb9
+            #   \u2192 \u771f\u673a\u75c7\u72b6\u300c\u641c\u7d22\u51fa\u6765\u8ddf\u641c\u7684\u8bcd\u6ca1\u5173\u7cfb\u300d\u3002\u672c\u5730\u6309\u6807\u9898\u5f3a\u8fc7\u6ee4\u515c\u5e95\u3002
+            kw = str(key or "").strip().lower()
+            if kw:
+                items = [x for x in items if kw in str(x.get("vod_name") or "").lower()]
             return {"list": items, "page": int(pg)}
         except Exception as e:
             self.log(f"searchContent error: {e}")

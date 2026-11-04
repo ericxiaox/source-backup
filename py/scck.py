@@ -74,9 +74,10 @@ _SITE_KEY = '\u0048\u0053\u0043\u004b'
 
 # \u53d1\u5e03\u7ad9\uff08423 B JS \u8df3\u8f6c\u58f3\uff1b\u8df3\u8f6c\u57df\u540d\u5199\u5728\u58f3\u91cc\u7684\u53d8\u91cf\uff0c\u4f1a\u8f6e\u6362\uff09
 _PUBLISH = 'http://\u0068\u0073\u0063\u006b.net/'
-# \u5185\u7f6e\u515c\u5e95\uff1a\u771f\u7ad9\uff082026-09-16 \u7531\u300c\u58f3\u2192\u95e8\u9762\u2192302\u300d\u5b9e\u6d4b\u843d\u70b9\uff09
+# \u5185\u7f6e\u515c\u5e95\uff1a\u771f\u7ad9\uff082026-11-04 \u7531\u300c\u58f3\u2192\u95e8\u9762\u2192302\u300d\u5b9e\u6d4b\u843d\u70b9 444.9965\u0068\u0073\u0063\u006b.cc\uff09
+# \u26a0 \u65e7\u7684 333.9960\u0068\u0073\u0063\u006b.cc \u5df2\u662f\u50f5\u5c38\u955c\u50cf\uff1a\u4efb\u610f\u8def\u5f84\u90fd\u5410\u9996\u9875\uff0c\u522b\u518d\u653e\u56de\u6765
 _BUILTIN_HOSTS = [
-    "http://\u0068\u0073\u0063\u006b.net"
+    "https://444.9965\u0068\u0073\u0063\u006b.cc"
 ]
 # \u5185\u7f6e\u515c\u5e95\uff1a\u95e8\u9762\u57df\uff08\u58f3\u91cc\u5b9e\u6d4b\u51fa\u73b0\u8fc7\u7684\uff1b\u5e26 :8899\uff0c**\u5fc5\u987b\u5e26 ?u=&p= \u624d\u6709\u5185\u5bb9**\uff09
 _BUILTIN_GATES = ['5858.space:8899', '2626.space:8899']
@@ -130,6 +131,20 @@ def _valid_page(text):
     """\u5185\u5bb9\u9875\u5224\u5b9a\uff1a\u542b\u5217\u8868\u9aa8\u67b6\u4e14\u771f\u6761\u76ee\u8db3\u591f\u6ee1\uff08`/v5/{aid}-{sid}-{nid}.html` \u2265 4\uff09\u3002"""
     t = text or ''
     return ('stui-vodlist' in t) and len(re.findall(r'/v5/\d+-\d+-\d+\.html', t)) >= 4
+
+
+def _valid_probe(text):
+    """\u63a2\u9488\u9875\u5224\u5b9a\uff082026-11-04 \u52a0\u56fa\uff09\uff1a\u5185\u5bb9\u9875\u5224\u636e + **\u5fc5\u987b\u771f\u7684\u662f\u5206\u7c7b\u9875**\u3002
+
+    \u5751\uff1a\u7ad9\u7fa4\u4f1a\u6302\u300c\u50f5\u5c38\u955c\u50cf\u300d\u2014\u2014\u5982 333.9960\u0068\u0073\u0063\u006b.cc \u5bf9**\u4efb\u610f\u8def\u5f84**\uff08\u542b `/vodsearch/?wd=`\uff09
+    \u4e00\u5f8b\u5410\u9996\u9875 92969B\u3002\u9996\u9875\u81ea\u5e26 130+ \u6761 `/v5/` \u94fe\u63a5\uff0c\u8db3\u4ee5\u9a97\u8fc7 _valid_page\uff0c\u4e8e\u662f
+    \u63a2\u9488\u628a\u5b83\u5224\u6210\u6d3b\u57df\u3001\u9489\u8fdb\u8bb0\u5fc6 \u2192 \u5206\u7c7b\u548c\u641c\u7d22\u5168\u62ff\u9996\u9875 \u2192 \u300c\u641c\u7d22\u51fa\u4e0e\u5173\u952e\u8bcd\u65e0\u5173\u7684\u89c6\u9891\u300d\u3002
+    \u6b63\u5e38\u5206\u7c7b\u9875\u5fc5\u5e26\u5206\u9875\u9aa8\u67b6\uff08`stui-page` \u6216 `/vodtype/{tid}-{pg}.html`\uff09\uff0c\u9996\u9875\u6ca1\u6709\u3002
+    """
+    if not _valid_page(text):
+        return False
+    t = text or ''
+    return ('stui-page' in t) or bool(_RE_TAIL.search(t))
 
 
 class Spider(BaseSpider):
@@ -287,7 +302,7 @@ class Spider(BaseSpider):
                              proxies=self.proxies, timeout=6, verify=False,
                              allow_redirects=True)
             body = r.text or ''
-            ok = (r.status_code == 200 and _valid_page(body))
+            ok = (r.status_code == 200 and _valid_probe(body))
             self.trace.append('%s -> %s %s' % (host_base, r.status_code, 'OK' if ok else '\u975e\u5185\u5bb9'))
             if ok and not result[0]:
                 result[0] = host_base

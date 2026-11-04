@@ -475,7 +475,9 @@ class Spider(BaseSpider):
 
     def d64(self, s):
         try:
-            return base64.b64decode((s or '').encode()).decode()
+            s = (s or '').replace(' ', '+')
+            s += '=' * (-len(s) % 4)
+            return base64.b64decode(s.encode(), altchars=b'-_').decode()
         except Exception:
             return ''
 

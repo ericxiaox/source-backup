@@ -165,32 +165,45 @@ class Spider(Spider):
     def parseList(self, html):
         res = []
         seen = set()
-        for m in re.finditer(r'<a[^>]+class=["\'][^"\']*stui-vodlist__thumb[^"\']*["\'][^>]+href=["\']/movie/index(\d+)\.html["\'][\s\S]*?(?=<a[^>]+class=["\'][^"\']*stui-vodlist__thumb|</ul>|</body>)', html or "", re.S):
-            item = m.group(0)
-            vid = m.group(1)
+        html = html or ""
+        # \u6807\u9898\u515c\u5e95\u8868\uff1adetail \u533a <h3 class="title"><a href="/movie/index{id}.html">\u6807\u9898</a>
+        name_map = {}
+        for vid0, t0 in re.findall(
+                r'<h3[^>]*class=["\'][^"\']*title[^"\']*["\'][^>]*>\s*<a[^>]+href=["\']/movie/index(\d+)\.html["\'][^>]*>(.*?)</a>',
+                html, re.S):
+            name_map[vid0] = self.clean(re.sub(r'<[^>]+>', '', t0))
+        # \ud83d\udea9 2026-11-04 \u4e24\u4e2a\u5751\u4e00\u8d77\u4fee\uff1a
+        #   \u2460 \u539f\u6b63\u5219\u628a class \u5199\u6b7b\u5728 href \u4e4b\u524d\uff08`class="stui-vodlist__thumb" \u2026 href=\u2026`\uff09\uff0c
+        #      \u7ad9\u70b9\u4e00\u8c03\u5c5e\u6027\u987a\u5e8f\u5c31\u6574\u9875 0 \u6761\uff1b
+        #   \u2461 \u540c\u4e00\u90e8\u7247\u6709**\u4e24\u4e2a** `<a href="/movie/index{id}.html">`\uff1a\u7f29\u7565\u56fe\u90a3\u4e2a\uff08\u5e26
+        #      data-original \u5c01\u9762\uff09\u548c detail \u533a h3 \u91cc\u7684\u7eaf\u6587\u5b57\u6807\u9898\u94fe\u63a5\u3002\u53ea\u6309 href \u5339\u914d\u4f1a\u5148
+        #      \u547d\u4e2d\u6807\u9898\u94fe\u63a5\uff0c`seen` \u53bb\u91cd\u540e\u628a\u5e26\u56fe\u7684\u94fe\u63a5\u5168\u90e8\u8df3\u8fc7 \u2192 \u6709\u6807\u9898\u6ca1\u5c01\u9762\u3002
+        #   \u6539\u4e3a\u300c\u904d\u5386 <a> \u5757 \u2192 \u53ea\u91c7\u7eb3\u5e26\u5c01\u9762\u5c5e\u6027\u7684\u5757\u300d\uff0c\u6807\u9898\u7528 detail \u533a\u6620\u5c04\u515c\u5e95\u3002
+        for m in re.finditer(r'<a\b([^>]*)>(.*?)</a>', html, re.S):
+            attrs, body = m.group(1), m.group(2)
+            if not re.search(r'stui-vodlist__thumb|data-original|data-src', attrs):
+                continue
+            # \ud83d\udea9 \u7f29\u7565\u56fe\u94fe\u63a5\u662f `/play/{id}-0-0.html`\uff0c\u8be6\u60c5\u94fe\u63a5\u624d\u662f `/movie/index{id}.html`
+            #   \u2014\u2014 \u539f\u6b63\u5219\u53ea\u8ba4\u540e\u8005\uff0c\u7f29\u7565\u56fe\u5757\u5168\u88ab\u8df3\u8fc7\u3002\u4e24\u79cd\u90fd\u6536\uff0cvid \u7edf\u4e00\u53d6\u7eaf\u6570\u5b57
+            #   \uff08detailContent \u6309 `/movie/index{vid}.html` \u62fc\u8be6\u60c5\u9875\uff09\u3002
+            hm = (re.search(r'href=["\']/play/(\d+)-\d+-\d+\.html', attrs)
+                  or re.search(r'href=["\']/movie/index(\d+)\.html', attrs))
+            if not hm:
+                continue
+            vid = hm.group(1)
             if not vid or vid in seen:
                 continue
             seen.add(vid)
-            name = self.clean(self.match(item, r'title=["\']([^"\']+)') or self.match(item, r'alt=["\']([^"\']+)'))
-            pic = self.fix(self.match(item, r'(?:data-original|data-src|src)=["\']([^"\']+\.(?:jpg|jpeg|png|webp|gif)[^"\']*)'))
-            remarks = self.clean(self.match(item, r'<span[^>]+class=["\'][^"\']*pic-text[^"\']*["\'][^>]*>(.*?)</span>'))
+            name = self.clean(self.match(attrs, r'title=["\']([^"\']+)') or name_map.get(vid, ''))
+            pic = self.fix(self.match(attrs, r'(?:data-original|data-src|src)=["\']([^"\']+\.(?:jpg|jpeg|png|webp|gif)[^"\']*)'))
+            if not pic:
+                pic = self.fix(self.match(body, r'(?:data-original|data-src|src)=["\']([^"\']+\.(?:jpg|jpeg|png|webp|gif)[^"\']*)'))
+            remarks = self.clean(self.match(body, r'<span[^>]+class=["\'][^"\']*pic-text[^"\']*["\'][^>]*>(.*?)</span>'))
             if name:
                 res.append({
                     "vod_id": vid,
                     "vod_name": name,
                     "vod_pic": pic,
                     "vod_remarks": remarks
-                })
-        if not res:
-            for m in re.finditer(r'<a[^>]+href=["\']/movie/index(\d+)\.html["\'][^>]*title=["\']([^"\']+)["\'][\s\S]*?(?:data-original|data-src|src)=["\']([^"\']+)["\']', html or "", re.S):
-                vid = m.group(1)
-                if vid in seen:
-                    continue
-                seen.add(vid)
-                res.append({
-                    "vod_id": vid,
-                    "vod_name": self.clean(m.group(2)),
-                    "vod_pic": self.fix(m.group(3)),
-                    "vod_remarks": ""
                 })
         return res

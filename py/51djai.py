@@ -548,7 +548,10 @@ class Spider(Spider):
         except Exception: return ""
 
     def d64(self, text):
-        try: return base64.b64decode(str(text).encode("utf-8")).decode("utf-8")
+        try:
+            text = str(text or '').replace(' ', '+')
+            text += '=' * (-len(text) % 4)
+            return base64.b64decode(text.encode("utf-8"), altchars=b'-_').decode("utf-8")
         except Exception: return ""
 
     def localProxy(self, param):

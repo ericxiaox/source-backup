@@ -311,27 +311,36 @@ class Spider(BaseSpider):
         items = []
         if not html:
             return items
-        pattern = r'<li[^>]*class="[^"]*content-item[^"]*"[^>]*>(.*?)</li>'
-        li_matches = re.findall(pattern, html, re.DOTALL)
-        for li in li_matches:
-            link_match = re.search(r'<a[^>]*href="([^"]+)"[^>]*>', li)
-            if not link_match:
+        # \ud83d\udea9 2026-11-04\uff1a\u7ad9\u65b9\u6a21\u677f\u4ece `<li class="content-item">` \u6539\u6210 `<a class="vod-item">`
+        #   \uff08\u641c\u7d22\u7ed3\u679c\u9875\u5b9e\u6d4b 200/70KB \u542b 12 \u6761 /vod/detail/id/*.html\uff0c\u4f46\u65e7\u6b63\u5219 content-item
+        #   \u547d\u4e2d 0 \u6b21 \u2192 \u771f\u673a\u75c7\u72b6\u300c\u8fd9\u4e2a\u6e90\u641c\u4e0d\u51fa\u4e1c\u897f\u300d\uff09\u3002
+        #   \u6539\u4e3a\u904d\u5386 <a> \u5757\u3001\u6309 class \u542b vod-item \u5224\u5b9a\uff0c\u987a\u5e26\u517c\u5bb9\u65e7 content-item \u5916\u5c42 li\u3002
+        seen = set()
+        for m in re.finditer(r'<a\b([^>]*)>(.*?)</a>', html, re.S):
+            attrs, body = m.group(1), m.group(2)
+            if 'vod-item' not in attrs and 'content-item' not in attrs:
+                # \u65e7\u6a21\u677f\uff1a<li class="content-item"><a ...>\u6807\u9898</a>\u2026
                 continue
-            link = link_match.group(1)
-            title_match = re.search(r'<a[^>]*title="([^"]*)"', li)
-            title = title_match.group(1) if title_match else ""
-            img_match = re.search(r'<img[^>]*data-original="([^"]+)"', li)
-            if not img_match:
-                img_match = re.search(r'<img[^>]*src="([^"]+)"', li)
-            pic = img_match.group(1) if img_match else ""
-            note_match = re.search(r'<span[^>]*class="[^"]*note[^"]*"[^>]*>([^<]*)</span>', li)
-            remark = note_match.group(1) if note_match else ""
-            vid_match = re.search(r'/vod/detail/id/(\d+)\.html', link)
-            vid = vid_match.group(1) if vid_match else link
+            vm = re.search(r'/vod/detail/id/(\d+)\.html', attrs)
+            if not vm:
+                continue
+            vid = vm.group(1)
+            if vid in seen:
+                continue
+            seen.add(vid)
+            title = (re.search(r'title="([^"]*)"', attrs) or re.search(r'alt="([^"]*)"', body)
+                     or re.search(r'alt="([^"]*)"', attrs))
+            title = title.group(1) if title else ""
+            im = re.search(r'(?:data-original|data-src)="([^"]+)"', body) or re.search(r'(?:data-original|data-src)="([^"]+)"', attrs)
+            if not im:
+                im = re.search(r'<img[^>]*src="([^"]+)"', body)
+            pic = im.group(1) if im else ""
+            nm = re.search(r'<span[^>]*class="[^"]*note[^"]*"[^>]*>([^<]*)</span>', body)
+            remark = nm.group(1) if nm else ""
             if title:
                 items.append({
                     "vod_id": vid,
-                    "vod_name": title.strip(),
+                    "vod_name": title.strip().replace('&amp;', '&').replace('&quot;', '"').replace('&#39;', "'"),
                     "vod_pic": pic,
                     "vod_remarks": remark.strip()
                 })
