@@ -97,6 +97,37 @@ class Spider(Spider):
     def destroy(self):
         pass
 
+    @staticmethod
+    def _pick_cats(raw):
+        """\u4ece\u5bfc\u822a <a> \u91cc\u6311\u51fa\u771f\u5206\u7c7b\uff1a\u53ea\u7559\u7ad9\u5185\u5217\u8868\u9875\uff0c\u6309 href \u53bb\u91cd\uff082026-11-04\uff09\u3002
+
+        \u672c\u7ad9\u7fa4\u628a\u5e7f\u544a\u76f4\u63a5\u585e\u8fdb\u5206\u7c7b\u680f\uff0c\u7edd\u4e0d\u80fd\u539f\u6837\u900f\u4f20\uff1a
+          \u00b7 \u7ad9\u5916 `http(s)://`\u3001`//` \u2192 \u63a8\u5e7f/aff \u5e7f\u544a\uff0851\u6210\u4eba\u5bfc\u822a\u300151\u5403\u74dcAPP\u300151\u771f\u4eba\u88f8\u804a\u2026\uff09
+          \u00b7 \u7ad9\u5185 `*.html`\u3001`/archives/{id}/` \u2192 \u5355\u9875/\u5355\u7bc7\uff08\u5206\u4eab\u9886\u73b0\u91d1\u3001\u6c42\u74dc\u6295\u7a3f\u3001\u5546\u52a1\u5408\u4f5c\u2026\uff09
+          \u771f\u5206\u7c7b\u5f62\u5982 `/category/xxx/`\uff0c\u9996\u9875\u4e3a `/`\u3002
+        \u515c\u5e95\uff1a\u7ad9\u70b9\u6362\u6a21\u677f\u5bfc\u81f4\u4e00\u6761\u90fd\u4e0d\u5269\u65f6\uff0c\u9000\u5230\u300c\u7ad9\u5185 + \u975e .html + \u975e /archives\u300d\u7684\u5bbd\u677e\u5224\u636e\uff0c
+        \u907f\u514d\u628a\u5206\u7c7b\u680f\u76f4\u63a5\u505a\u7a7a\u3002
+        """
+        seen = set()
+        strict = []
+        loose = []
+        for href, name in raw:
+            h = (href or '').strip()
+            if not h or h in seen:
+                continue
+            if h.startswith('//') or re.match(r'^https?://', h, re.I):
+                continue                      # \u7ad9\u5916\u5e7f\u544a
+            if not h.startswith('/'):
+                continue
+            if h.startswith('/archives') or re.search(r'\.html?(?:$|[?#])', h):
+                continue                      # \u5355\u7bc7 / \u5355\u9875
+            seen.add(h)
+            item = {'type_name': name, 'type_id': h}
+            loose.append(item)
+            if h == '/' or h.startswith('/category/'):
+                strict.append(item)
+        return strict if len(strict) >= 3 else (loose or strict)
+
     def homeContent(self, filter):
 
         try:
@@ -108,28 +139,32 @@ class Spider(Spider):
             result = {}
             classes = []
             
-            # Try to get categories from different possible locations
+            # \ud83d\udea9 2026-11-04 \u5206\u7c7b\u680f\u4e24\u4e2a\u5751\uff08\u771f\u673a\u75c7\u72b6\uff1a\u5206\u7c7b\u91cc\u4e00\u534a\u662f\u5e7f\u544a\u3001\u540d\u5b57\u8fde\u6210\u4e00\u957f\u4e32\uff09\uff1a
+            #   \u2460 \u539f\u6765\u6309 `li` \u904d\u5386\uff0c\u4f1a\u547d\u4e2d\u300c\u5403\u74dc\u70ed\u95e8\u300d\u8fd9\u79cd\u7236\u5b50\u5bb9\u5668 li \u2014\u2014 \u5b83\u5185\u542b 6 \u4e2a\u5b50\u5206\u7c7b <a>\uff0c
+            #      `link.text()` \u628a 6 \u4e2a\u540d\u5b57\u62fc\u6210\u591a\u884c \u2192 \u5206\u7c7b\u540d\u9519\u4f4d\u3001tid \u91cd\u590d\u51fa\u73b0\uff1b
+            #   \u2461 \u540c\u4e00\u6279 <a> \u91cc\u6df7\u7740 10 \u4e2a\u7ad9\u5916\u63a8\u5e7f\uff0851\u6210\u4eba\u5bfc\u822a/51\u5403\u74dcAPP/51\u771f\u4eba\u88f8\u804a/51\u7504\u9009\u5305\u517b\u2026\uff0c
+            #      \u6307\u5411 aff \u63a8\u5e7f\u57df\uff09\u548c 10 \u4e2a\u7ad9\u5185\u5355\u9875\uff08\u5206\u4eab\u9886\u73b0\u91d1/\u6c42\u74dc\u6295\u7a3f/\u5546\u52a1\u5408\u4f5c/\u52a0\u5165\u6211\u4eec\u2026\uff0c
+            #      \u70b9\u8fdb\u53bb 0 \u6761\uff09\u3002\u539f\u5b9e\u73b0\u53ea\u6392\u9664 `#`\uff0c\u5168\u90fd\u5f53\u6210\u4e86\u5206\u7c7b\u3002
+            #   \u6539\u6cd5\uff1a\u76f4\u63a5\u5728 <a> \u7ea7\u904d\u5386\uff08\u4e00 a \u4e00\u5206\u7c7b\uff09+ \u53ea\u6536\u7ad9\u5185\u5217\u8868\u9875 + \u6309 href \u53bb\u91cd\u3002
             category_selectors = [
-                '.category-list ul li',
-                '.nav-menu li',
-                '.menu li',
-                'nav ul li'
+                '.category-list a',
+                '.nav-menu a',
+                '.menu a',
+                'nav ul a',
             ]
-            
+
+            raw = []
             for selector in category_selectors:
                 for k in data(selector).items():
-                    link = k('a')
-                    href = (link.attr('href') or '').strip()
-                    name = (link.text() or '').strip()
+                    href = (k.attr('href') or '').strip()
+                    name = (k.text() or '').strip().replace('\n', ' ')
                     # Skip placeholder or invalid entries
                     if not href or href == '#' or not name:
                         continue
-                    classes.append({
-                        'type_name': name,
-                        'type_id': href
-                    })
-                if classes:
+                    raw.append((href, name))
+                if raw:
                     break
+            classes = self._pick_cats(raw)
             
             # If no categories found, create some default ones
             if not classes:
@@ -778,6 +813,10 @@ class Spider(Spider):
             b = k('h2').text() or k('.post-title').text()
             # Some pages might not include datePublished; use a fallback
             c = k('span[itemprop="datePublished"]').text() or k('.post-meta, .entry-meta, time').text()
+            # \ud83d\udea9 \u7ad9\u5916\u94fe\u63a5\uff1d\u5e7f\u544a\uff08\u672c\u7ad9\u7fa4\u5728\u5217\u8868\u91cc\u63d2 aff \u5361\u7247\uff0c\u591a\u6570\u65e0\u6807\u9898\u5df2\u88ab b \u6321\u6389\uff0c
+            #   \u4f46\u4e2a\u522b\u955c\u50cf\u4f1a\u914d\u4e00\u53e5\u6587\u6848 \u2192 \u518d\u6309\u57df\u515c\u4e00\u5c42\uff0c\u522b\u8ba9\u5e7f\u544a\u8fdb\u5217\u8868\uff09
+            if a and (a.startswith('http://') or a.startswith('https://') or a.startswith('//')):
+                continue
             if a and b:
                 pic = self.getimg(k('script').text(), k)
                 if not pic:
