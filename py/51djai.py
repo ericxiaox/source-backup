@@ -1,586 +1,428 @@
 # coding=utf-8
-import json, ssl, re, base64, random, urllib.parse, time, hashlib
-from base.spider import Spider
-import requests
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
+"""
+51\u77ed\u5267 AI \u7248 \u2014\u2014 2026-11-14 \u6309\u7ad9\u65b9 2026-11-12 \u5927\u6539\u7248\u6574\u5957\u91cd\u5199\u3002
 
-# \u53d6\u57df\u547d\u4e2d\u8bb0\u5fc6\uff082026-10-30 \u63d0\u901f\uff09\uff1a_resolve_domain \u6bcf\u8f6e init \u90fd\u8981\u300c\u6293\u53d1\u5e03\u9875 \u2192 \u8ffd\u4e00\u8df3 \u2192 base64 \u89e3\u300d\uff0c
-# \u5b9e\u6d4b\u6bcf\u6b21 1.1s \u4e14\u7b2c 2 \u6b21\u4ecd 1.1s \uff1d \u6bcf\u6b21\u767d\u63a2\u3002\u7ad9\u65b9\u7684 host \u662f\u300c\u968f\u673a\u524d\u7f00+\u56fa\u5b9a\u540e\u7f00\u300d\uff0c
-# \u751f\u6210\u51fa\u6765\u7684\u57df\u90fd\u53ef\u7528\uff0c\u6240\u4ee5\u8bb0\u4f4f\u4e0a\u6b21\u90a3\u4e2a\u5c31\u884c\uff0c10 \u5206\u949f\u540e\u91cd\u89e3\u4e00\u6b21\u515c\u4f4f\u6362\u540e\u7f00\u3002
-_LAST_GOOD = ['', 0.0]
-_LAST_GOOD_TTL = 600
+\u65e7\u7248\uff08Nuxt SSR\uff09\u5df2\u5168\u90e8\u4f5c\u5e9f\uff1a
+  - \u65e7\u8def\u5f84 rank-drama/week/\u3001explore-drama/\u3001drama-detail/\u3001play/\u3001search-drama/ \u5168 404\uff1b
+  - \u65e7\u6570\u636e\u8f7d\u4f53 <script id=\"__NUXT_DATA__\"> \u5df2\u4e0d\u5b58\u5728 \u21d2 \u539f\u89e3\u6790\u5668\u6052 0 \u6761\uff08\u4f53\u68c0\u5b9e\u6d4b\uff09\u3002
+  - \u8fde\u5e26\u5e9f\u5f03\uff1aAES \u56fe\u5e8a\u89e3\u5bc6\u3001\u52a0\u5bc6 API\u3001\u5f39\u5e55 XML\u3001\u672c\u5730\u56fe\u7247\u6620\u5c04\u6587\u4ef6\u3002
+
+\u65b0\u7248\uff08\u670d\u52a1\u7aef\u6e32\u67d3 HTML\uff09\uff1a
+  - \u680f\u76ee /recommend/{pg}/\u3001/newest/{pg}/\u3001/ai-duanju/{pg}/\u3001/ai-manju/{pg}/ \u2026
+    /tag/{slug}/ \u7684\u5206\u9875\u5374\u662f /tag/{slug}/page/{pg}/\uff08\u4e0e\u680f\u76ee\u4e0d\u540c\uff0c\u522b\u7167\u6284\uff09\u3002
+  - \u5217\u8868\u5361\u7247 .hg-card-grid .hg-drama-card\uff08\u6bcf\u9875 20 \u6761\uff09\u3002\u641c\u7d22\u5efa\u8bae\u5f39\u5c42\u3001\u4fa7\u680f\u63a8\u8350\u91cc\u7684
+    \u540c\u540d\u5361\u7247\u4e0d\u5728 .hg-card-grid \u5185\uff0c\u7528\u5bb9\u5668\u9650\u5b9a\u5373\u5929\u7136\u6392\u9664\uff0c\u4e0d\u80fd\u5168\u9875\u626b\u3002
+    \u6392\u884c\u699c\u9875 /ranks/hot/ \u53e6\u7528 .hg-rank-item\uff0825 \u6761\uff0c\u65e0\u5206\u9875\uff09\u3002
+  - \u6807\u9898 <a> \u5185\u6df7\u6709 <span class=\"sr-only\">\u5168\u96c6\u5728\u7ebf\u89c2\u770b</span>\uff0c\u53d6 a[0].text \u624d\u5e72\u51c0\u3002
+  - \u8be6\u60c5\u5373\u64ad\u653e\u9875 /video/{id}/\uff0c\u7b2c N \u96c6 /video/{id}/ep-{N}/\u3002
+    <script id=\"videoInitialData\" type=\"application/json\"> \u5185\u542b
+      title / coverSrc / description / tags / tracking.total_episode /
+      epPlaySrcs\uff08\u5f53\u524d\u96c6 \u00b11 \u7684\u6ed1\u52a8\u7a97\u53e3\uff0c\u6700\u591a 3 \u6761\uff09/ videoSrc\uff08\u5f53\u524d\u96c6\u76f4\u94fe\uff0c\u5e26\u65f6\u6548\u7968\u636e\uff09\u3002
+    \u21d2 \u6bcf\u96c6\u5728\u81ea\u5df1\u7684\u96c6\u9875\u53d6 videoSrc\uff1b\u7f3a\u76f4\u94fe\u65f6\u539f\u6837\u8fd4\u56de\u96c6\u9875\u5730\u5740\u5e76\u6253\u65e5\u5fd7\uff0c
+      \U0001f6a9 \u7edd\u4e0d\u515c\u5e95\u5230\u7b2c\u4e00\u96c6\uff082026-10-26 \u65e7\u7248\u8840\u6559\u8bad\uff09\u3002
+  - \u641c\u7d22\u5fc5\u987b\u8d70\u9759\u6001\u8def\u5f84 /search/keyword/{\u8bcd}/{pg}/\u3002
+    /search/?q= \u53ea\u662f\u8df3\u8f6c\u5165\u53e3\uff0cCloudFront \u7f13\u5b58\u5ffd\u7565 query string\uff0c\u5b9e\u6d4b\u8bf7\u6c42\u300c\u4e3d\u6625\u9662\u300d
+    \u4f1a\u62ff\u5230\u300c\u6559\u5b66 \u7b2c2\u9875\u300d\u7684\u7ed3\u679c\uff1b\u4e14 301 \u76ee\u6807\u7531 cookie \u51b3\u5b9a \u21d2 \u7edd\u4e0d\u53ef\u7528\u3002
+    \u547d\u4e2d\u9875\u6709\u300c\u5171 N \u4e2a\u7ed3\u679c\u300d\uff1b\u65e0\u547d\u4e2d\u9875\u6ca1\u6709\u8fd9\u884c\uff0c\u5374\u585e 7 \u5f20\u300c\u731c\u4f60\u559c\u6b22\u300d\u5361 \u21d2 \u5fc5\u987b\u5148\u5224\u7a7a\u3002
+
+\u53d6\u57df\uff082026-11-14 \u5b9a\u6848\uff09\uff1a
+  - \u53d1\u5e03\u9875 https://51dj20.com/ \u2192 \u8df3\u677f \u2192 Base64 \u89e3\u7801\u9875\u91cc\u5217\u7740\u771f\u5b9e\u56fa\u5b9a\u57df\u3002
+  - \u65e7\u5b9e\u73b0\u9760 words.random() \u62fc\u300c\u968f\u673a\u524d\u7f00 + .henoceapn.cc\u300d\u57df\uff0c\u5b9e\u6d4b 8 \u4e2a\u5168\u90e8\u8fde\u4e0d\u4e0a
+    \uff1d \u5047\u81ea\u6108\uff08\u6280\u80fd\u4e66 \u5171\u7528/03 \u00a7\u5341\uff09\uff1b\u73b0\u6539\u4e3a\u5148\u8bd5\u5185\u7f6e\u6d3b\u57df\uff0c\u5168\u6302\u624d\u4ece\u53d1\u5e03\u9875\u62bd\u94fe\u9010\u4e2a\u9a8c\u9996\u9875\u7279\u5f81\u3002
+"""
+import base64
+import json
+import re
+import time
+import urllib.parse
+
+import requests
+from base.spider import Spider
+from pyquery import PyQuery as pq
+
+PUBLISH = "https://51dj20.com/"
+# 2026-11-14 \u5b9e\u6d4b\u53ef\u8fbe\u3001\u4e14\u8fd4\u56de\u65b0\u7248 HTML \u7684\u56fa\u5b9a\u57df\uff08\u53d1\u5e03\u9875\u89e3\u7801\u5185\u5bb9\u91cc\u4e5f\u6709\u5176\u4e00\uff09
+FALLBACK_HOSTS = [
+    "https://873f8.dikclehn.cc/",
+    "https://ceiling.sysrycady.com/",
+]
+_LAST_GOOD = ["", 0.0]      # [host, expire_ts]
+_HOST_TTL = 600
+_EP_CACHE = {}              # {sid: {ep: (ts, m3u8)}}
+_EP_TTL = 300               # \u76f4\u94fe\u5e26 auth_key \u65f6\u6548\u7968\u636e\uff0c\u7f13\u5b58 5 \u5206\u949f\u540e\u91cd\u53d6
+
+CLASSES = [
+    {"type_id": "recommend",    "type_name": "\u63a8\u8350"},
+    {"type_id": "newest",       "type_name": "\u6700\u65b0"},
+    {"type_id": "rank_hot",     "type_name": "\u6392\u884c\u699c"},
+    {"type_id": "ai_duanju",    "type_name": "AI\u77ed\u5267"},
+    {"type_id": "ai_manju",     "type_name": "AI\u6f2b\u5267"},
+    {"type_id": "ai_huanlian",  "type_name": "AI\u6362\u8138"},
+    {"type_id": "ai_mogai",     "type_name": "AI\u9b54\u6539"},
+    {"type_id": "tag_chengren", "type_name": "\u6210\u4eba\u6807\u7b7e"},
+    {"type_id": "tag_lunli",    "type_name": "\u4f26\u7406\u6807\u7b7e"},
+    {"type_id": "tag_doushi",   "type_name": "\u90fd\u5e02\u6807\u7b7e"},
+]
+CAT_PATH = {
+    "recommend": "recommend",
+    "newest": "newest",
+    "rank_hot": "ranks/hot",
+    "ai_duanju": "ai-duanju",
+    "ai_manju": "ai-manju",
+    "ai_huanlian": "ai-huanlian",
+    "ai_mogai": "ai-mogai",
+}
 
 
 class Spider(Spider):
-    def getName(self): return "51\u77ed\u5267"
+    def getName(self):
+        return "51\u77ed\u5267"
 
     def init(self, extend=""):
-        self.publish = "https://51dj20.com/"
-        self.ua = "Mozilla/5.0 (Linux; Android 16) AppleWebKit/537.36 Chrome/143.0 Mobile Safari/537.36"
-        self.headers = {"User-Agent": self.ua, "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", "Accept-Language": "zh-CN,zh;q=0.9", "Referer": self.publish}
+        self.ua = "Mozilla/5.0 (Linux; Android 16; Pixel 8) AppleWebKit/537.36 Chrome/143.0.0.0 Mobile Safari/537.36"
+        self.headers = {
+            "User-Agent": self.ua,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "zh-CN,zh;q=0.9",
+        }
         self.session = requests.Session()
-        self.media_key = b"f5d965df75336270"
-        self.media_iv = b"97b60394abc2fbe1"
-        self.api_host = "https://api.51dj1.com"
-        self.api_key = b"2acf7e91e9864673"
-        self.api_iv = b"1c29882d3ddfcfd6"
-        try: ssl._create_default_https_context = ssl._create_unverified_context
-        except Exception: pass
-        self.host = "https://ceiling.sysrycady.com/"
+        self.host = FALLBACK_HOSTS[0]
         self._resolve_domain()
-        self.image_map = {}; self.image_id_map = {}
-        try:
-            with open("/storage/emulated/0/\u5f71\u89c6/AI/51\u77ed\u5267/51\u77ed\u5267\u56fe\u7247\u6620\u5c04.json", "r", encoding="utf-8") as f: raw = f.read()
-            for x in self._walk(self._payload(raw), ["video_id", "title"]):
-                title = str(x.get("title") or ""); cover = self._pic(x.get("cover") or x.get("cover_img") or x.get("cover_image"))
-                if title and cover: self.image_map[title] = cover; self.image_id_map[str(x.get("video_id"))] = cover
-            for title, cover in re.findall(r'\"title\"\s*:\s*\"([^\"]+)\"[\s\S]{0,300}?\"cover\"\s*:\s*\"([^\"]+)\"', raw):
-                self.image_map.setdefault(title, self._pic(cover))
-            print(f"[51短剧] 图片映射: 标题{len(self.image_map)}条, ID{len(self.image_id_map)}条")
-        except Exception as e: print(f"[51短剧] 图片映射读取失败: {e}")
-        self.classes = [{"type_id":"actor","type_name":"\u6f14\u5458"},{"type_id":"drama","type_name":"\u5267\u96c6"},{"type_id":"drama_week","type_name":"\u5267\u96c6\u5468\u699c"},{"type_id":"drama_month","type_name":"\u5267\u96c6\u6708\u699c"},{"type_id":"aisd","type_name":"AI\u6210\u4eba\u77ed\u5267"}]
-        self.filters = {"actor":[{"key":"sort","name":"\u6f14\u5458","value":[{"n":"\u70ed\u95e8","v":"hot"},{"n":"\u7537\u6f14\u5458","v":"2"},{"n":"\u5973\u6f14\u5458","v":"1"}]}],"drama":[{"key":"theme","name":"\u4e3b\u9898","value":[{"n":"\u5168\u90e8","v":"0"},{"n":"\u6210\u4eba","v":"1"},{"n":"AI\u6f2b\u5267","v":"46"},{"n":"51\u539f\u521b","v":"47"},{"n":"AI\u9b54\u6539\u77ed\u5267","v":"51"},{"n":"\u81f4\u5bcc","v":"63"},{"n":"\u4fee\u4ed9","v":"59"},{"n":"\u53a8\u795e","v":"60"},{"n":"\u8bfb\u5fc3","v":"61"},{"n":"\u4eca\u53e4\u8054\u901a","v":"62"},{"n":"\u5973\u6027\u6210\u957f","v":"4"},{"n":"\u9274\u5b9d","v":"64"},{"n":"\u4eb2\u60c5","v":"65"},{"n":"\u672b\u4e16","v":"66"},{"n":"\u6b66\u4fa0","v":"67"},{"n":"\u840c\u5ba0","v":"68"},{"n":"\u840c\u5b9d","v":"69"},{"n":"\u771f\u5047\u5343\u91d1","v":"70"},{"n":"\u9752\u6625","v":"18"},{"n":"\u73b0\u8a00","v":"3"},{"n":"\u5947\u5e7b","v":"5"},{"n":"\u6218\u795e","v":"6"},{"n":"\u5bab\u6597","v":"7"},{"n":"\u53e4\u8a00","v":"8"},{"n":"\u7384\u5e7b","v":"9"},{"n":"\u8111\u6d1e","v":"10"},{"n":"\u6743\u8c0b","v":"11"},{"n":"\u5e74\u4ee3\u7231\u60c5","v":"12"},{"n":"\u79cd\u7530","v":"15"},{"n":"\u60ac\u7591","v":"13"},{"n":"\u6c11\u56fd\u7231\u60c5","v":"16"},{"n":"\u8f7b\u677e\u559c\u5267","v":"17"},{"n":"\u5fd7\u602a","v":"19"},{"n":"\u8d85\u80fd","v":"58"},{"n":"\u5f3a\u5236","v":"57"},{"n":"\u5f02\u4e16\u754c","v":"56"},{"n":"NTR","v":"55"},{"n":"\u7eaf\u7231","v":"71"},{"n":"\u7fa4\u50cf","v":"78"}]},{"key":"setting","name":"\u8bbe\u5b9a","value":[{"n":"\u5168\u90e8","v":"0"},{"n":"\u540e\u5bab","v":"20"},{"n":"NTR","v":"55"},{"n":"\u53cd\u5dee","v":"38"},{"n":"\u6deb\u59bb","v":"74"},{"n":"\u5c11\u5987","v":"73"},{"n":"\u5927\u7537\u4e3b","v":"20"},{"n":"\u5927\u5973\u4e3b","v":"7"},{"n":"\u7cfb\u7edf","v":"29"},{"n":"\u91cd\u751f","v":"27"},{"n":"\u7a7f\u8d8a","v":"28"},{"n":"\u795e\u8c6a","v":"23"},{"n":"\u6253\u8138\u8650\u6e23","v":"25"},{"n":"\u9a6c\u7532","v":"26"},{"n":"\u8ffd\u59bb/\u592b\u706b\u846c\u573a","v":"72"},{"n":"\u4e92\u76f8\u6551\u8d4e","v":"22"},{"n":"\u751c\u5ba0","v":"88"},{"n":"\u53cc\u5411\u5954\u8d74","v":"48"},{"n":"\u4f20\u627f\u89c9\u9192","v":"38"},{"n":"\u5bb6\u957f\u91cc\u77ed","v":"37"},{"n":"\u7834\u955c\u91cd\u5706","v":"36"},{"n":"\u8650\u604b","v":"35"},{"n":"\u9738\u603b","v":"34"},{"n":"\u5f3a\u8005\u56de\u5f52","v":"33"},{"n":"\u5148\u5a5a\u540e\u7231","v":"32"},{"n":"\u5c0f\u4eba\u7269","v":"31"},{"n":"\u9006\u88ad","v":"39"},{"n":"\u4f26\u7406","v":"92"},{"n":"\u51fa\u8f68","v":"98"},{"n":"\u5077\u60c5","v":"97"},{"n":"\u5fa1\u59d0","v":"89"},{"n":"\u841d\u8389","v":"88"},{"n":"\u66ff\u5ac1","v":"82"},{"n":"\u56e2\u5ba0","v":"81"},{"n":"\u65e0CP","v":"80"}]},{"key":"background","name":"\u80cc\u666f","value":[{"n":"\u5168\u90e8","v":"0"},{"n":"\u6821\u56ed","v":"54"},{"n":"\u67b6\u7a7a","v":"53"},{"n":"\u6c11\u56fd","v":"52"},{"n":"\u804c\u573a","v":"45"},{"n":"\u5e74\u4ee3","v":"44"},{"n":"\u73b0\u4ee3","v":"40"},{"n":"\u90fd\u5e02","v":"41"},{"n":"\u53e4\u4ee3","v":"42"},{"n":"\u4e61\u6751","v":"43"}]},{"key":"audience","name":"\u53d7\u4f17","value":[{"n":"\u5168\u90e8","v":"0"},{"n":"\u7537","v":"1"},{"n":"\u5973","v":"2"}]},{"key":"time","name":"\u65f6\u95f4","value":[{"n":"\u5168\u90e8","v":"0"},{"n":"7\u5929\u5185","v":"7"},{"n":"14\u5929\u5185","v":"14"},{"n":"30\u5929\u5185","v":"30"},{"n":"90\u5929\u5185","v":"90"}]},{"key":"recommend","name":"\u63a8\u8350","value":[{"n":"\u9ed8\u8ba4","v":"0"},{"n":"\u6700\u65b0","v":"time"},{"n":"\u6700\u70ed","v":"hits"},{"n":"\u539f\u521b","v":"original"}]}]}
+        self.headers["Referer"] = self.host
 
-        self.filters["actor"][0]["value"] += [{"n":"\u65b0\u4eba\u699c","v":"new"},{"n":"\u70ed\u5ea6\u699c","v":"hot"},{"n":"\u63a8\u8350\u699c","v":"recommend"}]
+    # ---------- \u53d6\u57df ----------
+    def _alive(self, url):
+        try:
+            h = dict(self.headers)
+            h["Cache-Control"] = "no-cache"
+            r = self.session.get(url, headers=h, timeout=8, verify=False)
+            body = r.content.decode("utf-8", "ignore")
+            return r.status_code == 200 and "hg-drama-card" in body and "51\u77ed\u5267" in body[:4000]
+        except Exception:
+            return False
+
+    def _from_publish(self):
+        """\u53d1\u5e03\u9875 \u2192 \u8df3\u677f \u2192 Base64 \u89e3\u7801\u9875 \u2192 \u62bd\u56fa\u5b9a\u57df \u2192 \u9010\u4e2a\u9a8c\u9996\u9875\u3002\u62bd 0 \u6761\u7b97\u5931\u8d25\uff0c\u4e0d\u4f2a\u9020\u3002"""
+        try:
+            r = self.session.get(PUBLISH, headers=self.headers, timeout=10, verify=False)
+            m = re.search(r'<a[^>]+href=["\'](https?://[^"\']+)', r.text, re.I)
+            if not m:
+                return ""
+            jump_url = m.group(1)
+            jump = self.session.get(jump_url, headers=self.headers, timeout=10, verify=False).text
+            jump_host = urllib.parse.urlparse(jump_url).netloc.lower()
+            m = re.search(r'Base64\.decode\(["\']([^"\']+)["\']\)', jump, re.I)
+            if not m:
+                return ""
+            page = base64.b64decode(m.group(1)).decode("utf-8", "ignore")
+            doms = re.findall(r'https?://([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.cc)', page, re.I)
+            cand, seen = [], set()
+            for d in doms:
+                d = d.lower()
+                if d in seen or d == jump_host or d.endswith("." + jump_host) or "51dj20" in d:
+                    continue
+                seen.add(d)
+                cand.append("https://" + d + "/")
+            print("[51\u77ed\u5267] \u53d1\u5e03\u9875\u62bd\u5230 %d \u4e2a\u5019\u9009\u57df" % len(cand))
+            for u in cand[:8]:
+                if self._alive(u):
+                    return u
+        except Exception as e:
+            print("[51\u77ed\u5267] \u53d1\u5e03\u9875\u53d6\u57df\u5931\u8d25: %s" % e)
+        return ""
 
     def _resolve_domain(self):
         if _LAST_GOOD[0] and _LAST_GOOD[1] > time.time():
             self.host = _LAST_GOOD[0]
-            self.headers["Referer"] = self.host
-            print(f"[51短剧] 域名(记忆): {self.host}")
             return
-        try:
-            h = self.session.get(self.publish, headers=self.headers, timeout=12, verify=False).text
-            m = re.search(r'<a[^>]+href=["\'](https?://[^"\']+)', h, re.I)
-            if not m: return
-            h = self.session.get(m.group(1), headers=self.headers, timeout=12, verify=False).text
-            m = re.search(r'Base64\.decode\(["\']([^"\']+)["\']\)', h, re.I)
-            if not m: return
-            decoded = base64.b64decode(m.group(1)).decode("utf-8", "ignore")
-            m = re.search(r"words\.random\(\)\s*\+\s*[\"']([^\"']+)[\"']", decoded, re.I)
-            if not m: return
-            suffix = m.group(1).strip()
-            prefix = "".join(random.choice("abcdefghjkmnpqrstuvwxy23456789") for _ in range(5))
-            self.host = "https://" + prefix + suffix.lstrip("/")
-            if not self.host.endswith("/"): self.host += "/"
-            self.headers["Referer"] = self.host
-            _LAST_GOOD[0] = self.host
-            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
-            print(f"[51短剧] 域名: {self.host}")
-        except Exception as e: print(f"[51短剧] 域名解析失败: {e}")
+        host = ""
+        for u in FALLBACK_HOSTS:
+            if self._alive(u):
+                host = u
+                break
+        if not host:
+            host = self._from_publish()
+        if not host:
+            host = FALLBACK_HOSTS[0]      # \u5168\u6302\u4e5f\u4e0d\u5199\u6b7b\u7a7a\uff0c\u7559\u7ed9 _req \u62a5\u9519\u4e0e\u4e0b\u6b21\u91cd\u8bd5
+            print("[51\u77ed\u5267] \u672a\u53d6\u5230\u6d3b\u57df\uff0c\u6682\u7528\u5185\u7f6e\u9996\u9009")
+        self.host = host
+        _LAST_GOOD[0], _LAST_GOOD[1] = host, time.time() + _HOST_TTL
+        print("[51\u77ed\u5267] \u57df\u540d: %s" % host)
 
     def _req(self, url):
         try:
-            r = self.session.get(url, headers=self.headers, timeout=20, verify=False)
-            if r.status_code != 200 and _LAST_GOOD[0] and str(url).startswith(_LAST_GOOD[0]):
-                # \u8bb0\u5fc6\u57df\u6253\u4e0d\u901a \u2192 \u5fd8\u6389\uff0c\u4e0b\u6b21 init \u91cd\u89e3\uff08\u5426\u5219\u6362\u540e\u7f00\u540e\u88ab\u9489\u4f4f\u6574\u4e2a TTL\uff09
-                _LAST_GOOD[0], _LAST_GOOD[1] = '', 0.0
-            return r.text if r.status_code == 200 else ""
+            r = self.session.get(url, headers=self.headers, timeout=15, verify=False)
+            if r.status_code != 200:
+                if _LAST_GOOD[0] and str(url).startswith(_LAST_GOOD[0]):
+                    _LAST_GOOD[0], _LAST_GOOD[1] = "", 0.0   # \u6362\u57df\u540e\u522b\u88ab\u9489\u5728 TTL \u91cc
+                return ""
+            return r.content.decode("utf-8", "ignore")
         except Exception as e:
-            print(f"[51短剧] 请求失败: {url} {e}")
-            if _LAST_GOOD[0] and str(url).startswith(_LAST_GOOD[0]):
-                _LAST_GOOD[0], _LAST_GOOD[1] = '', 0.0
+            print("[51\u77ed\u5267] \u8bf7\u6c42\u5931\u8d25: %s %s" % (url, e))
             return ""
 
-    def _payload(self, html):
-        m = re.search(r'<script[^>]+id=["\']__NUXT_DATA__["\'][^>]*>(.*?)</script>', html, re.S | re.I)
-        if not m: return None
+    # ---------- \u901a\u7528\u89e3\u6790 ----------
+    def _fix(self, u):
+        u = str(u or "").replace("\\u002F", "/").replace("\\/", "/")
+        if u.startswith("http"):
+            return u
+        return self.host.rstrip("/") + "/" + u.lstrip("/")
+
+    def _initial(self, html):
+        m = re.search(r'<script[^>]*id=["\']videoInitialData["\'][^>]*>(.*?)</script>', html or "", re.S | re.I)
+        if not m:
+            return {}
         try:
-            raw=json.loads(m.group(1).strip()); memo={}
-            def get(i):
-                if not isinstance(i,int) or i<0 or i>=len(raw): return i
-                if i in memo: return memo[i]
-                x=raw[i]
-                if isinstance(x,list):
-                    out=[]; memo[i]=out
-                    for v in x: out.append(get(v))
-                    return out
-                if isinstance(x,dict):
-                    out={}; memo[i]=out
-                    for k,v in x.items(): out[k]=get(v)
-                    return out
-                memo[i]=x; return x
-            return get(0)
-        except Exception as e:
-            print(f"[51短剧] Nuxt解析失败: {e}")
+            return json.loads(m.group(1).strip()) or {}
+        except Exception:
+            return {}
+
+    def _card_vod(self, c):
+        a = c.find(".hg-drama-card__title a")
+        if not a:
             return None
+        title = (a[0].text or "").strip()          # \u53ea\u53d6\u9996\u4e2a\u6587\u672c\u8282\u70b9\uff0c\u7529\u6389 sr-only
+        link = c.find(".hg-drama-card__cover-link").attr("href") or a.attr("href") or ""
+        if not title or not link or "/video/" not in link:
+            return None
+        img = c.find(".hg-drama-card__cover-link img")
+        pic = img.attr("data-src") or img.attr("src") or ""
+        if "cover-placeholder" in pic:
+            pic = ""
+        ep = c.find(".hg-drama-card__episode").text() or ""
+        m = re.search("(\u5168\\d+\u96c6|\u66f4\u65b0\u81f3\\d+\u96c6)", ep)
+        return {
+            "vod_id": self._fix(link),
+            "vod_name": title,
+            "vod_pic": self._fix(pic) if pic else "",
+            "vod_remarks": m.group(1) if m else "",
+            "vod_tag": "",
+        }
 
-    def _walk(self, obj, keys):
+    def _cards(self, html):
+        if not html:
+            return []
         out, seen = [], set()
-        def go(x):
-            if isinstance(x, dict):
-                if all(k in x for k in keys):
-                    mark = str(x.get(keys[0])) + str(x.get(keys[1]))
-                    if mark not in seen: seen.add(mark); out.append(x)
-                for v in x.values(): go(v)
-            elif isinstance(x, list):
-                for v in x: go(v)
-        go(obj); return out
-
-    def _pic(self, x):
-        if not isinstance(x, str): return ""
-        url=x.replace("\\u002F", "/").replace("\\/", "/").replace("&amp;", "&").strip()
-        if not url: return ""
-        if url.startswith("//"): url = "https:" + url
-        elif not url.startswith("http"): url = self._fix(url)
-        try: return self.getProxyUrl()+"&url="+urllib.parse.quote(self.e64(url), safe="")+"&type=img"
-        except Exception: return url
-
-    def _media(self, x):
-        if not isinstance(x, str): return ""
-        url=x.replace("\\u002F", "/").replace("\\/", "/").replace("&amp;", "&").strip()
-        if not url: return ""
-        if url.startswith("//"): return "https:" + url
-        if url.startswith("http"): return url
-        return self._fix(url)
-
-    def _num(self, n):
-        try:
-            n=int(float(str(n).replace(",","")))
-            return str(round(n/10000,1)).rstrip(".0")+"W" if n>=10000 else str(n)
-        except Exception: return ""
-
-    def _xml(self, s):
-        s = str(s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        q = chr(34)
-        return s.replace(q, "\x26quot;")
-
-
-    def _api_decrypt(self, obj):
-        try:
-            if isinstance(obj, str): obj=json.loads(obj)
-            data=str(obj.get("data") or "").replace(" ","+")
-            if not data: return obj if isinstance(obj, dict) else {}
-            raw=base64.b64decode(data)
-            txt=unpad(AES.new(self.api_key,AES.MODE_CBC,self.api_iv).decrypt(raw), AES.block_size).decode("utf-8","ignore")
-            return json.loads(txt)
-        except Exception as e:
-            print(f"[51短剧] API解密失败: {e}")
-            return {}
-
-    def _api_post(self, path, data):
-        try:
-            hdr=dict(self.headers)
-            hdr.update({"Accept":"application/json, text/plain, */*","Content-Type":"application/x-www-form-urlencoded","Origin":self.host.rstrip("/"),"Referer":self.host})
-            body={"bundleId":"com.pwa.mater","version":"1.3.2","oauth_id":"7d05538c4b8a5e74e82f93c0dab0163c","oauth_type":"web","language":"zh","via":"pwa","token":"","trace_id":"7d05538c4b8a5e74e82f93c0dab0163c"}
-            body.update(data or {})
-            r=self.session.post(self.api_host.rstrip("/") + path, data=body, headers=hdr, timeout=15, verify=False)
-            return self._api_decrypt(r.json()) if r.status_code == 200 else {}
-        except Exception as e:
-            print(f"[51短剧] API请求失败: {path} {e}")
-            return {}
-
-    def _danmaku_url(self, url):
-        try:
-            sid=(re.search(r"(?:id|video_id|playlet_id)=(\d+)", str(url)) or [None,""])[1]
-            eid=(re.search(r"episode_id=(\d+)", str(url)) or [None,""])[1]
-            if not sid or not eid: return ""
-            return self.getProxyUrl()+"&type=danmu&vid="+urllib.parse.quote(str(sid))+"&eid="+urllib.parse.quote(str(eid))
-        except Exception: return ""
-
-    def _danmaku_xml(self, vid, eid):
-        rows=[]
-        data=self._api_post("/api/playlet/danmakuList", {"video_id":vid,"playlet_id":vid,"id":vid,"episode_id":eid,"page":1,"limit":500})
-        try: rows=((data.get("data") or {}).get("list") or []) if isinstance(data, dict) else []
-        except Exception: rows=[]
-        ts=int(time.time())
-        lines=['<?xml version="1.0" encoding="UTF-8"?><i>','<chatserver>51\u77ed\u5267</chatserver>','<chatid>'+self._xml(str(vid)+"_"+str(eid))+'</chatid>','<mission>0</mission>','<maxlimit>'+str(len(rows))+'</maxlimit>','<state>0</state>','<real_name>0</real_name>','<source>51dj</source>']
-        n=0
-        for x in rows:
-            try:
-                text=str(x.get("text") or x.get("content") or "")
-                if not text: continue
-                tm=max(0,float(x.get("time") or 0)); mode=int(x.get("mode") or 0)
-                dm=5 if mode == 1 else (4 if mode == 2 else 1)
-                c=str(x.get("color") or "#FFFFFF").strip().lstrip("#")[:6]
-                color=int(c,16) if re.match(r"^[0-9a-fA-F]{6}$", c) else 16777215
-                lines.append('<d p="%.3f,%d,25,%d,%d,0,51dj,%d">%s</d>' % (tm,dm,color,ts,n,self._xml(text)))
-                n+=1
-            except Exception: continue
-        lines.append('</i>')
-        print(f"[51短剧] 弹幕 {vid}/{eid}: {n} 条")
-        return "\n".join(lines)
-
-    def _vod(self, x, actor=False):
-        title = str(x.get("title") or x.get("name") or x.get("video_title") or x.get("drama_name") or "")
-        vid = x.get("actor_id") if actor else (x.get("video_id") or x.get("playlet_id") or x.get("id") or x.get("actor_id"))
-        if not title or vid is None: return None
-        if actor and x.get("actor_id") is not None:
-            aid=str(x.get("actor_id")); pic=self._pic(x.get("avatar"))
-            works=self._num(x.get("works")); fans=self._num(x.get("fans_count")); plays=self._num(x.get("play_count"))
-            remark=("\u4f5c\u54c1"+works if works else "\u6f14\u5458\u4f5c\u54c1") + ((" \u00b7 \u7c89\u4e1d"+fans) if fans else "") + ((" \u00b7 \u64ad\u653e"+plays) if plays else "")
-            return {"vod_id":"actor_detail_"+aid,"vod_name":title,"vod_pic":pic,"vod_remarks":remark,"vod_tag":"folder","vod_play_from":"","vod_play_url":""}
-        eid = x.get("episode_id") or ""
-        # \u8be6\u60c5\u9875\u7528\u7ad9\u70b9\u771f\u5b9e\u8def\u5f84 drama-detail/{video_id}/\uff08\u65e7\u5199\u6cd5 drama-play?id=..&episode_id=.. 
-        # \u670d\u52a1\u7aef\u4e0d\u8ba4\uff0c\u9875\u5185 payload \u4f1a\u9000\u5316\u6210\u522b\u90e8\u5267 \u2014\u2014 \u8fd9\u6b63\u662f"\u70b9\u4efb\u4f55\u4e00\u96c6\u90fd\u662f\u7b2c\u4e00\u96c6"\u7684\u6839\u56e0\uff09
-        play_id = self.host + "drama-detail/" + str(vid) + "/"
-        pic=self.image_id_map.get(str(vid)) or self.image_map.get(title) or self._pic(x.get("cover") or x.get("cover_img") or x.get("cover_image") or x.get("image") or x.get("poster") or x.get("thumb"))
-        plays=str(x.get("play_count_text") or "") or self._num(x.get("play_count")); chase=self._num(x.get("chase_count")); status=str(x.get("serialize_status_text") or ("\u64ad\u653e" if eid else ""))
-        remark=(("\u64ad\u653e"+plays) if plays else "") + ((" \u00b7 \u8ffd\u5267"+chase) if chase else "")
-        return {"vod_id":play_id,"vod_name":title,"vod_pic":pic,"vod_remarks":remark or status,"vod_tag":"video","vod_play_id":str(eid)}
-
-    def _meta(self, html):
-        data = self._payload(html)
-        for x in self._walk(data, ["total","page","limit"]):
-            total = int(x.get("total") or 0); limit = int(x.get("limit") or 20)
-            return total, limit, max(1, (total + limit - 1) // limit)
-        for x in self._walk(data, ["total","page"]):
-            total = int(x.get("total") or 0); limit = 30
-            return total, limit, max(1, (total + limit - 1) // limit)
-        return 0, 20, 1
-
-    def _load_filters(self):
-        if getattr(self, "_filters_loaded", False): return
-        self._filters_loaded = True
-        try:
-            data = self._payload(self._req(self.host + "rank-drama/week/"))
-            found=[]
-            def go(x):
-                if isinstance(x, dict):
-                    if isinstance(x.get("video_filter"), dict): found.append(x)
-                    for v in x.values(): go(v)
-                elif isinstance(x, list):
-                    for v in x: go(v)
-            go(data)
-            opt = found[0] if found else {}
-            vf = opt.get("video_filter") or {}
-            fs=[]
-            for k in ("theme","setting","background","audience","time","recommend"):
-                b = vf.get(k)
-                if not isinstance(b, dict): continue
-                vals=[{"n":"\u5168\u90e8","v":"0"}]; seen={"0"}
-                for it in b.get("list") or []:
-                    v=str(it.get("value","")); n=str(it.get("name",""))
-                    if v and n and v not in seen: seen.add(v); vals.append({"n":n,"v":v})
-                fs.append({"key":str(b.get("parameter") or k),"name":str(b.get("title") or k),"value":vals})
-            if fs: self.filters["drama"] = fs
-            af = opt.get("actor_filter")
-            if isinstance(af, list):
-                vals=[{"n":str(i.get("name")),"v":str(i.get("value"))} for i in af if i.get("name") and i.get("value") is not None]
-                if vals: self.filters["actor"] = [{"key":"sort","name":"\u6f14\u5458","value":vals}]
-            print(f"[51短剧] 动态筛选: 剧集{len(self.filters.get('drama', []))}组")
-        except Exception as e: print(f"[51短剧] 动态筛选失败: {e}")
-
-    def _page(self, html, actor=False):
-        data = self._payload(html); keys = ["actor_id","name"] if actor else ["video_id","title"]
-        if not actor:
-            html_pics=re.findall(r'(?:data-original|data-src|src)=["\']([^"\']+\.(?:jpg|jpeg|png|webp)[^"\']*)', html, re.I)
-        else: html_pics=[]
-        arr = self._walk(data, keys) if data else []; result=[]; seen=set()
-        if actor:
-            links = re.findall(r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>[\s\S]{0,300}?</a>', html, re.I)
-            actor_links = [u for u in links if ("/actor" in u or "actor_id" in u) and "explore-actor" not in u and "rank-actor" not in u]
-        else: actor_links=[]
-        for i,x in enumerate(arr):
-            if actor:
-                v=self._vod(x, True)
-                if v and not v.get("vod_id"): v["vod_id"] = self._fix(actor_links[i]) if i < len(actor_links) else v.get("vod_id","")
-            else:
-                v=self._vod(x, False)
-                if v and not v.get("vod_pic") and i < len(html_pics): v["vod_pic"] = self._fix(html_pics[i])
-            if v and v["vod_id"] not in seen: seen.add(v["vod_id"]); result.append(v)
-        return result
-
-    def _fix(self, url):
-        url=str(url or "").replace("\\u002F","/").replace("\\/","/")
-        if url.startswith("http"): return url
-        return self.host.rstrip("/") + "/" + url.lstrip("/")
-
-    def _sid(self, vid):
-        """\u4ece\u5404\u79cd\u5f62\u6001\u7684 id \u91cc\u53d6\u51fa\u5267\u7684 video_id\uff08\u7eaf\u6570\u5b57\uff09\u3002
-        \u517c\u5bb9\uff1a12878 / drama-detail/12878/ / play/12878/2/ / drama-play?id=12878&episode_id=811467"""
-        s = str(vid or "").strip()
-        m = re.search(r"[?&](?:id|video_id)=(\d+)", s)
-        if m: return m.group(1)
-        m = re.search(r"/(?:drama-detail|drama-play|drama|play|video)/(\d+)", s)
-        if m: return m.group(1)
-        m = re.search(r"(\d+)", s)
-        return m.group(1) if m else s
-
-    def _cget(self, sid, field):
-        c=self.__dict__.setdefault("_cache", {}).get(str(sid)) or {}
-        if c.get(field) is not None and time.time()-c.get("t", 0) < 300: return c[field]
-        return None
-
-    def _cput(self, sid, field, val):
-        c=self.__dict__.setdefault("_cache", {}).setdefault(str(sid), {})
-        c["t"]=time.time(); c[field]=val
-
-    def _episode_rows(self, vid):
-        """\u5267\u96c6\u6743\u5a01\u987a\u5e8f\uff1adrama-detail \u9875\u7684 episodes\uff08id \u5373 episode_id\uff0c\u5e26 sort / \u89e3\u9501\u6807\u8bb0\uff09\u3002"""
-        sid=self._sid(vid)
-        hit=self._cget(sid, "eps")
-        if hit is not None: return hit
-        eps=[]
-        try:
-            data=self._payload(self._req(self.host+"drama-detail/"+sid+"/"))
-            candidates=self._walk(data,["video_id","title"]) or self._walk(data,["video_id","video_title"])
-            for row in candidates:
-                if str(row.get("video_id")) == sid and isinstance(row.get("episodes"), list):
-                    for e in row.get("episodes"):
-                        if isinstance(e, dict) and e.get("id") is not None:
-                            eps.append({"id":e.get("id"),"sort":e.get("sort") or 0,
-                                        "title":e.get("title") or (str(row.get("title"))+"-\u7b2c"+str(e.get("sort"))+"\u96c6"),
-                                        "locked": not bool(e.get("web_unlocked", True)),
-                                        "duration":e.get("duration") or 0})
-                    break
-            eps=sorted(eps, key=lambda x:int(x.get("sort") or 0))
-        except Exception as e: print(f"[51短剧] 剧集列表失败: {e}")
-        if eps: self._cput(sid, "eps", eps)
-        return eps
-
-    def _url_map(self, sid):
-        """\u64ad\u653e\u9875 /play/{sid}/1/ \u7684 payload \u4e00\u6b21\u5e26\u5168\u5267\u96c6\u8282\u70b9\uff1a
-        \u5df2\u89e3\u9501\u96c6\u6709 video_url\uff0c\u672a\u89e3\u9501\u96c6\uff08web_unlocked=false\uff09\u6ca1\u6709\u3002\u8fd4\u56de {episode_id: \u76f4\u94fe}\u3002"""
-        sid=str(sid or "").strip()
-        hit=self._cget(sid, "umap")
-        if hit is not None: return hit
-        out={}
-        try:
-            data=self._payload(self._req(self.host+"play/"+sid+"/1/"))
-            def go(x):
-                if isinstance(x, dict):
-                    if x.get("episode_title") is not None and x.get("id") is not None:
-                        u=self._media(x.get("video_url"))
-                        if u: out.setdefault(str(x.get("id")), u)
-                    for v in x.values(): go(v)
-                elif isinstance(x, list):
-                    for v in x: go(v)
-            go(data)
-        except Exception as e: print(f"[51短剧] 播放页直链失败: {e}")
-        if out: self._cput(sid, "umap", out)
+        for c in pq(html)(".hg-card-grid .hg-drama-card").items():
+            v = self._card_vod(c)
+            if v and v["vod_id"] not in seen:
+                seen.add(v["vod_id"])
+                out.append(v)
         return out
 
-    def _url(self, cid, pg, ext=None):
-        pg=max(1,int(pg)); e=ext if isinstance(ext,dict) else {}
-        if cid == "actor":
-            sort=str(e.get("sort") or "popular")
-            if sort == "1": base=self.host + "explore-actor/1/"
-            elif sort == "2": base=self.host + "explore-actor/2/"
-            elif sort in ("new","hot","recommend"): base=self.host + "rank-actor/" + sort + "/"
-            else: base=self.host + "rank-actor/"
-            return base if pg == 1 else base + "page/" + str(pg) + "/"
-        if cid == "drama":
-            vals=[str(e.get(k,0) or 0) for k in ("theme","setting","background","audience","time","recommend")]
-            base=self.host + "explore-drama/" + "-".join(vals) + "/"
-            return base if pg == 1 else base + "page/" + str(pg) + "/"
-        if cid == "drama_week":
-            base=self.host + "rank-drama/week/"; return base if pg == 1 else base + "page/" + str(pg) + "/"
-        if cid == "drama_month":
-            base=self.host + "rank-drama/month/"; return base if pg == 1 else base + "page/" + str(pg) + "/"
-        if cid == "aisd":
-            base=self.host + "drama/AISD/"; return base if pg == 1 else base + "page/" + str(pg) + "/"
-        if cid == "explore":
-            e=ext if isinstance(ext,dict) else {}; vals=[str(e.get(k,0) or 0) for k in ("theme","setting","background","audience","time","recommend")]
-            u=self.host+"explore-drama/"+"-".join(vals)+"/"; return u if pg==1 else u+"page/"+str(pg)+"/"
-        if cid == "male": return self.host+"explore-actor/2/"+("page/"+str(pg)+"/" if pg>1 else "")
-        if cid == "female": return self.host+"explore-actor/1/"+("page/"+str(pg)+"/" if pg>1 else "")
-        if cid in ("actor_recommend","actor_new","actor_hot"):
-            kind={"actor_recommend":"recommend","actor_new":"new","actor_hot":"hot"}[cid]; return self.host+"rank-actor/"+kind+"/"+("page/"+str(pg)+"/" if pg>1 else "")
-        if cid.startswith("drama_"):
-            kind="week" if cid=="drama_week" else "month"; return self.host+"rank-drama/"+kind+"/"+("page/"+str(pg)+"/" if pg>1 else "")
-        if cid == "aisd": return self.host+"drama/AISD/"+("page/"+str(pg)+"/" if pg>1 else "")
-        if cid.startswith("actor$"): return self.host+"actor/"+cid.split("$",1)[1]+"/"
-        return self.host
+    def _ranks(self, html):
+        if not html:
+            return []
+        out, seen = [], set()
+        for it in pq(html)(".hg-rank-item").items():
+            a = it.find(".hg-rank-item__cover")
+            link = a.attr("href") or ""
+            title = it.find(".hg-rank-item__title a").text().strip() or it.attr("data-track-title") or ""
+            if not title or "/video/" not in link:
+                continue
+            img = a.find("img")
+            pic = img.attr("data-src") or ""
+            if "cover-placeholder" in pic:
+                pic = ""
+            v = {"vod_id": self._fix(link), "vod_name": title,
+                 "vod_pic": self._fix(pic) if pic else "",
+                 "vod_remarks": "\u699c%s" % (it.attr("data-rank") or "?"), "vod_tag": ""}
+            if v["vod_id"] not in seen:
+                seen.add(v["vod_id"])
+                out.append(v)
+        return out
 
+    def _pager(self, html, pg, count):
+        """\u4ece .hg-pager a[href] \u6293\u6700\u5927\u9875\u7801\uff1b\u6ca1\u6709\u5206\u9875\u6761\u5c31\u6309\u672c\u9875\u6761\u6570\u4f30\u3002"""
+        top = pg
+        for a in pq(html or "")(".hg-pager a[href]").items():
+            m = re.search(r"/(\d+)/?$", str(a.attr("href") or ""))
+            if m:
+                top = max(top, int(m.group(1)))
+        if top == pg and count >= 20:
+            top = pg + 1
+        return top
+
+    def _empty(self, pg):
+        return {"list": [], "page": pg, "pagecount": pg, "limit": 20, "total": 0}
+
+    # ---------- \u5165\u53e3 ----------
     def homeContent(self, filter):
-        self._load_filters()
-        return {"class":self.classes,"filters":self.filters,"list":[]}
-    def homeVideoContent(self): return self.categoryContent("drama",1,{}, {"source":"week"})
+        return {"class": CLASSES, "filters": {}, "list": self._cards(self._req(self.host))}
+
+    def homeVideoContent(self):
+        return self._cards(self._req(self.host))
+
+    def _url(self, cid, pg):
+        cid = str(cid)
+        if cid in CAT_PATH:
+            base = self.host + CAT_PATH[cid] + "/"
+            if cid == "rank_hot":
+                return base
+            return base if pg <= 1 else base + str(pg) + "/"
+        if cid.startswith("tag_"):
+            slug = cid[4:]
+            base = self.host + "tag/" + slug + "/"
+            return base if pg <= 1 else base + "page/" + str(pg) + "/"
+        # \u517c\u5bb9\u65e7\u7f13\u5b58\u91cc\u7684\u5206\u7c7b id
+        if cid in ("drama", "drama_week", "drama_month", "aisd"):
+            return self._url("recommend", pg)
+        return self.host
 
     def categoryContent(self, cid, pg, filter, ext):
         try:
-            pg=int(pg) if str(pg).isdigit() else 1
-            if str(cid).startswith("actor_detail_") or str(cid).startswith("actor-detail$") or str(cid).startswith("actor$") or "/actor-detail/" in str(cid) or "/actor/" in str(cid):
-                aid=re.search(r"actor_detail_(\d+)", str(cid)).group(1) if str(cid).startswith("actor_detail_") else (str(cid).split("$")[1] if "$" in str(cid) else (re.search(r"actor-detail/(\d+)", str(cid)) or re.search(r"actor/(\d+)", str(cid)) or re.search(r"(\d+)", str(cid))).group(1))
-                url=self.host+"actor-detail/"+aid+"/"+("?page="+str(pg) if pg>1 else "")
-                html=self._req(url)
-                if not html: return {"list":[],"page":pg,"pagecount":1,"limit":20,"total":0}
-                data=self._payload(html)
-                arr=[]; seen=set()
-                works=self._walk(data,["video_id","title"]) or self._walk(data,["video_id","video_title"])
-                for x in works:
-                    v=self._vod(x,False)
-                    if v and v["vod_id"] not in seen: seen.add(v["vod_id"]); arr.append(v)
-                total, limit, pagecount = self._meta(html)
-                print(f"[51短剧] 演员二级 {cid} 第{pg}页: {len(arr)} 条, 共{total}条")
-                return {"list":arr,"page":pg,"pagecount":pagecount,"limit":limit,"total":total or len(arr)}
-            actor=cid == "actor"
-            html=self._req(self._url(cid,pg,ext)); vods=self._page(html,actor)
-            total, limit, pagecount = self._meta(html)
-            if cid == "aisd" and vods:
-                limit = limit or 30
-                pagecount = max(pagecount, pg + 1) if len(vods) >= limit else pg
-                total = max(total, pagecount * limit)
-            print(f"[51短剧] 分类 {cid} 第{pg}页: {len(vods)} 条")
-            return {"list":vods,"page":pg,"pagecount":pagecount,"limit":limit,"total":total or len(vods)}
+            pg = int(pg) if str(pg).isdigit() else 1
+            pg = max(1, pg)
+            html = self._req(self._url(cid, pg))
+            vods = self._ranks(html) if str(cid) == "rank_hot" else self._cards(html)
+            if not vods:
+                return self._empty(pg)
+            pagecount = 1 if str(cid) == "rank_hot" else self._pager(html, pg, len(vods))
+            print("[51\u77ed\u5267] \u5206\u7c7b %s \u7b2c%d\u9875: %d \u6761 / \u5171%d\u9875" % (cid, pg, len(vods), pagecount))
+            return {"list": vods, "page": pg, "pagecount": pagecount,
+                    "limit": 20, "total": pagecount * 20}
         except Exception as e:
-            print(f"[51短剧] 分类失败: {e}"); return {"list":[],"page":1,"pagecount":1,"limit":20,"total":0}
+            print("[51\u77ed\u5267] \u5206\u7c7b\u5931\u8d25: %s" % e)
+            return self._empty(1)
+
+    def _sid(self, vid):
+        s = str(vid or "")
+        m = re.search(r"/video/(\d+)", s) or re.search(r"[?&](?:id|video_id)=(\d+)", s)
+        if m:
+            return m.group(1)
+        m = re.search(r"/(?:drama-detail|drama-play|play|actor-detail)/(\d+)", s)
+        if m:
+            return m.group(1)
+        m = re.search(r"(\d+)", s)
+        return m.group(1) if m else ""
+
+    def _ep_url(self, sid, ep):
+        return self.host + "video/" + str(sid) + "/" + (("ep-" + str(ep) + "/") if ep > 1 else "")
 
     def detailContent(self, ids):
         try:
-            vid=str(ids[0])
-            if vid.startswith("actor_detail_") or vid.startswith("actor-detail$") or vid.startswith("actor$") or "/actor-detail/" in vid or "/actor/" in vid:
-                aid=re.search(r"actor_detail_(\d+)", vid).group(1) if vid.startswith("actor_detail_") else (vid.split("$")[1] if "$" in vid else (re.search(r"actor-detail/(\d+)", vid) or re.search(r"actor/(\d+)", vid) or re.search(r"(\d+)", vid)).group(1))
-                url=self.host+"actor-detail/"+aid+"/"
-                html=self._req(url)
-                if not html: return {"list":[]}
-                data=self._payload(html)
-                arr=[]; seen=set()
-                works=self._walk(data,["video_id","title"]) or self._walk(data,["video_id","video_title"])
-                for x in works:
-                    v=self._vod(x,False)
-                    if v and v["vod_id"] not in seen: seen.add(v["vod_id"]); arr.append(v)
-                print(f"[51短剧] 演员 {aid} 作品: {len(arr)} 条")
-                return {"list":[{"vod_id":x["vod_id"],"vod_name":x["vod_name"],"vod_pic":x.get("vod_pic",""),"vod_remarks":"\u53c2\u6f14\u5267\u96c6","vod_tag":"video","vod_play_id":x.get("vod_play_id","")} for x in arr]}
-            sid=self._sid(vid)
-            html=self._req(self.host+"drama-detail/"+sid+"/"); data=self._payload(html)
-            # \u8be6\u60c5\u9875\u91cc\u540c\u65f6\u6df7\u7740 related_list\uff08\u522b\u7684\u5267\uff09\u2014\u2014 \u5fc5\u987b\u6309 video_id \u7cbe\u786e\u6311\u672c\u5267\uff0c\u5426\u5219\u6807\u9898/\u5c01\u9762\u4f1a\u4e32
-            pics=[r for r in (self._walk(data,["video_id","title"]) or self._walk(data,["video_id","video_title"])) if str(r.get("video_id"))==sid]
-            if not pics: pics=self._walk(data,["video_title","cover_img"])
-            info=pics[0] if pics else {}
-            title=str(info.get("title") or info.get("video_title") or info.get("drama_name") or sid)
-            pic=self.image_map.get(title) or self._pic(info.get("cover") or info.get("cover_img") or info.get("cover_image") or info.get("image") or info.get("poster") or info.get("thumb")) if info else self.image_map.get(title, "")
-            desc=str(info.get("description") or info.get("video_desc") or info.get("content") or "")
-            tags=info.get("tags") or info.get("tag") or []
-            vod_class=",".join([str(t) for t in tags]) if isinstance(tags,list) else str(tags or "")
-            plays=str(info.get("play_count_text") or "") or self._num(info.get("play_count")); chase=self._num(info.get("chase_count")); remarks=(("\u64ad\u653e"+plays) if plays else "") + ((" \u00b7 \u8ffd\u5267"+chase) if chase else "")
-            eps=self._episode_rows(sid)
-            umap=self._url_map(sid)
-            urls=[]; seen=set()
-            if eps:
-                for x in eps:
-                    eid=str(x.get("id")); sort=int(x.get("sort") or 0)
-                    n=str(x.get("title") or ("\u7b2c"+str(sort)+"\u96c6" if sort else "\u64ad\u653e"))
-                    if not umap.get(eid): n=n+"[\u672a\u89e3\u9501]"
-                    # \u7528\u7ad9\u70b9\u81ea\u5df1\u7684\u96c6\u9875\u5730\u5740\uff08/play/{sid}/{\u96c6\u5e8f\u53f7}/\uff09\uff1a\u70b9\u64ad\u65f6\u6309\u65f6\u5e8f\u53f7\u5b9a\u4f4d\uff0c
-                    # \u4ece\u6839\u4e0a\u675c\u7edd"\u4efb\u4f55\u4e00\u96c6\u90fd\u64ad\u7b2c\u4e00\u96c6"\u3002\u76f4\u94fe\u5728\u64ad\u653e\u9636\u6bb5\u7531\u7f13\u5b58/\u73b0\u6293\u7ed9\u51fa\u3002
-                    u=self.host+"play/"+sid+"/"+str(sort)+"/"
-                    if u not in seen: seen.add(u); urls.append((n,u))
-                if len(umap)<len(eps): remarks+=(" \u00b7 \u53ef\u770b%d/%d\u96c6" % (min(len(umap),len(eps)), len(eps)))
-            elif umap:
-                urls=[(("\u7b2c"+k+"\u96c6"),v) for k,v in sorted(umap.items(), key=lambda z:z[0])]
-            else:
-                for x in (self._walk(data,["episode_title","video_url"]) or []):
-                    u=self._media(x.get("video_url"))
-                    if u and u not in seen: seen.add(u); urls.append((str(x.get("episode_title") or "\u6b63\u7247"),u))
-                if not urls:
-                    pu=self._media(info.get("play_url"))
-                    if pu: urls.append(("\u6b63\u7247",pu))
-            return {"list":[{"vod_id":vid,"vod_name":title,"vod_pic":pic,"vod_remarks":remarks,"vod_class":vod_class,"vod_content":desc,"vod_play_from":"51\u77ed\u5267" if urls else "","vod_play_url":"#".join(n+"$"+u for n,u in urls)}]}
-        except Exception as e: print(f"[51短剧] 详情失败: {e}"); return {"list":[]}
+            sid = self._sid(ids[0])
+            if not sid:
+                return {"list": []}
+            html = self._req(self._ep_url(sid, 1))
+            d = self._initial(html)
+            if not d:
+                return {"list": []}
+            title = str(d.get("title") or "")
+            pic = str(d.get("coverSrc") or d.get("posterSrc") or "")
+            desc = str(d.get("description") or "")
+            tags = [str(x) for x in (d.get("tags") or [])]
+            tr = d.get("tracking") or {}
+            try:
+                total = int(tr.get("total_episode") or 0)
+            except Exception:
+                total = 0
+            total = max(total, int(d.get("ep") or 1), 1)
+            srcs = d.get("epPlaySrcs") or {}
+            now = time.time()
+            slot = _EP_CACHE.setdefault(sid, {})
+            for k, v in srcs.items():
+                if v:
+                    slot[str(k)] = (now, str(v).replace("\\u0026", "&"))
+            eps = ["\u7b2c%d\u96c6$%s" % (n, self._ep_url(sid, n)) for n in range(1, total + 1)]
+            return {"list": [{
+                "vod_id": self._ep_url(sid, 1),
+                "vod_name": title,
+                "vod_pic": self._fix(pic) if pic else "",
+                "vod_content": desc,
+                "vod_remarks": "\u5168%d\u96c6" % total,
+                "vod_year": str(d.get("time") or "")[:4],
+                "vod_tag": ",".join(tags),
+                "vod_play_from": "51\u77ed\u5267",
+                "vod_play_url": "#".join(eps),
+            }]}
+        except Exception as e:
+            print("[51\u77ed\u5267] \u8be6\u60c5\u5931\u8d25: %s" % e)
+            return {"list": []}
 
     def searchContent(self, key, quick, pg="1"):
         try:
-            pg=int(pg) if str(pg).isdigit() else 1
-            q=urllib.parse.quote(str(key))
-            u=self.host+"search-drama/"+q+"/"+("page/"+str(pg)+"/" if pg>1 else "")
-            html=self._req(u); vods=self._page(html,False); total,limit,pagecount=self._meta(html)
-            print(f"[51短剧] 搜索 {key} 第{pg}页: {len(vods)} 条")
-            return {"list":vods,"page":pg,"pagecount":pagecount,"limit":limit,"total":total or len(vods)}
+            pg = max(1, int(pg) if str(pg).isdigit() else 1)
+            kw = str(key or "").strip()
+            if not kw:
+                return self._empty(pg)
+            u = self.host + "search/keyword/" + urllib.parse.quote(kw) + "/"
+            if pg > 1:
+                u += str(pg) + "/"
+            html = self._req(u)
+            if not html:
+                return self._empty(pg)
+            # \u65e0\u547d\u4e2d\u9875\u585e\u7684\u662f\u300c\u731c\u4f60\u559c\u6b22\u300d\u5361\uff0c\u5fc5\u987b\u7528\u547d\u4e2d\u6570\u5224\u7a7a\uff0c\u5426\u5219\u641c\u5783\u573e\u8bcd\u4f1a\u51fa\u4e00\u5806\u4e0d\u76f8\u5e72\u6761\u76ee
+            txt = pq(html)(".hg-list-page").text()
+            m = re.search("\u5171\\s*(\\d+)\\s*\u4e2a\u7ed3\u679c", txt)
+            if not m or int(m.group(1)) == 0:
+                return self._empty(pg)
+            total = int(m.group(1))
+            vods = self._cards(html)
+            pagecount = self._pager(html, pg, len(vods))
+            print("[51\u77ed\u5267] \u641c\u7d22 %s \u7b2c%d\u9875: %d \u6761 / \u547d\u4e2d%d / \u5171%d\u9875" % (kw, pg, len(vods), total, pagecount))
+            return {"list": vods, "page": pg, "pagecount": pagecount,
+                    "limit": 20, "total": total}
         except Exception as e:
-            print(f"[51短剧] 搜索失败: {e}"); return {"list":[],"page":pg,"pagecount":1,"limit":20,"total":0}
+            print("[51\u77ed\u5267] \u641c\u7d22\u5931\u8d25: %s" % e)
+            return self._empty(1)
+
+    def isVideoFormat(self, url):
+        return bool(re.search(r"\.(m3u8|mp4|m4v|ts)(\?|$)", str(url), re.I))
 
     def playerContent(self, flag, id, vipFlags):
+        url = str(id or "").replace("\\u002F", "/").replace("\\/", "/")
+        ret = {"parse": 0, "url": url, "header": json.dumps(self.headers, ensure_ascii=False)}
         try:
-            url=str(id).replace("\\u002F","/").replace("\\/","/")
-            sid=""; target=""; want_sort=0
-            if not self.isVideoFormat(url):
-                # \u76ee\u6807\u96c6\u5b9a\u4f4d\uff1a/play/{sid}/{n}/ \u7528\u96c6\u5e8f\u53f7\uff0c\u65e7 drama-play?id=..&episode_id=.. \u7528 episode_id
-                sid=self._sid(url) if ("/play/" in url or "drama-play" in url) else ""
-                mn=re.search(r"/play/\d+/(\d+)", url); me=re.search(r"episode_id=(\d+)", url)
-                if mn: want_sort=int(mn.group(1))
-                elif me: target=me.group(1)
-                best=""
-                if sid:
-                    umap=self._url_map(sid)
-                    if not target and want_sort:
-                        eps=self._episode_rows(sid)
-                        hit=[str(e.get("id")) for e in eps if int(e.get("sort") or 0)==want_sort]
-                        target=hit[0] if hit else ""
-                    best=umap.get(target) or ""
-                    if not best and want_sort:
-                        # \u7f13\u5b58\u6ca1\u7ed9 \u2192 \u73b0\u6293\u8be5\u96c6\u9875\u9762\u515c\u5e95\uff08\u6309\u96c6\u5e8f\u53f7\u5339\u914d\uff0c\u7edd\u4e0d\u56de\u5230\u7b2c\u4e00\u96c6\uff09
-                        d2=self._payload(self._req(self.host+"play/"+sid+"/"+str(want_sort)+"/"))
-                        def go2(x):
-                            nonlocal best, target
-                            if best: return
-                            if isinstance(x, dict):
-                                if int(x.get("sort") or 0)==want_sort and x.get("video_url"):
-                                    best=self._media(x.get("video_url"))
-                                    target=str(x.get("id") or target); return
-                                for v in x.values(): go2(v)
-                            elif isinstance(x, list):
-                                for v in x: go2(v)
-                        go2(d2)
-                    if not best:
-                        print(f"[51短剧] 第{target or want_sort}集无可用直链（多半未解锁），不做兜底串集")
-                elif "drama-play" in url:
-                    html=self._req(url); data=self._payload(html)
-                    def go(x):
-                        nonlocal best
-                        if best: return
-                        if isinstance(x, dict):
-                            if str(x.get("id") or x.get("episode_id") or "") == target:
-                                u=x.get("video_url") or x.get("play_url") or ""
-                                if u: best=self._media(u); return
-                            for v in x.values(): go(v)
-                        elif isinstance(x, list):
-                            for v in x: go(v)
-                    if target: go(data)
-                    if not best:
-                        m=re.search(r"https?:[^\"'<>\s]+\.(?:m3u8|mp4)[^\"'<>\s]*", html)
-                        if m: best=m.group(0).replace("\\u002F","/").replace("\\/","/")
-                if best: url=best
-            dm_url=""
-            if sid and target:   # \u62ff\u5230\u51c6\u786e\u7684\u5267/\u96c6 id \u624d\u6302\u5f39\u5e55\uff0c\u907f\u514d\u8bef\u7528\u7b2c\u4e00\u96c6\u7684\u5f39\u5e55
-                dm_url=self.getProxyUrl()+"&type=danmu&vid="+urllib.parse.quote(str(sid))+"&eid="+urllib.parse.quote(str(target))
-            ret={"parse":0,"url":url,"header":json.dumps(self.headers,ensure_ascii=False)}
-            if dm_url: ret["danmaku"]=[{"name":"51\u77ed\u5267\u5f39\u5e55","url":dm_url}]
+            if self.isVideoFormat(url):
+                return ret
+            sid, ep = self._sid(url), 0
+            m = re.search(r"/video/\d+/ep-(\d+)", url)
+            if m:
+                ep = int(m.group(1))
+            else:
+                m = re.search(r"/play/\d+/(\d+)", url)     # \u65e7\u7248\u96c6\u9875 URL \u517c\u5bb9
+                if m:
+                    ep = int(m.group(1))
+                elif "drama-play" in url or "episode_id=" in url:
+                    # \u65e7\u7248 episode_id \u4e0e\u65b0\u7248\u96c6\u5e8f\u53f7\u662f\u4e24\u5957 id\uff0c\u65e0\u6cd5\u6620\u5c04 \u21d2 \u4e0d\u731c\u3001\u4e0d\u4e32\u96c6
+                    print("[51\u77ed\u5267] \u65e7\u7248\u96c6\u5730\u5740\u65e0\u6cd5\u6620\u5c04\uff0c\u8fd4\u56de\u539f\u5730\u5740\uff0c\u8bf7\u91cd\u65b0\u4ece\u8be6\u60c5\u70b9\u9009")
+                    return ret
+                else:
+                    ep = 1
+            if not sid:
+                return ret
+            src = ""
+            slot = _EP_CACHE.get(sid) or {}
+            hit = slot.get(str(ep))
+            if hit and time.time() - hit[0] < _EP_TTL:
+                src = hit[1]
+            if not src:
+                d = self._initial(self._req(self._ep_url(sid, ep)))
+                src = str(d.get("videoSrc") or (d.get("epPlaySrcs") or {}).get(str(ep)) or "")
+                src = src.replace("\\u0026", "&")
+                now = time.time()
+                for k, v in (d.get("epPlaySrcs") or {}).items():
+                    if v:
+                        slot[str(k)] = (now, str(v).replace("\\u0026", "&"))
+                _EP_CACHE[sid] = slot
+                if src:
+                    slot[str(ep)] = (now, src)
+            if not src:
+                print("[51\u77ed\u5267] %s \u7b2c%d\u96c6\u65e0\u76f4\u94fe\uff0c\u4e0d\u505a\u515c\u5e95\u4e32\u96c6" % (sid, ep))
+                return ret
+            ret["url"] = src
             return ret
         except Exception as e:
-            print(f"[51短剧] 播放解析失败: {e}")
-            return {"parse":0,"url":str(id),"header":json.dumps(self.headers,ensure_ascii=False)}
-    def isVideoFormat(self, url): return bool(re.search(r'\.(m3u8|mp4|m4v|ts)(\?|$)',str(url),re.I))
-    def e64(self, text):
-        try: return base64.b64encode(str(text).encode("utf-8")).decode("utf-8")
-        except Exception: return ""
-
-    def d64(self, text):
-        try:
-            text = str(text or '').replace(' ', '+')
-            text += '=' * (-len(text) % 4)
-            return base64.b64decode(text.encode("utf-8"), altchars=b'-_').decode("utf-8")
-        except Exception: return ""
+            print("[51\u77ed\u5267] \u64ad\u653e\u89e3\u6790\u5931\u8d25: %s" % e)
+            return ret
 
     def localProxy(self, param):
-        if param.get("type") == "danmu":
-            try:
-                vid=str(param.get("vid") or param.get("video_id") or "")
-                eid=str(param.get("eid") or param.get("episode_id") or "")
-                if not vid or not eid: return [404,"text/plain","",""]
-                return [200,"application/xml; charset=utf-8",self._danmaku_xml(vid,eid),{"Cache-Control":"no-store"}]
-            except Exception as e:
-                print(f"[51短剧] 弹幕代理失败: {e}")
-                return [404,"text/plain","",""]
-        if param.get("type") != "img": return [404,"text/plain","",""]
-        try:
-            url=self.d64(param.get("url", ""))
-            if not url: return [404,"text/plain","",""]
-            r=self.session.get(url,headers=self.headers,timeout=15,verify=False)
-            content=r.content
-            try: content=unpad(AES.new(self.media_key,AES.MODE_CBC,self.media_iv).decrypt(content), AES.block_size)
-            except Exception: pass
-            ctype="image/jpeg"
-            if content.startswith(b"\x89PNG"): ctype="image/png"
-            elif content[:4] == b"RIFF" and content[8:12] == b"WEBP": ctype="image/webp"
-            elif content.startswith(b"GIF"): ctype="image/gif"
-            return [r.status_code,ctype,content,{}]
-        except Exception as e:
-            print(f"[51短剧] 图片代理失败: {e}")
-            return [404,"text/plain","",""]
+        # \u65b0\u7248\u5c01\u9762\u662f\u666e\u901a\u56fe\u5e8a\u76f4\u94fe\u3001\u65e0\u52a0\u5bc6\uff1b\u5f39\u5e55\u63a5\u53e3\u5df2\u968f\u65e7\u7248\u4e00\u8d77\u4e0b\u7ebf
+        return [404, "text/plain", "", {}]
 
     def destroy(self):
-        try: self.session.close()
-        except Exception: pass
+        try:
+            self.session.close()
+        except Exception:
+            pass
