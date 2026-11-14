@@ -1,7 +1,7 @@
 # coding: utf-8
 """
 \u4e50\u556a\u798f\u5229 TVBox \u722c\u866b
-\u7ad9\u70b9\uff1ahttps://lpfl12.cfd/
+\u7ad9\u70b9\uff1ahttps://lpfl11.cfd/  \u2190 2026-11-14 lpfl12.cfd DNS 0.0.0.0
 \u7c7b\u578b\uff1aMacCMS HTML \u5f71\u89c6\u7ad9
 """
 import re
@@ -14,7 +14,7 @@ from base.spider import Spider as BaseSpider
 
 class Spider(BaseSpider):
     def __init__(self):
-        self.host = "https://lpfl12.cfd"
+        self.host = "https://lpfl11.cfd"
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Linux; Android 14; 22127RK46C) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.6422.165 Mobile Safari/537.36",
             "Referer": self.host + "/"

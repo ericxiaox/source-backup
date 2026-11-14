@@ -3,8 +3,9 @@
 \u7ad9\u70b9: \u9ec4\u8272\u5b9d\u5e93-Hsbk.CC (bk678.cc)
 \u7c7b\u578b: \u6210\u4eba\u5f71\u89c6\u7ad9 (MacCMS)
 \u7279\u70b9: \u6807\u51c6MacCMS\u67b6\u6784\uff0cm3u8\u76f4\u94fe\u64ad\u653e
-\u57df\u540d: https://www.bk678.cc/
-\u5907\u7528: www.hsbk.cc, www.bk567.cc
+\u57df\u540d: https://www.hsbk.cc/   \u2190 2026-11-14 bk678.cc \u5df2 DNS 0.0.0.0\uff0c\u5b9e\u6d4b\u5907\u7528\u4e3b\u57df hsbk.cc
+      \u9996\u9875/\u5206\u7c7b(/vodtype/{tid}-{pg}/)/\u641c\u7d22(/vodsearch/...?wd=) \u4e09\u6761\u8def\u5f84\u5168 200 \u540c\u7ad9
+\u5907\u7528: www.bk567.cc\uff08\u5b9e\u6d4b\u4e0d\u901a\uff0c\u7559\u6863\uff09
 \u5206\u7c7b: \u65e5\u97e9AV(1), \u56fd\u4ea7\u7cfb\u5217(2), \u6b27\u7f8e(3), \u65e0\u7801\u4e2d\u6587\u5b57\u5e55(5), \u6709\u7801\u4e2d\u6587\u5b57\u5e55(6), \u65e5\u672c\u65e0\u7801(7), \u65e5\u672c\u6709\u7801(8), \u56fd\u4ea7\u89c6\u9891(9), \u6b27\u7f8e\u9ad8\u6e05(10), \u52a8\u6f2b\u5267\u60c5(11)
 """
 
@@ -17,7 +18,7 @@ from base.spider import Spider as BaseSpider
 
 class Spider(BaseSpider):
     def __init__(self):
-        self.host = "https://www.bk678.cc/"
+        self.host = "https://www.hsbk.cc/"
         self.classes = [
             {"type_id": "1", "type_name": "\u65e5\u97e9AV"},
             {"type_id": "2", "type_name": "\u56fd\u4ea7\u7cfb\u5217"},
@@ -478,7 +479,7 @@ class Spider(BaseSpider):
         """\u7ad9\u70b9\u4fe1\u606f"""
         return {
             "name": "\u9ec4\u8272\u5b9d\u5e93",
-            "domain": "bk678.cc",
+            "domain": "hsbk.cc",
             "type": "\u6210\u4eba\u5f71\u89c6\u7ad9",
             "description": "MacCMS\u6807\u51c6\u67b6\u6784\uff0cm3u8\u76f4\u94fe\u64ad\u653e"
         }

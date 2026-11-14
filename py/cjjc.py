@@ -28,16 +28,15 @@ class Spider(Spider):
     #   s26 \u7ea2\u6843\u89c6\u9891  = s10 \u5927\u5976\u5b50\u8d44\u6e90 (apidanaizi.com)
     #   s27 \u9e21\u5764\u8d44\u6e90  = s23 jkun\u8d44\u6e90    (jkunzyapi.com)
     #   s31 \u8001\u8272\u903c\u8d44\u6e90 = s29 lsb\u8d44\u6e90    (apilsbzy1.com)
+    # 2026-11-14\uff1a\u5168\u5e93\u4f53\u68c0\u518d\u5220 6 \u4e2a\u6b7b\u5b50\u6e90\uff08\u9010\u4e2a\u5b9e\u6d4b ?ac=detail&pg=1\uff0c17/23 \u6d3b\uff09\uff1a
+    #   s1 \u674f\u5427\u8d85\u65f6 / s6 \u9ec4\u8272\u4ed3\u5e93 / s8 \u6843\u82b1 / s11 \u641cav / s23 jkun \u8fde\u63a5\u5931\u8d25\uff1bs24 \u6e7f\u4e50\u56ed 200 \u4f46\u6b63\u6587 6B \u65e0 list
+    #   \u5176\u4e2d s1 \u662f\u5206\u7c7b\u8868\u9996\u9879\uff0c\u6545\u70b9\u7b2c\u4e00\u4e2a\u5206\u7c7b\u6052 0 \u6761\uff1b\u5220\u540e\u9996\u9879=s2 \u6781\u54c1\u8d44\u6e90(\u5b9e\u6d4b 20 \u6761)\u3002
     sources = {
-        's1': {'name': '\u674f\u5427\u8d44\u6e90', 'api': 'https://xingba111.com/api.php/provide/vod/'},
         's2': {'name': '\u6781\u54c1\u8d44\u6e90', 'api': 'https://jipinvip1.com/api.php/provide/vod/'},
         's4': {'name': '\u756a\u8304\u8d44\u6e90', 'api': 'https://fqzy.me//api.php/provide/vod/'},
         's5': {'name': '\u9ed1\u6599\u8d44\u6e90', 'api': 'https://heiliaozyapi.com/api.php/seaxml/vod/'},
-        's6': {'name': '\u9ec4\u8272\u4ed3\u5e93', 'api': 'https://\u0068\u0073\u0063\u006bzy.vip/api.php/provide/vod/'},
-        's8': {'name': '\u6843\u82b1\u8d44\u6e90', 'api': 'https://thzy1.me/api.php/provide/vod/'},
         's9': {'name': 'CK\u4f26\u7406\u8d44\u6e90', 'api': 'https://ckzy.me/api.php/provide/vod/'},
         's10': {'name': '\u5927\u5976\u5b50\u8d44\u6e90', 'api': 'https://apidanaizi.com/api.php/provide/vod/'},
-        's11': {'name': '\u641cav\u8d44\u6e90', 'api': 'https://api.souavzyw.net/api.php/provide/vod/'},
         's12': {'name': '\u5965\u65af\u5361\u8d44\u6e90', 'api': 'https://aosikazy1.com/api.php/provide/vod/'},
         's13': {'name': '\u6ef4\u6ef4\u8d44\u6e90', 'api': 'https://api.ddapi.cc/api.php/provide/vod/at/json/'},
         's14': {'name': '\u8c46\u8c46\u8d44\u6e90', 'api': 'https://api.douapi.cc/api.php/provide/vod/'},
@@ -46,8 +45,6 @@ class Spider(Spider):
         's19': {'name': '\u4e50\u64ad\u8d44\u6e90', 'api': 'https://lbapi9.com/api.php/provide/vod/'},
         's20': {'name': '\u7389\u5154\u8d44\u6e90', 'api': 'https://apiyutu.com/api.php/provide/vod/'},
         's21': {'name': '\u756a\u53f7\u8d44\u6e90', 'api': 'http://fhapi9.com/api.php/provide/vod/'},
-        's23': {'name': 'jkun\u8d44\u6e90', 'api': 'https://jkunzyapi.com/api.php/provide/vod/'},
-        's24': {'name': '\u6e7f\u4e50\u56ed', 'api': 'https://xxavs.com/api.php/provide/vod/'},
         's25': {'name': '\u8d8a\u5357\u8d44\u6e90', 'api': 'https://www.vnzyz.com/api.php/provide/vod/'},
         's29': {'name': 'lsb\u8d44\u6e90', 'api': 'https://apilsbzy1.com/api.php/provide/vod/'},
         's32': {'name': '\u706b\u901f\u8bba\u7406\u8d44\u6e90', 'api': 'https://api.huosuapi.cc/api.php/provide/vod/'},
