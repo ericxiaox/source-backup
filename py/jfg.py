@@ -3,10 +3,15 @@
 # \u57df\u540d: sourceUrl \u81ea\u5e26\u7684 punycode \u82b1\u5f0f\u57df\u540d\uff08"\u8bf7\u8bb0\u4f4f-jifangge\u70b9com.\u4e91\u641c\u798f\u5229.com"\uff09
 #       \u5373\u73b0\u5f79\u5165\u53e3\uff0c2026-09-08 \u5b9e\u6d4b 200\uff08Cloudflare\uff09\uff1b\u7ad9\u5185\u4e92\u94fe twin \u57df\u540c\u6837\u53ef\u7528
 # \u7ed3\u6784: \u5206\u7c7b = newlist.php?p={n}(\u4eca\u65e5\u66f4\u65b0) / toplist.php?p={n}(\u4eca\u65e5\u70ed\u64adTop100)
-#       \u6761\u76ee <a href="content/{md5}.html"> + cover \u80cc\u666f\u56fe + ctitle \u6807\u9898 + vodtime
-#       \u8be6\u60c5 m3u8 \u5728 <a playdata="..."> \u660e\u6587\u5c5e\u6027
-#       \u641c\u7d22 /search-0-{pg}-{AES\u5bc6\u6587b64}.html\uff1a\u8bcd\u6761 AES-CBC(key/iv \u5747 16 \u5b57\u8282 ASCII)
-#       \u52a0\u5bc6\u2192base64\u2192URL \u7f16\u7801\uff082026-09-08 \u5b9e\u6d4b 200\uff0c\u4e0e\u5217\u8868\u9875\u540c\u6b3e li \u7ed3\u6784\u53ef\u590d\u7528\u89e3\u6790\uff09
+# 2026-11-15 \u7ad9\u65b9\u6539\u7248\uff08\u65e7\u7ed3\u6784\u5df2\u5168\u5e9f\uff0c\u4ee5\u4e0b\u4e3a\u73b0\u7f51\u5b9e\u6d4b\uff09\uff1a
+#   \u5217\u8868 <li data-video-card data-id="N"> + <a href="/content/{\u6570\u5b57}.html">
+#        + \u5c01\u9762 data-source="\u539f\u56fe"\uff08\u53e6\u6709 data-s3="webp"\uff09+ ctitle + vodtime
+#        \u26a0 \u65e7\u7248\u6309\u88f8 <li> \u5207\u5757 + content/{md5}.html + background-image \u21d2 \u6052 0 \u6761
+#   \u8be6\u60c5 <script id="video-data"> \u5185\u5d4c JSON(title/image/source_image/url)
+#        + <video data-play-data-url="https://pd.xsocdn.com/data/v1/play/{id}.json">
+#        \u8be5 JSON \u7684 lines[] = {label, scheme, host, path} \u21d2 \u76f4\u94fe = scheme://host+path
+#        \u26a0 \u65e7\u7248 <a playdata="...m3u8"> \u4e0e poster= \u5df2\u4e0d\u5b58\u5728
+#   \u641c\u7d22 /search.php?k={\u8bcd}&p={\u9875}\uff08\u660e\u6587\uff0c\u65e0 AES\uff09\uff0c\u65e0\u547d\u4e2d\u9875\u542b\u300c\u6ca1\u6709\u627e\u5230\u300d
 import json
 import re
 import sys
@@ -38,13 +43,22 @@ _UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like
 
 # \u5217\u8868\u6761\u76ee: \u6309 <li> \u5206\u5757\uff1b\u5757\u5185 <a href="content/{md5}.html..."> + cover \u80cc\u666f\u56fe
 #           + <p>\u6807\u9898</p> + vodtime
-_RE_LINK = re.compile(r'<a[^>]*href="(content/[a-f0-9]+\.html[^"]*)"')
-_RE_COVER = re.compile(r"background-image:\s*url\('([^']+)'\)")
+# 2026-11-15\uff1a\u517c\u5bb9\u65b0\u65e7\u4e24\u4ee3\u94fe\u63a5\uff08content/{md5}.html \u4e0e /content/{\u6570\u5b57}.html\uff09
+_RE_LINK = re.compile(r'<a[^>]*href="((?:/)?content/[A-Za-z0-9]+\.html[^"]*)"')
+# \u5c01\u9762\u4f18\u5148 data-source\uff08\u539f\u56fe\uff09\uff0c\u5176\u6b21 data-s3\uff08webp\uff09\uff0c\u6700\u540e\u65e7\u7248 background-image
+_RE_COVER = re.compile(r"""data-source=["']([^"']+)["']|background-image:\s*url\((?:["']?)([^"')]+)""")
+# data-s3 \u5355\u72ec\u653e\uff1a\u5b83\u5728 HTML \u91cc\u6392\u5728 data-source \u524d\u9762\uff0c\u82e5\u5e76\u8fdb\u540c\u4e00\u6b63\u5219\uff0c
+# re.search \u4f1a\u6309"\u6700\u5de6\u5339\u914d"\u5148\u547d\u4e2d webp\uff0c\u5bfc\u81f4\u6ce8\u91ca\u91cc\u8bf4\u7684"\u539f\u56fe\u4f18\u5148"\u843d\u7a7a\u3002
+_RE_COVER_S3 = re.compile(r"""data-s3=["']([^"']+)["']""")
 _RE_CTITLE = re.compile(r'<div class="ctitle">\s*<p>([^<]+)</p>')
 _RE_VT = re.compile(r'<span class="vodtime">([^<]+)</span>')
 _RE_HREF = re.compile(r'<a[^>]*href="([^"]+)"')
-_RE_POSTER = re.compile(r"poster=['\"]([^'\"]+)['\"]")
+_RE_POSTER = re.compile(r"""poster=["']([^"']+)["']""")
 _RE_PLAY = re.compile(r'<a[^>]*playdata="([^"]+\.m3u8[^"]*)"')
+# \u65b0\u7248\u8be6\u60c5\uff1a<li \u5e26\u5c5e\u6027\u3001video-data \u5185\u5d4c JSON\u3001data-play-data-url \u64ad\u653e\u63a5\u53e3
+_RE_LI = re.compile(r'<li(?:\s|>)')
+_RE_VIDEO_DATA = re.compile(r"""<script[^>]*id=["']video-data["'][^>]*>(.*?)</script>""", re.S | re.I)
+_RE_PLAYDATA_URL = re.compile(r"""data-play-data-url=["']([^"']+)["']""")
 
 
 class Spider(BaseSpider):
@@ -55,6 +69,9 @@ class Spider(BaseSpider):
     #   **\u6839\u8def\u5f84\u662f\u53d1\u5e03\u9875\u6837\u5185\u5bb9\uff0c\u53ea\u6709 /toplist.php?p=N \u624d\u662f\u771f\u5185\u5bb9**\uff08200 / 94KB / 20 \u6761
     #   content/{md5}.html\uff09\u21d2 \u5fc5\u987b\u914d probe_path\uff0c\u5426\u5219\u88ab _validate \u7684\u53d1\u5e03\u9875\u6392\u4ed6\u5224\u8bef\u6740\u3002
     BUILTIN_HOSTS = [
+        # 2026-11-15 \u5b9e\u6d4b\uff1ajifangge.club \u4e0e punycode \u4e3b\u57df /toplist.php \u5747 200/28KB\uff1b
+        # jfgsou.com / jfgso.xyz \u4ecd ConnectTimeout\uff0c\u540e\u7f6e\u4ec5\u4f5c\u515c\u5e95\uff08\u653e\u9996\u4f4d\u4f1a\u767d\u7b49 12s\uff09\u3002
+        "https://jifangge.club",
         "https://xn---jifanggecom-ud8sv658aesydp6a.xn--9kq80g37uthu.com",
         "https://jfgsou.com",
     ]
@@ -370,8 +387,9 @@ class Spider(BaseSpider):
 
         def _validate(host, text):
             t = text or ''
-            # 2026-10-30\uff1a\u63a2\u6d3b\u8d70 /toplist.php\uff0c\u547d\u4e2d\u5373\u5217\u8868\u9875 \u2192 \u6709 content/{md5}.html \u5c31\u662f\u771f\u7ad9
-            if re.search(r'content/[a-f0-9]{6,}\.html', t):
+            # 2026-11-15\uff1a\u65b0\u7248\u5217\u8868\u662f /content/{\u6570\u5b57}.html + data-video-card\uff1b
+            # \u65e7\u5224\u636e\u53ea\u8ba4 md5 \u94fe\u63a5\uff0c\u4f1a\u8ba9\u6240\u6709\u771f\u7ad9\u88ab\u5224\u6b7b\uff08\u53d6\u57df\u767d\u8dd1 20s \u540e\u843d\u7a7a\uff09\u3002
+            if re.search(r'(data-video-card|jfg-pagination|content/[A-Za-z0-9]{4,}\.html)', t):
                 return True
             if '\u96c6\u82b3\u9601' not in t and 'h_d_key' not in t:
                 return False
@@ -382,6 +400,23 @@ class Spider(BaseSpider):
                     and not re.search(r'(newlist|toplist|playdata|m3u8)', t):
                 return False
             return True
+
+        # 2026-11-15 \u5feb\u901f\u8def\u5f84\uff1a\u5185\u7f6e\u6d3b\u57df / hosts@ \u5148\u63a2\u4e00\u6b21 /toplist.php?p=1\uff0c
+        # \u547d\u4e2d\u5373\u8fd4\u56de\uff08\u5b9e\u6d4b init 19.7s \u2192 ~1s\uff09\u3002**\u5168\u6302\u624d**\u5b8c\u6574\u8dd1\u53d1\u5e03\u9875\u62bd\u94fe\uff0c
+        # publish@ \u81ea\u6108\u80fd\u529b\u4e0d\u524a\u5f31\uff08\u8fd9\u6b63\u662f\u4ee5\u524d\u6bcf\u6b21\u51b7\u542f\u52a8\u767d\u7b49 20s \u7684\u6839\u56e0\uff09\u3002
+        _cands = []
+        for h in (list(self._ext.get('hosts') or []) + builtin):
+            h = str(h).strip().rstrip('/')
+            if h and h not in _cands:
+                _cands.append(h)
+        for h in _cands[:4]:
+            try:
+                r = requests.get(h + self._PROBE_PATH, headers=self.headers,
+                                 proxies=self.proxies, timeout=5, verify=False)
+                if r.status_code == 200 and _validate(h, r.text):
+                    return h
+            except Exception:
+                continue
 
         if resolve_host:
             try:
@@ -412,7 +447,7 @@ class Spider(BaseSpider):
     def _parse_list(html_text):
         out = []
         seen = set()
-        for blk in html_text.split('<li>')[1:]:
+        for blk in _RE_LI.split(html_text)[1:]:
             ml = _RE_LINK.search(blk)
             if not ml:
                 continue
@@ -428,7 +463,11 @@ class Spider(BaseSpider):
             pic = ''
             mc = _RE_COVER.search(blk)
             if mc:
-                pic = _html.unescape(mc.group(1)).strip()
+                pic = _html.unescape(next((g for g in mc.groups() if g), '')).strip()
+            if not pic:
+                ms = _RE_COVER_S3.search(blk)
+                if ms:
+                    pic = _html.unescape(ms.group(1)).strip()
             remark = ''
             mv = _RE_VT.search(blk)
             if mv:
@@ -555,7 +594,11 @@ class Spider(BaseSpider):
             if not kw:
                 return result
             n = int(pg) if str(pg).isdigit() else 1
-            path = f'/search-0-{n}-{quote(self._search_ct(kw), safe="")}.html'
+            # 2026-11-15\uff1a\u7ad9\u65b9\u5f03\u7528 AES \u5bc6\u6587\u8def\u5f84\uff0c\u6539 /search.php?k=\u660e\u6587&p=\u9875\uff1b
+            # \u7b2c 1 \u9875\u4e0d\u5e26 p\uff08\u4e0e\u7ad9\u65b9\u81ea\u5df1\u7684\u5206\u9875\u94fe\u63a5\u4e00\u81f4\uff09\u3002\u65e0\u547d\u4e2d\u9875\u542b\u300c\u6ca1\u6709\u627e\u5230\u300d\u4e14 0 \u5361\u7247\u3002
+            path = '/search.php?k=' + quote(kw, safe='')
+            if n > 1:
+                path += '&p=%d' % n
             result['list'] = self._parse_list(self._get(path).text or '')
         except Exception:
             pass
@@ -567,21 +610,70 @@ class Spider(BaseSpider):
     def searchContentPage(self, key, quick, pg):
         return self._search(key, pg)
 
+    def _play_urls(self, body, key):
+        """\u65b0\u7248\u64ad\u653e\uff1a\u8be6\u60c5\u9875 data-play-data-url \u2192 JSON lines[] \u2192 \u7ebf\u8def$\u76f4\u94fe\uff0c# \u5206\u9694\u3002
+
+        \u5b9e\u6d4b https://pd.xsocdn.com/data/v1/play/{id}.json \u8fd4\u56de
+        {\"lines\":[{\"label\":..., \"scheme\":\"https\", \"host\":..., \"path\":\"/.../index.m3u8\"}]}\u3002
+        domain_map_url \u5f53\u524d domains={}\uff08\u7a7a\uff09\uff0c\u6682\u4e0d\u53c2\u4e0e\u62fc\u63a5\uff1b\u7ad9\u65b9\u542f\u7528\u57df\u6620\u5c04\u540e\u5728\u6b64\u6362 host\u3002
+        """
+        try:
+            m = _RE_PLAYDATA_URL.search(body or '')
+            if not m:
+                return ''
+            u = _html.unescape(m.group(1)).strip()
+            if u.startswith('//'):
+                u = 'https:' + u
+            elif not u.startswith('http'):
+                u = _absolute(self.host, u)
+            d = json.loads(self._get(u).text or '{}')
+            out = []
+            for ln in (d.get('lines') or []):
+                if not isinstance(ln, dict):
+                    continue
+                host = str(ln.get('host') or '').strip().rstrip('/')
+                path = str(ln.get('path') or '').strip()
+                if not host or not path:
+                    continue
+                scheme = str(ln.get('scheme') or 'https').rstrip(':/')
+                url = scheme + '://' + host + (path if path.startswith('/') else '/' + path)
+                label = str(ln.get('label') or '\u64ad\u653e').replace('$', '').replace('#', '')
+                out.append(label + '$' + url)
+            return '#'.join(out)
+        except Exception:
+            return ''
+
     def detailContent(self, ids):
         result = {'list': []}
         try:
             key = str(ids[0]).split('?')[0]
             body = self._get(key).text or ''
             title = ''
-            m = re.search(r'<title>([^<]+)</title>', body)
-            if m:
-                title = _html.unescape(m.group(1)).strip()
-                title = re.sub('\\s*[-|]\\s*\u96c6\u82b3\u9601.*$', '', title).strip()
             pic = ''
-            mp = _RE_POSTER.search(body)
-            if mp:
-                pic = (mp.group(1) or mp.group(2) or '').strip()
-            url = _absolute(self.host, key)
+            # 2026-11-15\uff1a\u65b0\u7248\u628a\u6807\u9898/\u5c01\u9762\u653e\u8fdb <script id="video-data"> \u5185\u5d4c JSON
+            mv = _RE_VIDEO_DATA.search(body)
+            if mv:
+                try:
+                    d = json.loads(mv.group(1))
+                    title = _html.unescape(str(d.get('title') or '')).strip()
+                    pic = str(d.get('source_image') or d.get('image') or '').strip()
+                except Exception:
+                    pass
+            if not title:
+                m = re.search(r'<title>([^<]+)</title>', body)
+                if m:
+                    title = _html.unescape(m.group(1)).strip()
+                    title = re.sub('\\s*[-|]\\s*\u96c6\u82b3\u9601.*$', '', title).strip()
+            if not pic:
+                mp = _RE_POSTER.search(body)
+                if mp:
+                    pic = (mp.group(1) or '').strip()
+            if pic.startswith('//'):
+                pic = 'https:' + pic
+            # \u8be6\u60c5\u9636\u6bb5\u53d6\u597d\u76f4\u94fe \u21d2 \u70b9\u64ad\u653e\u96f6\u989d\u5916\u8bf7\u6c42\uff1b\u5931\u8d25\u624d\u9000\u56de\u8be6\u60c5\u9875\u4ea4\u7ed9 playerContent
+            play = self._play_urls(body, key)
+            if not play:
+                play = '\u64ad\u653e$' + _absolute(self.host, key)
             result['list'].append({
                 'vod_id': key,
                 'vod_name': title or key,
@@ -594,7 +686,7 @@ class Spider(BaseSpider):
                 'vod_director': '',
                 'vod_content': '',
                 'vod_play_from': 'jfg',
-                'vod_play_url': f'播放${url}',
+                'vod_play_url': play,
             })
         except Exception:
             pass
@@ -604,11 +696,22 @@ class Spider(BaseSpider):
         result = {'parse': 0, 'playUrl': '', 'url': '', 'header': {'User-Agent': _UA}}
         try:
             url = str(id)
+            hdr = {'User-Agent': _UA, 'Referer': self.host + '/'}
+            # \u8be6\u60c5\u5df2\u5199\u597d\u76f4\u94fe\uff1a\u76f4\u63a5\u900f\u4f20\uff0c\u4e0d\u518d\u6293\u9875
+            if re.search(r'\.(m3u8|mp4)(\?|$)', url, re.I):
+                result['url'] = url
+                result['header'] = hdr
+                return result
             body = self._get(url).text or ''
-            mp = _RE_PLAY.search(body)
+            mp = _RE_PLAY.search(body)             # \u65e7\u7248 <a playdata="...m3u8">
             if mp:
                 result['url'] = mp.group(1).strip()
-                result['header'] = {'User-Agent': _UA, 'Referer': self.host + '/'}
+                result['header'] = hdr
+                return result
+            play = self._play_urls(body, url)       # \u65b0\u7248\u64ad\u653e JSON
+            if play:
+                result['url'] = play.split('#')[0].split('$', 1)[-1]
+                result['header'] = hdr
         except Exception:
             pass
         return result
