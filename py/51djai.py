@@ -25,6 +25,16 @@
     \u4f1a\u62ff\u5230\u300c\u6559\u5b66 \u7b2c2\u9875\u300d\u7684\u7ed3\u679c\uff1b\u4e14 301 \u76ee\u6807\u7531 cookie \u51b3\u5b9a \u21d2 \u7edd\u4e0d\u53ef\u7528\u3002
     \u547d\u4e2d\u9875\u6709\u300c\u5171 N \u4e2a\u7ed3\u679c\u300d\uff1b\u65e0\u547d\u4e2d\u9875\u6ca1\u6709\u8fd9\u884c\uff0c\u5374\u585e 7 \u5f20\u300c\u731c\u4f60\u559c\u6b22\u300d\u5361 \u21d2 \u5fc5\u987b\u5148\u5224\u7a7a\u3002
 
+\u5c01\u9762\uff082026-11-25 \u5b9a\u6848\uff09\uff1a
+  - \u9875\u9762\u4e0a\u7684 <img data-src> \u6307\u5411\u56fe\u5e8a pic.mmgbaa.cn\uff0c\u53d6\u56de\u7684\u5b57\u8282\u662f **AES-128-CBC \u5bc6\u6587**
+    \uff08\u524d\u7aef /static/web/js/plugins/crypto-worker.js \u7528 crypto-worker \u89e3\u5bc6\u540e\u518d\u8f6c blob\uff1b
+     key/iv \u786c\u7f16\u7801\u5728 worker \u91cc\uff1af5d965df75336270 / 97b60394abc2fbe1\uff0cNoPadding + PKCS7 \u5c3e\u90e8\uff09\u3002
+    \u58f3\u5b50\u76f4\u8fde\u53ea\u80fd\u62ff\u5230\u5bc6\u6587 \u21d2 \u5168\u90e8\u7834\u56fe\uff0c\u6d4f\u89c8\u5668\u76f4\u5f00\u540c\u6837\u89e3\u4e0d\u51fa\uff08\u5df2\u7528 Edge \u5b9e\u6d4b naturalWidth=0\uff09\u3002
+  - \U0001f6a9 \u660e\u6587\u5165\u53e3\u5728\u7ad9\u65b9\u7ed9\u793e\u4ea4\u5e73\u53f0\u6293\u53d6\u7528\u7684\u5206\u4eab\u5c01\u9762\uff1a`{host}share/video/{id}/cover`\uff0c
+    \u5b9e\u6d4b\u8fd4\u56de 420x600 image/jpeg\uff0c\u9996\u9875 33 \u4e2a ID **33/33 \u5168\u90e8\u53ef\u7528**\uff08\u5747\u503c 69KB\uff09\uff0c
+    \u65e0\u9700\u7b7e\u540d/Referer\uff1b\u4e0d\u5b58\u5728\u7684 ID \u624d 404\u3002\u5217\u8868\u3001\u6392\u884c\u699c\u3001\u8be6\u60c5\u7edf\u4e00\u8d70\u5b83\u3002
+  - \u4e0d\u8981\u9000\u56de data URI \u5185\u5d4c\uff1a\u89e3\u5bc6\u540e\u5747\u503c 353KB\uff08PNG \u5c01\u9762\u6700\u5927 970KB\uff09\uff0c20 \u6761\u5217\u8868\u8981 9MB\u3002
+
 \u53d6\u57df\uff082026-11-14 \u5b9a\u6848\uff09\uff1a
   - \u53d1\u5e03\u9875 https://51dj20.com/ \u2192 \u8df3\u677f \u2192 Base64 \u89e3\u7801\u9875\u91cc\u5217\u7740\u771f\u5b9e\u56fa\u5b9a\u57df\u3002
   - \u65e7\u5b9e\u73b0\u9760 words.random() \u62fc\u300c\u968f\u673a\u524d\u7f00 + .henoceapn.cc\u300d\u57df\uff0c\u5b9e\u6d4b 8 \u4e2a\u5168\u90e8\u8fde\u4e0d\u4e0a
@@ -172,6 +182,14 @@ class Spider(Spider):
             return u
         return self.host.rstrip("/") + "/" + u.lstrip("/")
 
+    def _cover(self, link):
+        """\u5c01\u9762\u53d6\u660e\u6587\u5206\u4eab\u56fe\uff1a/{host}share/video/{id}/cover\uff08\u8be6\u89c1\u6587\u4ef6\u5934\u300c\u5c01\u9762\u300d\u6bb5\uff09\u3002
+        \u56fe\u5e8a pic.mmgbaa.cn \u662f AES \u5bc6\u6587\uff0c\u58f3\u5b50\u89e3\u4e0d\u51fa\uff1b\u672c\u63a5\u53e3\u662f\u7ad9\u65b9\u81ea\u5df1\u7ed9 OG \u6293\u53d6\u7684\u660e\u6587\u51fa\u53e3\u3002"""
+        sid = self._sid(link)
+        if not sid:
+            return ""
+        return self.host.rstrip("/") + "/share/video/" + sid + "/cover"
+
     def _initial(self, html):
         m = re.search(r'<script[^>]*id=["\']videoInitialData["\'][^>]*>(.*?)</script>', html or "", re.S | re.I)
         if not m:
@@ -189,16 +207,13 @@ class Spider(Spider):
         link = c.find(".hg-drama-card__cover-link").attr("href") or a.attr("href") or ""
         if not title or not link or "/video/" not in link:
             return None
-        img = c.find(".hg-drama-card__cover-link img")
-        pic = img.attr("data-src") or img.attr("src") or ""
-        if "cover-placeholder" in pic:
-            pic = ""
         ep = c.find(".hg-drama-card__episode").text() or ""
         m = re.search("(\u5168\\d+\u96c6|\u66f4\u65b0\u81f3\\d+\u96c6)", ep)
         return {
             "vod_id": self._fix(link),
             "vod_name": title,
-            "vod_pic": self._fix(pic) if pic else "",
+            # \u9875\u9762 <img data-src> \u662f AES \u5bc6\u6587\u56fe\u5e8a\uff0c\u6539\u8d70\u660e\u6587\u5206\u4eab\u5c01\u9762
+            "vod_pic": self._cover(link),
             "vod_remarks": m.group(1) if m else "",
             "vod_tag": "",
         }
@@ -224,12 +239,8 @@ class Spider(Spider):
             title = it.find(".hg-rank-item__title a").text().strip() or it.attr("data-track-title") or ""
             if not title or "/video/" not in link:
                 continue
-            img = a.find("img")
-            pic = img.attr("data-src") or ""
-            if "cover-placeholder" in pic:
-                pic = ""
             v = {"vod_id": self._fix(link), "vod_name": title,
-                 "vod_pic": self._fix(pic) if pic else "",
+                 "vod_pic": self._cover(link),
                  "vod_remarks": "\u699c%s" % (it.attr("data-rank") or "?"), "vod_tag": ""}
             if v["vod_id"] not in seen:
                 seen.add(v["vod_id"])
@@ -318,7 +329,7 @@ class Spider(Spider):
             if not d:
                 return {"list": []}
             title = str(d.get("title") or "")
-            pic = str(d.get("coverSrc") or d.get("posterSrc") or "")
+            pic = self._cover(sid)        # \u4e0d\u7528 initialData.coverSrc\uff1a\u90a3\u662f\u5bc6\u6587\u56fe\u5e8a
             desc = str(d.get("description") or "")
             tags = [str(x) for x in (d.get("tags") or [])]
             tr = d.get("tracking") or {}
@@ -337,7 +348,7 @@ class Spider(Spider):
             return {"list": [{
                 "vod_id": self._ep_url(sid, 1),
                 "vod_name": title,
-                "vod_pic": self._fix(pic) if pic else "",
+                "vod_pic": pic,
                 "vod_content": desc,
                 "vod_remarks": "\u5168%d\u96c6" % total,
                 "vod_year": str(d.get("time") or "")[:4],
