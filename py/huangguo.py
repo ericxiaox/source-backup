@@ -231,19 +231,246 @@ except Exception:
 
 
 
-try:
-    from Crypto.Hash import SHA256 as _SHA256
-    from Crypto.PublicKey import ECC as _ECC
-    from Crypto.Protocol.DH import key_agreement as _ecdh_bits
-    from Crypto.Protocol.KDF import HKDF as _HKDF
-except Exception:
-    try:
-        from Cryptodome.Hash import SHA256 as _SHA256
-        from Cryptodome.PublicKey import ECC as _ECC
-        from Cryptodome.Protocol.DH import key_agreement as _ecdh_bits
-        from Cryptodome.Protocol.KDF import HKDF as _HKDF
-    except Exception:
-        _SHA256 = _ECC = _ecdh_bits = _HKDF = None
+# ---------- \u7eaf Python \u5bc6\u7801\u5b66\uff082026-11-25\uff09 ----------
+# \u4e3a\u4ec0\u4e48\u4e0d\u518d\u7528 pycryptodome \u53d6\u6d41\uff1adx150-edge-v1 \u9700\u8981 `Protocol.DH.key_agreement` \u4e0e
+# `ECC.export_key(format="raw")`\uff0c\u4e24\u8005\u90fd\u662f**\u8f83\u65b0** API\uff1b\u771f\u673a\uff08Chaquopy \u5185\u5d4c Python\uff09
+# \u5e38\u5e26 pycrypto \u6216\u8001\u7248 pycryptodome \u21d2 ImportError / AttributeError \u2192 \u53d6\u6d41\u9759\u9ed8\u8fd4\u56de\u7a7a
+# \u2192 App \u62a5\u300c\u64ad\u653e\u5730\u5740\u52a0\u8f7d\u5931\u8d25\u300d\u3002\u4e0b\u9762\u7528\u6807\u51c6\u5e93\u5b9e\u73b0\u4e09\u4ef6\uff0c\u4e0e pycryptodome **\u9010\u5b57\u8282\u4e00\u81f4**
+# \uff082026-11-25 \u5bf9\u62cd\uff1a\u516c\u94a5 / ECDH \u5171\u4eab\u5bc6\u94a5 / HKDF / GCM \u5bc6\u6587+tag \u5168\u7b49\uff09\uff0c
+# \u4ece\u6b64\u4e0d\u770b\u771f\u673a\u88c5\u4e86\u4ec0\u4e48\u5e93\u3002
+# \u5b9e\u6d4b\u8017\u65f6\uff08PC\uff09\uff1a\u516c\u94a5\u751f\u6210 2ms \uff5c ECDH 2ms \uff5c GCM \u52a0/\u89e3\u5bc6\u5404 5ms\uff08\u6bcf\u8bf7\u6c42\u7ea6 10ms\uff09\u3002
+import os as _pure_os
+import hmac as _pure_hmac
+import hashlib as _pure_hashlib
+
+_P256_P = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff
+_P256_N = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551
+_P256_A = _P256_P - 3
+_P256_G = (0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296,
+           0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5, 1)
+
+
+def _p2_dbl(P):
+    """Jacobian \u500d\u70b9\u3002P=(X,Y,Z) \u6216 None\uff08\u65e0\u7a77\u8fdc\uff09\u3002"""
+    if P is None:
+        return None
+    X, Y, Z = P
+    if Y == 0:
+        return None
+    p = _P256_P
+    YY = Y * Y % p
+    S = 4 * X * YY % p
+    ZZ = Z * Z % p
+    M = (3 * X * X + _P256_A * ZZ * ZZ) % p
+    X3 = (M * M - 2 * S) % p
+    Y3 = (M * (S - X3) - 8 * YY * YY) % p
+    Z3 = 2 * Y * Z % p
+    return (X3, Y3, Z3)
+
+
+def _p2_add(P, Q):
+    """Jacobian \u70b9\u52a0\uff08\u542b\u500d\u70b9\u5206\u652f\uff1b\u4e92\u4e3a\u9006\u5143 \u2192 None\uff09\u3002"""
+    if P is None:
+        return Q
+    if Q is None:
+        return P
+    p = _P256_P
+    X1, Y1, Z1 = P
+    X2, Y2, Z2 = Q
+    Z1Z1 = Z1 * Z1 % p
+    Z2Z2 = Z2 * Z2 % p
+    U1 = X1 * Z2Z2 % p
+    U2 = X2 * Z1Z1 % p
+    S1 = Y1 * Z2Z2 % p * Z2 % p
+    S2 = Y2 * Z1Z1 % p * Z1 % p
+    if U1 == U2:
+        if S1 != S2:
+            return None
+        return _p2_dbl(P)
+    H = (U2 - U1) % p
+    I = (2 * H) ** 2 % p
+    J = H * I % p
+    r = 2 * (S2 - S1) % p
+    V = U1 * I % p
+    X3 = (r * r - J - 2 * V) % p
+    Y3 = (r * (V - X3) - 2 * S1 * J) % p
+    Z3 = ((Z1 + Z2) ** 2 - Z1Z1 - Z2Z2) % p * H % p
+    return (X3, Y3, Z3)
+
+
+def _p2_mul(k, P):
+    R = None
+    while k > 0:
+        if k & 1:
+            R = _p2_add(R, P)
+        P = _p2_dbl(P)
+        k >>= 1
+    return R
+
+
+def _p2_to_raw(P):
+    """Jacobian \u2192 \u65e0\u538b\u7f29 65B\uff080x04 || X || Y\uff09\uff0c\u4e0e WebCrypto / pycryptodome raw \u4e00\u81f4\u3002"""
+    X, Y, Z = P
+    zi = pow(Z, _P256_P - 2, _P256_P)
+    zi2 = zi * zi % _P256_P
+    x = X * zi2 % _P256_P
+    y = Y * zi2 % _P256_P * zi % _P256_P
+    return b'\x04' + x.to_bytes(32, 'big') + y.to_bytes(32, 'big')
+
+
+def _p2_from_raw(raw):
+    return (int.from_bytes(raw[1:33], 'big'), int.from_bytes(raw[33:65], 'big'), 1)
+
+
+def _p256_gen():
+    """\u968f\u673a\u79c1\u94a5\uff081..n-1\uff09\u3002\u7528 os.urandom\uff0cChaquopy \u771f\u673a\u540c\u6837\u6709\u3002"""
+    return int.from_bytes(_pure_os.urandom(32), 'big') % (_P256_N - 1) + 1
+
+
+def _p256_pub(d):
+    return _p2_to_raw(_p2_mul(d, _P256_G))
+
+
+def _p256_shared(d, peer_raw):
+    """ECDH\uff1a\u8fd4\u56de\u5171\u4eab\u70b9 x \u5750\u6807 32B\uff08pycryptodome key_agreement \u540c\u8bed\u4e49\uff09\u3002"""
+    X, Y, Z = _p2_mul(d, _p2_from_raw(peer_raw))
+    zi = pow(Z, _P256_P - 2, _P256_P)
+    return (X * zi * zi % _P256_P).to_bytes(32, 'big')
+
+
+def _hkdf32(shared, salt, info):
+    """HKDF-SHA256\uff0cL=32\uff08\u5355\u8f6e\u8db3\u591f\uff09\u3002"""
+    prk = _pure_hmac.new(salt, shared, _pure_hashlib.sha256).digest()
+    return _pure_hmac.new(prk, info + b'\x01', _pure_hashlib.sha256).digest()
+
+
+_AES_SBOX = bytes.fromhex(
+    '637c777bf26b6fc53001672bfed7ab76ca82c97dfa5947f0add4a2af9ca472c0'
+    'b7fd9326363ff7cc34a5e5f171d8311504c723c31896059a071280e2eb27b275'
+    '09832c1a1b6e5aa0523bd6b329e32f8453d100ed20fcb15b6acbbe394a4c58cf'
+    'd0efaafb434d338545f9027f503c9fa851a3408f929d38f5bcb6da2110fff3d2'
+    'cd0c13ec5f974417c4a77e3d645d197360814fdc222a908846eeb814de5e0bdb'
+    'e0323a0a4906245cc2d3ac629195e479e7c8376d8dd54ea96c56f4ea657aae08'
+    'ba78252e1ca6b4c6e8dd741f4bbd8b8a703eb5664803f60e613557b986c11d9e'
+    'e1f8981169d98e949b1e87e9ce5528df8ca1890dbfe6426841992d0fb054bb16')
+
+
+def _aes_xt(a):
+    a <<= 1
+    return (a ^ 0x11b) & 0xff if a & 0x100 else a
+
+
+def _aes_gmul(a, b):
+    r = 0
+    while b:
+        if b & 1:
+            r ^= a
+        a = _aes_xt(a)
+        b >>= 1
+    return r
+
+
+class _AesPure(object):
+    """AES \u5206\u7ec4\u52a0\u5bc6\uff08\u53ea\u505a\u52a0\u5bc6\u65b9\u5411\uff1bGCM \u7684\u89e3\u5bc6\uff1dCTR \u518d\u5f02\u6216\u4e00\u6b21\uff09\u3002"""
+
+    def __init__(self, key):
+        nk = len(key) // 4
+        self.nr = nk + 6
+        w = [list(key[4 * i:4 * i + 4]) for i in range(nk)]
+        rcon = 1
+        for i in range(nk, 4 * (self.nr + 1)):
+            t = list(w[i - 1])
+            if i % nk == 0:
+                t = t[1:] + t[:1]
+                t = [_AES_SBOX[b] for b in t]
+                t[0] ^= rcon
+                rcon = _aes_xt(rcon)
+            elif nk > 6 and i % nk == 4:
+                t = [_AES_SBOX[b] for b in t]
+            w.append([w[i - nk][j] ^ t[j] for j in range(4)])
+        self.w = w
+
+    def _ark(self, s, rnd):
+        for c in range(4):
+            k = self.w[rnd * 4 + c]
+            for r in range(4):
+                s[r][c] ^= k[r]
+
+    def block(self, b):
+        s = [[b[r + 4 * c] for c in range(4)] for r in range(4)]
+        self._ark(s, 0)
+        for rnd in range(1, self.nr + 1):
+            for r in range(4):
+                for c in range(4):
+                    s[r][c] = _AES_SBOX[s[r][c]]
+            for r in range(1, 4):
+                s[r] = s[r][r:] + s[r][:r]
+            if rnd != self.nr:
+                for c in range(4):
+                    a0, a1, a2, a3 = s[0][c], s[1][c], s[2][c], s[3][c]
+                    s[0][c] = _aes_gmul(a0, 2) ^ _aes_gmul(a1, 3) ^ a2 ^ a3
+                    s[1][c] = a0 ^ _aes_gmul(a1, 2) ^ _aes_gmul(a2, 3) ^ a3
+                    s[2][c] = a0 ^ a1 ^ _aes_gmul(a2, 2) ^ _aes_gmul(a3, 3)
+                    s[3][c] = _aes_gmul(a0, 3) ^ a1 ^ a2 ^ _aes_gmul(a3, 2)
+            self._ark(s, rnd)
+        return bytes(s[r][c] for c in range(4) for r in range(4))
+
+
+def _ghash(H, aad, ct):
+    """GHASH\uff1aAAD \u4e0e\u5bc6\u6587\u5404\u8865 16B \u5bf9\u9f50\uff0c\u672b\u5c3e\u63a5\u957f\u5ea6\u5757\u3002"""
+    def _pad(x):
+        return x + b'\x00' * (-len(x) % 16)
+    data = (_pad(aad) + _pad(ct)
+            + (len(aad) * 8).to_bytes(8, 'big') + (len(ct) * 8).to_bytes(8, 'big'))
+    y = 0
+    for i in range(0, len(data), 16):
+        y = _gf128(y ^ int.from_bytes(data[i:i + 16], 'big'), H)
+    return y.to_bytes(16, 'big')
+
+
+def _gf128(X, Y):
+    R = 0xe1000000000000000000000000000000
+    Z, V = 0, Y
+    for i in range(127, -1, -1):
+        if (X >> i) & 1:
+            Z ^= V
+        V = (V >> 1) ^ R if V & 1 else V >> 1
+    return Z
+
+
+def _gcm_bits(key, iv):
+    a = _AesPure(key)
+    j0 = iv + b'\x00\x00\x00\x01'
+    return a, j0, int.from_bytes(a.block(b'\x00' * 16), 'big')
+
+
+def _gcm_enc(key, iv, aad, pt):
+    """AES-256-GCM \u52a0\u5bc6 \u2192 (\u5bc6\u6587, 16B tag)\u3002iv \u56fa\u5b9a 12B\u3002"""
+    a, j0, H = _gcm_bits(key, iv)
+    ctr = int.from_bytes(j0, 'big')
+    out = bytearray()
+    for i in range(0, len(pt), 16):
+        ctr = (ctr & ~0xffffffff) | ((ctr + 1) & 0xffffffff)
+        ks = a.block(ctr.to_bytes(16, 'big'))
+        out += bytes(x ^ y for x, y in zip(pt[i:i + 16], ks))
+    ct = bytes(out)
+    tag = bytes(x ^ y for x, y in zip(_ghash(H, aad, ct), a.block(j0)))
+    return ct, tag
+
+
+def _gcm_dec(key, iv, aad, ct, tag):
+    """AES-256-GCM \u89e3\u5bc6\uff08\u5148\u9a8c tag\uff0c\u4e0d\u7b26\u5373\u629b\uff09\u3002"""
+    a, j0, H = _gcm_bits(key, iv)
+    calc = bytes(x ^ y for x, y in zip(_ghash(H, aad, ct), a.block(j0)))
+    if calc != tag:
+        raise ValueError('gcm tag mismatch')
+    ctr = int.from_bytes(j0, 'big')
+    out = bytearray()
+    for i in range(0, len(ct), 16):
+        ctr = (ctr & ~0xffffffff) | ((ctr + 1) & 0xffffffff)
+        ks = a.block(ctr.to_bytes(16, 'big'))
+        out += bytes(x ^ y for x, y in zip(ct[i:i + 16], ks))
+    return bytes(out)
 
 
 class _EdgeApi(object):
@@ -281,8 +508,10 @@ class _EdgeApi(object):
         return base64.b64decode(s)
 
     def _post(self, scope, body):
-        import time as _t
-        r = rq.post(self.host + self.PATHS[scope], json=body, timeout=self.timeout,
+        # \u7528 data= \u800c\u975e json=\uff1a\u771f\u673a\u82e5\u88c5\u7684\u662f\u5f88\u8001\u7684 requests\uff08<2.4\uff09\uff0cjson= \u4e0d\u5b58\u5728\u4f1a\u76f4\u63a5
+        # TypeError\uff1b\u4e24\u8005\u53d1\u51fa\u7684\u5b57\u8282\u5b8c\u5168\u4e00\u6837\uff0c\u6362\u6210 data= \u96f6\u6210\u672c\u6d88\u9664\u8fd9\u4e2a\u7248\u672c\u4f9d\u8d56\u3002
+        payload = json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        r = rq.post(self.host + self.PATHS[scope], data=payload, timeout=self.timeout,
                     verify=False, headers={
                         "User-Agent": self.ua,
                         "Accept": "application/json, text/plain, */*",
@@ -294,18 +523,17 @@ class _EdgeApi(object):
 
     def _open(self, scope):
         import time as _t
-        priv = _ECC.generate(curve="P-256")
-        pub = priv.public_key().export_key(format="raw")     # 65B\uff0c\u542b 0x04\uff0c\u4e0e WebCrypto raw \u4e00\u81f4
+        d = _p256_gen()
+        pub = _p256_pub(d)              # 65B\uff0c\u542b 0x04\uff0c\u4e0e WebCrypto raw \u4e00\u81f4
         hello = self._post(scope, {"v": 1, "type": "hello", "client_pub": self._b64u(pub)})
         if hello.get("type") != "hello" or not hello.get("server_pub"):
             raise IOError("edge hello \u65e0\u6548")
-        spub = _ECC.import_key(self._unb64u(hello["server_pub"]), curve_name="P-256")
-        shared = _ecdh_bits(static_priv=priv, static_pub=spub, kdf=lambda x: x)
+        shared = _p256_shared(d, self._unb64u(hello["server_pub"]))
         info = "\n".join([self.PROTO, scope, str(hello.get("site") or ""),
                           str(hello.get("kid") or ""), str(hello.get("sid") or "")])
         salt = self._unb64u(hello["salt"])
-        keys = dict((d, _HKDF(shared, 32, salt, _SHA256, 1,
-                              context=(info + "\n" + d).encode())) for d in ("req", "res"))
+        keys = dict((x, _hkdf32(shared, salt, (info + "\n" + x).encode()))
+                    for x in ("req", "res"))
         now = int(_t.time())
         sess = {"info": info, "kid": hello["kid"], "sid": hello["sid"],
                 "off": int(hello["server_time"]) - now,
@@ -322,19 +550,18 @@ class _EdgeApi(object):
         sess["seq"] += 1
         seq, ts = sess["seq"], int(_t.time()) + sess["off"]
         iv = b"\x00" * 8 + seq.to_bytes(4, "big")
-        c = AES.new(sess["req"], AES.MODE_GCM, nonce=iv, mac_len=16)
-        c.update(("%s\nreq\n%d\n%d" % (sess["info"], seq, ts)).encode())
-        ct, tag = c.encrypt_and_digest(
-            json.dumps({"request": request}, ensure_ascii=False,
-                       separators=(",", ":")).encode("utf-8"))
+        ct, tag = _gcm_enc(sess["req"], iv,
+                           ("%s\nreq\n%d\n%d" % (sess["info"], seq, ts)).encode(),
+                           json.dumps({"request": request}, ensure_ascii=False,
+                                      separators=(",", ":")).encode("utf-8"))
         res = self._post(scope, {"v": 1, "type": "call", "kid": sess["kid"], "sid": sess["sid"],
                                  "seq": seq, "ts": ts, "ciphertext": self._b64u(ct + tag)})
         if res.get("type") != "result" or res.get("seq") != seq:
             raise IOError("edge result \u4e0d\u5339\u914d")
         raw = self._unb64u(res["ciphertext"])
-        d = AES.new(sess["res"], AES.MODE_GCM, nonce=iv, mac_len=16)
-        d.update(("%s\nres\n%d\n%d" % (sess["info"], seq, ts)).encode())
-        inner = json.loads(d.decrypt_and_verify(raw[:-16], raw[-16:]))
+        inner = json.loads(_gcm_dec(sess["res"], iv,
+                                    ("%s\nres\n%d\n%d" % (sess["info"], seq, ts)).encode(),
+                                    raw[:-16], raw[-16:]))
         body = inner.get("body") or ""
         return json.loads(base64.b64decode(body).decode("utf-8")) if body else {}
 
@@ -1252,16 +1479,30 @@ class Spider(Spider):
         return "", 1
 
     def _edge_play(self, sid, ep):
-        """\u8d70\u52a0\u5bc6\u7f51\u5173\u53d6\u8be5\u96c6 m3u8\uff1b\u6362\u57df\u540e\u81ea\u52a8\u91cd\u5efa\u5ba2\u6237\u7aef\u3002\u5931\u8d25\u8fd4\u56de\u7a7a\u4e32\u3002"""
-        if not _ECC or not _HKDF or not _SHA256 or AES is None:
-            return ""
+        """\u8d70\u52a0\u5bc6\u7f51\u5173\u53d6\u8be5\u96c6 m3u8\uff1b\u6362\u57df\u540e\u81ea\u52a8\u91cd\u5efa\u5ba2\u6237\u7aef\u3002\u5931\u8d25\u8fd4\u56de\u7a7a\u4e32\u3002
+
+        2026-11-25 \u8d77**\u4e0d\u518d\u4f9d\u8d56 pycryptodome**\uff08\u6539\u7528\u4e0b\u65b9 _p256_* / _gcm_* \u7eaf\u5b9e\u73b0\uff09\uff1a
+        \u771f\u673a\u7f3a Protocol.DH / ECC raw export \u65f6\uff0c\u65e7\u7684 `if not _ECC \u2026 : return \"\"` \u4f1a\u8ba9
+        \u53d6\u6d41\u9759\u9ed8\u5931\u8d25\uff0cApp \u76f4\u63a5\u62a5\u300c\u64ad\u653e\u5730\u5740\u52a0\u8f7d\u5931\u8d25\u300d\u2014\u2014\u8fd9\u6b63\u662f\u5f53\u5929\u771f\u673a\u590d\u73b0\u7684\u5751\u3002
+        """
         host = self._safe_host()
-        api = getattr(self, '_edge_api', None)
-        if api is None or api.host != host:
-            api = _EdgeApi(host, UA)
-            self._edge_api = api
-        d = api.playback(sid, ep) or {}
-        return str(d.get('url') or '')
+        # \u771f\u673a\uff084G\uff0f\u5f31\u7f51\uff09\u5b9e\u6d4b\u5076\u53d1\u4e00\u6b21 ReadTimeout\uff0c\u800c\u8fd9\u91cc\u4e00\u5931\u8d25\u5c31\u662f\u300c\u64ad\u653e\u5730\u5740\u52a0\u8f7d\u5931\u8d25\u300d\uff0c
+        # \u7528\u6237\u53ea\u4f1a\u91cd\u8bd5\u4e00\u6b21 \u2192 \u6e90\u4fa7\u5148\u91cd\u8bd5\u4e00\u6b21\uff08\u91cd\u5efa\u4f1a\u8bdd\uff09\uff0c\u628a\u5076\u53d1\u6296\u52a8\u5403\u6389\u3002
+        for attempt in (1, 2):
+            try:
+                api = getattr(self, '_edge_api', None)
+                if api is None or api.host != host:
+                    api = _EdgeApi(host, UA)
+                    self._edge_api = api
+                d = api.playback(sid, ep) or {}
+                u = str(d.get('url') or '')
+                if u:
+                    return u
+                self._edge_err = 'playback \u65e0 streams.main'
+            except Exception as e:
+                self._edge_err = '%s: %s' % (type(e).__name__, str(e)[:60])
+                self._edge_api = None      # \u4f1a\u8bdd/\u8fde\u63a5\u53ef\u80fd\u5df2\u574f \u2192 \u4e0b\u4e00\u8f6e\u91cd\u5efa
+        return ''
 
     def playerContent(self, flag, id, vipFlags=None, vipIds=None):
         """\u5bf9\u9f50\u7cbe\u7b80\u7248 + \u517c\u5bb9\u7eaf\u6570\u5b57 id / \u5355\u96c6 AI\u9b54\u6539\u3002"""
