@@ -1,9 +1,27 @@
 # coding: utf-8
 # \u63a2\u82b1\u7fa4 \u5f71\u89c6\u722c\u866b - \u6807\u51c6HTML\u7ad9
-# \u7ad9\u70b9: https://132608.tanhq.top/
+# \u7ad9\u70b9: \u8df3\u677f https://132608.tanhq.top/ \uff5c \u771f\u7ad9 https://{\u65e5}{\u5e74}{\u6708}.tanhq.top/index.html
+#
+# 2026-11-25 \u53d6\u57df\u91cd\u5199\uff08\u65e7\u7248\u5199\u6b7b 132608.tanhq.top \u2192 \u5206\u7c7b\u9875\u6052 0 \u6761\uff09\uff1a
+#   \u65e7\u94fe\u8def `https://132608.tanhq.top/` \u73b0\u5728**\u4e0d\u518d\u76f4\u51fa\u5185\u5bb9**\uff0c\u53ea\u8fd4\u56de 852B \u8df3\u677f\u9875\uff1a
+#     <meta http-equiv="refresh" content="0;url=https://axc.tanhq.top/index.html">
+#     <script>
+#       function getCurrentDate(){ ... return day + year + month; }   // 6 \u4f4d '252611'
+#       window.location.replace(`https://${dateSub}.tanhq.top/index.html?${dateSub}`);
+#     </script>
+#   \u21d2 \u771f\u7ad9\u662f**\u65e5\u671f\u5b50\u57df\u955c\u50cf**\uff1a`{dd}{yy}{mm}.tanhq.top/index.html`\uff08\u4eca\u65e5 2026-11-25 \u2192 252611\uff09\u3002
+#   \u5b9e\u6d4b -6~+6 \u5929\u5171 13 \u4e2a\u65e5\u671f\u57df\uff0c\u9664 3 \u4e2a\u5076\u53d1 DNS/\u8fde\u63a5\u4e2d\u65ad\u5916**\u5168\u90e8 200 \u4e14\u5185\u5bb9\u540c\u4e00\u4efd**
+#   \uff08\u5747 21870B / 21 \u4e2a hot-item\uff09\u21d2 \u65e5\u671f\u53ea\u5f53\u300c\u955c\u50cf\u7f16\u53f7\u300d\u7528\uff0c**\u4e0d\u5fc5**\u4e25\u683c\u7b49\u4e8e\u5f53\u5929\u3002
+#   \u6545\u53d6\u57df\uff1d\u6309 \u4eca\u5929\u2192\u6628\u5929\u2192\u660e\u5929\u2192\u524d\u5929\u2192\u540e\u5929\u2026 \u5e76\u53d1\u63a2 `/index.html`\uff0c\u547d\u4e2d\u5373\u7528\uff0c\u4e0d\u505a\u683c\u5f0f\u786c\u7b97\u3002
+#   \u26a0 \u6839\u8def\u5f84 `/` \u6c38\u8fdc\u662f\u8df3\u677f\uff08984B\uff09\uff0c\u9996\u9875\u5fc5\u987b\u8d70 `/index.html`\u3002
+#   \u26a0 \u65e7\u7248\u6761\u76ee\u94fe\u662f `/v/{id}`\uff0c\u73b0\u5df2\u6539 `/player/{\u5e74}/{\u6708}/{\u65e5}/{id}.html?{mm.dd}`\uff08\u76f8\u5bf9\u8def\u5f84\uff0c
+#     `hot-item`/`data-original`/`hot-title` \u4e09\u4e2a\u951a\u70b9\u672a\u53d8 \u2192 \u5217\u8868\u6b63\u5219\u6cbf\u7528\uff0c\u65e0\u9700\u6539\uff09\u3002
 
+import datetime
 import re
 import json
+import threading
+import time
 import urllib.parse
 import posixpath
 from urllib.parse import quote, urlencode
@@ -11,9 +29,23 @@ from urllib.parse import quote, urlencode
 from base.spider import Spider as BaseSpider
 
 
+# \u8df3\u677f\u57df\uff08\u53ea\u7528\u6765\u6d3e\u751f\u56fa\u5b9a\u57df\uff0c\u4e0d\u627f\u8f7d\u5185\u5bb9\uff09
+_GATE_HOSTS = [
+    "https://132608.tanhq.top",
+    "https://axc.tanhq.top",
+]
+# \u65e5\u671f\u955c\u50cf\u6a21\u677f\uff1atag = \u65e5(2) + \u5e74(2) + \u6708(2)
+_DATE_TPL = "https://%s.tanhq.top"
+# \u63a2\u6d3b\u6df1\u94fe\uff08\u5fc5\u987b index.html\uff1b`/` \u662f\u8df3\u677f\uff09
+_PROBE_PATH = "/index.html"
+# \u547d\u4e2d\u8bb0\u5fc6\uff08\u79d2\uff09\uff1a\u7ad9\u70b9\u6362\u57df\u662f\u5c0f\u65f6\u7ea7\u4e8b\u4ef6\uff0c\u70ed\u542f\u4e0d\u518d\u63a2\u6d3b
+_LAST_GOOD = ["", 0.0]
+_LAST_GOOD_TTL = 600
+
+
 class Spider(BaseSpider):
     def __init__(self):
-        self.host = "https://132608.tanhq.top"
+        self.host = ""
         self.site_name = "\u63a2\u82b1\u7fa4"
         self.classes = [
             {"type_id": "1", "type_name": "\u65e5\u97e9"},
@@ -36,6 +68,126 @@ class Spider(BaseSpider):
 
     def init(self, extend=""):
         self.extend = extend or ""
+        h = self._resolve_host()
+        if h:
+            self._set_host(h)
+
+    def _set_host(self, host):
+        self.host = host.rstrip("/")
+        self.headers.update({
+            "Referer": self.host + "/",
+            "Origin": self.host,
+        })
+
+    def _ensure_host(self):
+        """init \u53d6\u57df\u5931\u8d25\uff08\u624b\u673a\u7f51\u7edc\u6162\uff09\u2192 \u9996\u6b21\u771f\u6b63\u8bbf\u95ee\u65f6\u518d\u8865\u4e00\u6b21\u3002"""
+        if self.host:
+            return
+        h = self._resolve_host()
+        if h:
+            self._set_host(h)
+
+    # ---------- \u53d6\u57df\uff08\u65e5\u671f\u955c\u50cf\u57df \u2192 \u8df3\u677f\u6d3e\u751f\u57df\uff09 ----------
+    def _probe(self, url, slot):
+        """\u63a2\u4e00\u4e2a\u5019\u9009\u57df\uff1b\u547d\u4e2d\u5199\u8fdb slot[0]\uff08\u5148\u5230\u5148\u5f97\uff09\u3002
+
+        \u26a0 \u5fc5\u987b\u63a2 `/index.html`\uff1a\u6839\u8def\u5f84 `/` \u5728\u8be5\u7ad9\u6c38\u8fdc\u662f 852B \u8df3\u677f\u9875\uff0c\u63a2 `/` \u5fc5\u7136\u5168\u706d\u3002
+        """
+        try:
+            u = url.rstrip("/")
+            if not u.endswith(_PROBE_PATH):
+                u += _PROBE_PATH
+            resp = self.fetch(u, headers=self.headers, timeout=8)
+            text = ""
+            if resp is not None:
+                content = getattr(resp, "content", b"") or b""
+                text = content.decode("utf-8", errors="ignore") if content else (getattr(resp, "text", "") or "")
+            # \u5224\u636e\uff1a\u771f\u5185\u5bb9\u9875\u4e00\u5b9a\u6709 hot-item \u5217\u8868\u5757\uff08\u8df3\u677f\u9875 852B\uff0c0 \u4e2a\uff09
+            if text.count("hot-item") >= 4 and not slot[0]:
+                slot[0] = url
+        except Exception as e:
+            self.log({"action": "probe_fail", "url": url, "error": str(e)[:60]})
+
+    def _date_hosts(self):
+        """\u65e5\u671f\u955c\u50cf\u5019\u9009\uff1a\u4eca\u5929 \u2192 \u6628\u5929 \u2192 \u660e\u5929 \u2192 \u524d\u5929 \u2192 \u540e\u5929 \u2192 -3/+3\u3002"""
+        out = []
+        today = datetime.date.today()
+        for delta in (0, -1, 1, -2, 2, -3, 3):
+            d = today + datetime.timedelta(days=delta)
+            u = _DATE_TPL % d.strftime("%d%y%m")
+            if u not in out:
+                out.append(u)
+        return out
+
+    def _gate_hosts(self):
+        """\u4ece\u8df3\u677f\u9875\u62bd**\u5199\u6b7b\u7684**\u56fa\u5b9a\u57df\uff08`${...}` \u6a21\u677f\u4e0d\u7b97\uff0c\u90a3\u8981\u9760\u65e5\u671f\u7b97\uff09\u3002"""
+        out = []
+        for g in _GATE_HOSTS:
+            page = self._fetch_html(g + "/")
+            if not page:
+                continue
+            # meta refresh \u7684\u843d\u70b9
+            for m in re.findall(r'url=([^"\'>\s]+)', page, re.I):
+                mm = re.match(r'^(https?://[^/]+)', m)
+                if mm and ".tanhq.top" in mm.group(1):
+                    out.append(mm.group(1))
+            # \u9875\u9762\u91cc\u5199\u6b7b\u7684\uff08\u975e\u63d2\u503c\uff09tanhq.top \u57df
+            for m in re.findall(r'https://([a-z0-9\-]+)\.tanhq\.top', page, re.I):
+                if "$" not in m:
+                    u = _DATE_TPL % m
+                    if u not in out:
+                        out.append(u)
+        return out
+
+    def _resolve_host(self):
+        # 0) \u547d\u4e2d\u8bb0\u5fc6
+        if _LAST_GOOD[0] and _LAST_GOOD[1] > time.time():
+            return _LAST_GOOD[0]
+
+        # \u26a0 \u5148**\u4e32\u884c**\u63a2\u4eca\u5929\uff1a\u5b9e\u6d4b\u4eca\u5929\u57df 1.1s \u547d\u4e2d\uff1b\u800c 5 \u4e2a\u5e76\u53d1\u4f1a\u88ab\u7ad9\u65b9\u9650\u901f
+        #   \u2192 \u5355\u4e2a\u8bf7\u6c42\u90fd\u62d6\u5230 7s \u4ee5\u4e0a\uff0c\u5e76\u53d1\u7a97\u53e3\u5185\u5168\u706d\uff0c\u53cd\u800c\u9000\u5230\u540e\u5929\u7684\u57df\uff0810.5s\uff09\u3002
+        cands = self._date_hosts()
+        slot = [None]
+        self._probe(cands[0], slot)
+        if slot[0]:
+            return self._remember(slot[0])
+
+        # 1) \u4eca\u5929\u6ca1\u4e2d\uff08\u6362\u4e86\u955c\u50cf\u7f16\u53f7/\u6682\u65f6\u6302\uff09\u2192 \u76f8\u90bb\u65e5\u671f\u5e76\u53d1\u8865\u63a2
+        rest = cands[1:]
+        for group in (rest[:4], rest[4:]):
+            if not group:
+                continue
+            result = [None]
+            ts = [threading.Thread(target=self._probe, args=(u, result)) for u in group]
+            for t in ts:
+                t.start()
+            for t in ts:
+                t.join(9)
+            if result[0]:
+                return self._remember(result[0])
+
+        # 2) \u8df3\u677f\u6d3e\u751f\u56fa\u5b9a\u57df\u515c\u5e95
+        gate = self._gate_hosts()
+        if gate:
+            result = [None]
+            ts = [threading.Thread(target=self._probe, args=(u, result)) for u in gate[:6]]
+            for t in ts:
+                t.start()
+            for t in ts:
+                t.join(9)
+            if result[0]:
+                return self._remember(result[0])
+
+        self.log({"action": "resolve_host_fail", "cands": cands[:7]})
+        return ""
+
+    def _remember(self, url):
+        m = re.match(r'^(https?://[^/]+)', url or "")
+        host = m.group(1) if m else ""
+        if host:
+            _LAST_GOOD[0] = host
+            _LAST_GOOD[1] = time.time() + _LAST_GOOD_TTL
+        return host
 
     def homeContent(self, filter):
         return {"class": self.classes, "filters": self.filters if filter else {}}
@@ -44,11 +196,13 @@ class Spider(BaseSpider):
         return self.homeContent(filter)
 
     def homeVideoContent(self):
-        html = self._fetch_html(self.host + "/index.html")
+        self._ensure_host()
+        html = self._fetch_html(self.host + _PROBE_PATH)
         items = self._parse_video_list(html)
         return {"list": items[:20]}
 
     def categoryContent(self, tid, pg, filter, extend):
+        self._ensure_host()
         pg = str(pg) if pg else "1"
         url = f"{self.host}/list.php?cid={tid}&page={pg}"
         html = self._fetch_html(url)
@@ -63,6 +217,7 @@ class Spider(BaseSpider):
         }
 
     def detailContent(self, ids):
+        self._ensure_host()
         if not ids:
             return {"list": []}
         if isinstance(ids, list):
@@ -108,6 +263,7 @@ class Spider(BaseSpider):
         return {"list": [vod]}
 
     def searchContent(self, key, quick, pg="1"):
+        self._ensure_host()
         pg = str(pg) if pg else "1"
         url = f"{self.host}/search.php?keyword={quote(key)}&page={pg}"
         html = self._fetch_html(url)
@@ -192,6 +348,7 @@ class Spider(BaseSpider):
             return {"list": []}
 
     def playerContent(self, flag, id, vipFlags):
+        self._ensure_host()
         if id and id.startswith("http") and ".m3u8" in id:
             return {
                 "parse": 0, 
@@ -360,26 +517,29 @@ class Spider(BaseSpider):
                 full_url = url + "&" + urlencode(params)
             else:
                 full_url = url + "?" + urlencode(params)
-        try:
-            resp = self.fetch(full_url, headers=self.headers, timeout=15)
-            if resp:
-                content = getattr(resp, "content", b"") or b""
-                if not content and hasattr(resp, "text") and resp.text:
-                    content = resp.text.encode("utf-8", errors="ignore")
-                
-                if content:
-                    for encoding in ["utf-8", "gbk", "gb2312", "gb18030", "latin-1"]:
-                        try:
-                            text = content.decode(encoding)
-                            if re.search(r'[\u4e00-\u9fa5]', text) or "html" in text.lower():
-                                return text
-                        except:
-                            continue
-                    return content.decode("utf-8", errors="ignore")
-            return ""
-        except Exception as e:
-            self.log({"action": "fetch_fail", "url": full_url, "error": str(e)})
-            return ""
+        # 2026-11-25\uff1a\u53d6\u57df\u521a\u5e76\u53d1\u63a2\u6d3b\u8fc7\uff0c\u7ad9\u65b9\u5076\u53d1\u9650\u901f/\u7a7a\u54cd\u5e94 \u2192 \u7a7a\u7ed3\u679c\u91cd\u8bd5\u4e00\u6b21\u518d\u5224\u6b7b\u3002
+        for attempt in (1, 2):
+            try:
+                resp = self.fetch(full_url, headers=self.headers, timeout=15)
+                if resp:
+                    content = getattr(resp, "content", b"") or b""
+                    if not content and hasattr(resp, "text") and resp.text:
+                        content = resp.text.encode("utf-8", errors="ignore")
+
+                    if content:
+                        for encoding in ["utf-8", "gbk", "gb2312", "gb18030", "latin-1"]:
+                            try:
+                                text = content.decode(encoding)
+                                if re.search(r'[\u4e00-\u9fa5]', text) or "html" in text.lower():
+                                    return text
+                            except:
+                                continue
+                        return content.decode("utf-8", errors="ignore")
+            except Exception as e:
+                self.log({"action": "fetch_fail", "url": full_url, "error": str(e), "try": attempt})
+            if attempt == 1:
+                time.sleep(0.6)
+        return ""
 
     def _parse_video_list(self, html):
         items = []

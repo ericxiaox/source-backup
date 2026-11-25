@@ -35,6 +35,14 @@
 #     **DNS \u5df2\u6c61\u67d3**\uff1a`157.240.10.36` = Facebook \u6bb5 \uff0b IPv6 `\u2026face:b00c` \u21d2 \u9700\u68af\u5b50\uff09
 #   \u26a0 \u88f8\u57df `ggyase.shop` / `udhzyase.shop` \u4e0e `abc.udhzyase.shop` \u5b9e\u6d4b**\u5168\u90e8 000** \u21d2 **\u975e\u6cdb\u89e3\u6790**
 #     \u2192 \u53d6\u57df\u4e0d\u80fd\u9760\u62fc\u8bcd\uff0c\u53ea\u80fd\u9760\u300c\u53d1\u5e03\u9875 301 \u6d3e\u751f\u300d\u3002
+#
+# 2026-11-25 \u6362\u57df\uff08\u65e7\u7248\u5185\u7f6e\u57df\u5199\u6b7b ggyase.shop \u2192 \u5206\u7c7b\u9875\u6052 0 \u6761\uff09\uff1a
+#   \u00b7 `https://ys.ggyase.shop/`        \u2192 000\uff08\u53d1\u5e03\u9875\u672c\u8eab\u5df2\u6302\uff0c`publish@` \u81ea\u6108\u8def\u5f84\u5931\u6548\uff09
+#   \u00b7 `https://ys.udhzyase.shop/`      \u2192 **301** \u2192 `https://ys.5idcfzyase.shop/`
+#   \u00b7 `https://ys.5idcfzyase.shop/`    \u2192 200 / 89KB / 50 \u4e2a `data-post-id`\uff08\u73b0\u5f79\uff0c\u5b9e\u6d4b\u76f4\u8fde\uff09
+#   \u21d2 \u5185\u7f6e\u57df\u6362 `5idcfzyase`\uff0c`_PUBLISH` \u6362 `udhzyase`\uff08\u4ecd\u5728\u8df3\uff0c\u4f5c 301 \u81ea\u6108\u5165\u53e3\uff09\uff0c
+#     ggyase \u7559\u4f5c\u5386\u53f2\u53d1\u5e03\u9875\uff08\u5df2\u6b7b\uff0c\u653e\u6700\u540e\uff0c\u53ea\u5728\u524d\u9762\u5168\u706d\u65f6\u624d\u6d6a\u8d39\u4e00\u6b21\u63a2\u6d4b\uff09\u3002
+#   \u26a0 `_probe_one` \u4e4b\u524d\u8bb0\u7684\u662f**\u5019\u9009\u57df**\u800c\u975e\u843d\u70b9\uff0c301 \u5019\u9009\u547d\u4e2d\u540e\u4f1a\u4e00\u76f4\u591a\u8df3\u4e00\u6b21 \u2192 \u6539\u8bb0 `r.url` \u7684 origin\u3002
 import base64
 import html as _html
 import json
@@ -72,11 +80,13 @@ _UA = ('Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 '
 
 _SITE_KEY = 'YASE'
 
-# \u53d1\u5e03\u9875\uff08301 \u8df3\u5230\u73b0\u5f79\u57df\uff1b**\u56fd\u5185\u76f4\u8fde\u53ef\u8fbe**\uff09
-_PUBLISH = 'https://ys.ggyase.shop/'
-# \u5185\u7f6e\u515c\u5e95\uff1a\u73b0\u5f79\u57df\uff082026-09-16 \u7531\u53d1\u5e03\u9875 301 \u6d3e\u751f \uff0b \u76f4\u8fde\u5b9e\u6d4b 200\uff09
+# \u53d1\u5e03\u9875\uff08\u5148\u63a2 301 \u8df3\u677f \u2192 \u73b0\u5f79\u57df\uff1b**\u56fd\u5185\u76f4\u8fde\u53ef\u8fbe**\uff09
+_PUBLISH = 'https://ys.udhzyase.shop/'
+# \u5386\u53f2\u53d1\u5e03\u9875\uff082026-11-25 \u5b9e\u6d4b 000\uff0c\u4ec5\u4f5c\u6700\u540e\u515c\u5e95\uff0c\u907f\u514d\u5220\u6389\u540e\u7ad9\u70b9\u53c8\u5207\u56de\u53bb\u65f6\u65e0\u951a\u70b9\uff09
+_PUBLISH_OLD = 'https://ys.ggyase.shop/'
+# \u5185\u7f6e\u515c\u5e95\uff1a\u73b0\u5f79\u57df\uff082026-11-25 \u7531 `ys.udhzyase.shop` 301 \u6d3e\u751f \uff0b \u76f4\u8fde\u5b9e\u6d4b 200\uff0f50 \u6761\uff09
 _BUILTIN_HOSTS = [
-    "https://ys.ggyase.shop"
+    "https://ys.5idcfzyase.shop"
 ]
 
 # \u63a2\u6d3b\u6df1\u94fe\uff08\u5206\u7c7b\u9875\uff1b\u542b video-block \u4e14 \u22654 \u6761\u771f\u6761\u76ee \u2014\u2014 \u9996\u9875/\u5206\u7c7b/\u641c\u7d22\u540c\u6784\uff0c\u4efb\u9009\u5176\u4e00\uff09
@@ -242,8 +252,9 @@ class Spider(BaseSpider):
         pages = []
         if self._ext.get('publish'):
             pages = [p.strip() for p in str(self._ext['publish']).split(',') if p.strip()]
-        if _PUBLISH not in pages:
-            pages.append(_PUBLISH)
+        for p in (_PUBLISH, _PUBLISH_OLD):
+            if p not in pages:
+                pages.append(p)
         for p in pages[:3]:
             try:
                 r = requests.get(p, headers=self.headers, proxies=self.proxies,
@@ -268,9 +279,16 @@ class Spider(BaseSpider):
                              allow_redirects=True)
             body = r.text or ''
             ok = (r.status_code == 200 and _valid_page(body))
-            self.trace.append('%s -> %s %s' % (host_base, r.status_code, 'OK' if ok else '\u975e\u5185\u5bb9'))
+            # \u26a0 \u8bb0**\u843d\u70b9 origin**\u800c\u4e0d\u662f\u5019\u9009\u503c\uff1a301 \u5019\u9009\uff08\u5982 udhzyase \u2192 5idcfzyase\uff09
+            #   \u82e5\u8bb0\u5019\u9009\uff0c\u540e\u7eed\u6bcf\u4e2a\u8bf7\u6c42\u90fd\u591a\u4e00\u8df3 301\uff0c\u4e14 `_abs()` \u4f1a\u62fc\u51fa\u65e7\u57df\u94fe\u63a5\u3002
+            fin = (getattr(r, 'url', '') or '').split('?')[0]
+            m = re.match(r'^(https?://[^/]+)', fin)
+            landed = (m.group(1).rstrip('/') if m else host_base)
+            self.trace.append('%s -> %s %s%s' % (
+                host_base, r.status_code, 'OK' if ok else '\u975e\u5185\u5bb9',
+                ('\uff08\u843d\u70b9 %s\uff09' % landed) if landed != host_base else ''))
             if ok and not result[0]:
-                result[0] = host_base
+                result[0] = landed
         except Exception as e:
             self.trace.append('%s -> FAIL %s' % (host_base, str(e)[:40]))
 
