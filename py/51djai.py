@@ -59,8 +59,12 @@ CLASSES = [
     {"type_id": "ai_manju",     "type_name": "AI\u6f2b\u5267"},
     {"type_id": "ai_huanlian",  "type_name": "AI\u6362\u8138"},
     {"type_id": "ai_mogai",     "type_name": "AI\u9b54\u6539"},
-    {"type_id": "tag_chengren", "type_name": "\u6210\u4eba\u6807\u7b7e"},
-    {"type_id": "tag_lunli",    "type_name": "\u4f26\u7406\u6807\u7b7e"},
+    # 2026-11-25\uff1a\u539f tag_chengren(\u6210\u4eba) / tag_lunli(\u4f26\u7406) \u53cc\u53cc\u5931\u6548\u2014\u2014
+    #   /tag/chengren/ \u662f**\u793e\u533a\u5e16\u5b50\u805a\u5408\u9875**\uff08h1\u300c#\u6210\u4eba\u300d\uff0c\u5361\u7247 0\uff09\uff0c\u4e0d\u662f\u77ed\u5267\u5217\u8868\uff1b
+    #   /tag/lunli/ \u7ad9\u65b9\u6839\u672c\u6ca1\u8fd9\u4e2a slug\uff08404 \u9875\u4f1a\u585e 8 \u5f20\u63a8\u8350\u5361\uff0c\u770b\u7740\u50cf\u6709\u5185\u5bb9\uff09\u3002
+    #   \u5df2\u6362\u6210\u7ad9\u65b9\u771f\u5b9e\u77ed\u5267\u6807\u7b7e yinluan / luanlun\uff0832 \u4e2a tag \u89c1\u9996\u9875\u6807\u7b7e\u533a\uff09\uff0c\u5747 27 \u5361\u3002
+    {"type_id": "tag_yinluan",  "type_name": "\u6deb\u4e71\u6807\u7b7e"},
+    {"type_id": "tag_luanlun",  "type_name": "\u4e71\u4f26\u6807\u7b7e"},
     {"type_id": "tag_doushi",   "type_name": "\u90fd\u5e02\u6807\u7b7e"},
 ]
 CAT_PATH = {
@@ -274,6 +278,11 @@ class Spider(Spider):
             pg = int(pg) if str(pg).isdigit() else 1
             pg = max(1, pg)
             html = self._req(self._url(cid, pg))
+            # \u7ad9\u65b9\u5bf9\u4e0d\u5b58\u5728\u7684\u680f\u76ee/slug \u4f1a\u8fd4\u56de 200 \u7684\u9519\u9875\uff0c\u9875\u91cc\u8fd8\u585e 8 \u5f20\u300c\u63a8\u8350\u300d\u5361\u2014\u2014
+            # \u4e0d\u5148\u5224\u9519\u9875\u5c31\u4f1a\u628a\u4e0d\u76f8\u5e72\u5185\u5bb9\u5f53\u6210\u8be5\u5206\u7c7b\u7ed3\u679c\uff082026-11-25 tag_lunli \u4e8b\u6545\uff09\u3002
+            head = (html or "")[:8000]
+            if not html or "\u9875\u9762\u672a\u627e\u5230" in head or "\u8bbf\u95ee\u7684\u9875\u9762\u51fa\u9519\u4e86" in head:
+                return self._empty(pg)
             vods = self._ranks(html) if str(cid) == "rank_hot" else self._cards(html)
             if not vods:
                 return self._empty(pg)

@@ -231,6 +231,133 @@ except Exception:
 
 
 
+try:
+    from Crypto.Hash import SHA256 as _SHA256
+    from Crypto.PublicKey import ECC as _ECC
+    from Crypto.Protocol.DH import key_agreement as _ecdh_bits
+    from Crypto.Protocol.KDF import HKDF as _HKDF
+except Exception:
+    try:
+        from Cryptodome.Hash import SHA256 as _SHA256
+        from Cryptodome.PublicKey import ECC as _ECC
+        from Cryptodome.Protocol.DH import key_agreement as _ecdh_bits
+        from Cryptodome.Protocol.KDF import HKDF as _HKDF
+    except Exception:
+        _SHA256 = _ECC = _ecdh_bits = _HKDF = None
+
+
+class _EdgeApi(object):
+    """dx150-edge-v1 \u52a0\u5bc6\u7f51\u5173\uff082026-11-24 \u7ad9\u65b9\u6539\u7248\u540e\u53d6\u6e90\u552f\u4e00\u901a\u9053\uff09\u3002
+
+    \u6539\u7248\u4e8b\u5b9e\uff082026-11-25 \u5b9e\u6d4b\uff09\uff1a
+      - \u8be6\u60c5\u9875 videoInitialData \u7684 videoSrc / epPlaySrcs / previewSrc \u5168\u4e3a\u7a7a\u4e32\uff0c
+        \u65e7\u89e3\u6790\u5668\u6052\u62ff\u4e0d\u5230\u5730\u5740 \u21d2 \u5168\u7ad9\u300c\u6240\u6709\u89c6\u9891\u90fd\u4e0d\u80fd\u64ad\u653e\u300d\uff1b
+      - \u7ad9\u65b9\u53e6\u6302 ECDH-P256 + HKDF-SHA256 + AES-256-GCM \u53cc\u5bc6\u94a5\u901a\u9053\uff08edge-api-crypto.js\uff09\uff0c
+        \u6e38\u5ba2\uff08\u65e0\u8d26\u53f7\u65e0 cookie\uff09POST /api/videos/{id}/episodes/{ep}/playback \u5373\u53ef\u62ff\u5230
+        streams.main\uff08\u5b8c\u6574 m3u8\uff0c\u975e\u8bd5\u770b\uff09\u3002\u6240\u4ee5\u8fd9\u662f**\u6362\u901a\u9053**\uff0c\u4e0d\u662f\u6536\u8d39\u5899\u3002
+      - \u660e\u6587\u76f4\u8fde\u540c\u4e00\u8def\u5f84\u4f1a\u88ab\u7f51\u5173\u8131\u654f\u6210\u7a7a videoSrc \u21d2 \u5fc5\u987b\u8d70\u52a0\u5bc6\u4fe1\u5c01\u3002
+
+    \u5e27\u683c\u5f0f\uff1ahello(client_pub) \u2192 server_pub/salt/kid/sid \u2192 HKDF \u6d3e\u751f req/res \u53cc\u5bc6\u94a5 \u2192
+    \u6bcf\u8bf7\u6c42 AES-GCM(iv=12B \u5c3e 4B \u5927\u7aef seq, AAD=\"info\\n\u65b9\u5411\\nseq\\nts\")\u3002
+    """
+    PROTO = "dx150-edge-v1"
+    PATHS = {"user": "/api/user/request", "playback": "/api/playback/request",
+             "public": "/api/public/request", "dynamic": "/api/dynamic/request"}
+
+    def __init__(self, host, ua, timeout=12):
+        self.host = str(host or "").rstrip("/")
+        self.ua = ua
+        self.timeout = timeout
+        self.sess = {}
+
+    @staticmethod
+    def _b64u(b):
+        return base64.b64encode(b).decode().replace("+", "-").replace("/", "_").rstrip("=")
+
+    @staticmethod
+    def _unb64u(s):
+        s = str(s or "").replace("-", "+").replace("_", "/")
+        s += "=" * (-len(s) % 4)
+        return base64.b64decode(s)
+
+    def _post(self, scope, body):
+        import time as _t
+        r = rq.post(self.host + self.PATHS[scope], json=body, timeout=self.timeout,
+                    verify=False, headers={
+                        "User-Agent": self.ua,
+                        "Accept": "application/json, text/plain, */*",
+                        "Content-Type": "application/json",
+                        "Origin": self.host, "Referer": self.host + "/"})
+        if r.status_code != 200:
+            raise IOError("edge %s HTTP %s" % (scope, r.status_code))
+        return r.json()
+
+    def _open(self, scope):
+        import time as _t
+        priv = _ECC.generate(curve="P-256")
+        pub = priv.public_key().export_key(format="raw")     # 65B\uff0c\u542b 0x04\uff0c\u4e0e WebCrypto raw \u4e00\u81f4
+        hello = self._post(scope, {"v": 1, "type": "hello", "client_pub": self._b64u(pub)})
+        if hello.get("type") != "hello" or not hello.get("server_pub"):
+            raise IOError("edge hello \u65e0\u6548")
+        spub = _ECC.import_key(self._unb64u(hello["server_pub"]), curve_name="P-256")
+        shared = _ecdh_bits(static_priv=priv, static_pub=spub, kdf=lambda x: x)
+        info = "\n".join([self.PROTO, scope, str(hello.get("site") or ""),
+                          str(hello.get("kid") or ""), str(hello.get("sid") or "")])
+        salt = self._unb64u(hello["salt"])
+        keys = dict((d, _HKDF(shared, 32, salt, _SHA256, 1,
+                              context=(info + "\n" + d).encode())) for d in ("req", "res"))
+        now = int(_t.time())
+        sess = {"info": info, "kid": hello["kid"], "sid": hello["sid"],
+                "off": int(hello["server_time"]) - now,
+                "exp": now + max(30, int(hello["expires_at"]) - int(hello["server_time"])),
+                "seq": 0, "req": keys["req"], "res": keys["res"]}
+        self.sess[scope] = sess
+        return sess
+
+    def _call(self, scope, request):
+        import time as _t
+        sess = self.sess.get(scope)
+        if not sess or sess["exp"] < int(_t.time()) + 5:
+            sess = self._open(scope)
+        sess["seq"] += 1
+        seq, ts = sess["seq"], int(_t.time()) + sess["off"]
+        iv = b"\x00" * 8 + seq.to_bytes(4, "big")
+        c = AES.new(sess["req"], AES.MODE_GCM, nonce=iv, mac_len=16)
+        c.update(("%s\nreq\n%d\n%d" % (sess["info"], seq, ts)).encode())
+        ct, tag = c.encrypt_and_digest(
+            json.dumps({"request": request}, ensure_ascii=False,
+                       separators=(",", ":")).encode("utf-8"))
+        res = self._post(scope, {"v": 1, "type": "call", "kid": sess["kid"], "sid": sess["sid"],
+                                 "seq": seq, "ts": ts, "ciphertext": self._b64u(ct + tag)})
+        if res.get("type") != "result" or res.get("seq") != seq:
+            raise IOError("edge result \u4e0d\u5339\u914d")
+        raw = self._unb64u(res["ciphertext"])
+        d = AES.new(sess["res"], AES.MODE_GCM, nonce=iv, mac_len=16)
+        d.update(("%s\nres\n%d\n%d" % (sess["info"], seq, ts)).encode())
+        inner = json.loads(d.decrypt_and_verify(raw[:-16], raw[-16:]))
+        body = inner.get("body") or ""
+        return json.loads(base64.b64decode(body).decode("utf-8")) if body else {}
+
+    def playback(self, vid, ep):
+        """\u8fd4\u56de {'url': \u5b8c\u6574 m3u8, 'hevc':\u2026, 'auth': CDN \u5934\u503c}\uff1b\u5931\u8d25\u629b\u5f02\u5e38\u7531\u8c03\u7528\u65b9\u964d\u7ea7\u3002"""
+        obj = self._call("playback", {
+            "method": "POST",
+            "path": "/api/videos/%s/episodes/%s/playback" % (vid, int(ep)),
+            "body": base64.b64encode(b"{}").decode(),
+            "content_type": "application/json",
+        })
+        data = (obj or {}).get("data") or {}
+        if not isinstance(data, dict):
+            return {}
+        streams = data.get("streams") or {}
+        url = str(streams.get("main") or "").replace("\\u0026", "&").strip()
+        if not url.startswith("http"):
+            return {}
+        cdn = data.get("cdn") or {}
+        return {"url": url, "hevc": str(streams.get("hevc") or ""),
+                "auth": str(cdn.get("authValue") or ""), "cdn": cdn}
+
+
 class Spider(Spider):
 
     def getName(self):
@@ -1107,6 +1234,35 @@ class Spider(Spider):
         return int(m.group(1)) if m else 0
 
     # ---------- \u64ad\u653e ----------
+    @staticmethod
+    def _edge_ids(key):
+        """\u4ece\u5404\u79cd\u5f62\u6001\u7684\u64ad\u653e id \u62bd\u51fa (\u89c6\u9891id, \u96c6\u53f7)\uff1a
+        /video/15654/\u3001/video/15654/ep-2/\u3001video/15654\u300115654\u300115654|2"""
+        k = str(key or "").strip()
+        m = re.search(r"/video/(\d+)", k if k.startswith("/") else "/" + k)
+        if m:
+            e = re.search(r"/ep-(\d+)", k)
+            return m.group(1), (int(e.group(1)) if e else 1)
+        parts = k.split("|")
+        if parts and parts[0].strip().isdigit():
+            ep = 1
+            if len(parts) > 1 and str(parts[1]).strip().isdigit():
+                ep = int(parts[1])
+            return parts[0].strip(), ep
+        return "", 1
+
+    def _edge_play(self, sid, ep):
+        """\u8d70\u52a0\u5bc6\u7f51\u5173\u53d6\u8be5\u96c6 m3u8\uff1b\u6362\u57df\u540e\u81ea\u52a8\u91cd\u5efa\u5ba2\u6237\u7aef\u3002\u5931\u8d25\u8fd4\u56de\u7a7a\u4e32\u3002"""
+        if not _ECC or not _HKDF or not _SHA256 or AES is None:
+            return ""
+        host = self._safe_host()
+        api = getattr(self, '_edge_api', None)
+        if api is None or api.host != host:
+            api = _EdgeApi(host, UA)
+            self._edge_api = api
+        d = api.playback(sid, ep) or {}
+        return str(d.get('url') or '')
+
     def playerContent(self, flag, id, vipFlags=None, vipIds=None):
         """\u5bf9\u9f50\u7cbe\u7b80\u7248 + \u517c\u5bb9\u7eaf\u6570\u5b57 id / \u5355\u96c6 AI\u9b54\u6539\u3002"""
         key = str(id or "").strip()
@@ -1117,6 +1273,19 @@ class Spider(Spider):
         if key.startswith("http"):
             url = key.replace("&amp;", "&").replace("\\u0026", "&")
             return {"parse": 0, "url": url, "header": {"User-Agent": UA}}
+
+        # 2026-11-25\uff1a\u7ad9\u65b9\u6539\u7248\u540e videoInitialData \u91cc\u5df2\u65e0 videoSrc\uff08\u5168\u7a7a\u4e32\uff09\uff0c
+        # \u5fc5\u987b\u8d70 dx150-edge-v1 \u52a0\u5bc6\u7f51\u5173\u53d6 streams.main\u3002\u5148\u8bd5\u5b83\uff0c\u5931\u8d25\u518d\u843d\u56de\u65e7\u89e3\u6790
+        # \uff08\u8001\u5267/\u6362\u57df\u671f\u95f4\u4ecd\u53ef\u80fd\u547d\u4e2d\u65e7\u9875\u7ed3\u6784\uff09\u3002
+        try:
+            sid, ep = self._edge_ids(key)
+            if sid:
+                u = self._edge_play(sid, ep)
+                if u:
+                    return {"parse": 0, "url": u,
+                            "header": {"User-Agent": UA, "Referer": self._safe_host() + "/"}}
+        except Exception as _e:
+            print("[\u9ec4\u679c] edge \u53d6\u6e90\u5931\u8d25: %s" % _e)
 
         # \u7eaf\u6570\u5b57 \u2192 \u5f53\u6210\u89c6\u9891 id\uff0c\u8d70 /video/{id}/
         if key.isdigit():

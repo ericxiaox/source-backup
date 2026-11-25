@@ -457,19 +457,30 @@ class Spider(BaseSpider):
         data = obj.get("data", obj) if isinstance(obj, dict) else {}
         if not isinstance(data, dict):
             return {"list": []}
+        # 2026-11-25\uff1a\u7ad9\u65b9\u6539\u6210\u6309\u96c6\u4ed8\u8d39\uff08\u5b9e\u6d4b 8 \u90e8\u5267 free_episodes \u5168\u90e8 = 1\uff0c
+        # \u7b2c 2 \u96c6\u8d77 coin 38/\u96c6\u6216\u6574\u5267 money/vip\uff0ccan_vip_watch \u6052 false\uff09\u3002
+        # \u53d6\u6d41\u63a5\u53e3\u5bf9\u7b2c 2 \u96c6\u8d77\u53ea\u56de preview-r10.mp4\uff0810 \u79d2\u8bd5\u770b\uff0c\u4e09\u6761\u7ebf\u8def\u540c\u4e00\u7247\uff09\uff0c
+        # \u8fd9\u662f\u7ad9\u70b9\u6536\u5165\u6765\u6e90\uff0c\u4e0d\u53ef\u7ed5\u3002\u6b64\u5904\u5982\u5b9e\u6807\u6ce8\uff0c\u4e0d\u5047\u88c5\u5168\u96c6\u53ef\u770b\u3002
+        free_n = self._int(data.get("free_episodes"), 0)
         data = self._unlock(data)
         vod_id = self._sid(data.get("id") or data.get("drama_id") or vid)
         name = data.get("name") or data.get("title") or data.get("t") or vod_id
         eps = data.get("episodes") if isinstance(data.get("episodes"), list) else []
         count = self._int(data.get("episode_count") or data.get("free_episodes"), len(eps) or 1)
+        pay_tag = ""
+        if free_n and count > free_n:
+            pay_tag = ("\u00b7\u4ec5\u7b2c%d\u96c6\u514d\u8d39" % free_n) if free_n == 1 else ("\u00b7\u4ec5\u524d%d\u96c6\u514d\u8d39" % free_n)
         play = []
         if eps:
             for i, ep in enumerate(eps, 1):
                 seq = ep.get("seq") or ep.get("episode") or ep.get("ep") or i
-                play.append("%s$%s|%s" % (ep.get("name") or ep.get("title") or "\u7b2c%s\u96c6" % seq, vod_id, seq))
+                nm = ep.get("name") or ep.get("title") or "\u7b2c%s\u96c6" % seq
+                if free_n and self._int(seq, 0) > free_n:
+                    nm = "%s\u00b7\u9700\u4ed8\u8d39" % nm
+                play.append("%s$%s|%s" % (nm, vod_id, seq))
         else:
-            play = ["\u7b2c%s\u96c6$%s|%s" % (i, vod_id, i) for i in range(1, count + 1)]
-        vod = {"vod_id": vod_id, "vod_name": name, "vod_pic": self._pic(data), "type_name": data.get("category") or data.get("type") or "", "vod_year": "", "vod_area": "", "vod_remarks": data.get("update_label") or "\u5168%s\u96c6" % count, "vod_actor": "", "vod_director": "", "vod_content": data.get("description") or data.get("summary") or name, "vod_play_from": self.name, "vod_play_url": "#".join(play)}
+            play = [("\u7b2c%s\u96c6%s$%s|%s" % (i, "\u00b7\u9700\u4ed8\u8d39" if (free_n and i > free_n) else "", vod_id, i)) for i in range(1, count + 1)]
+        vod = {"vod_id": vod_id, "vod_name": name, "vod_pic": self._pic(data), "type_name": data.get("category") or data.get("type") or "", "vod_year": "", "vod_area": "", "vod_remarks": (data.get("update_label") or "\u5168%s\u96c6" % count) + pay_tag, "vod_actor": "", "vod_director": "", "vod_content": data.get("description") or data.get("summary") or name, "vod_play_from": self.name, "vod_play_url": "#".join(play)}
         return {"list": [vod], "parse": 0, "jx": 0}
 
     def searchContent(self, key, quick, pg="1"):
@@ -612,6 +623,9 @@ class Spider(BaseSpider):
         return item.get("img_y") or item.get("img_x") or item.get("img") or item.get("cover") or item.get("pic") or ""
 
     def _unlock(self, d):
+        # \ud83d\udea9 \u4ec5\u300c\u5c55\u793a\u5c42\u300d\u89e3\u9501\uff1a\u8ba9\u58f3\u5b50\u628a\u5168\u90e8\u96c6\u5217\u51fa\u6765\u53ef\u70b9\uff08is_buy/pay_type \u7f6e\u771f\uff09\u3002
+        #    \u5b83**\u4e0d\u6539\u53d8\u53d6\u6d41**\u2014\u2014\u7ad9\u65b9 /drama/play \u5bf9\u7b2c 2 \u96c6\u8d77\u53ea\u56de 10 \u79d2 preview-r10.mp4\uff0c
+        #    \u771f\u6b63\u4ed8\u8d39\u96c6\u4ecd\u9700\u5145\u503c\u3002\u522b\u628a\u5b83\u5f53\u6210\u5df2\u89e3\u9501\uff082026-11-25 \u590d\u6838\uff09\u3002
         eps = d.get("episodes")
         if isinstance(eps, list):
             for ep in eps:
