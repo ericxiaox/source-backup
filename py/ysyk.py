@@ -43,6 +43,19 @@
 #   \u21d2 \u5185\u7f6e\u57df\u6362 `5idcfzyase`\uff0c`_PUBLISH` \u6362 `udhzyase`\uff08\u4ecd\u5728\u8df3\uff0c\u4f5c 301 \u81ea\u6108\u5165\u53e3\uff09\uff0c
 #     ggyase \u7559\u4f5c\u5386\u53f2\u53d1\u5e03\u9875\uff08\u5df2\u6b7b\uff0c\u653e\u6700\u540e\uff0c\u53ea\u5728\u524d\u9762\u5168\u706d\u65f6\u624d\u6d6a\u8d39\u4e00\u6b21\u63a2\u6d4b\uff09\u3002
 #   \u26a0 `_probe_one` \u4e4b\u524d\u8bb0\u7684\u662f**\u5019\u9009\u57df**\u800c\u975e\u843d\u70b9\uff0c301 \u5019\u9009\u547d\u4e2d\u540e\u4f1a\u4e00\u76f4\u591a\u8df3\u4e00\u6b21 \u2192 \u6539\u8bb0 `r.url` \u7684 origin\u3002
+#
+# 2026-11-25 \u64ad\u653e\u7ebf\u8def\u5b9e\u6d4b\uff08\u8be6\u60c5\u9875 4 \u6761 line-btn\uff0c**3 \u6761 m3u8 \u5168\u5e9f\uff0c\u53ea\u5269 mp4**\uff09\uff1a
+#   \u00b7 \u7ebf\u8def\u4e00 mp4  `https://opgudoercx.cfd/mp4/media/videos/mp4/{\u5a92\u4f53id}_480p.mp4` \u2192 **206**\uff08\u552f\u4e00\u6d3b\u8def\uff09
+#   \u00b7 \u7ebf\u8def\u4e8c hls  `https://hls.opgudoercx.cfd/media/media/hls/\u2026`  \u2192 **NXDOMAIN**
+#        \uff08\u672c\u5730 DNS \u4e0e doh.pub \u4e00\u81f4\uff1aCF \u6743\u5a01 NS \u76f4\u63a5 Status 3 \u21d2 \u8be5\u5b50\u57df\u5df2\u5220\uff0c\u4e0d\u662f\u6c61\u67d3\uff09
+#   \u00b7 \u7ebf\u8def\u4e09 hls  `https://opgudoercx.cfd/media/hls/\u2026`            \u2192 **404**
+#        \uff08\u88f8\u57df\u5df2\u4e0d\u63d0\u4f9b HLS\uff1b\u6362 9 \u79cd\u8def\u5f84\u524d\u7f00\u5168 404\uff0c404 \u9875\u6052 27150B\uff09
+#   \u00b7 \u7ebf\u8def\u56db hls  `https://dns.lkdxgertes.cfd/media/media/hls/\u2026`  \u2192 \u89e3\u6790 216.227.169.51\uff0c
+#        ping \u901a(188ms) \u4f46 443 \u62d2\u8fde\uff08\u4ee3\u7406/\u76f4\u8fde/--resolve \u4e09\u6cd5\u7686\u5931\u8d25\uff09
+#   \u21d2 \u65e7\u7248\u300cm3u8 \u4f18\u5148\u300d\u7eaf\u4e8f\uff1a\u4e09\u6761\u6b7b\u94fe\u5404\u7b49\u4e00\u6b21\u8d85\u65f6\uff0c\u5b9e\u6d4b **\u64ad\u653e 11~12s** \u624d\u51fa\u753b\u9762\uff1b
+#     \u800c\u8fd9\u4e9b m3u8 \u4e0e mp4 \u540c\u5c5e **480p \u540c\u4e00\u6863**\uff0c\u5f03\u7528\u4e0d\u6389\u6e05\u6670\u5ea6\u3002
+#   \u21d2 \u6539\uff1amp4 \u4f18\u5148\u3001\u6b7b\u57df\u62bc\u540e\u5e76\u7ed9 2.5s \u8fde\u63a5\u8d85\u65f6\uff1b\u5168\u5931\u8d25\u65f6\u4ecd\u56de\u843d mp4 \u9996\u6761\uff08\u4e0d\u8fd4\u56de\u6b7b\u94fe\uff09\u3002
+#     \u5b9e\u6d4b 0.3s \u547d\u4e2d\u3002
 import base64
 import html as _html
 import json
@@ -88,6 +101,10 @@ _PUBLISH_OLD = 'https://ys.ggyase.shop/'
 _BUILTIN_HOSTS = [
     "https://ys.5idcfzyase.shop"
 ]
+
+# \u5df2\u5e9f\u64ad\u653e\u57df\uff082026-11-25 \u5b9e\u6d4b\uff1a\u524d\u4e24\u4e2a **NXDOMAIN**\uff0c\u7b2c\u4e09\u4e2a\u89e3\u6790\u5230 216.227.169.51\uff0f443 \u62d2\u8fde\uff09
+# \u2192 \u64ad\u653e\u5019\u9009\u91cc\u62bc\u5230\u6700\u540e\uff0c\u4e14\u53ea\u7ed9 2.5s \u8fde\u63a5\u8d85\u65f6\u3002\u7ad9\u65b9\u82e5\u6062\u590d HLS\uff0c\u628a\u57df\u4ece\u4e0b\u8868\u5220\u6389\u5373\u53ef\u590d\u4f4d\u3002
+_DEAD_PLAY_HOSTS = ('hls.opgudoercx.cfd', 'dns.opgudoercx.cfd', 'dns.lkdxgertes.cfd')
 
 # \u63a2\u6d3b\u6df1\u94fe\uff08\u5206\u7c7b\u9875\uff1b\u542b video-block \u4e14 \u22654 \u6761\u771f\u6761\u76ee \u2014\u2014 \u9996\u9875/\u5206\u7c7b/\u641c\u7d22\u540c\u6784\uff0c\u4efb\u9009\u5176\u4e00\uff09
 _PROBE_PATH = '/video/category/dalu/'
@@ -139,6 +156,12 @@ _AD_NAME_RE = re.compile('(<|http|www\\.|\\.com|\\.cc|\u516c\u4f17\u53f7|\u5173\
 
 def _clean(s):
     return _html.unescape(re.sub(r'<[^>]+>', '', s or '')).replace('\xa0', ' ').strip()
+
+
+def _is_dead_play(u):
+    """\u76f4\u94fe\u662f\u5426\u843d\u5728\u5df2\u5e9f\u64ad\u653e\u57df\uff082026-11-25 \u5b9e\u6d4b\u6e05\u5355\uff0c\u89c1 `_DEAD_PLAY_HOSTS`\uff09\u3002"""
+    u = (u or '').lower()
+    return any(h in u for h in _DEAD_PLAY_HOSTS)
 
 
 def _valid_page(text):
@@ -550,35 +573,41 @@ class Spider(BaseSpider):
         return out
 
     def _resolve_play(self, detail_url):
-        """\u4f18\u5148 m3u8\uff0c\u5176\u6b21 mp4\uff1b\u9010\u6761\u5b9e\u6d4b\u76f4\u94fe\uff0c\u53d6\u7b2c\u4e00\u6761 200\u3002"""
+        """mp4 \u4f18\u5148\u3001m3u8 \u62bc\u540e\uff1b\u9010\u6761\u5b9e\u6d4b\u76f4\u94fe\uff0c\u8fd4\u56de (url, \u662f\u5426\u5b9e\u6d4b\u901a\u8fc7)\u3002
+
+        2026-11-25 \u8d77**\u7ad9\u65b9\u53ea\u5269 mp4 \u4e00\u6761\u6d3b\u8def**\uff08\u8be6\u89c1\u6587\u4ef6\u5934\u300c\u64ad\u653e\u7ebf\u8def\u5b9e\u6d4b\u300d\uff09\uff0c
+        \u65e7\u7248\u300cm3u8 \u4f18\u5148\u300d\u662f\u51c0\u4e8f\uff1a\u4e09\u6761\u6b7b m3u8 \u5404\u7b49\u4e00\u6b21\u8d85\u65f6 \u2192 \u64ad\u653e\u8981 11~12s \u624d\u51fa\u753b\u9762\u3002
+        """
         lines = self._detail_lines(detail_url)
         if not lines:
             self.trace.append('\u8be6\u60c5\u9875\u672a\u627e\u5230 line-btn \u76f4\u94fe')
-            return ''
-        m3u8 = [x for x in lines if 'mpegurl' in (x[2] or '').lower() or '.m3u8' in x[1]]
-        other = [x for x in lines if x not in m3u8]
-        ordered = m3u8 + other
-        first = ''
+            return '', False
+        mp4 = [x for x in lines if '.mp4' in x[1].split('?')[0].lower()]
+        rest = [x for x in lines if x not in mp4]
+        live = [x for x in rest if not _is_dead_play(x[1])]
+        dead = [x for x in rest if _is_dead_play(x[1])]
+        ordered = mp4 + live + dead
+        fallback = ordered[0][1] if ordered else ''
         for idx, (nm, u, mty) in enumerate(ordered):
-            if not first:
-                first = u
             if idx >= 4:
                 break
+            # \u5df2\u77e5\u6b7b\u57df\u53ea\u7ed9\u5f88\u77ed\u8fde\u63a5\u8d85\u65f6\uff0c\u514d\u5f97\u518d\u4e3a\u5b83\u4eec\u5e72\u7b49\uff08\u771f\u673a\u9996\u6b21\u64ad\u653e\u4e5f\u4e0d\u5361\uff09
+            to = (2.5, 5) if _is_dead_play(u) else (4, 8)
             try:
                 # \u76f4\u94fe\u662f**\u5f02\u57df**\u8d44\u6e90\uff08img/hls/media \u57df\uff09\uff0c\u5b9e\u6d4b\u4e0d\u5e26 Referer \u4e5f 200
                 rr = requests.get(u, headers={'User-Agent': _UA}, proxies=self.proxies,
-                                  timeout=8, verify=False, stream=True)
-                ok = rr.status_code == 200
+                                  timeout=to, verify=False, stream=True)
+                ok = rr.status_code in (200, 206)
                 try:
                     rr.close()
                 except Exception:
                     pass
                 self.trace.append('\u7ebf\u8def %s -> %s %s' % (nm, rr.status_code, 'OK' if ok else ''))
                 if ok:
-                    return u
+                    return u, True
             except Exception as e:
                 self.trace.append('\u7ebf\u8def %s FAIL %s' % (nm, str(e)[:32]))
-        return first
+        return fallback, False
 
     def playerContent(self, flag, id, vipFlags=None):
         self._ensure_host()
@@ -588,11 +617,11 @@ class Spider(BaseSpider):
         if not v:
             return {'parse': 1, 'url': ''}
         detail_url = '%s/video/%s/' % (self.host, v)
-        real = self._play_cache.get(v)
+        real, ok = self._play_cache.get(v, ('', False))
         if not real:
-            real = self._resolve_play(detail_url)
-            if real:
-                self._play_cache[v] = real
+            real, ok = self._resolve_play(detail_url)
+            if ok:
+                self._play_cache[v] = (real, ok)
         if not real:
             # \u515c\u5e95\uff1a\u628a\u8be6\u60c5\u9875\u4ea4\u56de App \u55c5\u63a2\uff08\u672c\u5f62\u6001\u8be6\u60c5\u9875\u91cc\u5c31\u662f\u660e\u6587\u76f4\u94fe\uff0cApp \u4fa7\u4ea6\u53ef\u55c5\u5230\uff09
             return {'parse': 1, 'url': detail_url}
